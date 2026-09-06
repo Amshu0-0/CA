@@ -3,7 +3,7 @@
 import csv
 import json
 import time
-
+import os
 from kafka import KafkaProducer
 
 
