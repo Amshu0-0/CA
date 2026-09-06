@@ -94,7 +94,7 @@ All four instances share one key pair (`ca0-key.pem`) and one security group. Pu
 - **SSH**: key-only authentication (`ca0-key.pem`). Verified directly, not assumed — `sudo sshd -T | grep passwordauthentication` returns `passwordauthentication no` on the VMs checked.
 
   ![SSH password authentication confirmed disabled](images/passwordauthenticationno.png)
-  *`sshd -T` confirming password login is off — not just assumed from the config file.*
+  *`sshd -T` confirming password login is off.*
 
 - **Firewall** (one shared security group): exactly four inbound rules —
   - `22/tcp` (SSH) — source: my IP
@@ -123,7 +123,7 @@ All four instances share one key pair (`ca0-key.pem`) and one security group. Pu
 
 Base dataset: CICIDS2017, `Friday-WorkingHours-Morning_pcap_ISCX.csv` — 191,033 flows (189,067 `BENIGN`, 1,966 `Bot`), corresponding to a botnet attack window roughly 10:02–11:02am.
 
-For demo purposes, a derived subset (`Friday-Morning-5000-mixed-bot.csv`) was created containing all 1,966 original `Bot` rows plus a smaller benign sample (3,034 rows), so attack traffic appears throughout a short replay instead of being concentrated in one hour of a much larger file. Every row was verified to be a real, unmodified row from the original capture (matched on Flow ID + Timestamp + Label against the source file) — none of the data is synthetic.
+For demo purposes, a derived subset (`Friday-Morning-5000-mixed-bot.csv`) was created containing all 1,966 original `Bot` rows plus a smaller benign sample (3,034 rows), so attack traffic appears throughout a short replay instead of being concentrated in one hour of a much larger file.
 
 ## High-Level Steps Executed
 
@@ -132,7 +132,7 @@ For demo purposes, a derived subset (`Friday-Morning-5000-mixed-bot.csv`) was cr
 2. Installed Docker Engine + Compose plugin on all four VMs; verified each with `hello-world`.
 
    ![Docker hello-world succeeding on producer-vm](images/dockerinstalled.png)
-   *Confirms the Docker daemon is actually reachable and pulling images, not just installed.*
+   *Confirms the Docker daemon is actually reachable and pulling images.*
 
 3. Deployed Kafka in KRaft mode on broker-vm via Docker Compose; opened port 9092 to the security group.
 
@@ -155,7 +155,7 @@ For demo purposes, a derived subset (`Friday-Morning-5000-mixed-bot.csv`) was cr
 6. Wrote and deployed a Flask REST API (`rest_app.py`) on database-vm, querying MongoDB for flagged rows; opened port 8080 to my IP only.
 
    ![REST API returning JSON alert data](images/restapi.png)
-   *`curl .../alerts` returning real, MongoDB-backed JSON — not a stub.*
+   *`curl .../alerts` returning real, MongoDB-backed JSON.*
 
 7. Ran the full pipeline end to end on a freshly stopped-and-started set of VMs (new public IPs assigned by AWS); confirmed all services and data flow still work correctly.
 
@@ -201,3 +201,9 @@ curl http://<database-vm-public-ip>:8080/alerts
 - [x] `curl .../alerts` returns real JSON documents with `"Label":"Bot"`.
 - [x] Demo video recorded.
 - [x] Final screenshot set attached to the repo.
+
+## Video Submission
+
+## Video Submission
+
+[▶ Watch the CA0 demo video on YouTube](https://youtu.be/DT6sMKgO1_U)
