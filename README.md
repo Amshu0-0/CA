@@ -166,7 +166,7 @@ For demo purposes, a derived subset (`Friday-Morning-5000-mixed-bot.csv`) was cr
 - **REST API not containerized.** The REST endpoint does not run as a container. Left it as a directly-run Flask process for simplicity.
 
 ## Running It
-
+Rebuilding this on your own VMs? docker-compose.yml (Kafka) and both producer.py and processor.py read KAFKA_BROKER and MONGO_HOST from the environment, falling back to this deployment's private IPs (172.31.21.128, 172.31.24.111) if unset. Export your own before running if your VMs get different private IPs.
 ```
 # broker-vm — Kafka (KRaft)
 cd ~/kafka && sudo docker compose up -d
@@ -174,7 +174,7 @@ cd ~/kafka && sudo docker compose up -d
 # database-vm — MongoDB
 cd ~/mongo && sudo docker compose up -d
 
-# database-vm — REST API
+# database-vm — REST API (first: pip3 install flask pymongo)
 python3 rest_app.py
 
 # processor-vm — start listening before the producer runs
