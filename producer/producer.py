@@ -8,7 +8,7 @@ from kafka import KafkaProducer
 
 
 # Private IP and port of the Kafka
-BROKER = "172.31.21.128:9092"
+BROKER = os.environ.get("KAFKA_BROKER", "172.31.21.128:9092")
 
 # Kafka topic where the network flow data will be sent
 TOPIC = "network-flows"
