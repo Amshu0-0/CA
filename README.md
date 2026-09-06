@@ -204,6 +204,4 @@ curl http://<database-vm-public-ip>:8080/alerts
 
 ## Video Submission
 
-## Video Submission
-
 [▶ Watch the CA0 demo video on YouTube](https://youtu.be/DT6sMKgO1_U)
