@@ -44,7 +44,7 @@ I own this outcome. If any part of it turns out to be wrong, that's on me, not o
 ## AI-Assisted Work
 I used Claude for this project, mainly for the code for the producer and the processor, rather than for the pipeline's actual design decisions, which I made myself.
 
-- **Verified and used as-is**: Kafka KRaft configuration syntax, producer code, processor code.
+- **Verified and used as-is**: Kafka KRaft configuration syntax, producer code, processor code, README and integrity packet.
 - **Verified independently before trusting**: when a MongoDB downgrade was suggested to fix a startup crash, the crash log itself pointed to a specific, checkable bug report, which was confirmed before proceeding.
 - **Decisions I made, not the AI**: the project topic (intrusion detection on CICIDS2017), the choice to relay the dataset's existing label rather than build independent detection logic, and the choice to build a denser demo dataset from the original file.
 - **Debugging approach**: nearly all the debugging — reading error messages, checking container status, testing network reachability was done by running commands myself and checking things directly; I cross-validated with Claude when I got confused while reading the logs. For example,  I used Claude when the Kafka config failed, and the MongoDB config failed by showing the logs, and then we fixed it by not using the Bitnami example in the CS 5287 doc and downgrading the MongoDB
