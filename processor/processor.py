@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
 import json
+import os
 from kafka import KafkaConsumer
 from pymongo import MongoClient
 
 
 # Kafka port
-BROKER = "172.31.21.128:9092"
+BROKER = os.environ.get("KAFKA_BROKER", "172.31.21.128:9092")
 
 # The Kafka topic to read message from
 TOPIC = "network-flows"
 
 # MongoDB port
-MONGO_HOST = "172.31.24.111"
+MONGO_HOST = os.environ.get("MONGO_HOST", "172.31.24.111")
 MONGO_PORT = 27017
 
 # Save the data in MongoDB
