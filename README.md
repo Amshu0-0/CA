@@ -106,6 +106,8 @@ All four instances share one key pair (`ca0-key.pem`) and one security group. Pu
 
   ![Security group inbound rules](images/security-group.png)
   *Inbound rules scoped to my IP for human-facing ports, and to the security group itself for inter-VM ports.*
+  <img width="1222" height="630" alt="image" src="https://github.com/user-attachments/assets/976a0682-acee-4b86-8a45-500cdef18811" />
+
 
 - **Non-root containers**: both the producer and processor Dockerfiles create and switch to an unprivileged `appuser` before running (`USER appuser`), confirmed in the build output of both images.
 
