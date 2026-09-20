@@ -8,7 +8,7 @@ This project re-implements CA0's Producer → Kafka → Processor → MongoDB �
 The pipeline's function is unchanged from CA0: the producer replays labeled CICIDS2017 network-flow records onto a Kafka topic, the processor consumes them and writes results to MongoDB, and a REST API exposes flagged (`Bot`) traffic. What changed for CA1 is *how it gets built*: nothing here was clicked into existence by hand, and every step below was validated before moving to the next one.
 
 ## Demo Video
-**[VIDEO LINK — https://youtu.be/pgluvohfW4A]**
+**[VIDEO LINK — https://youtu.be/_km0kpBqTcI]**
 
 Recorded live against a fresh `terraform apply` → `ansible-playbook site.yml` deploy: all four hosts pinging, the producer replaying 5,000 rows, the processor's alert log climbing in real time, and both REST endpoints returning live data.
 
@@ -114,12 +114,25 @@ All four VMs share one Terraform-managed key pair (`ca1-key`) and one security g
 
 ## Prerequisites
 
-- **Terraform** ≥ 1.16 — `brew install hashicorp/tap/terraform` (macOS)
-- **Ansible** ≥ 2.21 — `brew install ansible` (macOS; pulls Python 3.14 and a handful of crypto libraries as dependencies)
-- **AWS CLI** ≥ 2.36 — `brew install awscli`
-- **An AWS account**, with an IAM user for Terraform to use. This project uses a dedicated user, `ca1-terraform`, with the `AmazonEC2FullAccess` managed policy attached — not the account root, and not a personal admin user.
-- **A static AWS access key for that IAM user**, configured via `aws configure` — not `aws login`. The AWS CLI's newer `aws login` (browser-based SSO-style flow, CLI ≥ 2.32) is not recognized as a valid credential source by the Terraform AWS provider ([hashicorp/terraform-provider-aws#45316](https://github.com/hashicorp/terraform-provider-aws/issues/45316), open as of this writing). `aws configure` with a static access key ID/secret works with both the CLI and Terraform, so that's what this project uses.
-- **Your own public IP**, for the security group's SSH/REST rules — get it with `curl https://checkip.amazonaws.com`.
+Everything below assumes macOS, since that's what this was built on. On Linux, swap Homebrew for your distro's package manager (`apt`, `dnf`, etc.); on Windows, use WSL2 and follow the Linux path inside it.
+
+**0. Homebrew — macOS's package manager.** Skip this if `brew --version` already prints something.
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+```bash
+brew --version
+```
+
+**1. Terraform** ≥ 1.16 — provisions the AWS infrastructure. Not a plain `brew install terraform`; it needs HashiCorp's own tap:
+```bash
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+```
+```bash
+terraform version
+```
+Should print `Terraform v1.16.3` or newer.
 
 ![Installing Terraform via Homebrew](images/download-terraform-with-homebrew.png)
 *`brew tap hashicorp/tap && brew install hashicorp/tap/terraform`.*
@@ -127,14 +140,55 @@ All four VMs share one Terraform-managed key pair (`ca1-key`) and one security g
 ![Confirming the installed Terraform version](images/check-terraform-version.png)
 *`terraform version` → 1.16.3.*
 
+**2. Ansible** ≥ 2.21 — configures the software on each VM:
+```bash
+brew install ansible
+```
+```bash
+ansible --version
+```
+Should print `ansible [core 2.21.4]` or newer. This pulls in Python 3.14 and a few crypto libraries as dependencies — that's expected, not an error.
+
+**3. AWS CLI** ≥ 2.36 — used to give Terraform your AWS credentials:
+```bash
+brew install awscli
+```
+```bash
+aws --version
+```
+Should print `aws-cli/2.36.49` or newer.
+
 ![Installing the AWS CLI via Homebrew](images/check-and-install-amazon-cli.png)
 *`brew install awscli`, then confirming with `aws --version`.*
+
+**4. An AWS account, with a dedicated IAM user** — not root, and not a personal admin user. If you don't already have one for this project:
+- Sign in to the [AWS Console](https://console.aws.amazon.com/) → **IAM → Users → Create user**
+- Name it something like `ca1-terraform`
+- Attach the `AmazonEC2FullAccess` managed policy directly to it
+- Under that user's page → **Security credentials → Access keys → Create access key** → choose "Command Line Interface (CLI)" → save the access key ID and secret somewhere safe. AWS only shows the secret once.
+
+**5. Configure that access key locally**, via `aws configure` — not `aws login`. The AWS CLI's newer `aws login` (browser-based SSO-style flow, CLI ≥ 2.32) is not recognized as a valid credential source by the Terraform AWS provider ([hashicorp/terraform-provider-aws#45316](https://github.com/hashicorp/terraform-provider-aws/issues/45316), open as of this writing). `aws configure` with the static access key ID/secret from step 4 works with both the CLI and Terraform:
+```bash
+aws configure
+```
+Paste in the access key ID and secret when prompted; region `us-east-2`.
 
 ![Configuring the static access key for the ca1-terraform IAM user](images/add-working-credentials.png)
 *`aws configure` with the `ca1-terraform` user's static access key — not `aws login`, for the reason explained above.*
 
+Confirm it worked and it's the scoped user, not root:
+```bash
+aws sts get-caller-identity
+```
+
 ![aws sts get-caller-identity confirming the scoped IAM user, not root](images/iam-user-confirmed.png)
 *`aws sts get-caller-identity` → `user/ca1-terraform`, not `root`.*
+
+**6. Your own public IP**, for the security group's SSH/REST rules:
+```bash
+curl https://checkip.amazonaws.com
+```
+Keep this handy — it's needed in step 2 of How to Deploy, below.
 
 ## Repository Structure
 
@@ -197,15 +251,9 @@ Each `.tf` file was written and validated on its own before the next one was add
 
 MongoDB's admin credentials never appear in plaintext anywhere in this repo. They live in `ansible/group_vars/all/vault.yml`, encrypted with Ansible Vault (AES256), and are injected into the Mongo container, the processor container, and the REST API's systemd unit as environment variables at configure time.
 
-To reproduce this on a fresh checkout:
-```bash
-cd CA1/ansible
-cp group_vars/all/vault.yml.example group_vars/all/vault.yml
-nano group_vars/all/vault.yml       # fill in vault_mongo_root_username / vault_mongo_root_password
-echo "your-chosen-vault-password" > .vault_pass
-ansible-vault encrypt group_vars/all/vault.yml
-```
-`ansible.cfg` points at `.vault_pass`, so `ansible-playbook` decrypts automatically — no `--ask-vault-pass` needed. Both `vault.yml` (post-encryption) and `.vault_pass` are gitignored; only `vault.yml.example` is committed.
+`vault.yml` — the encrypted ciphertext — **is committed to this repo**; that's the entire point of vaulting it, rather than gitignoring something nobody could then ever share or reproduce from. What's never committed is `.vault_pass`, the plaintext password that decrypts it, for the same reason an AWS access key never is. `ansible.cfg` points at `.vault_pass` locally, so `ansible-playbook` decrypts automatically once it exists — no `--ask-vault-pass` needed.
+
+Setting up your own vault — needed only if your checkout doesn't already have a matching `.vault_pass` — is step 3 of **How to Deploy — Start to Finish**, below.
 
 ![Vault-encrypted MongoDB credentials, verified with cat](images/no-secrets-in-plain-text.png)
 *`cat group_vars/all/vault.yml` — AES256 ciphertext, not plaintext.*
@@ -227,20 +275,49 @@ instance_type = "t3.medium"
 aws_region    = "us-east-2"
 ```
 
-## How to Deploy
+## How to Deploy — Start to Finish
 
+This section assumes only that the tools in Prerequisites are already installed, and walks through everything else from a completely fresh checkout.
+
+**1. Get your own AWS credentials.** Use your own AWS account — create a dedicated IAM user (not root) with the `AmazonEC2FullAccess` policy, generate a static access key for it, then:
 ```bash
-# One-time setup
-cd CA1/terraform
-terraform init
+aws configure
+```
+Paste in that access key ID and secret when prompted, region `us-east-2`. (This is `aws configure`, not `aws login` — see Prerequisites above for why.)
 
-# Every deploy
-terraform apply        # type "yes" when prompted
-cd ../ansible
-ansible-playbook site.yml
+**2. Set your own IP.**
+```bash
+curl https://checkip.amazonaws.com
+```
+Create `CA1/terraform/terraform.tfvars` with that value:
+```
+my_ip_cidr = "YOUR_IP_HERE/32"
 ```
 
-`terraform apply` creates the four VMs, the key pair, and the security group, then writes `../ansible/inventory.ini` with the real IPs. `ansible-playbook site.yml` then runs all six roles in order: Docker on every VM, then Kafka, MongoDB, the processor, the producer, and finally the REST API.
+**3. Set up your own vault.** `group_vars/all/vault.yml` is committed to this repo as real, encrypted ciphertext — but `.vault_pass`, the password that decrypts it, is deliberately never committed, for the same reason an AWS key never is. **If your checkout already has both `vault.yml` and a matching `.vault_pass`, skip this step entirely.** Otherwise:
+```bash
+cd CA1/ansible
+cp group_vars/all/vault.yml.example group_vars/all/vault.yml
+nano group_vars/all/vault.yml
+```
+Fill in `vault_mongo_root_username` and `vault_mongo_root_password` with values of your own choosing, then:
+```bash
+echo "your-chosen-vault-password" > .vault_pass
+ansible-vault encrypt group_vars/all/vault.yml
+```
+This works correctly with any credentials you pick. Mongo, the processor, and the REST API all read from this same file in the same deploy, so the system is internally consistent regardless of which specific values are inside it — you're choosing your own secret here, not trying to guess mine.
+
+**4. Initialize Terraform (one-time).**
+```bash
+cd ../terraform
+terraform init
+```
+
+**5. Provision the infrastructure.**
+```bash
+terraform apply
+```
+Type `yes` when prompted. This creates the four VMs, the key pair, and the security group, then writes `../ansible/inventory.ini` with the real IPs.
 
 ![terraform plan showing all resources to add](images/terraform-plan.png)
 *The full plan for a deploy: instances, key pair, security group, local key file, and generated inventory.*
@@ -260,8 +337,26 @@ ansible-playbook site.yml
 ![Ansible inventory auto-generated by Terraform, with real IPs filled in](images/ansible-inventory-generated.png)
 *`cat ../ansible/inventory.ini` — Terraform's `templatefile()` output, with no manual editing.*
 
+**6. Configure everything.**
+```bash
+cd ../ansible
+ansible-playbook site.yml
+```
+Runs all six roles in order — Docker on every VM, then Kafka, MongoDB, the processor, the producer, and finally the REST API. Wait for a clean `PLAY RECAP`: all four hosts should show `failed=0, unreachable=0`.
+
+**7. Confirm it's actually alive.**
+```bash
+ansible all -m ping
+```
+
 ![Ansible ping confirming all four hosts are reachable](images/pinging-ansible.png)
 *`ansible all -m ping` — all four report `pong` before any configuration runs.*
+
+All four should report `pong`. For the full data-flow proof — the producer replaying rows, the processor's alert log, both REST endpoints — see Validation / Smoke Test below.
+
+**8. Validation** See exact sequence used to prove the pipeline moves real data end to end in **Validation / Smoke Test section**
+
+**9. Tear it down when you're finished.** See How to Destroy, immediately below.
 
 ## How to Destroy
 
