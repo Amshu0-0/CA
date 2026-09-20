@@ -1,0 +1,17 @@
+services:
+  mongodb:
+    # Use MongoDB 7.0 for the database container.
+    image: "mongo:7.0"
+
+    # Restart MongoDB automatically unless it is stopped manually.
+    restart: unless-stopped
+
+    # Expose MongoDB on port 27017 so the other pipeline components can connect to the database inside AWS.
+    ports:
+      - "27017:27017"
+
+    environment:
+      # Create the MongoDB administrator account.
+      # These values come from the encrypted Ansible Vault file instead of being written directly into this template.
+      MONGO_INITDB_ROOT_USERNAME: "{{ vault_mongo_root_username }}"
+      MONGO_INITDB_ROOT_PASSWORD: "{{ vault_mongo_root_password }}"

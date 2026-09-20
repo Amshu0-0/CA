@@ -1,0 +1,38 @@
+---
+# This role sets up MongoDB on the database VM.
+# It only runs on the database machine because the other VMs do not need to run MongoDB.
+
+# Create a folder where the MongoDB Docker Compose file will be stored on the database VM.
+- name: Create Mongo directory
+  file:
+    path: /home/ubuntu/mongo
+    state: directory
+    mode: "0755"
+
+# Create the MongoDB docker-compose.yml file from the Jinja2 template.
+# The real username and password are filled in from the encrypted Ansible Vault variables.
+#
+# The file uses 0600 permissions because it contains the real MongoDB password after Ansible creates it.
+- name: Template Mongo docker-compose.yml with vaulted credentials
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/ubuntu/mongo/docker-compose.yml
+    mode: "0600"
+
+# Start the MongoDB container in the background.
+# chdir makes sure Docker Compose runs from the folder containing the docker-compose.yml file.
+- name: Start MongoDB
+  command: docker compose up -d
+  args:
+    chdir: /home/ubuntu/mongo
+  changed_when: false
+
+# Check that the MongoDB container is actually running.
+# The playbook will fail here if MongoDB is not listed as a running container.
+- name: Confirm MongoDB container is running
+  command: docker compose ps --status running
+  args:
+    chdir: /home/ubuntu/mongo
+  register: mongo_status
+  changed_when: false
+  failed_when: "'mongodb' not in mongo_status.stdout"

@@ -1,0 +1,55 @@
+# This file installs Docker on the VMs.
+# All four machines need Docker because Kafka, MongoDB, the producer, and the processor will all run in containers.
+
+# Update the package list before installing anything.
+- name: Update apt cache
+  apt:
+    update_cache: true
+
+# Install the packages Docker needs before its repository and signing key can be added.
+- name: Install Docker prerequisites
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+
+# Download Docker's official signing key.
+# Ubuntu uses this key to verify that Docker packages really came from Docker's repository.
+- name: Add Docker's official GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+# Add Docker's official Ubuntu package repository.
+# This lets apt install Docker directly from Docker's source instead of using an older package from the default Ubuntu repository.
+- name: Add Docker apt repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+
+# Install Docker Engine, its command-line tools, containerd, and the Docker Compose plugin.
+- name: Install Docker Engine and Compose plugin
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+# Add the ubuntu user to the docker group.
+# This lets the ubuntu user run Docker commands without needing sudo every time.
+- name: Add ubuntu user to the docker group
+  user:
+    name: ubuntu
+    groups: docker
+    append: true
+
+# Run a small test container to make sure Docker is actually working after the installation.
+- name: Verify Docker actually works
+  command: docker run --rm hello-world
+  changed_when: false

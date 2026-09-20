@@ -1,0 +1,36 @@
+# This systemd service keeps the REST API running as a background service on the database VM.
+
+[Unit]
+# Name shown by systemd for this service.
+Description=CA1 REST API
+
+# Wait until networking and Docker are available before starting the REST API.
+After=network.target docker.service
+
+
+[Service]
+# Run the API as the ubuntu user instead of root.
+User=ubuntu
+
+# Run the application from the folder where
+# Ansible will copy rest_app.py.
+WorkingDirectory=/home/ubuntu
+
+# Pass the MongoDB username and password into the API.
+# These values come from the encrypted Ansible Vault when Ansible creates this service file.
+Environment=MONGO_USER={{ vault_mongo_root_username }}
+Environment=MONGO_PASSWORD={{ vault_mongo_root_password }}
+
+# Start the Flask REST API.
+ExecStart=/usr/bin/python3 /home/ubuntu/rest_app.py
+
+# Restart the API automatically if it crashes.
+Restart=on-failure
+
+# Wait 5 seconds before trying to restart it.
+RestartSec=5
+
+
+[Install]
+# Start this service automatically during normal system startup.
+WantedBy=multi-user.target

@@ -1,0 +1,56 @@
+---
+# This role installs and starts the REST API on the database VM.
+
+# Make sure Python 3 and pip are installed before installing the API's Python packages.
+- name: Install Python3 and pip
+  apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
+
+# Install the Python packages used by the REST API.
+# Flask runs the API and pymongo connects to MongoDB.
+- name: Install Flask and pymongo
+  pip:
+    name:
+      - flask
+      - pymongo
+    executable: pip3
+    extra_args: --break-system-packages
+
+# Copy the REST API program onto the database VM.
+- name: Copy rest_app.py
+  copy:
+    src: rest_app.py
+    dest: /home/ubuntu/rest_app.py
+    mode: "0644"
+
+# Create the systemd service file from the template.
+# The MongoDB credentials are filled in from Ansible Vault when this file is created on the VM.
+- name: Install systemd unit for the REST API
+  template:
+    src: rest_api.service.j2
+    dest: /etc/systemd/system/rest_api.service
+    mode: "0600"
+
+# Enable the REST API so it starts automatically on boot.
+# state: restarted also makes sure the latest version of the service is running now.
+- name: Enable and start the REST API service
+  systemd:
+    name: rest_api
+    enabled: true
+    state: restarted
+    daemon_reload: true
+
+# Call the health endpoint to make sure the API is actually responding over HTTP.
+#
+# Ansible will retry up to 5 times and wait 3 seconds between attempts if the API is still starting.
+- name: Wait for the API to actually respond
+  uri:
+    url: "http://localhost:8080/health"
+    status_code: 200
+  register: health_check
+  retries: 5
+  delay: 3
+  until: health_check.status == 200

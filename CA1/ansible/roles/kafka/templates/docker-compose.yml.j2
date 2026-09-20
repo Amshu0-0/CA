@@ -1,0 +1,44 @@
+services:
+  kafka:
+    # Use the Confluent Kafka image for the broker.
+    image: "confluentinc/cp-kafka:7.7.1"
+
+    # Restart Kafka automatically unless it is stopped manually.
+    restart: unless-stopped
+
+    # Expose Kafka on port 9092 so the other pipeline components can connect to the broker.
+    ports:
+      - "9092:9092"
+
+    environment:
+      # This broker uses node ID 1.
+      KAFKA_NODE_ID: 1
+
+      # Run Kafka in KRaft mode so the same container handles both the broker and controller roles.
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      # Tell the controller where the KRaft controller for this single-node Kafka setup is running.
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      # Use the CONTROLLER listener for KRaft controller traffic.
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # Define the listeners Kafka will open inside the container.
+      # INTERNAL is used inside Docker, EXTERNAL is used by the other VMs, and CONTROLLER is used by KRaft.
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+
+      # Tell clients which addresses they should use to reach Kafka.
+      # The broker's private IP comes from inventory.ini and is filled into this template by Ansible.
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://{{ private_ip }}:9092"
+
+      # Use plaintext communication for each listener.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      # Use the INTERNAL listener for communication between Kafka broker processes.
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # This project only has one Kafka broker, so the offsets topic uses a replication factor of 1.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # Fixed cluster ID used by Kafka when running in KRaft mode.
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'

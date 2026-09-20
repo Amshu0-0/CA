@@ -1,0 +1,35 @@
+# This role sets up Kafka on the broker VM.
+# It only runs on the broker because the other three machines do not need to run Kafka.
+
+# Create a folder where the Kafka Docker Compose file will be stored on the broker VM.
+- name: Create Kafka directory
+  file:
+    path: /home/ubuntu/kafka
+    state: directory
+    mode: "0755"
+
+# Create the broker's docker-compose.yml file from the Jinja2 template.
+# Ansible fills in values such as the broker's private IP before saving the file on the VM.
+- name: Template Kafka docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/ubuntu/kafka/docker-compose.yml
+    mode: "0644"
+
+# Start the Kafka container in the background.
+# chdir makes sure Docker Compose runs from the folder that contains the docker-compose.yml file.
+- name: Start Kafka
+  command: docker compose up -d
+  args:
+    chdir: /home/ubuntu/kafka
+  changed_when: false
+
+# Check that the Kafka container is actually running.
+# The playbook will fail here if Kafka is not listed as a running container.
+- name: Confirm Kafka container is running
+  command: docker compose ps --status running
+  args:
+    chdir: /home/ubuntu/kafka
+  register: kafka_status
+  changed_when: false
+  failed_when: "'kafka' not in kafka_status.stdout"

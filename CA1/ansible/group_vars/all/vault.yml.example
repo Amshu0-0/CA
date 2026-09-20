@@ -1,0 +1,9 @@
+# CA0's MongoDB did not use authentication.
+# CA1 adds a real MongoDB username and password so the database is not left open to every service that can reach port 27017.
+
+# Example MongoDB administrator username.
+# This file is only a template, so the example value can be committed.
+vault_mongo_root_username: "ca1admin"
+
+# Replace this example value with your own real password in the actual encrypted Vault file later.
+vault_mongo_root_password: "REPLACE_ME_WITH_YOUR_OWN_PASSWORD"

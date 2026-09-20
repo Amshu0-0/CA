@@ -1,0 +1,21 @@
+---
+# This role prepares the producer VM.
+# It copies the producer code, Dockerfile, and demo dataset onto the machine and builds the image.
+
+# Copy the producer program, Dockerfile, and CSV dataset from the Ansible role onto the producer VM.
+- name: Copy producer source, Dockerfile, and demo dataset
+  copy:
+    src: "{{ item }}"
+    dest: "/home/ubuntu/{{ item }}"
+    mode: "0644"
+  loop:
+    - producer.py
+    - Dockerfile
+    - Friday-Morning-5000-mixed-bot.csv
+
+# Build the producer Docker image using the files that were copied onto the producer VM.
+- name: Build the producer image
+  command: docker build -t producer .
+  args:
+    chdir: /home/ubuntu
+  changed_when: false

@@ -1,0 +1,81 @@
+---
+# This is the main Ansible playbook.
+# It connects the roles we create to the VMs listed in the Ansible inventory.
+
+# Install Docker on all four CA1 VMs.
+- name: Install Docker on every VM
+  # "all" means run this play on every machine listed in inventory.ini.
+  hosts: all
+
+  # Run the tasks with administrator permissions.
+  # Setting this here means every task inside the Docker role gets the permissions it needs without repeating become inside each individual task.
+  become: true
+
+  # Run the Docker role on each VM.
+  roles:
+    - docker
+
+
+# Configure Kafka only on the broker VM.
+- name: Configure the Kafka broker
+  # "broker" means this play only runs on the machine listed under the [broker] group in inventory.ini.
+  hosts: broker
+
+  # Kafka setup needs administrator permissions for the tasks inside the Kafka role.
+  become: true
+
+  # Run the Kafka role only on the broker VM.
+  roles:
+    - kafka
+
+
+# Configure MongoDB only on the database VM.
+- name: Configure MongoDB
+  # "database" means this play only runs on the machine listed under the [database] group in inventory.ini.
+  hosts: database
+
+  # MongoDB setup needs administrator permissions for the tasks inside the Mongo role.
+  become: true
+
+  # Run the Mongo role only on the database VM.
+  roles:
+    - mongo
+
+
+# Configure the processor only on the processor VM.
+- name: Configure the processor
+  # "processor" means this play only runs on the machine listed under the [processor] group in inventory.ini.
+  hosts: processor
+
+  # The processor setup needs administrator permissions for building and starting the Docker container.
+  become: true
+
+  # Run the processor role only on the processor VM.
+  roles:
+    - processor
+
+
+# Configure the producer only on the producer VM.
+- name: Configure the producer
+  # "producer" means this play only runs on the machine listed under the [producer] group in inventory.ini.
+  hosts: producer
+
+  # The producer setup needs administrator permissions for copying files and building the Docker image.
+  become: true
+
+  # Run the producer role only on the producer VM.
+  roles:
+    - producer
+
+
+# Configure the REST API on the database VM.
+- name: Configure the REST API
+  # The REST API runs on the same VM as MongoDB, so this play targets the database group.
+  hosts: database
+
+  # The REST API setup needs administrator permissions to install packages and create the systemd service.
+  become: true
+
+  # Run the REST API role on the database VM.
+  roles:
+    - restapi

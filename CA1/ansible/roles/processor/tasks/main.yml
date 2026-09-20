@@ -1,0 +1,55 @@
+---
+# This role sets up and starts the processor container on the processor VM.
+
+# Copy the processor program and Dockerfile from the Ansible role onto the processor VM.
+- name: Copy processor source and Dockerfile
+  copy:
+    src: "{{ item }}"
+    dest: "/home/ubuntu/{{ item }}"
+    mode: "0644"
+  loop:
+    - processor.py
+    - Dockerfile
+
+# Build the processor Docker image using the Dockerfile that was copied onto the VM.
+- name: Build the processor image
+  command: docker build -t processor .
+  args:
+    chdir: /home/ubuntu
+  changed_when: false
+
+# Remove an older processor container if one already exists.
+# failed_when: false means the playbook will continue even if there is no old container to remove.
+- name: Remove any previous processor container
+  command: docker rm -f processor
+  failed_when: false
+  changed_when: false
+
+# Start the processor container.
+#
+# The Kafka broker private IP comes from the broker host in inventory.ini, even though this task is running on the processor VM.
+#
+# The MongoDB private IP is found the same way from the database host.
+#
+# The MongoDB username and password come from the encrypted Ansible Vault variables.
+- name: Run the processor container
+  command: >
+    docker run -d
+    --name processor
+    -e KAFKA_BROKER={{ hostvars[groups['broker'][0]].private_ip }}:9092
+    -e MONGO_HOST={{ hostvars[groups['database'][0]].private_ip }}
+    -e MONGO_USER={{ vault_mongo_root_username }}
+    -e MONGO_PASSWORD={{ vault_mongo_root_password }}
+    --restart unless-stopped
+    processor
+  changed_when: true
+
+# Check that the processor container is actually running.
+#
+# Docker inspect also uses {{ }} syntax, so the inner expression is wrapped this way so Ansible passes
+# {{.State.Running}} directly to Docker instead of trying to treat it as an Ansible variable.
+- name: Confirm the processor container is actually running
+  command: docker inspect -f "{{ '{{.State.Running}}' }}" processor
+  register: processor_running
+  changed_when: false
+  failed_when: "'true' not in processor_running.stdout"
