@@ -7,6 +7,11 @@ This project re-implements CA0's Producer → Kafka → Processor → MongoDB �
 
 The pipeline's function is unchanged from CA0: the producer replays labeled CICIDS2017 network-flow records onto a Kafka topic, the processor consumes them and writes results to MongoDB, and a REST API exposes flagged (`Bot`) traffic. What changed for CA1 is *how it gets built*: nothing here was clicked into existence by hand, and every step below was validated before moving to the next one.
 
+## Demo Video
+**[VIDEO LINK — https://youtu.be/pgluvohfW4A]**
+
+Recorded live against a fresh `terraform apply` → `ansible-playbook site.yml` deploy: all four hosts pinging, the producer replaying 5,000 rows, the processor's alert log climbing in real time, and both REST endpoints returning live data.
+
 ## Architecture Diagram
 
 ```mermaid
@@ -343,8 +348,12 @@ After `ansible-playbook site.yml` finishes clean, this is the exact sequence use
 # 1. Replay the dataset - broker_private_ip resolves from inventory.ini, nothing to edit
 ansible producer -m command -a "docker run --rm -e KAFKA_BROKER={{ broker_private_ip }}:9092 producer"
 
-# 2. Confirm the processor actually consumed and inserted it - already fully literal
-ansible processor -m shell -a "docker logs --tail 30 processor"
+# 2. Confirm the processor actually consumed and inserted it
+# --become is required here: a fresh deploy's ad-hoc docker commands can hit
+# "permission denied ... docker.sock" before the ubuntu user's docker-group
+# membership is picked up by that session, even though the processor role's
+# own build/run tasks already succeeded. --become uses sudo instead, sidestepping it.
+ansible processor -m shell -a "docker logs --tail 30 processor" --become
 
 # 3. Confirm the REST API is reachable and returning real data - grabs its own IP
 DB_IP=$(cd ../terraform && terraform output -json public_ips | python3 -c "import json,sys; print(json.load(sys.stdin)['database'])")
@@ -398,7 +407,7 @@ Values below are from the most recent full deploy before final teardown; a fresh
 - **REST endpoints (database VM, port 8080):**
   - `GET /health` → `{"status": "ok"}`
   - `GET /alerts` → up to 50 non-`BENIGN` flows as JSON
-- **Example run's public IPs:** producer `3.145.188.4` · broker `3.137.216.1` · processor `18.117.232.234` · database `18.226.28.68`
+- **Example run's public IPs (from the demo video's recording session):** producer `18.219.203.198` · broker `18.226.251.51` · processor `18.118.2.204` · database `3.148.205.149`
 - **Validation results:** all 4 hosts pinged successfully; all 6 Ansible roles completed with `failed=0, unreachable=0`; producer sent 5000/5000 rows; processor logged a climbing `[ALERT]` count reaching 5000; `/health` and `/alerts` both returned correct live data.
 
 ## Deviations From CA0
