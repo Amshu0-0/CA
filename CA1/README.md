@@ -337,18 +337,19 @@ Six roles, run in order by `site.yml`. Each one's `PLAY RECAP` was checked for `
 
 ## Validation / Smoke Test
 
-After `ansible-playbook site.yml` finishes clean, this is the sequence used to prove the pipeline moves real data end to end (`<broker-private-ip>` and `<database-public-ip>` come from `terraform output`):
+After `ansible-playbook site.yml` finishes clean, this is the exact sequence used to prove the pipeline moves real data end to end. Every line is directly pasteable, with no manual IP lookup: `broker_private_ip` already lives in `inventory.ini`'s `[all:vars]`, so Ansible resolves it itself, and the one command that needs the database's public IP captures it from `terraform output` automatically.
 
 ```bash
-# 1. Replay the dataset from the producer VM
-ansible producer -m command -a "docker run --rm -e KAFKA_BROKER=<broker-private-ip>:9092 producer"
+# 1. Replay the dataset - broker_private_ip resolves from inventory.ini, nothing to edit
+ansible producer -m command -a "docker run --rm -e KAFKA_BROKER={{ broker_private_ip }}:9092 producer"
 
-# 2. Confirm the processor actually consumed and inserted it
+# 2. Confirm the processor actually consumed and inserted it - already fully literal
 ansible processor -m shell -a "docker logs --tail 30 processor"
 
-# 3. Confirm the REST API is reachable and returning real data
-curl http://<database-public-ip>:8080/health
-curl http://<database-public-ip>:8080/alerts
+# 3. Confirm the REST API is reachable and returning real data - grabs its own IP
+DB_IP=$(cd ../terraform && terraform output -json public_ips | python3 -c "import json,sys; print(json.load(sys.stdin)['database'])")
+curl http://$DB_IP:8080/health
+curl http://$DB_IP:8080/alerts
 ```
 
 ![Producer sending all 5000 rows](images/smoke-test-producer.png)
