@@ -27,40 +27,51 @@
     mode: "0755"
 
 # Copy the REST API program onto the database VM.
+# If the program changed, the notify line asks for a restart at the end of this role.
 - name: Copy rest_app.py
   copy:
     src: rest_app.py
     dest: /home/ubuntu/rest_app.py
     mode: "0644"
+  notify: Restart the REST API
 
 # Write the REST API's settings into an environment file on the VM.
 #
 # Every value comes from config.yml or the encrypted Ansible Vault.
 # The file contains the MongoDB password, so only root can read it.
 # no_log: true keeps the password out of Ansible's output.
+# If a setting changed, the notify line asks for a restart.
 - name: Write the REST API environment file
   template:
     src: rest_api.env.j2
     dest: /etc/ca1/rest_api.env
     mode: "0600"
   no_log: true
+  notify: Restart the REST API
 
 # Create the systemd service file from the template.
 # The service reads its settings from the environment file written above.
+# If the service file changed, the notify line asks for a restart.
 - name: Install systemd unit for the REST API
   template:
     src: rest_api.service.j2
     dest: /etc/systemd/system/rest_api.service
     mode: "0644"
+  notify: Restart the REST API
 
-# Enable the REST API so it starts automatically on boot.
-# state: restarted also makes sure the latest version of the service is running now.
+# Make sure the REST API starts automatically on boot and is running now.
+# state: started changes nothing when the service is already running. Restarts happen only through
+# the handler, and only when the program, its settings, or its service file really changed.
 - name: Enable and start the REST API service
   systemd:
     name: rest_api
     enabled: true
-    state: restarted
+    state: started
     daemon_reload: true
+
+# Run any restart that was requested above right now, so the health check below tests the new version.
+- name: Apply any pending restart before checking health
+  meta: flush_handlers
 
 # Call the health endpoint to make sure the API is actually responding over HTTP.
 # The port comes from config.yml.

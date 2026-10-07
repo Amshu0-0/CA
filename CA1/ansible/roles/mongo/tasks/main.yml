@@ -19,13 +19,14 @@
     dest: /home/ubuntu/mongo/docker-compose.yml
     mode: "0600"
 
-# Start the MongoDB container in the background.
-# chdir makes sure Docker Compose runs from the folder containing the docker-compose.yml file.
+# Make sure the MongoDB container is running the way the compose file describes.
+#
+# Ansible's Docker Compose module only reports a change when it really has to create, replace, or start
+# the container. If MongoDB is already running with the right settings, running the playbook again does nothing.
 - name: Start MongoDB
-  command: docker compose up -d
-  args:
-    chdir: /home/ubuntu/mongo
-  changed_when: false
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/mongo
+    state: present
 
 # Check that the MongoDB container is actually running.
 # The playbook will fail here if MongoDB is not listed as a running container.

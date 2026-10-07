@@ -1,0 +1,10 @@
+---
+# Handlers run only when a task that names them reports a change.
+
+# Restart the REST API so it picks up a new program file, new settings, or a new systemd unit.
+# daemon_reload makes systemd read the unit file again first, in case that changed.
+- name: Restart the REST API
+  systemd:
+    name: rest_api
+    state: restarted
+    daemon_reload: true

@@ -16,13 +16,14 @@
     dest: /home/ubuntu/kafka/docker-compose.yml
     mode: "0644"
 
-# Start the Kafka container in the background.
-# chdir makes sure Docker Compose runs from the folder that contains the docker-compose.yml file.
+# Make sure the Kafka container is running the way the compose file describes.
+#
+# Ansible's Docker Compose module only reports a change when it really has to create, replace, or start
+# the container. If Kafka is already running with the right settings, running the playbook again does nothing.
 - name: Start Kafka
-  command: docker compose up -d
-  args:
-    chdir: /home/ubuntu/kafka
-  changed_when: false
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/kafka
+    state: present
 
 # Check that the Kafka container is actually running.
 # The playbook will fail here if Kafka is not listed as a running container.

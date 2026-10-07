@@ -8,15 +8,25 @@
     state: directory
     mode: "0755"
 
-# Copy the processor program and Dockerfile from the Ansible role onto the processor VM.
+# Create a folder that holds only the files Docker needs to build the processor image.
+# A dedicated folder keeps the rest of the home directory out of the Docker build.
+- name: Create the processor build folder
+  file:
+    path: /home/ubuntu/processor
+    state: directory
+    mode: "0755"
+
+# Copy the processor program and Dockerfile from the Ansible role into that folder.
+# register saves the result, so a later task can tell whether either file changed.
 - name: Copy processor source and Dockerfile
   copy:
     src: "{{ item }}"
-    dest: "/home/ubuntu/{{ item }}"
+    dest: "/home/ubuntu/processor/{{ item }}"
     mode: "0644"
   loop:
     - processor.py
     - Dockerfile
+  register: processor_source
 
 # Write the processor's settings into an environment file on the VM.
 #
@@ -30,32 +40,38 @@
     mode: "0600"
   no_log: true
 
-# Build the processor Docker image using the Dockerfile that was copied onto the VM.
-- name: Build the processor image
-  command: docker build -t processor .
-  args:
-    chdir: /home/ubuntu
-  changed_when: false
-
-# Remove an older processor container if one already exists.
-# failed_when: false means the playbook will continue even if there is no old container to remove.
-- name: Remove any previous processor container
-  command: docker rm -f processor
+# Find out whether the processor image already exists on this VM.
+# This only reads information, so it never reports a change.
+- name: Check whether the processor image exists
+  command: docker image inspect --format "{{ '{{.Id}}' }}" processor
+  register: processor_image_check
   failed_when: false
   changed_when: false
 
-# Start the processor container.
+# Build the processor Docker image, but only when there is a reason to.
 #
-# Docker reads all of the processor's settings from the environment file written above,
-# so no address, topic name, or password appears on this command line.
+# The reasons are that the image does not exist yet, or that one of the files it is built from just changed.
+# Skipping the build otherwise matters because every Docker build stamps the image with a new creation time,
+# which gives it a new ID even when the contents are identical. A new ID would make Ansible replace the
+# running container on every run. This task reports a change only when it actually runs.
+- name: Build the processor image
+  command: docker build --tag processor /home/ubuntu/processor
+  when: processor_source.changed or processor_image_check.rc != 0
+
+# Run the processor container.
+#
+# Ansible makes sure a container named processor exists, is running, uses the image built above, and has every
+# setting from the environment file. A matching container is left alone. It is replaced only when the image or a
+# setting really changed, so running the playbook again changes nothing.
+# no_log: true because the module's result includes the container's environment, which contains the MongoDB password.
 - name: Run the processor container
-  command: >
-    docker run -d
-    --name processor
-    --env-file /etc/ca1/processor.env
-    --restart unless-stopped
-    processor
-  changed_when: true
+  community.docker.docker_container:
+    name: processor
+    image: processor
+    env_file: /etc/ca1/processor.env
+    restart_policy: unless-stopped
+    state: started
+  no_log: true
 
 # Check that the processor container is actually running.
 #

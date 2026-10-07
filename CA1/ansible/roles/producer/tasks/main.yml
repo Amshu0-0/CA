@@ -9,17 +9,37 @@
     state: directory
     mode: "0755"
 
-# Copy the producer program, Dockerfile, and CSV dataset from the Ansible role onto the producer VM.
+# Create a folder that holds only the files Docker needs to build the producer image.
+# A dedicated folder keeps the rest of the home directory out of the Docker build.
+- name: Create the producer build folder
+  file:
+    path: /home/ubuntu/producer
+    state: directory
+    mode: "0755"
+
+# Copy the producer program, Dockerfile, and CSV dataset from the Ansible role into that folder.
 # The dataset's file name comes from config.yml.
+# register saves the result, so a later task can tell whether any of the files changed.
 - name: Copy producer source, Dockerfile, and demo dataset
   copy:
     src: "{{ item }}"
-    dest: "/home/ubuntu/{{ item }}"
+    dest: "/home/ubuntu/producer/{{ item }}"
     mode: "0644"
   loop:
     - producer.py
     - Dockerfile
     - "{{ dataset_file }}"
+  register: producer_source
+
+# Record the build arguments in a small file next to the files they apply to.
+# This way a change to the dataset setting counts as a change to the build inputs and triggers a rebuild,
+# even when both CSV files are already on the VM.
+- name: Record the producer build arguments
+  copy:
+    content: "DATASET_FILE={{ dataset_file }}\n"
+    dest: /home/ubuntu/producer/build-args.txt
+    mode: "0644"
+  register: producer_build_args
 
 # Write the producer's settings into an environment file on the VM.
 # This file contains no secrets, so any user on the VM may read it.
@@ -29,10 +49,19 @@
     dest: /etc/ca1/producer.env
     mode: "0644"
 
-# Build the producer Docker image using the files that were copied onto the producer VM.
-# The dataset's file name is passed to the Dockerfile as a build argument.
-- name: Build the producer image
-  command: docker build --build-arg DATASET_FILE={{ dataset_file }} -t producer .
-  args:
-    chdir: /home/ubuntu
+# Find out whether the producer image already exists on this VM.
+# This only reads information, so it never reports a change.
+- name: Check whether the producer image exists
+  command: docker image inspect --format "{{ '{{.Id}}' }}" producer
+  register: producer_image_check
+  failed_when: false
   changed_when: false
+
+# Build the producer Docker image, but only when there is a reason to.
+#
+# The reasons are that the image does not exist yet, or that a file it is built from or a build argument changed.
+# The dataset's file name is passed to the Dockerfile as a build argument.
+# This task reports a change only when it actually runs.
+- name: Build the producer image
+  command: docker build --build-arg DATASET_FILE={{ dataset_file }} --tag producer /home/ubuntu/producer
+  when: producer_source.changed or producer_build_args.changed or producer_image_check.rc != 0

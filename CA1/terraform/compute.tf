@@ -64,6 +64,13 @@ resource "aws_instance" "vm" {
   # Create the internet gateway before the VMs boot, and remove it only after they are gone.
   depends_on = [aws_internet_gateway.main]
 
+  # The AMI lookup above uses most_recent = true, so Canonical publishing a newer Ubuntu image later
+  # would otherwise make Terraform want to replace every VM on the next plan.
+  # A new deployment still gets the newest image; VMs that already exist are left alone.
+  lifecycle {
+    ignore_changes = [ami]
+  }
+
 
   # Give each instance a readable name and role in AWS.
   tags = {
