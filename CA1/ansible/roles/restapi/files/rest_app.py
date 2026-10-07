@@ -84,6 +84,22 @@ def get_alerts():
     })
 
 
+# Look up one event by the trace_id it carries.
+#
+# Real traffic from the dataset has no trace_id. The end-to-end smoke test tags one event with a unique
+# trace_id, then asks this endpoint for it to prove the event made it all the way through the pipeline.
+# The answer is JSON in both cases, so a caller can tell "this event is not here" (found: false)
+# apart from "this URL does not exist" (an HTML error page).
+@app.route("/events/<trace_id>", methods=["GET"])
+def get_event(trace_id):
+    event = collection.find_one({"trace_id": trace_id}, {"_id": 0})
+
+    if event is None:
+        return jsonify({"found": False, "trace_id": trace_id}), 404
+
+    return jsonify({"found": True, "event": event})
+
+
 # Start the Flask API on the configured port.
 # 0.0.0.0 allows requests to reach it from outside the container or VM.
 if __name__ == "__main__":

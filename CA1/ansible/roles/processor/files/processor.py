@@ -80,6 +80,16 @@ for message in consumer:
     collection.insert_one(row)
     count += 1
 
+    # If this event carries a trace_id, log it together with its place in Kafka.
+    #
+    # Real traffic from the dataset has no trace_id, so this stays silent for it.
+    # The end-to-end smoke test tags one event with a unique trace_id and then looks for this line.
+    # It proves the processor read that exact event from that exact Kafka offset and stored it.
+    trace_id = row.get("trace_id")
+
+    if trace_id:
+        print(f"[TRACE] trace_id={trace_id} partition={message.partition} offset={message.offset} stored", flush=True)
+
     # Print an alert when the flow is not BENIGN.
     label = row.get("Label", "?")
 
