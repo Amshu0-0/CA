@@ -1,11 +1,11 @@
 # Create one shared security group for all four CA1 VMs.
 # This controls what traffic is allowed into and out of the machines.
-# It is attached to the default VPC that was found in network.tf.
+# It is attached to the VPC that Terraform creates in network.tf.
 
 resource "aws_security_group" "ca1" {
   name        = "ca1-pipeline-sg"
   description = "CA1 - one shared security group for all four pipeline VMs"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
 
   # Allow SSH only from my own public IP.

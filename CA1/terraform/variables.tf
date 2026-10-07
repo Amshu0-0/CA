@@ -27,3 +27,21 @@ variable "my_ip_cidr" {
   description = "Your own public IP in CIDR form, for example 68.62.181.203/32"
   type        = string
 }
+
+# Address range of the private network (VPC) that Terraform now creates for this project.
+# 10.0.0.0/16 allows 65,536 addresses, far more than four VMs need, but it is the standard size
+# and leaves room for later assignments to add more subnets.
+variable "vpc_cidr" {
+  description = "CIDR block for the CA1 VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+
+# Address range of the single public subnet inside the VPC.
+# It must fall inside vpc_cidr. 10.0.1.0/24 allows 251 usable addresses.
+variable "subnet_cidr" {
+  description = "CIDR block for the CA1 public subnet"
+  type        = string
+  default     = "10.0.1.0/24"
+}

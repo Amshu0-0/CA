@@ -30,3 +30,16 @@ output "ssh_command_example" {
 
   value = "ssh -i ${local_sensitive_file.private_key.filename} ubuntu@${aws_instance.vm["broker"].public_ip}"
 }
+
+# Show the ID of the VPC that Terraform created.
+# Useful for checking the network in the AWS console or with the AWS CLI.
+output "vpc_id" {
+  description = "ID of the CA1 VPC"
+  value       = aws_vpc.main.id
+}
+
+# Show the ID of the public subnet that holds the four VMs.
+output "subnet_id" {
+  description = "ID of the CA1 public subnet"
+  value       = aws_subnet.public.id
+}

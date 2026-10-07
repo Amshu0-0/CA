@@ -52,14 +52,17 @@ resource "aws_instance" "vm" {
   # Use the SSH key pair created in key_pair.tf.
   key_name = aws_key_pair.ca1.key_name
 
-  # Launch the VM inside the subnet found in network.tf.
-  subnet_id = data.aws_subnet.chosen.id
+  # Launch the VM inside the public subnet created in network.tf.
+  subnet_id = aws_subnet.public.id
 
   # Attach the shared CA1 security group from security.tf.
   vpc_security_group_ids = [aws_security_group.ca1.id]
 
   # Give each VM a public IP so Ansible and I can connect to it.
   associate_public_ip_address = true
+
+  # Create the internet gateway before the VMs boot, and remove it only after they are gone.
+  depends_on = [aws_internet_gateway.main]
 
 
   # Give each instance a readable name and role in AWS.
