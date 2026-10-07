@@ -1,0 +1,27 @@
+# Shared settings for the whole CA1 pipeline.
+#
+# This is the one place these values are written down. Terraform reads this file
+# (security group ports), Ansible reads this file (service configuration), and the
+# applications receive the same values from Ansible as environment variables,
+# so the tools can never disagree with each other.
+#
+# These are settings, not secrets. Passwords live in ansible/group_vars/all/vault.yml.
+
+# Kafka topic the producer writes to and the processor reads from.
+kafka_topic: network-flows
+
+# Port the Kafka broker listens on.
+kafka_port: 9092
+
+# Port MongoDB listens on.
+mongo_port: 27017
+
+# MongoDB database and collection where the processor stores events.
+mongo_db: ca1
+mongo_collection: flows
+
+# Port the REST API listens on.
+rest_port: 8080
+
+# CSV file the producer replays. It must exist in ansible/roles/producer/files/.
+dataset_file: Friday-Morning-5000-mixed-bot.csv

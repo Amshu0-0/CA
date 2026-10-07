@@ -23,8 +23,8 @@ resource "aws_security_group" "ca1" {
   # This keeps port 8080 from being open to the entire internet.
   ingress {
     description = "REST API - operator only"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = local.config.rest_port
+    to_port     = local.config.rest_port
     protocol    = "tcp"
     cidr_blocks = [var.my_ip_cidr]
   }
@@ -34,8 +34,8 @@ resource "aws_security_group" "ca1" {
   # self = true means only machines using this same security group can communicate on Kafka port 9092.
   ingress {
     description = "Kafka - VM-to-VM only"
-    from_port   = 9092
-    to_port     = 9092
+    from_port   = local.config.kafka_port
+    to_port     = local.config.kafka_port
     protocol    = "tcp"
     self        = true
   }
@@ -45,8 +45,8 @@ resource "aws_security_group" "ca1" {
   # MongoDB is not exposed directly to the public internet.
   ingress {
     description = "MongoDB - VM-to-VM only"
-    from_port   = 27017
-    to_port     = 27017
+    from_port   = local.config.mongo_port
+    to_port     = local.config.mongo_port
     protocol    = "tcp"
     self        = true
   }

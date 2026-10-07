@@ -19,6 +19,13 @@
     executable: pip3
     extra_args: --break-system-packages
 
+# Create the folder where the pipeline's settings files live on the VM.
+- name: Create the settings folder
+  file:
+    path: /etc/ca1
+    state: directory
+    mode: "0755"
+
 # Copy the REST API program onto the database VM.
 - name: Copy rest_app.py
   copy:
@@ -26,13 +33,25 @@
     dest: /home/ubuntu/rest_app.py
     mode: "0644"
 
+# Write the REST API's settings into an environment file on the VM.
+#
+# Every value comes from config.yml or the encrypted Ansible Vault.
+# The file contains the MongoDB password, so only root can read it.
+# no_log: true keeps the password out of Ansible's output.
+- name: Write the REST API environment file
+  template:
+    src: rest_api.env.j2
+    dest: /etc/ca1/rest_api.env
+    mode: "0600"
+  no_log: true
+
 # Create the systemd service file from the template.
-# The MongoDB credentials are filled in from Ansible Vault when this file is created on the VM.
+# The service reads its settings from the environment file written above.
 - name: Install systemd unit for the REST API
   template:
     src: rest_api.service.j2
     dest: /etc/systemd/system/rest_api.service
-    mode: "0600"
+    mode: "0644"
 
 # Enable the REST API so it starts automatically on boot.
 # state: restarted also makes sure the latest version of the service is running now.
@@ -44,11 +63,12 @@
     daemon_reload: true
 
 # Call the health endpoint to make sure the API is actually responding over HTTP.
+# The port comes from config.yml.
 #
 # Ansible will retry up to 5 times and wait 3 seconds between attempts if the API is still starting.
 - name: Wait for the API to actually respond
   uri:
-    url: "http://localhost:8080/health"
+    url: "http://localhost:{{ rest_port }}/health"
     status_code: 200
   register: health_check
   retries: 5

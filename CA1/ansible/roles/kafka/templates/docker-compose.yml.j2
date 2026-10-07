@@ -6,9 +6,10 @@ services:
     # Restart Kafka automatically unless it is stopped manually.
     restart: unless-stopped
 
-    # Expose Kafka on port 9092 so the other pipeline components can connect to the broker.
+    # Expose Kafka on the port from config.yml so the other pipeline components can connect to the broker.
+    # The first number is the port on the VM. The second number is the port inside the container.
     ports:
-      - "9092:9092"
+      - "{{ kafka_port }}:9092"
 
     environment:
       # This broker uses node ID 1.
@@ -29,7 +30,7 @@ services:
 
       # Tell clients which addresses they should use to reach Kafka.
       # The broker's private IP comes from inventory.ini and is filled into this template by Ansible.
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://{{ private_ip }}:9092"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://{{ private_ip }}:{{ kafka_port }}"
 
       # Use plaintext communication for each listener.
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT

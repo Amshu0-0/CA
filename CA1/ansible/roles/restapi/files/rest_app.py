@@ -3,7 +3,43 @@
 # This program provides a small REST API for checking the database and viewing detected alerts.
 
 import os
+import sys
 
+
+# Read one required setting from an environment variable.
+#
+# There is deliberately no default value. If a setting is missing, the program stops
+# right away and names it, instead of quietly falling back to an old address or name.
+def require(name):
+    value = os.environ.get(name)
+
+    if not value:
+        sys.exit(f"missing required setting: {name}")
+
+    return value
+
+
+# Read every setting before connecting to anything, so a missing one is reported first.
+# Ansible provides all of these in an environment file for the systemd service.
+# The values come from config.yml and the encrypted Ansible Vault.
+
+# MongoDB address, plus the database and collection that hold the network flows.
+# MongoDB runs on this same VM, so Ansible sets the address to localhost.
+MONGO_HOST = require("MONGO_HOST")
+MONGO_PORT = int(require("MONGO_PORT"))
+DB_NAME = require("MONGO_DB")
+COLLECTION_NAME = require("MONGO_COLLECTION")
+
+# MongoDB username and password. These come from the encrypted Ansible Vault.
+MONGO_USER = require("MONGO_USER")
+MONGO_PASSWORD = require("MONGO_PASSWORD")
+
+# The port this REST API listens on.
+REST_PORT = int(require("REST_PORT"))
+
+
+# These libraries are imported after the settings check on purpose,
+# so a missing setting is always the first thing reported.
 from flask import Flask, jsonify
 from pymongo import MongoClient
 
@@ -12,29 +48,17 @@ from pymongo import MongoClient
 app = Flask(__name__)
 
 
-# Get the MongoDB username and password from environment variables.
-# These values will come from the encrypted Ansible Vault.
-MONGO_USER = os.environ.get("MONGO_USER", "")
-MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "")
+# Connect to MongoDB using the username and password.
+client = MongoClient(
+    MONGO_HOST,
+    MONGO_PORT,
+    username=MONGO_USER,
+    password=MONGO_PASSWORD,
+)
 
 
-# Connect to MongoDB running on this same VM.
-# Use authentication when a username and password are provided.
-#
-# The else block keeps the old CA0 behavior available for local testing without MongoDB authentication.
-if MONGO_USER and MONGO_PASSWORD:
-    client = MongoClient(
-        "localhost",
-        27017,
-        username=MONGO_USER,
-        password=MONGO_PASSWORD,
-    )
-else:
-    client = MongoClient("localhost", 27017)
-
-
-# Use the ca0 database and the flows collection.
-collection = client["ca0"]["flows"]
+# Use the configured database and collection.
+collection = client[DB_NAME][COLLECTION_NAME]
 
 
 # Simple health endpoint used to confirm that the REST API itself is running.
@@ -60,7 +84,7 @@ def get_alerts():
     })
 
 
-# Start the Flask API on port 8080.
+# Start the Flask API on the configured port.
 # 0.0.0.0 allows requests to reach it from outside the container or VM.
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=REST_PORT)

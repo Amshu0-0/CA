@@ -6,8 +6,10 @@ WORKDIR /app
 # Copy the producer program into the container
 COPY producer.py .
 
-# Copy the edited CICIDS2017 CSV file into the container
-COPY Friday-Morning-5000-mixed-bot.csv .
+# Copy the CSV file that the producer replays.
+# Its name comes from config.yml: Ansible passes it in as a build argument.
+ARG DATASET_FILE
+COPY ${DATASET_FILE} .
 
 # Install the Python library used to send messages to Kafka
 RUN pip install kafka-python

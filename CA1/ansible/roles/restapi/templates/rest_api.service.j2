@@ -16,10 +16,10 @@ User=ubuntu
 # Ansible will copy rest_app.py.
 WorkingDirectory=/home/ubuntu
 
-# Pass the MongoDB username and password into the API.
-# These values come from the encrypted Ansible Vault when Ansible creates this service file.
-Environment=MONGO_USER={{ vault_mongo_root_username }}
-Environment=MONGO_PASSWORD={{ vault_mongo_root_password }}
+# Read the API's settings (MongoDB address, database name, credentials, and port) from this file.
+# Ansible writes it from config.yml and the encrypted Ansible Vault.
+# systemd reads it as root before starting the API, so the file can stay private to root.
+EnvironmentFile=/etc/ca1/rest_api.env
 
 # Start the Flask REST API.
 ExecStart=/usr/bin/python3 /home/ubuntu/rest_app.py

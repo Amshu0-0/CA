@@ -6,9 +6,10 @@ services:
     # Restart MongoDB automatically unless it is stopped manually.
     restart: unless-stopped
 
-    # Expose MongoDB on port 27017 so the other pipeline components can connect to the database inside AWS.
+    # Expose MongoDB on the port from config.yml so the other pipeline components can connect to the database inside AWS.
+    # The first number is the port on the VM. The second number is the port inside the container.
     ports:
-      - "27017:27017"
+      - "{{ mongo_port }}:27017"
 
     environment:
       # Create the MongoDB administrator account.

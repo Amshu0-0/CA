@@ -2,29 +2,49 @@
 
 import csv
 import json
-import time
 import os
-from kafka import KafkaProducer
+import sys
+import time
 
 
-# Private IP and port of the Kafka
-BROKER = os.environ.get("KAFKA_BROKER", "172.31.21.128:9092")
+# Read one required setting from an environment variable.
+#
+# There is deliberately no default value. If a setting is missing, the program stops
+# right away and names it, instead of quietly falling back to an old address or name.
+def require(name):
+    value = os.environ.get(name)
 
-# Kafka topic where the network flow data will be sent
-TOPIC = "network-flows"
+    if not value:
+        sys.exit(f"missing required setting: {name}")
 
-CSV_FILE = "Friday-Morning-5000-mixed-bot.csv"
+    return value
+
+
+# Read every setting before connecting to anything, so a missing one is reported first.
+# Ansible provides these in an environment file on the producer VM.
+# The values come from config.yml and the Ansible inventory.
+
+# Private IP and port of the Kafka broker, and the Kafka topic where the network flow data is sent.
+BROKER = require("KAFKA_BROKER")
+TOPIC = require("KAFKA_TOPIC")
+
+# The CSV file to replay. Its name comes from config.yml.
+CSV_FILE = require("DATASET_FILE")
 
 # This slows the replay down so we can see the data moving during the demo
 DELAY_SECONDS = 0
 
-#  Send every row in the csv, no limit
+# Send every row in the csv, no limit
 LIMIT = None
+
+
+# This library is imported after the settings check on purpose,
+# so a missing setting is always the first thing reported.
+from kafka import KafkaProducer
 
 
 # Connect to Kafka
 producer = KafkaProducer(
-
     bootstrap_servers=BROKER,
 
     # Turn each Python row into JSON text, then turn that text into bytes because Kafka sends bytes

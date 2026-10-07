@@ -1,6 +1,13 @@
 ---
 # This role sets up and starts the processor container on the processor VM.
 
+# Create the folder where the pipeline's settings files live on the VM.
+- name: Create the settings folder
+  file:
+    path: /etc/ca1
+    state: directory
+    mode: "0755"
+
 # Copy the processor program and Dockerfile from the Ansible role onto the processor VM.
 - name: Copy processor source and Dockerfile
   copy:
@@ -10,6 +17,18 @@
   loop:
     - processor.py
     - Dockerfile
+
+# Write the processor's settings into an environment file on the VM.
+#
+# Every value comes from config.yml, the Ansible inventory, or the encrypted Ansible Vault.
+# The file contains the MongoDB password, so only root can read it.
+# no_log: true keeps the password out of Ansible's output.
+- name: Write the processor environment file
+  template:
+    src: processor.env.j2
+    dest: /etc/ca1/processor.env
+    mode: "0600"
+  no_log: true
 
 # Build the processor Docker image using the Dockerfile that was copied onto the VM.
 - name: Build the processor image
@@ -27,19 +46,13 @@
 
 # Start the processor container.
 #
-# The Kafka broker private IP comes from the broker host in inventory.ini, even though this task is running on the processor VM.
-#
-# The MongoDB private IP is found the same way from the database host.
-#
-# The MongoDB username and password come from the encrypted Ansible Vault variables.
+# Docker reads all of the processor's settings from the environment file written above,
+# so no address, topic name, or password appears on this command line.
 - name: Run the processor container
   command: >
     docker run -d
     --name processor
-    -e KAFKA_BROKER={{ hostvars[groups['broker'][0]].private_ip }}:9092
-    -e MONGO_HOST={{ hostvars[groups['database'][0]].private_ip }}
-    -e MONGO_USER={{ vault_mongo_root_username }}
-    -e MONGO_PASSWORD={{ vault_mongo_root_password }}
+    --env-file /etc/ca1/processor.env
     --restart unless-stopped
     processor
   changed_when: true

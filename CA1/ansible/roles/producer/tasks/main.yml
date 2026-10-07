@@ -2,7 +2,15 @@
 # This role prepares the producer VM.
 # It copies the producer code, Dockerfile, and demo dataset onto the machine and builds the image.
 
+# Create the folder where the pipeline's settings files live on the VM.
+- name: Create the settings folder
+  file:
+    path: /etc/ca1
+    state: directory
+    mode: "0755"
+
 # Copy the producer program, Dockerfile, and CSV dataset from the Ansible role onto the producer VM.
+# The dataset's file name comes from config.yml.
 - name: Copy producer source, Dockerfile, and demo dataset
   copy:
     src: "{{ item }}"
@@ -11,11 +19,20 @@
   loop:
     - producer.py
     - Dockerfile
-    - Friday-Morning-5000-mixed-bot.csv
+    - "{{ dataset_file }}"
+
+# Write the producer's settings into an environment file on the VM.
+# This file contains no secrets, so any user on the VM may read it.
+- name: Write the producer environment file
+  template:
+    src: producer.env.j2
+    dest: /etc/ca1/producer.env
+    mode: "0644"
 
 # Build the producer Docker image using the files that were copied onto the producer VM.
+# The dataset's file name is passed to the Dockerfile as a build argument.
 - name: Build the producer image
-  command: docker build -t producer .
+  command: docker build --build-arg DATASET_FILE={{ dataset_file }} -t producer .
   args:
     chdir: /home/ubuntu
   changed_when: false

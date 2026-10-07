@@ -4,36 +4,48 @@
 
 import json
 import os
+import sys
 
+
+# Read one required setting from an environment variable.
+#
+# There is deliberately no default value. If a setting is missing, the program stops
+# right away and names it, instead of quietly falling back to an old address or name.
+def require(name):
+    value = os.environ.get(name)
+
+    if not value:
+        sys.exit(f"missing required setting: {name}")
+
+    return value
+
+
+# Read every setting before connecting to anything, so a missing one is reported first.
+# Ansible provides all of these when it starts the processor container.
+# The values come from config.yml, the Ansible inventory, and the encrypted Ansible Vault.
+
+# Kafka broker address and the topic that contains the network flow data.
+BROKER = require("KAFKA_BROKER")
+TOPIC = require("KAFKA_TOPIC")
+
+# MongoDB address, plus the database and collection used to store the flows.
+MONGO_HOST = require("MONGO_HOST")
+MONGO_PORT = int(require("MONGO_PORT"))
+DB_NAME = require("MONGO_DB")
+COLLECTION_NAME = require("MONGO_COLLECTION")
+
+# MongoDB username and password. These come from the encrypted Ansible Vault.
+MONGO_USER = require("MONGO_USER")
+MONGO_PASSWORD = require("MONGO_PASSWORD")
+
+
+# These libraries are imported after the settings check on purpose,
+# so a missing setting is always the first thing reported.
 from kafka import KafkaConsumer
 from pymongo import MongoClient
 
 
-# Get the Kafka broker address from an environment variable.
-# The default value is only used if KAFKA_BROKER is not provided.
-BROKER = os.environ.get("KAFKA_BROKER", "172.31.21.128:9092")
-
-# Kafka topic that contains the network flow data.
-TOPIC = "network-flows"
-
-
-# Get the MongoDB connection information from environment variables.
-# Ansible will provide these values when the processor container is started.
-MONGO_HOST = os.environ.get("MONGO_HOST", "172.31.24.111")
-MONGO_PORT = 27017
-
-# Get the MongoDB username and password from environment variables.
-# These values will come from the encrypted Ansible Vault.
-MONGO_USER = os.environ.get("MONGO_USER", "")
-MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "")
-
-
-# MongoDB database and collection used to store the flows.
-DB_NAME = "ca0"
-COLLECTION_NAME = "flows"
-
-
-# Connect to Kafka and start reading messages from the network-flows topic.
+# Connect to Kafka and start reading messages from the configured topic.
 consumer = KafkaConsumer(
     TOPIC,
     bootstrap_servers=BROKER,
@@ -43,18 +55,13 @@ consumer = KafkaConsumer(
 )
 
 
-# Connect to MongoDB using authentication when a username and password are provided.
-#
-# The else block keeps the old CA0 behavior available for local testing without MongoDB authentication.
-if MONGO_USER and MONGO_PASSWORD:
-    client = MongoClient(
-        MONGO_HOST,
-        MONGO_PORT,
-        username=MONGO_USER,
-        password=MONGO_PASSWORD,
-    )
-else:
-    client = MongoClient(MONGO_HOST, MONGO_PORT)
+# Connect to MongoDB using the username and password.
+client = MongoClient(
+    MONGO_HOST,
+    MONGO_PORT,
+    username=MONGO_USER,
+    password=MONGO_PASSWORD,
+)
 
 
 # Select the database and collection where the network flow records will be stored.
