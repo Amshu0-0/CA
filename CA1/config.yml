@@ -32,3 +32,8 @@ aws_region: us-east-2
 # Value of the Project tag that Terraform puts on every AWS resource it creates.
 # The cleanup scan (scripts/aws_scan.py) searches for this tag to prove nothing is left after terraform destroy.
 project_tag: CA1
+
+# Container image versions used by the two infrastructure services.
+# Change the tag here instead of editing the Ansible templates.
+kafka_image: confluentinc/cp-kafka:7.7.1
+mongo_image: mongo:7.0

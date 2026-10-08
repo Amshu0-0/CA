@@ -1,61 +1,225 @@
 # Integrity Packet — CA1
 
-*Last updated: September 19, 2026*
+*Last updated: October 8, 2026*
 
 **Owner: Amshu Wagle. I own this outcome.**
 
 ## Outcome
-I automated CA0's entire manual deployment using Terraform (infrastructure) and Ansible (configuration), so the same four-VM network intrusion detection pipeline — producer, Kafka, processor, MongoDB, REST API — can be created and destroyed with two commands each, with zero manual console-clicking and zero manual SSH-and-type-commands configuration. The goal was the same as CA0's: prove genuine, working data flow across four separate machines — but this time, prove that the *deployment itself* is repeatable, not just the pipeline's behavior once it happens to be running.
 
-## Assumptions
-- The person running this owns an AWS account and is willing to create a scoped IAM user rather than use root — this project doesn't assume access to my specific account.
-- The default VPC exists in the target region with at least one subnet. I read both via Terraform data sources rather than hardcoding IDs, so this project follows whatever subnet AWS's data source happens to pick — which may land in a different AZ on a different run (see Risk, below).
-- Terraform's local state file is authoritative for what currently exists. If AWS resources are changed by hand in the console between Terraform runs, the next `plan`/`apply` may not reconcile correctly without an explicit `terraform refresh` — this project assumes the console isn't touched manually between Terraform operations.
-- Ansible's inventory (`inventory.ini`) always reflects the *current* apply's IPs, because Terraform regenerates it every time. The playbooks assume it's never a stale file from a previous run.
-- The vault password file (`.vault_pass`) exists locally before `ansible-playbook` runs. Without it, every vault-dependent task fails immediately and loudly, rather than silently falling back to a wrong or default credential.
+I automated CA0's four-VM Producer → Kafka → Processor → MongoDB → REST API deployment using Terraform for infrastructure and Ansible for configuration. After CA1 was graded, I went back through the professor's debrief checklist and improved the parts that were still weak: the network is now disposable, shared application settings are centralized, the Kafka and MongoDB image tags are centralized with those settings, the Ansible roles converge without unnecessary changes, the smoke test follows one exact event through every stage, and an AWS scan checks that destroy really left nothing behind.
 
-## Evidence
-- A full `terraform apply` → `destroy` → `apply` round trip, producing entirely different instance IDs and IPs the second time — proof this isn't tied to leftover state from the first run, not just a claim that it "should" work.
-- All six Ansible role `PLAY RECAP`s showing `failed=0, unreachable=0` on every host, for every role, in order.
-- `cat group_vars/all/vault.yml` showing AES256 ciphertext, not plaintext, independently confirmed after encryption.
-- The security group's actual AWS Console **Inbound rules tab** (not the instance-launch wizard) — this specific gap was flagged in CA0's grading, so closing it here with the correct evidence type was deliberate, not incidental.
-- Producer logs showing all 5,000 rows sent; processor logs showing a climbing `[ALERT]` count reaching 5,000; REST API `/health` and `/alerts` both returning correct live data over `curl` run from outside AWS entirely.
-- A final `terraform destroy` run against the *fully-configured* pipeline (Docker, Kafka, Mongo, everything Ansible touched) — not just the bare infrastructure from an earlier reproducibility test — followed by an independent AWS Console check confirming zero running instances.
+I also ran the final version from nothing: Terraform created a new environment, Ansible configured it, a second Ansible run reported `changed=0`, the unique-event smoke test passed, Terraform destroyed 14 resources, and the cleanup scanner returned CLEAN. That rebuild found one real operational problem that is still intentionally documented rather than hidden: my operator public IP had changed while `terraform.tfvars` still contained the old `/32`, so SSH was blocked until I updated `my_ip_cidr` and re-ran Terraform.
 
-## Validation
-- Ran the full `terraform apply` → `ansible-playbook site.yml` → smoke test → `terraform destroy` cycle twice, with completely different resulting IPs each time, specifically to rule out "it worked because of leftover state" as an explanation.
-- Ran `terraform validate` after adding each individual `.tf` file, not just once at the end. This caught a real bug immediately: a missing newline in an early version of `variables.tf` that broke parsing, found and fixed before any AWS credentials were even involved.
-- Diagnosed an Ansible SSH failure (`no such identity: ./ca1-key.pem`) by checking which directory Ansible was actually being invoked from, rather than guessing at Ansible configuration flags — the real cause was a relative key path that only resolved correctly from one specific working directory. Fixed by switching to `abspath()` in Terraform's `key_pair.tf`, which is a fix at the source of truth rather than a workaround in Ansible.
-- Verified the vault is genuinely *usable*, not just encrypted-looking, by confirming Mongo, the processor, and the REST API could all successfully authenticate using the values Ansible decrypted from it — encryption alone doesn't prove the credentials round-trip correctly.
-- Ran a third, fully independent `terraform apply` → `ansible-playbook site.yml` → smoke test cycle specifically to record the demo video, producing four brand-new instance IPs with no relationship to any earlier example in this document. Producer sent 5,000/5,000 rows again; processor's alert count climbed to 5,000 again; both REST endpoints returned correct live data again — a third cold-start proof, not just the first two.
-- During that same session, an ad-hoc `docker logs` command against the processor host failed with a Docker-socket permission error, even though the processor role's own build/run tasks had already succeeded moments earlier in the same playbook run. Likely cause: the `ubuntu` user's docker-group membership hadn't been picked up by that specific ad-hoc connection yet, and Ansible ad-hoc commands don't automatically use elevated privileges the way I could choose to configure playbook tasks to. Fixed by adding `--become` to that one command. Not a deployment defect — the deploy itself never failed — but real enough, and common enough for anyone else running these exact commands, that the README's validation command now includes `--become` by default rather than leaving it as a surprise.
+The professor described the Integrity Packet as a verification packet, not an AI confession form. Each claim below therefore follows the same pattern: **Claim → Evidence → Assumption → Validation → AI Review**.
+
+## Assumptions That Apply to the Whole Project
+
+- The person deploying has an AWS account and uses a scoped IAM user rather than root.
+- AWS credentials are configured locally and are not stored in this repository.
+- `terraform.tfstate` is the source of truth for Terraform-managed resources and is kept local/protected.
+- The operator checks that `terraform/terraform.tfvars` contains the computer's current public IPv4 address as `/32` before deploying.
+- `ansible/group_vars/all/vault.yml` and `.vault_pass` exist locally before running the playbook. The repository contains only the example file.
+- Nobody manually changes CA1 resources in the AWS console between Terraform operations.
+
+---
+
+## Claim 1 — Terraform owns a disposable environment and destroy leaves no CA1 resources behind
+
+**Claim.** CA1 no longer depends on the AWS account's default VPC/subnet. Terraform creates the network and compute resources needed for the pipeline and can remove them again.
+
+**Evidence.** The post-grading Terraform code creates a dedicated VPC, public subnet, internet gateway, route table, route association, security group, key pair, four EC2 instances, local private-key file, and generated Ansible inventory. A fresh rebuild ended with 14 managed resources created. The final destroy ended:
+
+```text
+Destroy complete! Resources: 14 destroyed.
+```
+
+Immediately afterward, `python3 scripts/aws_scan.py` reported:
+
+```text
+RESULT: CLEAN - nothing tagged Project=CA1 is left, and no billable resources are running in us-east-2.
+```
+
+**Assumption.** The IAM user can perform the required EC2/network describe calls. It cannot call `tag:GetResources`, so the scanner explicitly marks that optional cross-service tag check as `[skip]` instead of pretending it ran.
+
+**Validation.** I used a positive control before destroy: while the project was deployed, the scanner found the CA1 resources and returned a leftovers result. After destroy it returned CLEAN. During the first cleanup cycle, Terraform state was empty afterward, the generated key and inventory files were gone, and the all-regions safety scan was clean. I later repeated the full apply/configure/validate/destroy/scan sequence from a completely fresh CA1 environment and again finished with CLEAN.
+
+**AI Review.** Claude helped design the scanner. Real AWS testing found problems in the first version: an optional permission denial was treated as fatal, and an AWS error string exposed the full account number. The scanner was changed so optional permission failures are shown as skipped, required failures cannot look clean, and account identifiers are masked. The real before/after scans proved the behavior.
+
+---
+
+## Claim 2 — Running Ansible again on an already-correct system makes no unnecessary changes
+
+**Claim.** The configuration layer is idempotent. A second complete `ansible-playbook site.yml` run against an already-correct deployment reports `changed=0` on every host.
+
+**Evidence.** On the final fresh rebuild, the first run changed the new machines as expected. Without changing any input, the second run ended with all four hosts at `changed=0`, `unreachable=0`, and `failed=0`.
+
+**Assumption.** The same configuration is used for both runs and nobody manually edits the VMs between them.
+
+**Validation.** I did not count destroy/rebuild as idempotency. I specifically ran the complete playbook twice against the same live environment. Earlier role implementations still recreated/restarted components on every run; the second-run evidence exposed that problem. After the fixes, the second run converged cleanly on the existing stack and again on the stack rebuilt from nothing.
+
+**AI Review.** The first Ansible approach used imperative Docker commands such as removing/recreating a container and restarting services, which guarantees a change even when the desired state is already correct. Claude helped replace those patterns with desired-state Docker modules, handlers, and guarded builds. A later attempt still rebuilt images unnecessarily; the second-run output caught that too. The final acceptance test was not the explanation — it was the `changed=0` recap.
+
+---
+
+## Claim 3 — The validation follows one exact event through Producer → Kafka → Processor → MongoDB → REST
+
+**Claim.** The smoke test proves the same uniquely tagged event reaches every pipeline stage; it does not rely on a generic statement like "the database has records."
+
+**Evidence.** `scripts/smoke_test.py` creates a unique trace ID, verifies it is absent first, sends it through the producer, records the Kafka topic/partition/offset, checks the processor log for that same partition/offset, confirms exactly one MongoDB document with the trace ID, then retrieves that event through `GET /events/<trace_id>`.
+
+Fresh-rebuild proof included:
+
+```text
+[PASS] REST API answers                                     GET /health -> 200
+[PASS] Event is not in the database yet                     GET /events/<id> -> 404
+[PASS] Producer sent it and Kafka stored it                 topic network-flows, partition 0, offset 0
+[PASS] Processor read the same Kafka offset and stored it   [TRACE] partition 0, offset 0
+[PASS] MongoDB holds exactly one copy                       ca1.flows: 1 document with this trace id
+[PASS] REST API returns the event                           GET /events/<id> -> 200
+RESULT: PASS
+```
+
+**Assumption.** Kafka, the processor, MongoDB, and REST API are reachable and the generated trace ID is new.
+
+**Validation.** I deliberately stopped the processor and re-ran the smoke test with a short timeout. Kafka accepted the event, but the validator failed specifically at the processor hop and exited non-zero. Running Ansible again repaired only the processor, and the next smoke test passed. This proves the test can detect a broken stage rather than always succeeding.
+
+**AI Review.** Claude helped write the trace-ID additions and validation script. I rejected the weaker row-count approach because it could pass on old data. Matching Kafka's exact offset to the processor trace is the evidence that the same event crossed the message-bus boundary.
+
+---
+
+## Claim 4 — Shared runtime settings and service image tags come from one config file, and old fallback IPs are gone
+
+**Claim.** The settings that cross Terraform, Ansible, and the applications — topic, ports, database/collection, dataset, AWS region, project tag, plus the Kafka and MongoDB image tags — are written in `config.yml` and consumed by the relevant layers. The applications do not silently fall back to private IPs from CA0.
+
+**Evidence.** The current shared settings include:
+
+```text
+kafka_topic
+kafka_port
+mongo_port
+mongo_db
+mongo_collection
+rest_port
+dataset_file
+aws_region
+project_tag
+kafka_image
+mongo_image
+```
+
+The two service image values are now:
+
+```text
+kafka_image: confluentinc/cp-kafka:7.7.1
+mongo_image: mongo:7.0
+```
+
+and the Ansible Compose templates reference `{{ kafka_image }}` and `{{ mongo_image }}` instead of repeating those tags. The producer, processor, and REST API also require their runtime settings instead of using hardcoded CA0 addresses/defaults.
+
+**Assumption.** `config.yml` contains non-secret configuration only. Credentials remain in Ansible Vault. The producer and processor Dockerfiles keep their existing `python:3.11-slim` base image; this final change addressed the Kafka and MongoDB image-tag gap specifically identified in the professor feedback.
+
+**Validation.** Earlier missing-setting tests caused the applications to stop and name the missing variable instead of continuing with an old address. A deliberate shared-configuration change also propagated through the expected consumers and reverted cleanly to `changed=0`. For the final image-tag cleanup, I kept the exact versions already used by the working system and moved only their location. The repository check showed:
+
+```text
+config.yml: kafka_image: confluentinc/cp-kafka:7.7.1
+config.yml: mongo_image: mongo:7.0
+ansible/roles/kafka/templates/docker-compose.yml.j2: image: "{{ kafka_image }}"
+ansible/roles/mongo/templates/docker-compose.yml.j2: image: "{{ mongo_image }}"
+OK: Kafka and Mongo image tags now live only in config.yml
+```
+
+Because the AWS stack had already been destroyed and the image values themselves did not change, I did not spend another AWS deployment cycle solely to prove this small refactor.
+
+**AI Review.** The original applications contained old CA0 fallback IPs, which were removed instead of being left as "safe defaults." The professor also specifically identified Kafka and MongoDB image tags as an incomplete parameterization gap. The final fix was intentionally narrow: add `kafka_image` and `mongo_image` to the existing shared config and make the two Compose templates consume them. I did not add unrelated automatic-IP or Python-image changes.
+
+---
+
+## Claim 5 — Secrets are kept out of Git and application passwords are not put on Docker command lines
+
+**Claim.** MongoDB credentials are stored in a local Ansible Vault and are not committed to the repository. The processor and REST API receive credentials through protected files/configuration rather than plaintext Docker command-line arguments.
+
+**Evidence.** The repository contains `vault.yml.example`, while the real `vault.yml` and `.vault_pass` are gitignored. `*.pem`, `*.tfstate*`, `*.tfvars`, and generated inventory are also local/ignored artifacts. The original evidence screenshot shows AES256 ciphertext in the local vault file.
+
+**Assumption.** The operator protects `.vault_pass`, the local vault file, the generated SSH key, and Terraform state on disk.
+
+**Validation.** The deployed processor, MongoDB, and REST API successfully authenticated using the vaulted values. A missing/wrong vault password causes Ansible to fail rather than silently disabling authentication.
+
+**AI Review.** An earlier README draft incorrectly said the encrypted `vault.yml` was committed. Cross-checking the repository policy showed that was false: the real file is ignored. The documentation was corrected so a fresh clone explicitly creates its own local vault.
+
+**Remaining limitation.** Because Terraform generates the SSH key itself, the private-key material is stored inside local Terraform state while that state exists. The state is gitignored, but it is sensitive and should be protected accordingly. Also, the MongoDB Compose render task should not be assumed safe for secret-revealing `--diff` output just because the resulting file has restrictive permissions.
+
+---
+
+## Debugging Case — The stale operator IP broke a clean rebuild
+
+This is not presented as a fixed automatic feature. It is a real failure that exposed a manual prerequisite.
+
+**What happened.** Terraform successfully rebuilt the environment, but Ansible timed out on SSH to all four new VMs.
+
+**Evidence.** The security group allowed the `/32` stored in `terraform.tfvars`, but `curl https://checkip.amazonaws.com` showed that my current public IP had changed since the previous run.
+
+**Correction.** I updated only `my_ip_cidr` to the current public IP with `/32` and ran `terraform apply` again. Terraform changed only the security-group rule:
+
+```text
+Plan: 0 to add, 1 to change, 0 to destroy.
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+```
+
+Ansible then connected and the full rebuild continued successfully.
+
+**What this proves.** The security rule was working as intended — it blocked an address that was not allow-listed — but the deployment procedure depends on the operator keeping `my_ip_cidr` current. The README now tells the operator to compare `terraform.tfvars` with the current public IP before every deploy. I did **not** solve the problem by opening SSH to `0.0.0.0/0`.
+
+---
+
+## What Went Wrong, and How It Was Caught
+
+| What was wrong | How it was caught | Correction | Proof |
+|---|---|---|---|
+| CA1 reused the default VPC/subnet | Professor feedback + class debrief | Terraform-owned VPC, subnet, IGW, route table/association | Fresh apply + full destroy/scan |
+| Processor/REST changed on every playbook run | Second-run idempotency check | Desired-state containers/services and guarded builds | Second complete run `changed=0` |
+| Old CA0 IP fallbacks remained in applications | Search/review against centralized-config guidance | Required environment settings; no old-IP fallbacks | Missing-setting tests + fresh rebuild |
+| Original smoke test inferred Kafka rather than observing it directly | Professor feedback | Unique trace ID + Kafka partition/offset + processor trace | PASS output + deliberate failure test |
+| Destroy had no independent AWS proof | Class checklist | `Project=CA1` tags + `aws_scan.py` | Positive control before destroy; CLEAN after |
+| Scanner treated an optional permission denial badly / exposed too much error detail | Real AWS run | Optional `[skip]`, required-check failure behavior, account masking | Real scan before/after destroy |
+| README had a claim that did not match `.gitignore` | Documentation audit | Correct fresh-clone vault setup | README and repository policy agree |
+| `my_ip_cidr` went stale | Fresh rebuild: all four SSH connections timed out | Update current `/32` and re-apply SG | `0 added, 1 changed, 0 destroyed`, then Ansible succeeded |
+| Kafka and MongoDB image tags were still repeated in Compose templates | Final comparison against professor parameterization feedback | Add `kafka_image` / `mongo_image` to `config.yml` and reference them from the templates | grep shows the literal tags only in `config.yml` |
+
+---
 
 ## Ownership
-I own this outcome. If any part of it turns out to be wrong, that's on me, not on the tools I used to help build it.
+
+I own this outcome. AI helped write and troubleshoot parts of the implementation, but the tests above are the reason I accept the claims. When an explanation and the tool output disagreed, I treated the output as authoritative and changed the implementation or documentation.
 
 ## Escalation Path
-This automation is not fully self-healing, and I don't want it to look like it is. These are the specific places I deliberately left a human in the loop instead of having the code guess or auto-retry:
 
-- **A `terraform apply` that fails partway through** (say, after 2 of 4 VMs are created) is not automatically rolled back or retried. Terraform's own state file reflects exactly what succeeded, and simply re-running `terraform apply` picks up from there correctly — but nothing auto-retries on failure, because a repeated failure (an AWS service limit, for instance) deserves a person actually reading the error, not the automation quietly hammering the API.
-- **If Ansible can't SSH into a freshly-created VM** — most likely because its cloud-init hasn't finished yet — the playbook fails loudly for that host rather than silently skipping it or retrying on a timer. On a slow AWS day, a person may need to simply re-run `ansible-playbook site.yml` a few seconds later. I chose not to add automatic wait-and-retry logic here, since a loud failure is more honest than a silent delay.
-- **If the vault password file is missing or wrong**, every vault-dependent task fails immediately with a clear Ansible error, instead of falling back to an unauthenticated MongoDB connection. A missing secret should stop the deploy, not silently make it less secure.
-- **Nothing here decides "is my AWS bill too high" or "am I actually done working."** `terraform destroy` is a separate, explicit, confirmation-gated command — never run on a timer or automatically — because that's a judgment call for a person, not a rule a script should enforce.
-- **Ad-hoc validation commands don't inherit the same privilege as the playbook that deployed everything**, as seen when a `docker logs` ad-hoc command hit a permission error the processor role's own tasks never did. Rather than silently retrying or masking that, the fix (`--become`) is now the documented default, so a person understands why it's there instead of the automation quietly working around a privilege boundary it hit.
+The project deliberately leaves some decisions to a person:
 
-## Risk
-- **A static IAM access key, configured via `aws configure`, rather than a short-lived session token.** I chose this specifically because the Terraform AWS provider doesn't yet recognize `aws login`'s newer SSO-style credential format ([hashicorp/terraform-provider-aws#45316](https://github.com/hashicorp/terraform-provider-aws/issues/45316)). The trade-off: a static key is longer-lived and marginally more sensitive if leaked than a session token would be. Mitigated by scoping the IAM user to `AmazonEC2FullAccess` only — never admin, never root.
-- **The vault password lives in a local, gitignored file (`.vault_pass`), not a managed secrets service.** For a single-developer class project on a personal AWS account, a cloud secrets manager (AWS Secrets Manager, a hosted Vault server) felt like disproportionate infrastructure for the actual risk. Ansible Vault's file-based encryption is still real AES256 encryption, and the plaintext password never touches git either way.
-- **No automatic retry or self-healing**, as described under Escalation Path above — a deliberate design choice, worth stating plainly as a real limitation rather than leaving it implicit.
-- **Subnet/AZ is chosen by a data source, not pinned.** A future run could land in a different AZ than either this run or CA0's, which is harmless for connectivity but means the exact AZ isn't a stable, citable fact about this project — it's whatever AWS's default subnet listing returns that day.
-- **Carried forward from CA0, unchanged:** a 5,000-row demo dataset doesn't prove behavior at the full ~191k-row scale, and the REST API still has no authentication of its own. Both are acceptable for a graded class demo, not for anything resembling production use.
+- **Partial Terraform failure:** read the error and re-run `terraform apply`; do not blindly auto-retry AWS indefinitely.
+- **Operator IP changed:** update `my_ip_cidr` to the current `/32` and run `terraform apply`; never widen SSH/REST to `0.0.0.0/0` just to make the error disappear.
+- **Vault missing/wrong:** stop and fix the local secret setup. Do not fall back to unauthenticated MongoDB.
+- **Required cleanup-scan permission fails:** scanner exits as an error instead of reporting CLEAN. The person decides whether to fix the permission or investigate manually.
+- **Destroy:** remains an explicit confirmation-gated operator action rather than an automatic timer.
+
+## Risks / Known Limitations
+
+1. **Operator IP is manual.** A network change can make `terraform.tfvars` stale and block access until Terraform updates the security group.
+2. **Terraform state contains the generated SSH private key.** State is ignored by Git but must be protected locally.
+3. **Applications use the MongoDB administrative credential.** A production system should use a least-privilege application account.
+4. **The IAM user cannot call `tag:GetResources`.** The scanner reports the optional cross-service tag check as skipped; the required resource/billable checks still run.
+5. **The MongoDB compose-render task should not be treated as safe for secret-revealing `--diff` output.** File permissions protect the rendered file on the host, but verbose diff output is a separate concern.
+6. **The REST API has no application-layer authentication.** Network exposure is limited by the security group.
+7. **The 5,000-row demo validates correctness, not full-scale performance.**
 
 ## AI-Assisted Work
-I used Claude mainly to help write and troubleshoot the Terraform and Ansible code itself — the architecture decisions were mine, same as CA0.
 
+I used Claude to help write and troubleshoot Terraform, Ansible, and the validation/cleanup scripts. I also used it to compare the implementation against the grading debrief. The important part was independent verification:
 
-- **Verified independently before trusting:** when Ansible failed to SSH with "no such identity," I confirmed the actual root cause myself — which working directory Ansible was invoked from, and how that interacted with the key's relative path — before accepting a fix, rather than applying the first suggestion untested. The `aws login` / Terraform incompatibility was checked against the real, open GitHub issue before I committed to the static-key approach, rather than taken on faith.
-- **Decisions I made, not the AI:**
-  - Choosing Terraform + Ansible over Puppet, Chef, or CloudFormation. My reasoning: Terraform's plan/apply/destroy lifecycle fits standing up and tearing down a small, disposable pipeline far better than Puppet or Chef, which are built around continuously reconciling long-lived server fleets rather than one-shot creation and destruction. Ansible's agentless, SSH-based model meant nothing extra had to be pre-installed on a VM before Ansible could start configuring it — unlike Chef or Puppet, which typically need an agent already present. CloudFormation would have locked this to AWS-only syntax for no real benefit here, since nothing about this pipeline needs AWS-specific resource types beyond what Terraform's `aws` provider already covers cleanly.
-  - Adding MongoDB authentication, which CA0 didn't have at all — a deliberate security improvement I chose to make, not something suggested to me.
-  - Parameterizing instance size specifically so CA2/CA3 can push the pipeline under load later by changing one variable, not editing four files.
-- **Debugging approach:** most debugging came from reading Terraform's and Ansible's own output directly — both tools are unusually explicit about what failed and why. The `variables.tf` syntax error, the missing newline, and the relative-path SSH key issue were all diagnosable from the tool's own error message before I needed to ask anything. I used Claude more as a second pair of eyes once I already had a theory about the cause, not as the source of the diagnosis itself.
+- AI suggestions that recreated containers every run were rejected after the second-run evidence showed the problem.
+- The stronger smoke test was accepted only after it produced a unique-event PASS and a deliberate processor-stop FAIL.
+- The cleanup scanner was changed after real AWS permission/error behavior exposed problems that local reasoning had missed.
+- The final rebuild exposed a stale-IP problem that was not obvious from code review alone.
+- The professor-identified Kafka/Mongo image-tag gap was closed with a minimal shared-config change, and a grep check proved the tags are no longer duplicated in the Compose templates.
+- Documentation claims were checked against the repository and corrected when they did not match reality.
+
+The Integrity Packet therefore records not just what AI suggested, but what I tested, what failed, what changed, and what evidence made me accept the result.

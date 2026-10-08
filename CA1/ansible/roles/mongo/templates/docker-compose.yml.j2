@@ -1,7 +1,7 @@
 services:
   mongodb:
     # Use MongoDB 7.0 for the database container.
-    image: "mongo:7.0"
+    image: "{{ mongo_image }}"
 
     # Restart MongoDB automatically unless it is stopped manually.
     restart: unless-stopped

@@ -1,531 +1,621 @@
 # CA1 — Infrastructure as Code: Real-Time Network Intrusion Detection Pipeline
 
-*Last updated: September 19, 2026*
+*Last updated: October 8, 2026*
 
 ## Overview
-This project re-implements CA0's Producer → Kafka → Processor → MongoDB → REST API pipeline entirely as code. Terraform provisions the AWS infrastructure (four EC2 VMs, one shared security group, one SSH key pair) and Ansible configures every piece of software on top of it (Docker, Kafka, MongoDB, the processor, the producer, and a systemd-managed REST API). A fresh deploy — from empty AWS account to a fully working, smoke-tested pipeline — takes two commands. Destroying it and leaving zero remnants takes one.
 
-The pipeline's function is unchanged from CA0: the producer replays labeled CICIDS2017 network-flow records onto a Kafka topic, the processor consumes them and writes results to MongoDB, and a REST API exposes flagged (`Bot`) traffic. What changed for CA1 is *how it gets built*: nothing here was clicked into existence by hand, and every step below was validated before moving to the next one.
+This project rebuilds the CA0 Producer → Kafka → Processor → MongoDB → REST API pipeline using Terraform for AWS infrastructure and Ansible for software configuration. Terraform now owns the disposable network as well as the four EC2 instances: a dedicated VPC, public subnet, internet gateway, route table and association, security group, SSH key pair, and generated Ansible inventory. Ansible installs Docker and deploys Kafka, MongoDB, the processor, producer, and REST API.
+
+The post-grading work focused on the exact problems discussed in the CA1 debrief: make the network disposable, centralize shared settings, make configuration idempotent, trace one unique event through every hop, and prove that destroy really leaves nothing behind. The final fresh rebuild proved that the system can be recreated from nothing, configured twice with `changed=0` on the second run, validated end to end, destroyed, and scanned clean.
+
+Once the one-time setup is complete, the lifecycle is:
+
+| Stage | Command | Proof |
+|---|---|---|
+| Provision | `terraform apply` | Fresh rebuild created 14 resources |
+| Configure | `ansible-playbook site.yml` | First run `failed=0`; second run `changed=0` on every host |
+| Validate | `python3 scripts/smoke_test.py` | One unique event crosses Producer → Kafka → Processor → MongoDB → REST |
+| Destroy | `terraform destroy` | `Destroy complete! Resources: 14 destroyed.` |
+| Verify cleanup | `python3 scripts/aws_scan.py` | `RESULT: CLEAN` |
+
+> **Important:** the operator public IP is still a manual Terraform input. Before a deploy, make sure `terraform/terraform.tfvars` contains your **current** public IPv4 address with `/32`. During the final rebuild, a stale value caused all four SSH connections to time out. Updating only `my_ip_cidr` and re-running `terraform apply` fixed the security group in place (`0 added, 1 changed, 0 destroyed`).
 
 ## Demo Video
+
 **[VIDEO LINK — https://youtu.be/_km0kpBqTcI]**
 
-Recorded live against a fresh `terraform apply` → `ansible-playbook site.yml` deploy: all four hosts pinging, the producer replaying 5,000 rows, the processor's alert log climbing in real time, and both REST endpoints returning live data.
+The video is from the original CA1 submission. It shows a live Terraform/Ansible deployment, the producer replaying 5,000 rows, processor activity, and the REST endpoints. The post-grading improvements described below were completed after that recording, so their proof comes from the later terminal runs documented in this README and the Integrity Packet.
+
+## What Changed After Grading
+
+The class debrief ended with a practical checklist. This is where the project stands now:
+
+| Debrief item | Current status | What changed |
+|---|---|---|
+| Make the network disposable | **Done** | Terraform creates and destroys a dedicated VPC, subnet, internet gateway, route table, association, security group, and compute resources. |
+| Centralize parameters | **Done** | Topic, ports, database/collection, dataset, AWS region, project tag, plus the Kafka and MongoDB image tags are in one `config.yml` shared across Terraform, Ansible, and the apps. Old CA0 fallback IPs were removed. |
+| Automate service installation | **Done** | Ansible roles install/configure the whole reference stack. |
+| Use a vault / secret manager | **Done** | MongoDB credentials use Ansible Vault; app credentials are delivered through protected environment/config files rather than Docker command-line arguments. |
+| Run the playbook twice | **Done** | A fresh rebuild was configured twice; the second complete run reported `changed=0` on all four hosts. |
+| Trace one unique event end to end | **Done** | `scripts/smoke_test.py` creates one unique trace ID and matches the exact Kafka partition/offset through processor, MongoDB, and REST. |
+| Verify destroy with a resource scan | **Done** | Every Terraform resource is tagged `Project=CA1`; `scripts/aws_scan.py` checks project resources and billable leftovers after destroy. |
+
+A separate issue was also exposed by the final rebuild: `my_ip_cidr` can go stale when the operator changes networks. That behavior is documented under **Operator IP / SSH Troubleshooting** and **Known Limitations** rather than hidden.
 
 ## Architecture Diagram
 
 ```mermaid
 flowchart TB
-    User["User / Grader<br/>source IP allow-listed"]
+    User["Operator / Grader<br/>current public IPv4 /32 allow-listed"]
 
-    subgraph AWS["AWS EC2 · us-east-2 (Ohio)<br/>VPC vpc-0605d873b24420203 · default subnet<br/>all 4 instances share ONE Terraform-managed security group"]
-        direction LR
+    subgraph AWS["AWS · us-east-2 · environment created and destroyed by Terraform"]
+        direction TB
 
-        subgraph PVM["producer-vm<br/>t3.medium (parameterized)"]
-            PDock["container: producer<br/>python:3.11-slim · USER appuser<br/>built by Ansible - no restart policy, run on demand"]
+        subgraph VPC["CA1 VPC 10.0.0.0/16<br/>public subnet 10.0.1.0/24<br/>internet gateway + route table"]
+            direction LR
+
+            subgraph PVM["producer-vm"]
+                PDock["Producer container<br/>python:3.11-slim<br/>run on demand"]
+            end
+
+            subgraph BVM["broker-vm"]
+                KafkaNode["confluentinc/cp-kafka:7.7.1<br/>KRaft mode"]
+            end
+
+            subgraph ZVM["processor-vm"]
+                ProcDock["Processor container<br/>restart: unless-stopped"]
+            end
+
+            subgraph DVM["database-vm"]
+                MongoNode["mongo:7.0<br/>db=ca1 · collection=flows"]
+                FlaskNode["Flask REST API · :8080<br/>/health · /alerts · /events/<trace_id>"]
+                FlaskNode --> MongoNode
+            end
+
+            PDock -->|"topic network-flows · TCP 9092"| KafkaNode
+            KafkaNode -->|"consume"| ProcDock
+            ProcDock -->|"authenticated insert · TCP 27017"| MongoNode
         end
-
-        subgraph BVM["broker-vm<br/>t3.medium"]
-            KafkaNode["confluentinc/cp-kafka:7.7.1<br/>KRaft mode<br/>restart: unless-stopped"]
-            KafkaPorts["EXTERNAL :9092 → other VMs<br/>INTERNAL :29092 → docker bridge only"]
-            KafkaNode --- KafkaPorts
-        end
-
-        subgraph ZVM["processor-vm<br/>t3.medium"]
-            ProcDock["container: processor<br/>restart: unless-stopped<br/>Mongo credentials injected from Ansible Vault"]
-        end
-
-        subgraph DVM["database-vm<br/>t3.medium"]
-            MongoNode["mongo:7.0 · port 27017<br/>db=ca0 · collection=flows<br/>auth ENABLED - vaulted credentials<br/>restart: unless-stopped"]
-            FlaskNode["Flask · port 8080<br/>systemd service - survives reboot & crashes<br/>GET /health · GET /alerts"]
-            FlaskNode -->|"authenticated pymongo find()"| MongoNode
-        end
-
-        PDock -->|"produce · TCP 9092<br/>topic: network-flows"| KafkaNode
-        KafkaNode -->|"consume · TCP 9092"| ProcDock
-        ProcDock -->|"insert_one() · authenticated · TCP 27017"| MongoNode
     end
 
-    User -->|"SSH :22, key-only"| PVM
-    User -->|"SSH :22, key-only"| BVM
-    User -->|"SSH :22, key-only"| ZVM
-    User -->|"SSH :22, key-only + HTTP :8080"| DVM
-
-    classDef internalOnly fill:#fff3e0,stroke:#e65100,stroke-width:1px
-    class KafkaPorts internalOnly
+    User -->|"SSH :22"| PVM
+    User -->|"SSH :22"| BVM
+    User -->|"SSH :22"| ZVM
+    User -->|"SSH :22 + REST :8080"| DVM
 ```
 
 ## Automation Toolchain
 
-How Terraform and Ansible actually hand off to each other — the part that didn't exist in CA0:
-
 ```mermaid
 flowchart LR
-    Dev["You<br/>terraform apply"]
-    TF["Terraform<br/>reads .tf files"]
-    AWSA["AWS API<br/>creates VMs, security group, key pair"]
-    Inv["ansible/inventory.ini<br/>auto-generated<br/>real IPs + key path filled in"]
-    Ans["Ansible<br/>ansible-playbook site.yml"]
-    VMs["4 EC2 VMs<br/>Docker, Kafka, Mongo,<br/>processor, producer, REST API"]
-    Vault["group_vars/all/vault.yml<br/>AES256 encrypted<br/>Mongo credentials"]
+    Cfg["config.yml<br/>topic · ports · DB/collection · dataset<br/>AWS region · project tag · Kafka/Mongo images"]
+    TF["Terraform"]
+    AWSA["AWS<br/>VPC + subnet + routes + SG + key + 4 VMs"]
+    Inv["ansible/inventory.ini<br/>generated by Terraform"]
+    Ans["Ansible"]
+    VMs["Docker · Kafka · MongoDB<br/>processor · producer · REST API"]
+    Vault["Ansible Vault<br/>Mongo credentials"]
+    Smoke["scripts/smoke_test.py"]
+    Scan["scripts/aws_scan.py"]
 
-    Dev -->|"1"| TF
-    TF -->|"2 · creates"| AWSA
-    TF -->|"3 · writes"| Inv
-    Dev -->|"4 · runs"| Ans
-    Inv -->|"5 · read by"| Ans
-    Vault -->|"decrypted at runtime by"| Ans
-    Ans -->|"6 · configures over SSH"| VMs
-
-    classDef toolNode fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef secretNode fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    class TF,Ans toolNode
-    class Vault secretNode
+    Cfg --> TF
+    Cfg --> Ans
+    TF --> AWSA
+    TF --> Inv
+    Inv --> Ans
+    Vault --> Ans
+    Ans --> VMs
+    VMs -. validated by .-> Smoke
+    AWSA -. cleanup checked by .-> Scan
 ```
 
-No manual step connects these two tools: Terraform's `local_file.ansible_inventory` resource writes `ansible/inventory.ini` itself, with each VM's real public/private IP and the absolute path to the SSH key it just generated. Ansible has nothing to guess.
+Terraform writes the current VM public/private IPs and the absolute SSH-key path into `ansible/inventory.ini`, so Ansible does not depend on old machine addresses. Shared application settings come from `config.yml`. The one environment-specific value that still has to be kept current by the operator is `my_ip_cidr` in `terraform.tfvars`.
 
 ## Software Stack
 
-| Component | Technology | Version |
+| Component | Technology / version |
+|---|---|
+| Provisioning | Terraform 1.16.3 |
+| Configuration | Ansible core 2.21.4 |
+| Kafka | `confluentinc/cp-kafka:7.7.1` |
+| MongoDB | `mongo:7.0` |
+| Producer | Python + `kafka-python`, Dockerized, `python:3.11-slim` |
+| Processor | Python + `kafka-python` + `pymongo`, Dockerized, `python:3.11-slim` |
+| REST API | Flask + pymongo, systemd-managed |
+| Container runtime | Docker Engine + Compose plugin |
+| Cloud | AWS EC2, `us-east-2` |
+| Secrets | Ansible Vault (AES256) |
+
+The Kafka and MongoDB image tags are now centralized in `config.yml`. Their Ansible Compose templates read `kafka_image` and `mongo_image` from that shared file, so changing either service version no longer requires editing the deployment template itself. The producer and processor still use their existing pinned `python:3.11-slim` base image in their Dockerfiles; that was not part of this Kafka/Mongo image-tag fix.
+
+## Configuration and Parameterization
+
+`CA1/config.yml` is the shared non-secret configuration source for the settings that cross tool boundaries:
+
+```yaml
+kafka_topic: network-flows
+kafka_port: 9092
+mongo_port: 27017
+mongo_db: ca1
+mongo_collection: flows
+rest_port: 8080
+dataset_file: Friday-Morning-5000-mixed-bot.csv
+aws_region: us-east-2
+project_tag: CA1
+kafka_image: confluentinc/cp-kafka:7.7.1
+mongo_image: mongo:7.0
+```
+
+Terraform reads it for region, firewall ports, and project tagging. Ansible reads the same values and injects them into the applications through templates/environment files. The producer, processor, and REST API no longer contain old CA0 private-IP fallbacks; required settings must be present or the app exits with an error instead of silently talking to an old address.
+
+Terraform-specific deployment inputs remain in `variables.tf` / `terraform.tfvars`, including:
+
+- `instance_type` — defaults to `t3.medium`
+- `vpc_cidr` — defaults to `10.0.0.0/16`
+- `subnet_cidr` — defaults to `10.0.1.0/24`
+- `my_ip_cidr` — the operator's **current** public IPv4 address with `/32`
+
+## Network
+
+Terraform now owns the disposable network rather than reusing the account's default VPC:
+
+| Resource | Current design |
+|---|---|
+| VPC | `10.0.0.0/16` |
+| Public subnet | `10.0.1.0/24` |
+| Internet gateway | Created and attached by Terraform |
+| Route table | Default route `0.0.0.0/0` to the internet gateway |
+| Route association | Terraform-managed |
+| Security group | One shared CA1 SG |
+| Compute | Four EC2 VMs |
+
+The security group exposes only what the pipeline needs:
+
+| Port | Source | Purpose |
 |---|---|---|
-| IaC — provisioning | Terraform | 1.16.3 |
-| IaC — configuration | Ansible | core 2.21.4 |
-| Pub/Sub hub | Apache Kafka (KRaft mode, no ZooKeeper) | `confluentinc/cp-kafka:7.7.1` |
-| Database | MongoDB (auth enabled) | `mongo:7.0` |
-| Producer | Python + `kafka-python`, Dockerized | Python 3.11-slim |
-| Processor | Python + `kafka-python` + `pymongo`, Dockerized | Python 3.11-slim |
-| REST API | Flask, run as a systemd service | Flask (systemd-managed) |
-| Container runtime | Docker Engine + Compose plugin | 29.8.1 |
-| Host OS | Ubuntu | 26.04 LTS |
-| Cloud provider | AWS EC2 | us-east-2 (Ohio) |
-| Secrets | Ansible Vault (AES256) | — |
-
-## Environment
-
-| VM | Role | Instance Type | Notes |
-|---|---|---|---|
-| producer-vm | Producer container | t3.medium (parameterized) | No restart policy — one-shot replay, run on demand |
-| broker-vm | Kafka (KRaft) | t3.medium | `restart: unless-stopped` |
-| processor-vm | Processor container | t3.medium | `restart: unless-stopped` |
-| database-vm | MongoDB + REST API | t3.medium | Mongo `restart: unless-stopped`; REST API is a systemd unit |
-
-All four VMs share one Terraform-managed key pair (`ca1-key`) and one security group (`ca1-pipeline-sg`), in the same default VPC CA0 used (`vpc-0605d873b24420203`). Public IPs are assigned fresh by AWS on every `terraform apply` and are not fixed here — run `terraform output public_ips` after a deploy to get current values.
+| 22/TCP | `my_ip_cidr` only | SSH |
+| 8080/TCP | `my_ip_cidr` only | REST API |
+| 9092/TCP | the CA1 security group itself | Kafka between VMs |
+| 27017/TCP | the CA1 security group itself | MongoDB between VMs |
 
 ## Prerequisites
 
-Everything below assumes macOS, since that's what this was built on. On Linux, swap Homebrew for your distro's package manager (`apt`, `dnf`, etc.); on Windows, use WSL2 and follow the Linux path inside it.
+Everything below was built on macOS.
 
-**0. Homebrew — macOS's package manager.** Skip this if `brew --version` already prints something.
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-```bash
-brew --version
-```
+### Terraform
 
-**1. Terraform** ≥ 1.16 — provisions the AWS infrastructure. Not a plain `brew install terraform`; it needs HashiCorp's own tap:
 ```bash
 brew tap hashicorp/tap
 brew install hashicorp/tap/terraform
-```
-```bash
 terraform version
 ```
-Should print `Terraform v1.16.3` or newer.
 
 ![Installing Terraform via Homebrew](images/download-terraform-with-homebrew.png)
-*`brew tap hashicorp/tap && brew install hashicorp/tap/terraform`.*
+*Original setup evidence: installing Terraform through HashiCorp's Homebrew tap.*
 
 ![Confirming the installed Terraform version](images/check-terraform-version.png)
-*`terraform version` → 1.16.3.*
+*Original setup evidence: Terraform version check.*
 
-**2. Ansible** ≥ 2.21 — configures the software on each VM:
+### Ansible
+
 ```bash
 brew install ansible
-```
-```bash
 ansible --version
 ```
-Should print `ansible [core 2.21.4]` or newer. This pulls in Python 3.14 and a few crypto libraries as dependencies — that's expected, not an error.
 
-**3. AWS CLI** ≥ 2.36 — used to give Terraform your AWS credentials:
+### AWS CLI
+
 ```bash
 brew install awscli
-```
-```bash
 aws --version
 ```
-Should print `aws-cli/2.36.49` or newer.
 
 ![Installing the AWS CLI via Homebrew](images/check-and-install-amazon-cli.png)
-*`brew install awscli`, then confirming with `aws --version`.*
+*Original setup evidence: AWS CLI installation/version check.*
 
-**4. An AWS account, with a dedicated IAM user** — not root, and not a personal admin user. If you don't already have one for this project:
-- Sign in to the [AWS Console](https://console.aws.amazon.com/) → **IAM → Users → Create user**
-- Name it something like `ca1-terraform`
-- Attach the `AmazonEC2FullAccess` managed policy directly to it
-- Under that user's page → **Security credentials → Access keys → Create access key** → choose "Command Line Interface (CLI)" → save the access key ID and secret somewhere safe. AWS only shows the secret once.
+Use a dedicated IAM user for this class project rather than root. Configure its access key with:
 
-**5. Configure that access key locally**, via `aws configure` — not `aws login`. The AWS CLI's newer `aws login` (browser-based SSO-style flow, CLI ≥ 2.32) is not recognized as a valid credential source by the Terraform AWS provider ([hashicorp/terraform-provider-aws#45316](https://github.com/hashicorp/terraform-provider-aws/issues/45316), open as of this writing). `aws configure` with the static access key ID/secret from step 4 works with both the CLI and Terraform:
 ```bash
 aws configure
-```
-Paste in the access key ID and secret when prompted; region `us-east-2`.
-
-![Configuring the static access key for the ca1-terraform IAM user](images/add-working-credentials.png)
-*`aws configure` with the `ca1-terraform` user's static access key — not `aws login`, for the reason explained above.*
-
-Confirm it worked and it's the scoped user, not root:
-```bash
 aws sts get-caller-identity
 ```
 
+![Configuring the static access key for the ca1-terraform IAM user](images/add-working-credentials.png)
+*Original setup evidence: AWS credentials configured locally.*
+
 ![aws sts get-caller-identity confirming the scoped IAM user, not root](images/iam-user-confirmed.png)
-*`aws sts get-caller-identity` → `user/ca1-terraform`, not `root`.*
+*Original setup evidence: the scoped IAM identity.*
 
-**6. Your own public IP**, for the security group's SSH/REST rules:
+### Current operator IP
+
+Before every deploy, especially after moving between Wi-Fi/campus/home networks, check your current public address:
+
 ```bash
-curl https://checkip.amazonaws.com
-```
-Keep this handy — it's needed in step 2 of How to Deploy, below.
-
-## Repository Structure
-
-```
-CA1
-├── ansible
-│   ├── ansible.cfg
-│   ├── group_vars
-│   │   └── all
-│   │       ├── vault.yml            # encrypted — Mongo credentials (gitignored key, committed ciphertext)
-│   │       └── vault.yml.example    # committed template, shows the two keys to fill in
-│   ├── roles
-│   │   ├── docker/tasks/main.yml
-│   │   ├── kafka/{tasks/main.yml, templates/docker-compose.yml.j2}
-│   │   ├── mongo/{tasks/main.yml, templates/docker-compose.yml.j2}
-│   │   ├── processor/{files/{Dockerfile,processor.py}, tasks/main.yml}
-│   │   ├── producer/{files/{Dockerfile,producer.py,Friday-Morning-5000-mixed-bot.csv}, tasks/main.yml}
-│   │   └── restapi/{files/rest_app.py, tasks/main.yml, templates/rest_api.service.j2}
-│   ├── site.yml                     # orchestrates all six roles in order
-│   └── inventory.ini                # AUTO-GENERATED by Terraform — do not hand-edit
-└── terraform
-    ├── versions.tf                  # provider requirements (aws ~>5.0, tls ~>4.0, local ~>2.0)
-    ├── variables.tf                 # aws_region, instance_type, my_ip_cidr
-    ├── key_pair.tf                  # generates ca1-key (RSA 4096), saves it locally
-    ├── network.tf                   # reads the default VPC + a subnet in it
-    ├── security.tf                  # ca1-pipeline-sg — the one shared security group
-    ├── compute.tf                   # the 4 EC2 instances, via for_each over a map
-    ├── outputs.tf                   # public_ips, private_ips, ssh_command_example
-    ├── inventory.tf + inventory.tpl # writes ../ansible/inventory.ini
-    ├── terraform.tfvars             # GITIGNORED — contains your real IP
-    └── .terraform.lock.hcl          # committed, pins provider versions
+curl -s https://checkip.amazonaws.com
 ```
 
-## Terraform Build, Validated Incrementally
+Then make sure `CA1/terraform/terraform.tfvars` contains exactly that address with `/32`, for example:
 
-Each `.tf` file was written and validated on its own before the next one was added — `terraform validate` doesn't require real AWS credentials, so this catches syntax errors immediately rather than at apply time. This sequence caught an actual bug: a missing newline in `variables.tf` that `validate` flagged right away.
+```hcl
+my_ip_cidr = "203.0.113.7/32"
+```
 
-![versions.tf created and validated](images/make-terraform-folder-and-create-version-and-validate.png)
-*`versions.tf` — provider requirements — created, then `terraform validate` confirms it's syntactically valid before anything else is added.*
-
-![variables.tf created and validated](images/create-variables-and-validate.png)
-*`variables.tf` added next; validated again. (An earlier pass at this file was missing a newline and `validate` caught it immediately.)*
-
-![key_pair.tf created and validated](images/create-key_pair-and-validate.png)
-*`key_pair.tf` — the RSA key generation and local save logic.*
-
-![network.tf created and validated](images/create-network-and-validate.png)
-*`network.tf` — the data sources that read the default VPC and pick a subnet.*
-
-![security.tf created and validated](images/create-security-and-validate.png)
-*`security.tf` — the shared security group definition.*
-
-![compute.tf created and validated](images/create-compute-and-validate.png)
-*`compute.tf` — the four EC2 instances, defined with `for_each` over a map so adding a fifth VM later is a one-line change.*
-
-![terraform init succeeding](images/initialize-terraform.png)
-*`terraform init` — downloads the `aws`, `tls`, and `local` providers and creates the lock file, once all the files above existed.*
+`terraform.tfvars` is environment-specific and is not committed.
 
 ## Secret Management
 
-MongoDB's admin credentials never appear in plaintext anywhere in this repo. They live in `ansible/group_vars/all/vault.yml`, encrypted with Ansible Vault (AES256), and are injected into the Mongo container, the processor container, and the REST API's systemd unit as environment variables at configure time.
+MongoDB credentials use Ansible Vault. A fresh clone does **not** contain your real `vault.yml`; it contains only `vault.yml.example`.
 
-`vault.yml` — the encrypted ciphertext — **is committed to this repo**; that's the entire point of vaulting it, rather than gitignoring something nobody could then ever share or reproduce from. What's never committed is `.vault_pass`, the plaintext password that decrypts it, for the same reason an AWS access key never is. `ansible.cfg` points at `.vault_pass` locally, so `ansible-playbook` decrypts automatically once it exists — no `--ask-vault-pass` needed.
-
-Setting up your own vault — needed only if your checkout doesn't already have a matching `.vault_pass` — is step 3 of **How to Deploy — Start to Finish**, below.
-
-![Vault-encrypted MongoDB credentials, verified with cat](images/no-secrets-in-plain-text.png)
-*`cat group_vars/all/vault.yml` — AES256 ciphertext, not plaintext.*
-
-## Parameterization
-
-Everything in `variables.tf` has a sensible default except your IP, which has none on purpose (so nobody accidentally commits a wide-open rule):
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `aws_region` | `us-east-2` | Where everything gets created |
-| `instance_type` | `t3.medium` | Size of all four VMs — bump this in `terraform.tfvars` to push the pipeline harder in later assignments |
-| `my_ip_cidr` | *(none — required)* | Your IP, scoped to `/32`, for SSH and REST API access |
-
-Override any of these in `terraform.tfvars`:
-```
-my_ip_cidr    = "YOUR_IP_HERE/32"
-instance_type = "t3.medium"
-aws_region    = "us-east-2"
-```
-
-## How to Deploy — Start to Finish
-
-This section assumes only that the tools in Prerequisites are already installed, and walks through everything else from a completely fresh checkout.
-
-**1. Get your own AWS credentials.** Use your own AWS account — create a dedicated IAM user (not root) with the `AmazonEC2FullAccess` policy, generate a static access key for it, then:
-```bash
-aws configure
-```
-Paste in that access key ID and secret when prompted, region `us-east-2`. (This is `aws configure`, not `aws login` — see Prerequisites above for why.)
-
-**2. Set your own IP.**
-```bash
-curl https://checkip.amazonaws.com
-```
-Create `CA1/terraform/terraform.tfvars` with that value:
-```
-my_ip_cidr = "YOUR_IP_HERE/32"
-```
-
-**3. Set up your own vault.** `group_vars/all/vault.yml` is committed to this repo as real, encrypted ciphertext — but `.vault_pass`, the password that decrypts it, is deliberately never committed, for the same reason an AWS key never is. **If your checkout already has both `vault.yml` and a matching `.vault_pass`, skip this step entirely.** Otherwise:
 ```bash
 cd CA1/ansible
 cp group_vars/all/vault.yml.example group_vars/all/vault.yml
 nano group_vars/all/vault.yml
-```
-Fill in `vault_mongo_root_username` and `vault_mongo_root_password` with values of your own choosing, then:
-```bash
-echo "your-chosen-vault-password" > .vault_pass
+echo "choose-a-vault-password" > .vault_pass
+chmod 600 .vault_pass
 ansible-vault encrypt group_vars/all/vault.yml
 ```
-This works correctly with any credentials you pick. Mongo, the processor, and the REST API all read from this same file in the same deploy, so the system is internally consistent regardless of which specific values are inside it — you're choosing your own secret here, not trying to guess mine.
 
-**4. Initialize Terraform (one-time).**
+`vault.yml`, `.vault_pass`, Terraform state, `*.pem`, `*.tfvars`, and generated inventory are local/sensitive artifacts and should not be committed.
+
+![Vault-encrypted MongoDB credentials, verified with cat](images/no-secrets-in-plain-text.png)
+*Original evidence: the local vault file contains AES256 ciphertext rather than plaintext.*
+
+The processor and REST API receive credentials through protected environment files rather than placing passwords directly on `docker run` or systemd command lines. The MongoDB Compose template still contains the credential after rendering on the VM, so its file permissions matter. See **Known Limitations** for the remaining `no_log`/state considerations.
+
+## How to Deploy
+
+### 1. Check the operator IP
+
 ```bash
-cd ../terraform
-terraform init
+cd CA1/terraform
+curl -s https://checkip.amazonaws.com
+cat terraform.tfvars
 ```
 
-**5. Provision the infrastructure.**
+If the address is different, update only `my_ip_cidr` to the current address with `/32`.
+
+### 2. Provision AWS
+
 ```bash
+terraform init        # first time only
+terraform validate
 terraform apply
 ```
-Type `yes` when prompted. This creates the four VMs, the key pair, and the security group, then writes `../ansible/inventory.ini` with the real IPs.
 
-![terraform plan showing all resources to add](images/terraform-plan.png)
-*The full plan for a deploy: instances, key pair, security group, local key file, and generated inventory.*
+A fresh rebuild should create 14 managed resources. Terraform also writes the SSH key and generated Ansible inventory locally.
 
-![terraform apply completing with outputs shown](images/terraform-applied.png)
-*Apply completing — the `public_ips` / `private_ips` / `ssh_command_example` outputs are printed immediately.*
+### 3. Configure the four VMs
 
-![A later apply fixing the SSH key path to an absolute path](images/outputs-fix.png)
-*An early version used a relative key path (`./ca1-key.pem`), which broke when Ansible ran from a different working directory. Fixed by switching to `abspath()` in `key_pair.tf`, which forced Terraform to recreate the key file and inventory — a real, caught-and-fixed bug, not a hypothetical one.*
-
-![Proving SSH access into a freshly created VM](images/ssh-into-broker.png)
-*SSH into the broker VM using the Terraform-generated key, confirming the key pair actually works end to end.*
-
-![AWS console showing all four instances running immediately after apply](images/aws-console-4vms.png)
-*All four instances up immediately after apply, tagged and named clearly.*
-
-![Ansible inventory auto-generated by Terraform, with real IPs filled in](images/ansible-inventory-generated.png)
-*`cat ../ansible/inventory.ini` — Terraform's `templatefile()` output, with no manual editing.*
-
-**6. Configure everything.**
 ```bash
 cd ../ansible
 ansible-playbook site.yml
 ```
-Runs all six roles in order — Docker on every VM, then Kafka, MongoDB, the processor, the producer, and finally the REST API. Wait for a clean `PLAY RECAP`: all four hosts should show `failed=0, unreachable=0`.
 
-**7. Confirm it's actually alive.**
-```bash
-ansible all -m ping
+On a fresh environment many tasks should report `changed`. On a healthy already-configured environment, running the same playbook again should converge to `changed=0` on every host.
+
+### Original Build Screenshots
+
+The following screenshots are from the original CA1 submission. Some infrastructure details shown in them (especially use of the default VPC) were replaced in the post-grading version described above, but the image paths are kept here as original build evidence.
+
+![Terraform folder/version validation](images/make-terraform-folder-and-create-version-and-validate.png)
+*Original build: Terraform project setup.*
+
+![Original variables.tf validation](images/create-variables-and-validate.png)
+*Original build: Terraform variables.*
+
+![Original key-pair configuration](images/create-key_pair-and-validate.png)
+*Original build: Terraform-managed SSH key.*
+
+![Original network configuration](images/create-network-and-validate.png)
+*Original build screenshot. This network implementation was later replaced with a dedicated Terraform-owned VPC/subnet/IGW/route-table design.*
+
+![Original security group configuration](images/create-security-and-validate.png)
+*Original build: security-group definition.*
+
+![Original compute configuration](images/create-compute-and-validate.png)
+*Original build: four EC2 instances defined in Terraform.*
+
+![terraform init succeeding](images/initialize-terraform.png)
+*Original build: `terraform init`.*
+
+![terraform plan showing resources](images/terraform-plan.png)
+*Original build: Terraform plan.*
+
+![terraform apply completing with outputs shown](images/terraform-applied.png)
+*Original build: successful apply.*
+
+![A later apply fixing the SSH key path to an absolute path](images/outputs-fix.png)
+*Original debugging evidence: relative SSH-key path replaced with an absolute path.*
+
+![Proving SSH access into a freshly created VM](images/ssh-into-broker.png)
+*Original build: SSH connectivity.*
+
+![AWS console showing all four instances running](images/aws-console-4vms.png)
+*Original build: four CA1 instances running.*
+
+![Terraform-generated Ansible inventory](images/ansible-inventory-generated.png)
+*Original build: inventory generated from Terraform outputs.*
+
+![All four Ansible hosts responding](images/pinging-ansible.png)
+*Original build: `ansible all -m ping`.*
+
+## What Ansible Configures
+
+### Docker
+
+![Ansible installing Docker across all four hosts](images/installing-docker-using-ansible.png)
+*Original evidence: Docker role execution.*
+
+![Docker version confirmed on all four hosts](images/docker-versions.png)
+*Original evidence: Docker installed on each VM.*
+
+### Kafka
+
+![Ansible configuring and starting Kafka](images/ansible-kafka-running.png)
+*Original evidence: Kafka role.*
+
+![Kafka container confirmed running](images/kafka-container-status.png)
+*Original evidence: Kafka container status.*
+
+### MongoDB
+
+![Ansible configuring and starting MongoDB](images/ansible-mongo-running.png)
+*Original evidence: MongoDB role.*
+
+### Processor
+
+![Processor role playbook run](images/processor-play-recap.png)
+*Original evidence: processor role.*
+
+![Processor logs confirming the topic](images/check-processor-logs.png)
+*Original evidence: processor listening/processing logs.*
+
+### Producer
+
+![Producer role playbook run](images/producer-play-recap.png)
+*Original evidence: producer role.*
+
+![Producer image confirmed built](images/producer-image-exsist-and-built.png)
+*Original evidence: producer image exists.*
+
+### REST API
+
+![REST API role playbook run](images/rest-api-play-recap.png)
+*Original evidence: REST API role.*
+
+![REST API health check returning 200](images/rest-api-health-200.png)
+*Original evidence: `/health` returned 200.*
+
+## Idempotency: Run It Twice
+
+The original submission proved reproducibility through destroy/rebuild, but the professor correctly separated that from **idempotency**. The post-grading Ansible roles were changed so already-correct containers/services are left alone.
+
+On a completely fresh rebuild, the first playbook run made the expected changes. The second full run, with nothing changed between runs, reported:
+
+```text
+database host : changed=0  unreachable=0  failed=0
+producer host : changed=0  unreachable=0  failed=0
+processor host: changed=0  unreachable=0  failed=0
+broker host   : changed=0  unreachable=0  failed=0
 ```
 
-![Ansible ping confirming all four hosts are reachable](images/pinging-ansible.png)
-*`ansible all -m ping` — all four report `pong` before any configuration runs.*
+That is the idempotency proof: the second run converged without unnecessary container recreation or service restarts.
 
-All four should report `pong`. For the full data-flow proof — the producer replaying rows, the processor's alert log, both REST endpoints — see Validation / Smoke Test below.
+## End-to-End Validation
 
-**8. Validation** See exact sequence used to prove the pipeline moves real data end to end in **Validation / Smoke Test section**
+Run from the CA1 root:
 
-**9. Tear it down when you're finished.** See How to Destroy, immediately below.
+```bash
+python3 scripts/smoke_test.py
+```
+
+The new smoke test creates one unique trace ID and follows **that exact event** through every stage instead of relying on a generic row count.
+
+Fresh-rebuild proof:
+
+```text
+CA1 end-to-end smoke test
+  path     : producer VM -> Kafka -> processor -> MongoDB -> REST API
+
+  [PASS] REST API answers                                     GET /health -> 200
+  [PASS] Event is not in the database yet                     GET /events/<id> -> 404 (found: false)
+  [PASS] Producer sent it and Kafka stored it                 topic network-flows, partition 0, offset 0
+  [PASS] Processor read the same Kafka offset and stored it   [TRACE] partition 0, offset 0
+  [PASS] MongoDB holds exactly one copy                       ca1.flows: 1 document with this trace id
+  [PASS] REST API returns the event                           GET /events/<id> -> 200, Label SMOKE-TEST
+  cleanup  : test event removed; REST API now answers 404
+
+RESULT: PASS - one event crossed producer -> Kafka -> processor -> MongoDB -> REST API
+```
+
+The test was also made to fail on purpose by stopping the processor. Kafka still accepted the event, but the test failed at the processor step with a non-zero exit code. Running the Ansible playbook repaired only the stopped processor, and the next smoke test passed. That proves the validator can detect a broken hop rather than always printing PASS.
+
+The original submission's 5,000-row smoke-test screenshots are still useful as supporting evidence:
+
+![Producer sending all 5000 rows](images/smoke-test-producer.png)
+*Original validation: 5,000 rows sent.*
+
+![Processor logs showing activity](images/smoke-test-processor.png)
+*Original validation: processor consuming/inserting.*
+
+![REST API returning MongoDB-backed data](images/smoke-test-rest-api.png)
+*Original validation: REST response backed by MongoDB.*
 
 ## How to Destroy
 
 ```bash
 cd CA1/terraform
-terraform destroy      # type "yes" when prompted
+terraform destroy
 ```
 
-One command tears down everything Terraform created — all four instances, the key pair, the security group, the local private key file, and the generated inventory file. Nothing is left behind.
+The final fresh rebuild ended with:
 
-![terraform destroy completing against the fully-configured pipeline](images/final-teardown.png)
-*Full teardown of a completely-configured pipeline (Docker, Kafka, Mongo, everything Ansible touched), not just the bare infrastructure.*
+```text
+Destroy complete! Resources: 14 destroyed.
+```
 
-![AWS console confirming zero running CA1 instances after destroy](images/final-teardown-aws-console.png)
-*Independently verified in the console — all four `ca1-*` instances terminated.*
-
-## Reproducibility: Proven With a Full Round Trip
-
-Idempotency isn't just claimed here — it was actually tested by tearing everything down and building it back up a second time, before any Ansible configuration existed:
-
-![An earlier terraform destroy, part of the round-trip test](images/terraform-destroyed.png)
-*First destroy of the round-trip test.*
-
-![AWS console confirming zero instances after that destroy](images/terrafrom-aws-console-ec2-destroyed.png)
-*Independently verified empty before re-applying.*
-
-![Re-applying produces four new instances, shown alongside CA0's older stopped VMs](images/aws-console-4vms-with-prev-ca0-vms.png)
-*A fresh `terraform apply` producing four entirely new instance IDs and IPs (shown here next to CA0's separate, stopped VMs for context) — proof this isn't tied to leftover state from the first run.*
-
-## Ansible Role-by-Role Evidence
-
-Six roles, run in order by `site.yml`. Each one's `PLAY RECAP` was checked for `failed=0, unreachable=0` before moving to the next.
-
-**Docker (all four VMs)** — installs Docker Engine + the Compose plugin from Docker's official apt repo (not the older distro-default package), adds `ubuntu` to the `docker` group, and verifies with `hello-world`.
-
-![Ansible installing Docker across all four hosts](images/installing-docker-using-ansible.png)
-*The `docker` role's full playbook run.*
-
-![Docker version confirmed on all four hosts](images/docker-versions.png)
-*`ansible all -m shell -a "docker --version"` — all four report the same version.*
-
-**Kafka (broker only)** — templates and starts a KRaft-mode Kafka broker via Docker Compose.
-
-![Ansible configuring and starting Kafka](images/ansible-kafka-running.png)
-*The `kafka` role's playbook run.*
-
-![Kafka container confirmed running via docker compose ps](images/kafka-container-status.png)
-*`docker compose ps` on the broker VM — the Kafka container is `Up`, port 9092 mapped.*
-
-**MongoDB (database only)** — templates a Compose file with credentials pulled from Ansible Vault and starts Mongo with authentication enabled.
-
-![Ansible configuring and starting MongoDB](images/ansible-mongo-running.png)
-*The `mongo` role's playbook run — the templated Compose file never contains a plaintext credential; only the rendered `{{ vault_... }}` values do, on the VM itself.*
-
-**Processor (processor only)** — copies the source and Dockerfile, builds the image, and runs it with Kafka and Mongo connection info (including vaulted credentials) passed in as environment variables.
-
-![Processor role playbook run](images/processor-play-recap.png)
-*The `processor` role completing — image built, old container removed, new one started and confirmed running.*
-
-![Processor logs confirming it's listening on the correct topic](images/check-processor-logs.png)
-*`docker logs processor` — `processor listening on topic: network-flows`.*
-
-**Producer (producer only)** — copies the source, Dockerfile, and the demo CSV, then builds the image. No container is started here by design — the producer is a one-shot replay tool, run on demand during the smoke test.
-
-![Producer role playbook run](images/producer-play-recap.png)
-*The `producer` role completing — files copied, image built.*
-
-![Producer image confirmed built](images/producer-image-exsist-and-built.png)
-*`docker images producer` — the image exists and is a reasonable size.*
-
-**REST API (database only)** — installs Flask and pymongo, copies `rest_app.py`, templates a systemd unit with vaulted credentials, and enables/starts it as a real service.
-
-![REST API role playbook run](images/rest-api-play-recap.png)
-*The `restapi` role completing — Python packages installed, systemd unit templated and started, health check passed as part of the role itself.*
-
-![REST API health check returning 200](images/rest-api-health-200.png)
-*The role's own `uri` health-check task confirming `/health` returns 200 before the play is considered done.*
-
-## Validation / Smoke Test
-
-After `ansible-playbook site.yml` finishes clean, this is the exact sequence used to prove the pipeline moves real data end to end. Every line is directly pasteable, with no manual IP lookup: `broker_private_ip` already lives in `inventory.ini`'s `[all:vars]`, so Ansible resolves it itself, and the one command that needs the database's public IP captures it from `terraform output` automatically.
+Then verify AWS from the CA1 root:
 
 ```bash
-# 1. Replay the dataset - broker_private_ip resolves from inventory.ini, nothing to edit
-ansible producer -m command -a "docker run --rm -e KAFKA_BROKER={{ broker_private_ip }}:9092 producer"
-
-# 2. Confirm the processor actually consumed and inserted it
-# --become is required here: a fresh deploy's ad-hoc docker commands can hit
-# "permission denied ... docker.sock" before the ubuntu user's docker-group
-# membership is picked up by that session, even though the processor role's
-# own build/run tasks already succeeded. --become uses sudo instead, sidestepping it.
-ansible processor -m shell -a "docker logs --tail 30 processor" --become
-
-# 3. Confirm the REST API is reachable and returning real data - grabs its own IP
-DB_IP=$(cd ../terraform && terraform output -json public_ips | python3 -c "import json,sys; print(json.load(sys.stdin)['database'])")
-curl http://$DB_IP:8080/health
-curl http://$DB_IP:8080/alerts
+cd ..
+python3 scripts/aws_scan.py
 ```
 
-![Producer sending all 5000 rows](images/smoke-test-producer.png)
-*`done - sent 5000 rows total`.*
+Expected result:
 
-![Processor logs showing climbing ALERT count up to 5000](images/smoke-test-processor.png)
-*Real `[ALERT] Bot flow inserted` lines, not a static log — the count climbs with each row.*
+```text
+RESULT: CLEAN - nothing tagged Project=CA1 is left, and no billable resources are running in us-east-2.
+```
 
-![REST API returning real alert data over curl](images/smoke-test-rest-api.png)
-*`curl .../health` → `{"status":"ok"}`; `curl .../alerts` → real MongoDB-backed JSON labeled `"Bot"`.*
+The scanner checks the project-tagged EC2/VPC/subnet/security-group/internet-gateway/route-table/key-pair resources and also checks common billable leftovers such as EC2 instances, EBS volumes, Elastic IPs, NAT gateways, and load balancers.
+
+The IAM user used for this project cannot call `tag:GetResources`. That optional cross-service tag check is therefore shown as `[skip]` and repeated in the final message. The required EC2/network/billable-resource checks still run; the scanner does not hide the missing permission.
+
+During the earlier cleanup proof, `terraform state list` was empty after destroy, the generated key/inventory files were gone, and the all-regions safety scan was clean. The final rebuild was then destroyed again and the normal cleanup scan returned CLEAN.
+
+![terraform destroy completing against the fully configured pipeline](images/final-teardown.png)
+*Original submission teardown evidence.*
+
+![AWS console confirming zero running CA1 instances after destroy](images/final-teardown-aws-console.png)
+*Original submission: terminated CA1 instances.*
+
+![Terraform destroyed output](images/terraform-destroyed.png)
+*Original destroy output.*
+
+![AWS console after destroy](images/terrafrom-aws-console-ec2-destroyed.png)
+*Original AWS-console teardown check.*
+
+![AWS console with prior CA0 VMs visible](images/aws-console-4vms-with-prev-ca0-vms.png)
+*Historical evidence that old CA0 resources existed separately. The post-grading cleanup scanner later caught old untagged billable resources as part of its positive-control testing.*
+
+## Operator IP / SSH Troubleshooting
+
+### Symptom
+
+All four Ansible hosts time out on SSH immediately after a successful Terraform rebuild.
+
+### Cause seen during the final rebuild
+
+`terraform.tfvars` still contained the public IP from the previous network. The CA1 security group correctly allowed only that old `/32`, so the new network could not SSH into any VM.
+
+### Check
+
+```bash
+curl -s https://checkip.amazonaws.com
+cat CA1/terraform/terraform.tfvars
+```
+
+The IPs must match, with `/32` added in `terraform.tfvars`.
+
+### Fix
+
+Update `my_ip_cidr`, then:
+
+```bash
+cd CA1/terraform
+terraform apply
+```
+
+In the actual rebuild, this changed only the security group:
+
+```text
+Plan: 0 to add, 1 to change, 0 to destroy.
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+```
+
+After that, Ansible connected normally.
+
+This is a **known manual prerequisite**, not an automatic-IP feature. Do not work around it by opening SSH to `0.0.0.0/0`.
 
 ## Security
 
-The security group (`ca1-pipeline-sg`) is created and fully managed by Terraform — there is no manually-configured firewall rule anywhere in this project. Exactly four inbound rules exist:
+The project keeps the original least-exposure design:
 
-| Port | Protocol | Source | Purpose |
-|---|---|---|---|
-| 22 | TCP | your IP only | SSH |
-| 8080 | TCP | your IP only | REST API |
-| 9092 | TCP | self (security group) | Kafka, VM-to-VM only |
-| 27017 | TCP | self (security group) | MongoDB, VM-to-VM only |
+- SSH and the REST API are exposed only to the operator's `/32`.
+- Kafka and MongoDB are only reachable from the CA1 security group / VMs.
+- MongoDB authentication is enabled using Ansible Vault credentials.
+- The generated private key is written locally with restrictive permissions and is gitignored.
+- Application credentials are not placed directly into Docker command lines.
+- The REST API is managed by systemd and restarts on failure.
 
-Egress is fully open (`0.0.0.0/0`), matching CA0.
+![Security group details](images/security-group-details.png)
+*Original evidence: security-group details.*
 
-![Security group details tab showing 4 inbound / 1 outbound permission entries](images/security-group-details.png)
-*The real security group's Details tab — 4 inbound, 1 outbound, matching the Terraform definition exactly.*
+![Security group inbound rules](images/security-group-inbound-rules.png)
+*Original evidence: inbound rule table.*
 
-![AWS console showing the actual final Security Group's four inbound rules](images/security-group-inbound-rules.png)
-*The real, final `ca1-pipeline-sg` inbound rule table — not the instance-launch wizard.*
-
-![AWS console showing the outbound rule](images/security-group-outbound-rules.png)
-*The single all-traffic egress rule.*
-
-Beyond the firewall:
-- **SSH is key-only.** The key (`ca1-key`, RSA 4096) is generated by Terraform and saved locally with `0400` permissions; nothing is committed to the repo (`*.pem` is gitignored).
-- **Both application containers run as a non-root user** (`appuser`), same as CA0.
-- **MongoDB now requires authentication** — a change from CA0, where Mongo had none. Credentials come from Ansible Vault and are passed to Mongo, the processor, and the REST API as environment variables.
-- **The REST API is a systemd service**, not a manually-started foreground process. It starts on boot (`WantedBy=multi-user.target`) and restarts automatically if it crashes (`Restart=on-failure`) — closing a gap from CA0, where the REST endpoint had to be started by hand after every reboot.
+![Security group outbound rules](images/security-group-outbound-rules.png)
+*Original evidence: outbound rule.*
 
 ## Outputs Summary
 
-Values below are from the most recent full deploy before final teardown; a fresh `terraform apply` will produce new IPs (`terraform output` shows current values at any time).
+The exact public/private IPs change on every fresh deployment, so the README does not treat any example IP as permanent. Use:
 
-- **Kafka topic:** `network-flows`
-- **MongoDB:** `db=ca0`, `collection=flows`, port `27017`, authentication enabled (credentials in `group_vars/all/vault.yml`)
-- **REST endpoints (database VM, port 8080):**
-  - `GET /health` → `{"status": "ok"}`
-  - `GET /alerts` → up to 50 non-`BENIGN` flows as JSON
-- **Example run's public IPs (from the demo video's recording session):** producer `18.219.203.198` · broker `18.226.251.51` · processor `18.118.2.204` · database `3.148.205.149`
-- **Validation results:** all 4 hosts pinged successfully; all 6 Ansible roles completed with `failed=0, unreachable=0`; producer sent 5000/5000 rows; processor logged a climbing `[ALERT]` count reaching 5000; `/health` and `/alerts` both returned correct live data.
+```bash
+cd CA1/terraform
+terraform output public_ips
+terraform output private_ips
+```
+
+Stable pipeline values:
+
+- Kafka topic: `network-flows`
+- Kafka port: `9092`
+- MongoDB: database `ca1`, collection `flows`, port `27017`
+- REST API port: `8080`
+- REST endpoints: `/health`, `/alerts`, `/events/<trace_id>`
+- Project tag: `Project=CA1`
+
+Final post-grading validation results:
+
+- fresh Terraform environment created successfully;
+- first Ansible run succeeded;
+- second full Ansible run reported `changed=0` everywhere;
+- unique-event smoke test returned PASS;
+- Terraform destroyed 14 resources;
+- cleanup scanner returned CLEAN.
 
 ## Deviations From CA0
 
-- **Subnet / AZ differs from CA0.** Terraform's `aws_subnets` data source picked `subnet-0c047edd51dfbe6f8` (AZ `us-east-2a`) rather than CA0's `subnet-0b00ba7301f12884e` (`us-east-2b`) — same default VPC, same connectivity, just a different subnet in the same pool since none was hardcoded.
-- **`aws configure` instead of `aws login`.** Explained under Prerequisites — the Terraform AWS provider doesn't yet recognize `aws login`'s credential format.
-- **MongoDB authentication added.** CA0 had none. `processor.py` and `rest_app.py` were both updated to accept `MONGO_USER`/`MONGO_PASSWORD` and authenticate when they're set, falling back to unauthenticated `MongoClient` only if they're absent (kept for local testing convenience).
-- **REST API runs under systemd**, not as a manually-started foreground process — see Security, above. This directly addresses feedback on CA0 that services "starting on boot" needs to actually be demonstrated, not just claimed.
-- **Every provisioning step is now literal, runnable code.** CA0's grading noted a few setup steps were summarized in prose rather than fully scripted; there's nothing left to summarize here — every install command lives in an Ansible task file.
+- **Dedicated disposable network.** CA0 used existing/default networking; current CA1 creates and destroys its own VPC, subnet, internet gateway, route table, and association.
+- **Configuration is shared across tools.** Topic, ports, DB/collection, dataset, region, project tag, and the Kafka/MongoDB image tags come from one `config.yml` instead of being repeated independently.
+- **Stale application fallback IPs were removed.** Missing required settings fail loudly instead of silently using CA0 addresses.
+- **MongoDB authentication is enabled.** Credentials use Ansible Vault.
+- **REST API runs under systemd.** It is deployed/configured rather than manually started.
+- **Ansible is idempotent.** A second complete run reports `changed=0` when nothing changed.
+- **Validation follows one exact event.** The smoke test checks the Kafka partition/offset, processor trace, database copy, and REST result for the same trace ID.
+- **Cleanup is independently scanned.** Terraform resources carry `Project=CA1`, and `aws_scan.py` checks AWS after destroy.
+
+## Known Limitations
+
+These are intentionally documented instead of being hidden:
+
+1. **Operator IP is manual.** `my_ip_cidr` must be updated when the computer's public IP changes. A stale value blocks SSH/REST until Terraform updates the security group.
+2. **Terraform state is sensitive.** Terraform generates the SSH private key, so the private-key material exists inside local `terraform.tfstate` while the state exists. State and `*.pem` files are gitignored and must be protected like credentials.
+3. **`tag:GetResources` is not allowed for the IAM user.** The cleanup scanner reports that optional cross-service check as `[skip]`; required resource/billing checks still run.
+4. **MongoDB uses its administrative account for the application connections.** A production system would create a least-privilege application user.
+5. **One rendered credential file needs careful handling with Ansible `--diff`.** The MongoDB Compose task renders the real credential on the VM; its permissions protect the file, but the task is not claimed to be safe for verbose secret-revealing diff output.
+6. **REST API authentication is out of scope.** Access is restricted at the security-group level, but the HTTP endpoint itself has no application-layer authentication.
+7. **The 5,000-row demo is not a full-scale benchmark.** It validates correctness, not the entire CICIDS2017-scale workload.
 
 ## Testing / Verification
 
-- [x] `terraform validate` passed after every file was added, incrementally — caught a real syntax error early
-- [x] `terraform plan` / `apply` / `destroy` / `apply` round trip completed — proves reproducibility, not a one-time fluke
-- [x] Final `terraform destroy` run against the fully-configured pipeline (not just bare infra), confirmed empty in the AWS console
-- [x] `ansible all -m ping` — all four hosts reachable
-- [x] All six Ansible roles completed with `failed=0, unreachable=0` in their PLAY RECAPs
-- [x] Ansible Vault confirmed encrypted (AES256), not plaintext
-- [x] Producer replay confirmed: 5000/5000 rows sent
-- [x] Processor confirmed consuming and inserting: climbing `[ALERT]` count to 5000
-- [x] REST API confirmed reachable externally: `/health` and `/alerts` both correct
-- [x] Final Security Group inbound rules independently verified in the AWS console (not the launch wizard)
+- [x] Terraform configuration validated during development
+- [x] Fresh apply from no CA1 infrastructure
+- [x] Terraform-owned VPC/subnet/IGW/route-table lifecycle
+- [x] Ansible first run `failed=0, unreachable=0`
+- [x] Ansible second full run `changed=0` on every host
+- [x] Shared-config change test propagated to the expected consumers and reverted cleanly
+- [x] Applications fail when required settings are missing instead of using stale fallbacks
+- [x] Unique-event end-to-end smoke test PASS
+- [x] Intentional smoke-test failure with processor stopped
+- [x] Ansible repaired the stopped processor and smoke test passed again
+- [x] Positive-control cleanup scan found deployed resources
+- [x] `terraform destroy` removed all 14 resources
+- [x] Post-destroy cleanup scan returned CLEAN
+- [x] Final rebuild-from-nothing repeated apply → Ansible twice → smoke test → destroy → scan
+- [x] Git working tree was clean after the final verification
 
 ## Integrity Packet
 
-See [`integritypacket.md`](./integritypacket.md) for the reasoning behind each major decision (Terraform+Ansible vs. alternatives, the `aws login` trade-off, the MongoDB-auth addition, and more), the AI-assisted work log, and the escalation path for states this automation can't safely resolve on its own.
+See [`integritypacket.md`](./integritypacket.md) for the claim/evidence/assumption/validation/AI-review record, including the idempotency fixes, unique-event proof, cleanup scan, stale-operator-IP failure, and remaining limitations.
