@@ -1,0 +1,16 @@
+# Managed by Ansible (infra/ansible/roles/k3s_server). Edits made here are overwritten on the next run.
+node-name: {{ inventory_hostname }}
+node-ip: {{ node_ip }}
+tls-san:
+  - {{ ansible_host }}
+  - {{ node_ip }}
+# Traefik (an ingress controller) and servicelb (a load balancer) are not used: the REST API is published
+# with a NodePort. Leaving them out means nothing listens on ports 80 and 443.
+disable:
+  - traefik
+  - servicelb
+# Encrypt Kubernetes Secrets at rest in the cluster database.
+secrets-encryption: true
+write-kubeconfig-mode: "0600"
+node-label:
+  - "ca2/role=server"

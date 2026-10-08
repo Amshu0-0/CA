@@ -1,0 +1,60 @@
+---
+# Installs k3s as a Kubernetes agent (worker) and joins it to the server.
+# Every task checks first or is safe to repeat, so a second run reports changed=0.
+
+- name: Find out which k3s version is installed (the output is empty when none is)
+  ansible.builtin.command: /usr/local/bin/k3s --version
+  register: k3s_agent_installed
+  changed_when: false
+  failed_when: false
+
+- name: Read the join token from the server
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_agent_token_file
+  delegate_to: "{{ groups['server'][0] }}"
+  run_once: true
+  no_log: true
+
+- name: Remember the join token (in memory only)
+  ansible.builtin.set_fact:
+    k3s_agent_token: "{{ k3s_agent_token_file.content | b64decode | trim }}"
+  no_log: true
+
+- name: Download the pinned k3s installer (a changed or tampered script fails the checksum)
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version }}/install.sh"
+    dest: /usr/local/bin/k3s-install.sh
+    mode: "0755"
+    checksum: "sha256:{{ k3s_installer_sha256 }}"
+
+- name: Create the k3s configuration folder
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    mode: "0755"
+
+- name: Write the k3s agent configuration (it contains the join token, so only root can read it)
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    mode: "0600"
+  notify: Restart k3s agent
+  no_log: true
+
+- name: Install k3s as an agent and join the cluster (skipped when this exact version is already installed)
+  ansible.builtin.command: /usr/local/bin/k3s-install.sh
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    INSTALL_K3S_EXEC: agent
+  when: k3s_version not in (k3s_agent_installed.stdout | default(''))
+  changed_when: true
+
+- name: Make sure the k3s agent is enabled and running
+  ansible.builtin.systemd_service:
+    name: k3s-agent
+    state: started
+    enabled: true
+
+- name: Apply a changed configuration now
+  ansible.builtin.meta: flush_handlers

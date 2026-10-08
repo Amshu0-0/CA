@@ -300,8 +300,46 @@ for h in hpas:
             fails.append("the target has no CPU request, so the autoscaler cannot compute utilisation")
     judge(G, "HPA " + name(h) + ": " + str(h["spec"]["minReplicas"]) + " to " + str(h["spec"]["maxReplicas"]) + " replicas of " + h["spec"]["scaleTargetRef"]["name"], fails)
 
-# ------------------------------------------------------------ 7. progress against the CA2 assignment
-G = "7. The CA2 assignment, requirement by requirement"
+# ------------------------------------------------------------ 7. the cluster is built by code
+G = "7. Cluster as code (Terraform and Ansible)"
+INFRA = ROOT / "infra"
+infra_ok = False
+if not INFRA.is_dir():
+    todo(G, "Terraform and Ansible build a 3-node Kubernetes cluster", "added in the cluster step")
+else:
+    needed = ["config.yml", "terraform/versions.tf", "terraform/config.tf", "terraform/network.tf", "terraform/security.tf",
+              "terraform/compute.tf", "terraform/outputs.tf", "terraform/inventory.tpl", "ansible/ansible.cfg", "ansible/site.yml",
+              "ansible/roles/k3s_server/tasks/main.yml", "ansible/roles/k3s_server/templates/config.yaml.j2",
+              "ansible/roles/k3s_agent/tasks/main.yml", "ansible/roles/k3s_agent/templates/config.yaml.j2"]
+    missing = ["infra/" + n for n in needed if not (INFRA / n).is_file()]
+    judge(G, "Terraform (network, security, compute) and Ansible (server and agent roles) are all present", ["missing " + m for m in missing])
+    try:
+        icfg = yaml.safe_load((INFRA / "config.yml").read_text()) or {}
+    except (OSError, yaml.YAMLError):
+        icfg = {}
+    fails = [k + " is missing from infra/config.yml" for k in ("region", "vpc_cidr", "subnet_cidr", "instance_type", "project_tag", "admin_cidr", "k3s_version") if not icfg.get(k)]
+    if int(icfg.get("agent_count", 0) or 0) < 2:
+        fails.append("agent_count is " + str(icfg.get("agent_count")) + ": the assignment needs at least 3 nodes (1 server and 2 agents)")
+    node_ports = [p.get("nodePort") for p in services.get("restapi", {}).get("spec", {}).get("ports", [])]
+    if icfg.get("rest_node_port") not in node_ports:
+        fails.append("rest_node_port " + str(icfg.get("rest_node_port")) + " is not the restapi Service nodePort " + str(node_ports) + ": the firewall would block the REST API")
+    if not re.fullmatch(r"v\d+\.\d+\.\d+\+k3s\d+", str(icfg.get("k3s_version", ""))):
+        fails.append("k3s_version must be a pinned release such as v1.37.1+k3s1")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(icfg.get("k3s_installer_sha256", ""))):
+        fails.append("k3s_installer_sha256 must be the 64-character checksum of the pinned installer")
+    judge(G, "infra/config.yml: 3 nodes, REST node port equals the Service, k3s release and installer checksum pinned", fails)
+    stray = []
+    code_files = sorted((INFRA / "terraform").glob("*.tf")) + [INFRA / "terraform" / "inventory.tpl"] + sorted((INFRA / "ansible").rglob("*.yml")) + sorted((INFRA / "ansible").rglob("*.j2"))
+    for f in code_files:
+        if f.is_file():
+            stray += [str(f.relative_to(ROOT)) + ": " + ip for ip in re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", f.read_text()) if ip not in ("0.0.0.0", "127.0.0.1")]
+    judge(G, "no IP address is written into the Terraform or Ansible code (everything comes from config.yml or AWS)", stray)
+    ignored = {line.strip() for line in ((ROOT / ".gitignore").read_text().splitlines() if (ROOT / ".gitignore").exists() else [])}
+    judge(G, "keys, Terraform state and the generated inventory cannot be committed (.gitignore)", [x + " is not a line in .gitignore" for x in (".secrets/", "infra/terraform/*.tfstate", "infra/ansible/inventory.ini") if x not in ignored])
+    infra_ok = all(row[0] == "PASS" for row in rows if row[1] == G)
+
+# ------------------------------------------------------------ 8. progress against the CA2 assignment
+G = "8. The CA2 assignment, requirement by requirement"
 makefile = (ROOT / "Makefile").read_text() if (ROOT / "Makefile").exists() else ""
 has = lambda k, n: (k, n) in by
 checks = [
@@ -315,6 +353,7 @@ checks = [
     ("Only the necessary ports are exposed", published == ["restapi"], False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
     ("Dockerfiles and a registry push for the three custom images", all((ROOT / c / "Dockerfile").exists() for c in ("producer", "processor", "restapi")) and workflow.exists(), False),
+    ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),
     ("NetworkPolicy restricting traffic between services", bool(policies), True),
     ("RBAC: a Role and a RoleBinding", bool(roles) and bool(of("RoleBinding")), True),
     ("HorizontalPodAutoscaler for the producers (1 to N)", any(h["spec"]["scaleTargetRef"]["name"].startswith("producer") for h in hpas), True),

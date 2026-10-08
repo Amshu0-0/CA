@@ -1,0 +1,47 @@
+# Settings for the CA2 cluster. This is the one place these values are written down:
+# Terraform reads this file (the AWS resources), Ansible reads it (k3s), and "make verify" checks it.
+# Nothing here is a secret. Keys and credentials live in .secrets/ and are never committed.
+#
+# Change a value here, then run "make cluster-up". It is safe to run again.
+
+# Naming and tagging. Every AWS resource gets the tag Project=<project_tag>.
+# The cleanup scan searches for that tag after "make cluster-down".
+project_tag: CS5287-CA2
+name_prefix: ca2
+
+# Where in AWS. An empty availability_zone means: the first available zone in the region.
+region: us-east-2
+availability_zone: ""
+
+# The private network that Terraform creates and destroys for this cluster.
+# It must not overlap k3s's own pod range (10.42.0.0/16) or service range (10.43.0.0/16).
+vpc_cidr: 10.20.0.0/16
+subnet_cidr: 10.20.1.0/24
+
+# The machines: one k3s server (the control plane) plus agent_count workers, so 3 nodes in total.
+# t3.medium has 2 vCPU and 4 GiB of memory, enough for Kafka, MongoDB, the processor and the REST API.
+instance_type: t3.medium
+root_volume_gb: 30
+agent_count: 2
+ssh_user: ubuntu
+
+# An empty ami_id means: the newest Ubuntu 24.04 LTS image from Canonical.
+# Set an ami-... id here to pin the exact image.
+ami_id: ""
+
+# Who may connect.
+# admin_cidr "auto" means the public IP address of the computer running this code, looked up on every
+# run, so nobody edits an address by hand. Or give a fixed range such as 203.0.113.7/32.
+admin_cidr: auto
+# Who may call the REST API: "admin" means the same address as admin_cidr.
+# Use 0.0.0.0/0 to let anyone call it, for example while the instructor tests it.
+rest_api_cidr: admin
+# The node port that publishes the REST API. It must equal nodePort in restapi/restapi.yaml
+# ("make verify" checks that they match).
+rest_node_port: 30080
+
+# Kubernetes (k3s). The installer script is pinned to this release and to this checksum, so a changed
+# or tampered script stops the run. To upgrade: change k3s_version, then replace the checksum with
+#   curl -sL https://raw.githubusercontent.com/k3s-io/k3s/<version>/install.sh | sha256sum
+k3s_version: v1.37.1+k3s1
+k3s_installer_sha256: ed01f89fd977bf20ac1516bbebf8370bf3ddbaa55dac8aba610956a4c78cc00b

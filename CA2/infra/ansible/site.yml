@@ -1,0 +1,96 @@
+---
+# Builds the CA2 Kubernetes cluster on the three machines Terraform created:
+# one k3s server (the control plane) and two agents (the workers).
+# Every task checks first or is safe to repeat, so a second run reports changed=0.
+
+- name: Wait until every machine accepts SSH
+  hosts: k3s
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH to come up on the new machine
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+- name: Install the k3s server (control plane)
+  hosts: server
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../config.yml
+  roles:
+    - k3s_server
+  handlers:
+    - name: Restart k3s
+      ansible.builtin.systemd_service:
+        name: k3s
+        state: restarted
+
+- name: Install the k3s agents (workers) and join them to the server
+  hosts: agents
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../config.yml
+  roles:
+    - k3s_agent
+  handlers:
+    - name: Restart k3s agent
+      ansible.builtin.systemd_service:
+        name: k3s-agent
+        state: restarted
+
+- name: Check the cluster and save the kubeconfig on this computer
+  hosts: server
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../config.yml
+  tasks:
+    - name: Wait until every node has joined and is Ready
+      ansible.builtin.shell: set -o pipefail && /usr/local/bin/k3s kubectl get nodes --no-headers | grep -c ' Ready'
+      args:
+        executable: /bin/bash
+      register: ready_nodes
+      until: ready_nodes.stdout | int == groups['k3s'] | length
+      retries: 40
+      delay: 6
+      changed_when: false
+      failed_when: false
+
+    - name: Label the agents as workers (this fills the ROLES column of kubectl get nodes)
+      ansible.builtin.command: /usr/local/bin/k3s kubectl label node {{ item }} node-role.kubernetes.io/worker= --overwrite
+      loop: "{{ groups['agents'] }}"
+      register: label_result
+      changed_when: "'not labeled' not in label_result.stdout"
+
+    - name: Read the admin kubeconfig from the server
+      ansible.builtin.slurp:
+        src: /etc/rancher/k3s/k3s.yaml
+      register: kubeconfig_raw
+      no_log: true
+
+    - name: Make sure the .secrets folder exists on this computer
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../../.secrets"
+        state: directory
+        mode: "0700"
+      delegate_to: localhost
+      become: false
+
+    # k3s writes a kubeconfig that points at 127.0.0.1 and names everything "default".
+    # The copy points at the server public address and uses the name ca2-k3s, so kubectl config get-contexts is readable.
+    - name: Save the kubeconfig on this computer
+      ansible.builtin.copy:
+        content: >-
+          {{ kubeconfig_raw.content | b64decode
+          | replace('https://127.0.0.1:6443', 'https://' ~ ansible_host ~ ':6443')
+          | replace(': default', ': ca2-k3s') }}
+        dest: "{{ playbook_dir }}/../../.secrets/kubeconfig.yaml"
+        mode: "0600"
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Show how to use the new cluster
+      ansible.builtin.debug:
+        msg: "{{ groups['k3s'] | length }} nodes are Ready. The kubeconfig is CA2/.secrets/kubeconfig.yaml (make cluster-status uses it)."

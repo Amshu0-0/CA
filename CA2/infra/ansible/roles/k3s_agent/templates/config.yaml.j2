@@ -1,0 +1,7 @@
+# Managed by Ansible (infra/ansible/roles/k3s_agent). Edits made here are overwritten on the next run.
+node-name: {{ inventory_hostname }}
+node-ip: {{ node_ip }}
+server: https://{{ hostvars[groups['server'][0]].node_ip }}:6443
+token: "{{ k3s_agent_token }}"
+node-label:
+  - "ca2/role=agent"

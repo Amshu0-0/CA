@@ -1,3 +1,10 @@
 .secrets/
 __pycache__/
 .DS_Store
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/crash.log
+infra/ansible/inventory.ini
+infra/ansible/known_hosts
+infra/ansible/*.retry

@@ -1,0 +1,8 @@
+bash scripts/make-key.sh
+Created SSH key: .secrets/ca2-key (private) and .secrets/ca2-key.pub (public)
+terraform -chdir=infra/terraform init -input=false > /dev/null && terraform -chdir=infra/terraform fmt -check -recursive && terraform -chdir=infra/terraform validate && \
+    cd infra/ansible && ansible-playbook -i syntax-inventory.ini --syntax-check site.yml
+Success! The configuration is valid.
+
+
+playbook: site.yml
