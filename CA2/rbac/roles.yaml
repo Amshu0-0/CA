@@ -1,0 +1,118 @@
+# Role-Based Access Control: WHO may do WHAT to WHICH resources, inside this namespace only.
+# A Role lists permissions. A RoleBinding gives a Role to a ServiceAccount.
+# There is no rule that allows "secrets" anywhere: nobody who uses these accounts can read the MongoDB password.
+# Proof (make rbac-check):  kubectl auth can-i get secrets --as=system:serviceaccount:ca2:pipeline-operator -n ca2   -> no
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-viewer
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: pipeline-viewer
+    app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Read-only access to the pipeline"
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-operator
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: pipeline-operator
+    app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Can run the producer and scale the pipeline, but cannot read Secrets"
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-viewer
+  namespace: ca2
+  labels:
+    app.kubernetes.io/part-of: ca2-pipeline
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-operator
+  namespace: ca2
+  labels:
+    app.kubernetes.io/part-of: ca2-pipeline
+rules:
+  # Everything the viewer can read...
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
+  # ...plus: start and remove producer replay jobs, and change the replica count of a Deployment.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pipeline-viewer
+  namespace: ca2
+  labels:
+    app.kubernetes.io/part-of: ca2-pipeline
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-viewer
+    namespace: ca2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-viewer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pipeline-operator
+  namespace: ca2
+  labels:
+    app.kubernetes.io/part-of: ca2-pipeline
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-operator
+    namespace: ca2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-operator

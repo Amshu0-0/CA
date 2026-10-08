@@ -72,6 +72,9 @@ spec:
       initContainers:
         - name: wait-for-kafka-and-mongo
           image: busybox:1.36
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}
           command:
             - sh
             - -c

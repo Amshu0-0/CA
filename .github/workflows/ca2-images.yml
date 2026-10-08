@@ -9,9 +9,16 @@ on:
   push:
     branches: [main]
     paths:
-      - "CA2/producer/**"
-      - "CA2/processor/**"
-      - "CA2/restapi/**"
+      - "CA2/producer/Dockerfile"
+      - "CA2/producer/requirements.txt"
+      - "CA2/producer/producer.py"
+      - "CA2/producer/*.csv"
+      - "CA2/processor/Dockerfile"
+      - "CA2/processor/requirements.txt"
+      - "CA2/processor/processor.py"
+      - "CA2/restapi/Dockerfile"
+      - "CA2/restapi/requirements.txt"
+      - "CA2/restapi/rest_app.py"
       - "CA2/VERSION"
       - ".github/workflows/ca2-images.yml"
   workflow_dispatch:

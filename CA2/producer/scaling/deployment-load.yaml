@@ -1,0 +1,80 @@
+# Producer load generator for the scaling demonstration (applied with "make scale-up", removed with "make scale-down").
+# Unlike the one-off Job, this is a Deployment that replays the dataset forever (REPLAY_FOREVER=true), so each replica
+# keeps the CPU busy and keeps sending. The HorizontalPodAutoscaler in hpa.yaml adds replicas while the CPU is busy.
+# It is kept out of the normal "make up" so a deployment does not fill the database with test traffic.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer-load
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: producer
+    app.kubernetes.io/component: load-generator
+    app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Continuous producer for the scaling test; replica count is managed by the HorizontalPodAutoscaler"
+spec:
+  # No "replicas": the HorizontalPodAutoscaler owns it (starts at 1).
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: producer
+      app.kubernetes.io/component: load-generator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: producer
+        app.kubernetes.io/component: load-generator
+        app.kubernetes.io/part-of: ca2-pipeline
+    spec:
+      serviceAccountName: producer
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # Spread the replicas over different nodes when possible, so the scale-up really uses the whole cluster.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: producer
+              app.kubernetes.io/component: load-generator
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z -w 2 kafka 9092; do echo waiting for kafka; sleep 3; done"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+      containers:
+        - name: producer
+          image: ghcr.io/amshu0-0/ca2-producer:1.0.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: pipeline-config
+          env:
+            - name: REPLAY_FOREVER
+              value: "true"
+          # Each replica may use up to 5 times its CPU request, so a busy producer pushes the average utilisation
+          # far above the autoscaler's target and the scale-up starts quickly.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

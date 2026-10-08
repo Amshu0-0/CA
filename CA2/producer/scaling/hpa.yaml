@@ -1,0 +1,39 @@
+# Horizontal Pod Autoscaler for the producers: scales the load generator from 1 up to 5 replicas.
+# Target: average CPU at 50% of the request. A producer in a tight loop is far above that, so the autoscaler
+# adds replicas (up to doubling every 15 seconds) until the maximum, and removes them again after the load stops.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: producer-load
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: producer
+    app.kubernetes.io/component: autoscaler
+    app.kubernetes.io/part-of: ca2-pipeline
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: producer-load
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30

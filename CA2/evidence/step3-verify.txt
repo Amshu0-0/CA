@@ -1,0 +1,64 @@
+python3 scripts/verify_manifests.py
+CA2 manifest check: 37 objects rendered by kubectl kustomize (11 NetworkPolicy, 7 ServiceAccount, 6 Service, 2 Role, 2 RoleBinding, 2 ConfigMap, 2 Deployment, 2 StatefulSet, 1 Namespace, 1 HorizontalPodAutoscaler, 1 Job)
+
+1. Every workload (Deployment, StatefulSet, Job)
+  PASS  processor (Deployment)
+  PASS  restapi (Deployment)
+  PASS  producer-load (Deployment)
+  PASS  kafka (StatefulSet)
+  PASS  mongo (StatefulSet)
+  PASS  producer-replay (Job)
+
+2. Every Service
+  PASS  kafka (ClusterIP)
+  PASS  kafka-headless (ClusterIP, headless)
+  PASS  mongo (ClusterIP)
+  PASS  mongo-headless (ClusterIP, headless)
+  PASS  processor (ClusterIP)
+  PASS  restapi (NodePort)
+  PASS  kafka StatefulSet names a headless Service
+  PASS  mongo StatefulSet names a headless Service
+  PASS  only the REST API is published to the outside
+
+3. Kafka and MongoDB
+  PASS  Kafka: KRaft settings and a PersistentVolumeClaim
+  PASS  Kafka: at least 3 partitions, so the processor can scale to 3 replicas
+  PASS  MongoDB: password from a mounted file, and a PersistentVolumeClaim
+
+4. Each program gets everything it requires
+  PASS  processor/processor.py in processor: 8 settings + 2 secret files
+  PASS  producer/producer.py in producer-replay: 3 settings + 0 secret files
+  PASS  producer/producer.py in producer-load: 3 settings + 0 secret files
+  PASS  restapi/rest_app.py in restapi: 5 settings + 2 secret files
+  PASS  ConfigMap values match the Services, ports, dataset and database name
+
+5. Images and registry
+  PASS  producer: Dockerfile, pinned requirements, image tag equals VERSION
+  PASS  processor: Dockerfile, pinned requirements, image tag equals VERSION
+  PASS  restapi: Dockerfile, pinned requirements, image tag equals VERSION
+  PASS  GitHub Actions workflow builds and pushes all three images
+
+6. Network rules, access rules and autoscalers
+  PASS  11 NetworkPolicies: every selector matches a real pod
+  PASS  default-deny-all: no pod accepts or sends traffic unless a policy allows it
+  PASS  2 Roles, 2 RoleBindings: none can read Secrets, all bindings resolve
+  PASS  HPA processor: 1 to 3 replicas of processor
+  PASS  HPA producer-load: 1 to 5 replicas of producer-load
+
+7. The CA2 assignment, requirement by requirement
+  PASS  Kafka: StatefulSet + PVC + Service (KRaft)
+  PASS  Database: StatefulSet + PVC + Service
+  PASS  Processor: Deployment + ConfigMap + Secret + ClusterIP Service
+  PASS  Producer: Job for a one-off replay
+  PASS  ConfigMaps and a Secret for settings and credentials
+  PASS  A REST endpoint declared and exposed
+  PASS  Secrets mounted, not embedded in manifests
+  PASS  Only the necessary ports are exposed
+  PASS  One command to apply the stack and one to delete it (make up / make down)
+  PASS  Dockerfiles and a registry push for the three custom images
+  PASS  NetworkPolicy restricting traffic between services
+  PASS  RBAC: a Role and a RoleBinding
+  PASS  HorizontalPodAutoscaler for the producers (1 to N)
+  PASS  HorizontalPodAutoscaler for the processor (optional elasticity)
+
+RESULT: 46 passed, 0 failed, 0 warnings, 0 still to do (later steps)

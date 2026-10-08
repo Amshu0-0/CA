@@ -1,12 +1,17 @@
+# One entry point for the whole stack:   kubectl apply -k .        (and   kubectl delete -k .   to remove it)
+# Kustomize is built into kubectl. It reads this list, collects all the manifests, and applies them together.
+# The scaling manifests in producer/scaling/ are not listed: "make scale-up" applies them on demand.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 resources:
   - namespace.yaml
+  - policies/networkpolicies.yaml
   - config/pipeline-config.yaml
   - rbac/serviceaccounts.yaml
+  - rbac/roles.yaml
   - db/mongo.yaml
   - kafka/kafka.yaml
   - processor/processor.yaml
+  - processor/hpa.yaml
   - restapi/restapi.yaml
   - producer/job-replay.yaml
