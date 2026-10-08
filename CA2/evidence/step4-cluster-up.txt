@@ -1,0 +1,911 @@
+bash scripts/make-key.sh
+SSH key already exists: .secrets/ca2-key
+terraform -chdir=infra/terraform init -input=false > /dev/null && \
+    terraform -chdir=infra/terraform apply -input=false -auto-approve && \
+    terraform -chdir=infra/terraform output -raw ansible_inventory > infra/ansible/inventory.ini && \
+    cd infra/ansible && ansible-playbook site.yml && \
+    echo "Cluster is up. Next: make up   (the kubeconfig is ~/Desktop/CA/CA2/.secrets/kubeconfig.yaml)"
+data.http.my_ip[0]: Reading...
+data.http.my_ip[0]: Read complete after 0s [id=https://checkip.amazonaws.com]
+data.aws_availability_zones.available[0]: Reading...
+data.aws_ami.ubuntu[0]: Reading...
+data.aws_availability_zones.available[0]: Read complete after 1s [id=us-east-2]
+data.aws_ami.ubuntu[0]: Read complete after 1s [id=ami-09519cc56eb20524a]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_default_security_group.default will be created
+  + resource "aws_default_security_group" "default" {
+      + arn                    = (known after apply)
+      + description            = (known after apply)
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = (known after apply)
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + region                 = "us-east-2"
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "ca2-default-locked"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-default-locked"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_instance.agent[0] will be created
+  + resource "aws_instance" "agent" {
+      + ami                                  = "ami-09519cc56eb20524a"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = true
+      + availability_zone                    = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + force_destroy                        = false
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.medium"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "ca2-key"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_group_id                   = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + region                               = "us-east-2"
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Name" = "ca2-agent-1"
+          + "Role" = "k3s-agent"
+        }
+      + tags_all                             = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-agent-1"
+          + "Project"    = "CS5287-CA2"
+          + "Role"       = "k3s-agent"
+        }
+      + tenancy                              = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + volume_tags                          = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-agent-1-root"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface (known after apply)
+
+      + primary_network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 30
+          + volume_type           = "gp3"
+        }
+
+      + secondary_network_interface (known after apply)
+    }
+
+  # aws_instance.agent[1] will be created
+  + resource "aws_instance" "agent" {
+      + ami                                  = "ami-09519cc56eb20524a"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = true
+      + availability_zone                    = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + force_destroy                        = false
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.medium"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "ca2-key"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_group_id                   = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + region                               = "us-east-2"
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Name" = "ca2-agent-2"
+          + "Role" = "k3s-agent"
+        }
+      + tags_all                             = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-agent-2"
+          + "Project"    = "CS5287-CA2"
+          + "Role"       = "k3s-agent"
+        }
+      + tenancy                              = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + volume_tags                          = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-agent-2-root"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface (known after apply)
+
+      + primary_network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 30
+          + volume_type           = "gp3"
+        }
+
+      + secondary_network_interface (known after apply)
+    }
+
+  # aws_instance.server will be created
+  + resource "aws_instance" "server" {
+      + ami                                  = "ami-09519cc56eb20524a"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = true
+      + availability_zone                    = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + force_destroy                        = false
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.medium"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "ca2-key"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_group_id                   = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + region                               = "us-east-2"
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Name" = "ca2-server"
+          + "Role" = "k3s-server"
+        }
+      + tags_all                             = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-server"
+          + "Project"    = "CS5287-CA2"
+          + "Role"       = "k3s-server"
+        }
+      + tenancy                              = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + volume_tags                          = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-server-root"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface (known after apply)
+
+      + primary_network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 30
+          + volume_type           = "gp3"
+        }
+
+      + secondary_network_interface (known after apply)
+    }
+
+  # aws_internet_gateway.main will be created
+  + resource "aws_internet_gateway" "main" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + region   = "us-east-2"
+      + tags     = {
+          + "Name" = "ca2-igw"
+        }
+      + tags_all = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-igw"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_key_pair.cluster will be created
+  + resource "aws_key_pair" "cluster" {
+      + arn             = (known after apply)
+      + fingerprint     = (known after apply)
+      + id              = (known after apply)
+      + key_name        = "ca2-key"
+      + key_name_prefix = (known after apply)
+      + key_pair_id     = (known after apply)
+      + key_type        = (known after apply)
+      + public_key      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINJ6h+WQzx4sdTQqiD+jQo5DxSaE2AorywWM6upbFREi ca2-cluster"
+      + region          = "us-east-2"
+      + tags_all        = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Project"    = "CS5287-CA2"
+        }
+    }
+
+  # aws_route_table.public will be created
+  + resource "aws_route_table" "public" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + region           = "us-east-2"
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + gateway_id                 = (known after apply)
+                # (12 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "ca2-public-rt"
+        }
+      + tags_all         = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-public-rt"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.nodes will be created
+  + resource "aws_route_table_association" "nodes" {
+      + id             = (known after apply)
+      + region         = "us-east-2"
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_security_group.cluster will be created
+  + resource "aws_security_group" "cluster" {
+      + arn                    = (known after apply)
+      + description            = "CA2 k3s cluster: admin access from one address, node-to-node traffic only inside the group"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "ca2-cluster"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + region                 = "us-east-2"
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "ca2-cluster-sg"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-cluster-sg"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_subnet.nodes will be created
+  + resource "aws_subnet" "nodes" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-2a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.20.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block                                = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + region                                         = "us-east-2"
+      + tags                                           = {
+          + "Name" = "ca2-nodes-subnet"
+        }
+      + tags_all                                       = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-nodes-subnet"
+          + "Project"    = "CS5287-CA2"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.main will be created
+  + resource "aws_vpc" "main" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.20.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + region                               = "us-east-2"
+      + tags                                 = {
+          + "Name" = "ca2-vpc"
+        }
+      + tags_all                             = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-vpc"
+          + "Project"    = "CS5287-CA2"
+        }
+    }
+
+  # aws_vpc_security_group_egress_rule.all_out will be created
+  + resource "aws_vpc_security_group_egress_rule" "all_out" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "Outbound: image pulls, package downloads and the k3s installer"
+      + id                     = (known after apply)
+      + ip_protocol            = "-1"
+      + region                 = "us-east-2"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Name" = "ca2-all-out"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-all-out"
+          + "Project"    = "CS5287-CA2"
+        }
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["flannel"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      + arn                          = (known after apply)
+      + description                  = "pod-to-pod traffic between nodes (VXLAN overlay network)"
+      + from_port                    = 8472
+      + id                           = (known after apply)
+      + ip_protocol                  = "udp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-2"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Name" = "ca2-flannel"
+        }
+      + tags_all                     = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-flannel"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                      = 8472
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kube_api"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      + arn                          = (known after apply)
+      + description                  = "agents talk to the Kubernetes API on the server"
+      + from_port                    = 6443
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-2"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Name" = "ca2-kube_api"
+        }
+      + tags_all                     = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-kube_api"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                      = 6443
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kubelet"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      + arn                          = (known after apply)
+      + description                  = "the control plane and metrics-server read each node kubelet"
+      + from_port                    = 10250
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-2"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Name" = "ca2-kubelet"
+        }
+      + tags_all                     = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-kubelet"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                      = 10250
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["ping"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      + arn                          = (known after apply)
+      + description                  = "ping, for troubleshooting"
+      + from_port                    = -1
+      + id                           = (known after apply)
+      + ip_protocol                  = "icmp"
+      + referenced_security_group_id = (known after apply)
+      + region                       = "us-east-2"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags                         = {
+          + "Name" = "ca2-ping"
+        }
+      + tags_all                     = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-ping"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                      = -1
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["kube_api"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "<my-ip>/32"
+      + description            = "Kubernetes API, used by kubectl on the admin computer"
+      + from_port              = 6443
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-2"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Name" = "ca2-kube_api"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-kube_api"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                = 6443
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["rest_api"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "<my-ip>/32"
+      + description            = "REST API node port: the one application port that is published"
+      + from_port              = 30080
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-2"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Name" = "ca2-rest_api"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-rest_api"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                = 30080
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["ssh"] will be created
+  + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "<my-ip>/32"
+      + description            = "SSH, used by Ansible and for debugging"
+      + from_port              = 22
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + region                 = "us-east-2"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags                   = {
+          + "Name" = "ca2-ssh"
+        }
+      + tags_all               = {
+          + "Assignment" = "CA2"
+          + "Course"     = "CS5287"
+          + "ManagedBy"  = "terraform"
+          + "Name"       = "ca2-ssh"
+          + "Project"    = "CS5287-CA2"
+        }
+      + to_port                = 22
+    }
+
+Plan: 19 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + admin_cidr_in_use = "<my-ip>/32"
+  + agent_public_ips  = [
+      + (known after apply),
+      + (known after apply),
+    ]
+  + ami_in_use        = "ami-09519cc56eb20524a"
+  + ansible_inventory = (known after apply)
+  + server_public_ip  = (known after apply)
+  + vpc_id            = (known after apply)
+aws_key_pair.cluster: Creating...
+aws_vpc.main: Creating...
+aws_key_pair.cluster: Creation complete after 0s [id=ca2-key]
+aws_vpc.main: Creation complete after 2s [id=vpc-09c0c70cf0d12dcaf]
+aws_internet_gateway.main: Creating...
+aws_subnet.nodes: Creating...
+aws_default_security_group.default: Creating...
+aws_security_group.cluster: Creating...
+aws_internet_gateway.main: Creation complete after 1s [id=igw-07e1820b3897800a3]
+aws_route_table.public: Creating...
+aws_default_security_group.default: Creation complete after 2s [id=sg-04d5745ee4feb4b9a]
+aws_route_table.public: Creation complete after 1s [id=rtb-0711d6eaf176db4e0]
+aws_security_group.cluster: Creation complete after 2s [id=sg-062e19ab54de33216]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creating...
+aws_vpc_security_group_egress_rule.all_out: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creating...
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creating...
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creating...
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Creating...
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creation complete after 1s [id=sgr-0b3f77041f8ac47a9]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creation complete after 1s [id=sgr-0b12c2994cad3ae7e]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creation complete after 1s [id=sgr-0a4d2524120321ede]
+aws_vpc_security_group_egress_rule.all_out: Creation complete after 1s [id=sgr-02694ec86e433d37f]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creation complete after 1s [id=sgr-0ae60196543b02774]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creation complete after 1s [id=sgr-08dcb49592f619e53]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Creation complete after 1s [id=sgr-0cb1772efa901c4b4]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Creation complete after 1s [id=sgr-01ca25c8cf16af21f]
+aws_subnet.nodes: Still creating... [00m10s elapsed]
+aws_subnet.nodes: Creation complete after 11s [id=subnet-0cf1aeced01dd7505]
+aws_route_table_association.nodes: Creating...
+aws_instance.agent[1]: Creating...
+aws_instance.server: Creating...
+aws_instance.agent[0]: Creating...
+aws_route_table_association.nodes: Creation complete after 1s [id=rtbassoc-0bc3db69a68621970]
+aws_instance.server: Still creating... [00m10s elapsed]
+aws_instance.agent[1]: Still creating... [00m10s elapsed]
+aws_instance.agent[0]: Still creating... [00m10s elapsed]
+aws_instance.agent[0]: Creation complete after 14s [id=i-074ab403abcd13948]
+aws_instance.server: Creation complete after 14s [id=i-031f2854c1257ab81]
+aws_instance.agent[1]: Creation complete after 14s [id=i-0e17d2fe8fe7eae8e]
+
+Apply complete! Resources: 19 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+admin_cidr_in_use = "<my-ip>/32"
+agent_public_ips = [
+  "3.142.133.3",
+  "3.138.36.122",
+]
+ami_in_use = "ami-09519cc56eb20524a"
+ansible_inventory = <<EOT
+# Generated by Terraform ("make cluster-up"). Do not edit: it is rewritten on every run.
+[server]
+ca2-server ansible_host=18.190.241.16 node_ip=10.20.1.180
+
+[agents]
+ca2-agent-1 ansible_host=3.142.133.3 node_ip=10.20.1.181
+ca2-agent-2 ansible_host=3.138.36.122 node_ip=10.20.1.135
+
+[k3s:children]
+server
+agents
+
+[k3s:vars]
+ansible_user=ubuntu
+ansible_ssh_private_key_file=~/Desktop/CA/CA2/.secrets/ca2-key
+
+EOT
+server_public_ip = "18.190.241.16"
+vpc_id = "vpc-09c0c70cf0d12dcaf"
+
+PLAY [Wait until every machine accepts SSH] ************************************
+
+TASK [Wait for SSH to come up on the new machine] ******************************
+ok: [ca2-agent-2]
+ok: [ca2-server]
+ok: [ca2-agent-1]
+
+PLAY [Install the k3s server (control plane)] **********************************
+
+TASK [k3s_server : Find out which k3s version is installed (the output is empty when none is)] ***
+ok: [ca2-server]
+
+TASK [k3s_server : Download the pinned k3s installer (a changed or tampered script fails the checksum)] ***
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the correct permissions manually
+changed: [ca2-server]
+
+TASK [k3s_server : Create the k3s configuration folder] ************************
+changed: [ca2-server]
+
+TASK [k3s_server : Write the k3s server configuration] *************************
+changed: [ca2-server]
+
+TASK [k3s_server : Install k3s and start it (skipped when this exact version is already installed)] ***
+changed: [ca2-server]
+
+TASK [k3s_server : Make sure k3s is enabled and running] ***********************
+ok: [ca2-server]
+
+TASK [k3s_server : Apply a changed configuration now, before anything waits on the API] ***
+
+RUNNING HANDLER [Restart k3s] **************************************************
+changed: [ca2-server]
+
+TASK [k3s_server : Wait until the Kubernetes API is ready] *********************
+ok: [ca2-server]
+
+PLAY [Install the k3s agents (workers) and join them to the server] ************
+
+TASK [k3s_agent : Find out which k3s version is installed (the output is empty when none is)] ***
+ok: [ca2-agent-2]
+ok: [ca2-agent-1]
+
+TASK [k3s_agent : Read the join token from the server] *************************
+ok: [ca2-agent-1 -> ca2-server]
+
+TASK [k3s_agent : Remember the join token (in memory only)] ********************
+ok: [ca2-agent-2]
+ok: [ca2-agent-1]
+
+TASK [k3s_agent : Download the pinned k3s installer (a changed or tampered script fails the checksum)] ***
+changed: [ca2-agent-2]
+changed: [ca2-agent-1]
+
+TASK [k3s_agent : Create the k3s configuration folder] *************************
+changed: [ca2-agent-2]
+changed: [ca2-agent-1]
+
+TASK [k3s_agent : Write the k3s agent configuration (it contains the join token, so only root can read it)] ***
+changed: [ca2-agent-1]
+changed: [ca2-agent-2]
+
+TASK [k3s_agent : Install k3s as an agent and join the cluster (skipped when this exact version is already installed)] ***
+changed: [ca2-agent-2]
+changed: [ca2-agent-1]
+
+TASK [k3s_agent : Make sure the k3s agent is enabled and running] **************
+ok: [ca2-agent-2]
+ok: [ca2-agent-1]
+
+TASK [k3s_agent : Apply a changed configuration now] ***************************
+
+TASK [k3s_agent : Apply a changed configuration now] ***************************
+
+RUNNING HANDLER [Restart k3s agent] ********************************************
+changed: [ca2-agent-2]
+changed: [ca2-agent-1]
+
+PLAY [Check the cluster and save the kubeconfig on this computer] **************
+
+TASK [Wait until every node has joined and is Ready] ***************************
+ok: [ca2-server]
+
+TASK [Label the agents as workers (this fills the ROLES column of kubectl get nodes)] ***
+changed: [ca2-server] => (item=ca2-agent-1)
+changed: [ca2-server] => (item=ca2-agent-2)
+
+TASK [Read the admin kubeconfig from the server] *******************************
+ok: [ca2-server]
+
+TASK [Make sure the .secrets folder exists on this computer] *******************
+ok: [ca2-server -> localhost]
+
+TASK [Save the kubeconfig on this computer] ************************************
+changed: [ca2-server -> localhost]
+
+TASK [Show how to use the new cluster] *****************************************
+ok: [ca2-server] => {
+    "msg": "3 nodes are Ready. The kubeconfig is CA2/.secrets/kubeconfig.yaml (make cluster-status uses it)."
+}
+
+PLAY RECAP *********************************************************************
+ca2-agent-1                : ok=10   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ca2-agent-2                : ok=9    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ca2-server                 : ok=15   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Cluster is up. Next: make up   (the kubeconfig is ~/Desktop/CA/CA2/.secrets/kubeconfig.yaml)

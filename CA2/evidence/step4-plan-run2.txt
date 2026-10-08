@@ -1,0 +1,33 @@
+bash scripts/make-key.sh
+SSH key already exists: .secrets/ca2-key
+terraform -chdir=infra/terraform init -input=false > /dev/null && terraform -chdir=infra/terraform plan -input=false
+data.http.my_ip[0]: Reading...
+data.http.my_ip[0]: Read complete after 0s [id=https://checkip.amazonaws.com]
+data.aws_availability_zones.available[0]: Reading...
+data.aws_ami.ubuntu[0]: Reading...
+aws_vpc.main: Refreshing state... [id=vpc-09c0c70cf0d12dcaf]
+aws_key_pair.cluster: Refreshing state... [id=ca2-key]
+data.aws_availability_zones.available[0]: Read complete after 1s [id=us-east-2]
+data.aws_ami.ubuntu[0]: Read complete after 1s [id=ami-09519cc56eb20524a]
+aws_internet_gateway.main: Refreshing state... [id=igw-07e1820b3897800a3]
+aws_default_security_group.default: Refreshing state... [id=sg-04d5745ee4feb4b9a]
+aws_subnet.nodes: Refreshing state... [id=subnet-0cf1aeced01dd7505]
+aws_security_group.cluster: Refreshing state... [id=sg-062e19ab54de33216]
+aws_route_table.public: Refreshing state... [id=rtb-0711d6eaf176db4e0]
+aws_route_table_association.nodes: Refreshing state... [id=rtbassoc-0bc3db69a68621970]
+aws_vpc_security_group_egress_rule.all_out: Refreshing state... [id=sgr-02694ec86e433d37f]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Refreshing state... [id=sgr-0b3f77041f8ac47a9]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Refreshing state... [id=sgr-0b12c2994cad3ae7e]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Refreshing state... [id=sgr-08dcb49592f619e53]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Refreshing state... [id=sgr-01ca25c8cf16af21f]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Refreshing state... [id=sgr-0ae60196543b02774]
+aws_instance.agent[0]: Refreshing state... [id=i-074ab403abcd13948]
+aws_instance.agent[1]: Refreshing state... [id=i-0e17d2fe8fe7eae8e]
+aws_instance.server: Refreshing state... [id=i-031f2854c1257ab81]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Refreshing state... [id=sgr-0cb1772efa901c4b4]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Refreshing state... [id=sgr-0a4d2524120321ede]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.

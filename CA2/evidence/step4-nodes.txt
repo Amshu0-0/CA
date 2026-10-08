@@ -1,0 +1,15 @@
+kubectl get nodes -o wide && kubectl get pods -A && \
+    (kubectl top nodes || echo "(metrics-server needs about a minute after the cluster starts; run: kubectl top nodes)")
+NAME          STATUS   ROLES           AGE     VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION           CONTAINER-RUNTIME
+ca2-agent-1   Ready    worker          3m24s   v1.37.1+k3s1   10.20.1.181   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-agent-2   Ready    worker          3m24s   v1.37.1+k3s1   10.20.1.135   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-server    Ready    control-plane   4m3s    v1.37.1+k3s1   10.20.1.180   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+NAMESPACE     NAME                                      READY   STATUS      RESTARTS   AGE
+kube-system   coredns-577d995dff-m27lg                  1/1     Running     0          3m48s
+kube-system   helm-install-gateway-api-crd-vv55b        0/1     Completed   0          3m48s
+kube-system   local-path-provisioner-6858d854cf-6vnbf   1/1     Running     0          3m48s
+kube-system   metrics-server-778c4649b4-c6r9s           1/1     Running     0          3m48s
+NAME          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+ca2-agent-1   10m          0%       402Mi           10%         
+ca2-agent-2   12m          0%       401Mi           10%         
+ca2-server    51m          2%       847Mi           22%         
