@@ -1,0 +1,186 @@
+# Processor: the processing stage.
+# It reads network flow messages from Kafka and stores them in MongoDB.
+#
+# This file creates three objects:
+#   1. A ConfigMap for processor-only settings
+#   2. A Deployment for the processor pods
+#   3. The required ClusterIP Service
+#
+# A Deployment fits because the processor is stateless.
+# If one pod is replaced, Kafka still remembers the consumer group's position.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: processor-config
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ca2-pipeline
+
+data:
+  # Multiple processors using the same consumer group share Kafka partitions.
+  # That is how processor scaling can work later.
+  CONSUMER_GROUP: "processor-group"
+
+  # Port used by the processor's health and metrics server.
+  METRICS_PORT: "8000"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: consumer
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  # There is intentionally no replicas field here.
+  # The autoscaler added later will control the replica count.
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: processor
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: processor
+        app.kubernetes.io/component: consumer
+        app.kubernetes.io/part-of: ca2-pipeline
+
+    spec:
+      serviceAccountName: processor
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Kubernetes has no Docker Compose depends_on.
+      # This init container waits until both Kafka and MongoDB accept connections.
+      # Only then does the real processor container start.
+      initContainers:
+        - name: wait-for-kafka-and-mongo
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z -w 2 kafka 9092 && nc -z -w 2 mongo 27017; do echo waiting for kafka and mongo; sleep 3; done
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      containers:
+        - name: processor
+          image: ghcr.io/amshu0-0/ca2-processor:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          # Load the shared pipeline settings and the processor-only settings.
+          envFrom:
+            - configMapRef:
+                name: pipeline-config
+
+            - configMapRef:
+                name: processor-config
+
+          env:
+            # The program reads the Mongo credentials from files
+            # mounted from the Kubernetes Secret.
+            - name: MONGO_USER_FILE
+              value: /etc/secrets/mongo/username
+
+            - name: MONGO_PASSWORD_FILE
+              value: /etc/secrets/mongo/password
+
+          ports:
+            - name: metrics
+              containerPort: 8000
+
+          volumeMounts:
+            - name: mongo-credentials
+              mountPath: /etc/secrets/mongo
+              readOnly: true
+
+          # Ready means the processor is connected and able to do work.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: metrics
+            periodSeconds: 10
+
+          # Alive means the processor's consumer loop is still healthy.
+          # Kubernetes restarts it if this keeps failing.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+
+          resources:
+            # CPU requests are important later because HPA measures
+            # CPU usage as a percentage of the requested amount.
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+            limits:
+              cpu: 500m
+              memory: 256Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-credentials
+            defaultMode: 288
+
+---
+# Processor ClusterIP Service.
+#
+# This Service is explicitly required by the CA2 assignment.
+# ClusterIP means it is reachable only from inside the Kubernetes cluster.
+# It gives all ready processor pods one stable in-cluster address:
+# processor.ca2.svc.cluster.local:8000
+#
+# The Service points to the processor's health and metrics HTTP server.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: consumer
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app.kubernetes.io/name: processor
+
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics
+      protocol: TCP

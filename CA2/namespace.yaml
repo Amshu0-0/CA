@@ -1,0 +1,11 @@
+# The namespace is the boundary of this whole assignment: RBAC roles, NetworkPolicies and
+# "kubectl delete namespace" all apply to it, so one delete removes everything that was created.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ca2
+  labels:
+    app.kubernetes.io/part-of: ca2-pipeline
+    # Pod Security Admission: the API server refuses pods that break the "baseline" profile
+    # (privileged containers, hostPath volumes, host networking and similar).
+    pod-security.kubernetes.io/enforce: baseline

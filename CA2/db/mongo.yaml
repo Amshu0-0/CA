@@ -1,0 +1,178 @@
+# MongoDB: the database stage of the pipeline.
+# This file creates one StatefulSet and two Services.
+#
+# Why StatefulSet instead of Deployment?
+# MongoDB needs a stable identity and its own persistent disk.
+# The StatefulSet gives the pod a stable name (mongo-0) and a PVC that survives pod restarts.
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  # The StatefulSet uses the headless Service for its stable network identity.
+  serviceName: mongo-headless
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongo
+
+  # Delete the disk when the StatefulSet is deleted,
+  # but keep it if the StatefulSet is only scaled down.
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Retain
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongo
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: ca2-pipeline
+
+    spec:
+      serviceAccountName: mongo
+      automountServiceAccountToken: false
+
+      # Do not automatically inject environment variables for other Kubernetes Services.
+      enableServiceLinks: false
+
+      terminationGracePeriodSeconds: 60
+
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: mongo
+          image: mongo:7.0
+
+          ports:
+            - name: mongo
+              containerPort: 27017
+
+          env:
+            # The official Mongo image reads these credentials from files.
+            # Kubernetes mounts those files from the mongo-credentials Secret.
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/secrets/mongo/username
+
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/secrets/mongo/password
+
+          volumeMounts:
+            # Persistent database storage.
+            - name: data
+              mountPath: /data/db
+
+            # Mongo username and password from the Kubernetes Secret.
+            - name: mongo-credentials
+              mountPath: /etc/secrets/mongo
+              readOnly: true
+
+          # Ready when MongoDB is accepting connections.
+          readinessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          # Restart the container if MongoDB stops responding.
+          livenessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 45
+            periodSeconds: 20
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+      volumes:
+        - name: mongo-credentials
+          secret:
+            secretName: mongo-credentials
+            defaultMode: 256
+
+  # Kubernetes creates a PersistentVolumeClaim from this template for the Mongo pod.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: mongo
+          app.kubernetes.io/component: database
+          app.kubernetes.io/part-of: ca2-pipeline
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 5Gi
+
+---
+# Headless Service:
+# clusterIP: None means there is no virtual Service IP.
+# It gives the StatefulSet pod a stable DNS identity such as
+# mongo-0.mongo-headless.ca2.svc.cluster.local.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-headless
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+
+  selector:
+    app.kubernetes.io/name: mongo
+
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo
+
+---
+# ClusterIP Service:
+# The other applications use the stable name "mongo" instead of knowing the Mongo pod's IP.
+# This Service is reachable only from inside the Kubernetes cluster.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app.kubernetes.io/name: mongo
+
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo

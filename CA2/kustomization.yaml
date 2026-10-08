@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - config/pipeline-config.yaml
+  - rbac/serviceaccounts.yaml
+  - db/mongo.yaml
+  - kafka/kafka.yaml
+  - processor/processor.yaml
+  - restapi/restapi.yaml
+  - producer/job-replay.yaml

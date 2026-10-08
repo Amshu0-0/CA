@@ -1,0 +1,238 @@
+# Kafka: the message bus stage.
+# This file creates one StatefulSet and two Services.
+#
+# Why StatefulSet?
+# Kafka stores its log on disk and clients are told the broker's exact name,
+# so it needs a stable identity (kafka-0) and its own PersistentVolumeClaim.
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/component: broker
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  # The headless Service gives kafka-0 its stable DNS name.
+  serviceName: kafka-headless
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Retain
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka
+        app.kubernetes.io/component: broker
+        app.kubernetes.io/part-of: ca2-pipeline
+
+    spec:
+      serviceAccountName: kafka
+      automountServiceAccountToken: false
+
+      # Kubernetes normally injects environment variables for every Service.
+      # A Service named kafka would create KAFKA_* variables.
+      # The Confluent image also treats KAFKA_* variables as Kafka configuration,
+      # so those automatic variables can interfere with the image.
+      enableServiceLinks: false
+
+      terminationGracePeriodSeconds: 120
+
+      securityContext:
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: kafka
+          image: confluentinc/cp-kafka:7.7.1
+
+          ports:
+            # Pipeline clients connect here.
+            - name: broker
+              containerPort: 9092
+
+            # KRaft controller communication happens here.
+            - name: controller
+              containerPort: 9093
+
+          env:
+            # Kubernetes fills these from the pod metadata.
+            # They let Kafka advertise its own stable DNS name.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            # KRaft configuration:
+            # this single Kafka node acts as both broker and controller.
+            - name: KAFKA_NODE_ID
+              value: "1"
+
+            - name: KAFKA_PROCESS_ROLES
+              value: "broker,controller"
+
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: "1@localhost:9093"
+
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+
+            # Kafka listens for normal clients on 9092 and its KRaft controller on 9093.
+            - name: KAFKA_LISTENERS
+              value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+
+            # After a client first connects, Kafka tells it to use this stable pod DNS name.
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://$(POD_NAME).kafka-headless.$(POD_NAMESPACE).svc.cluster.local:9092"
+
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "PLAINTEXT"
+
+            # There is only one broker, so Kafka's internal topics use one replica.
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "1"
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "1"
+
+            - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+              value: "0"
+
+            # New topics get three partitions.
+            # This lets multiple processor replicas share work later during scaling.
+            - name: KAFKA_NUM_PARTITIONS
+              value: "3"
+
+            - name: KAFKA_LOG_DIRS
+              value: "/var/lib/kafka/data"
+
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xms512m -Xmx512m"
+
+            # Fixed KRaft cluster ID used when Kafka initializes its storage.
+            - name: CLUSTER_ID
+              value: "MkU3OEVBNTcwNTJENDM2Qk"
+
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/kafka/data
+
+          # Kafka can take time to initialize its disk.
+          # The startup probe gives it time before normal health checks begin.
+          startupProbe:
+            tcpSocket:
+              port: broker
+            periodSeconds: 10
+            failureThreshold: 30
+
+          readinessProbe:
+            tcpSocket:
+              port: broker
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: broker
+            periodSeconds: 20
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+
+  # Each Kafka pod gets its own persistent disk from this template.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: kafka
+          app.kubernetes.io/component: broker
+          app.kubernetes.io/part-of: ca2-pipeline
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 5Gi
+
+---
+# Headless Service:
+# gives kafka-0 the stable DNS name
+# kafka-0.kafka-headless.ca2.svc.cluster.local.
+# Kafka advertises this name to its clients.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-headless
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/component: broker
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+
+  selector:
+    app.kubernetes.io/name: kafka
+
+  ports:
+    - name: broker
+      port: 9092
+      targetPort: broker
+
+---
+# ClusterIP Service:
+# pipeline clients first connect to kafka:9092.
+# Kafka then gives them the broker's advertised stable DNS address.
+# The KRaft controller port 9093 is not exposed through this Service.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/component: broker
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app.kubernetes.io/name: kafka
+
+  ports:
+    - name: broker
+      port: 9092
+      targetPort: broker

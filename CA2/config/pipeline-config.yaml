@@ -1,0 +1,22 @@
+# ConfigMap: the non-secret settings that more than one component needs.
+# The key names are exactly the environment variables the programs read, so a component can load
+# the whole ConfigMap with "envFrom". Names such as "kafka" and "mongo" are Service names:
+# Kubernetes DNS turns them into addresses.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pipeline-config
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: pipeline-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ca2-pipeline
+data:
+  KAFKA_BROKER: "kafka:9092"
+  KAFKA_TOPIC: "network-flows"
+  MONGO_HOST: "mongo"
+  MONGO_PORT: "27017"
+  MONGO_DB: "ca2"
+  MONGO_COLLECTION: "flows"
+  REST_PORT: "8080"
+  DATASET_FILE: "Friday-Morning-5000-mixed-bot.csv"

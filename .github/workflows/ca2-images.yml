@@ -1,0 +1,65 @@
+# Builds the three CA2 application images and pushes them to the GitHub Container Registry (ghcr.io).
+#
+# Why this exists: the images are built on GitHub's servers, so no Docker installation is needed on the laptop.
+# It builds for both amd64 (the AWS nodes) and arm64 (Apple Silicon Macs), so the same tag runs on either.
+# It uses the temporary token GitHub gives every workflow run, so no registry password is stored anywhere.
+name: CA2 images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "CA2/producer/**"
+      - "CA2/processor/**"
+      - "CA2/restapi/**"
+      - "CA2/VERSION"
+      - ".github/workflows/ca2-images.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [producer, processor, restapi]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # The registry requires a lowercase name. The version comes from CA2/VERSION, so it is changed in one place.
+      - name: Work out the image name and version
+        id: meta
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          version="$(tr -d '[:space:]' < CA2/VERSION)"
+          echo "image=ghcr.io/${owner}/ca2-${{ matrix.component }}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU (lets the amd64 runner build the arm64 image)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.component }}
+        uses: docker/build-push-action@v6
+        with:
+          context: CA2/${{ matrix.component }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
