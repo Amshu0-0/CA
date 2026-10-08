@@ -25,3 +25,10 @@ rest_port: 8080
 
 # CSV file the producer replays. It must exist in ansible/roles/producer/files/.
 dataset_file: Friday-Morning-5000-mixed-bot.csv
+
+# AWS region where Terraform builds everything. The cleanup scan searches the same region.
+aws_region: us-east-2
+
+# Value of the Project tag that Terraform puts on every AWS resource it creates.
+# The cleanup scan (scripts/aws_scan.py) searches for this tag to prove nothing is left after terraform destroy.
+project_tag: CA1

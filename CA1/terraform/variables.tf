@@ -2,13 +2,8 @@
 # Using variables prevents values from being hard-coded throughout the Terraform configuration.
 
 
-# AWS region where the four EC2 instances will be created.
-# CA0 used the Ohio region, so CA1 uses the same region by default.
-variable "aws_region" {
-  description = "AWS region - CA0 used us-east-2 (Ohio)"
-  type        = string
-  default     = "us-east-2"
-}
+# The AWS region is not set here. It lives in config.yml (aws_region), so that Terraform and the
+# cleanup scan always look at the same region.
 
 
 # EC2 instance size used for all four machines.

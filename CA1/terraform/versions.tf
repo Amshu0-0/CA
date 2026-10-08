@@ -31,7 +31,18 @@ terraform {
 }
 
 # Tells Terraform that the infrastructure will be created in AWS.
-# The actual region comes from variables.tf instead of being hard-coded here.
+# The region comes from config.yml instead of being hard-coded here.
+#
+# default_tags puts the same tags on every AWS resource that Terraform creates.
+# The Project tag is what the cleanup scan (scripts/aws_scan.py) searches for after terraform destroy,
+# to prove that nothing was left behind.
 provider "aws" {
-  region = var.aws_region
+  region = local.config.aws_region
+
+  default_tags {
+    tags = {
+      Project   = local.config.project_tag
+      ManagedBy = "terraform"
+    }
+  }
 }
