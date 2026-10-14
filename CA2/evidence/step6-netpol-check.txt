@@ -1,0 +1,29 @@
+NS=ca2 KUBECTL=kubectl python3 scripts/netpol-check.py
+NetworkPolicy test: 11 policies in namespace ca2
+
+Starting 6 probe pods (busybox; one of them in the namespace ca2-intruder)...
+Trying 30 connections (a blocked one can take up to 3 seconds to give up)...
+
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8080    DNS:53          
+  stranger (no role, in ca2)                  blocked         blocked         blocked         blocked         open            
+  intruder (another namespace)                blocked         blocked         blocked         open            open            
+  producer (wears the producer label)         open            blocked         blocked         blocked         open            
+  processor (wears the processor label)       open            open            blocked         blocked         open            
+  restapi (wears the REST API label)          blocked         open            blocked         blocked         open            
+  observer (the monitoring role)              blocked         blocked         open            open            open            
+
+  open = the connection was accepted; blocked = it did not get through; ! = not what the policies say
+
+What that shows:
+  stranger   reaches nothing but DNS: default-deny-all blocks the rest, and allow-dns-egress opens only the DNS server
+  intruder   (another namespace) reaches only the REST API: restapi-ingress is the one policy that accepts any sender
+  producer   reaches only Kafka: producer-egress lets it out, kafka-ingress lets it in
+  processor  reaches Kafka and MongoDB: processor-egress, kafka-ingress and mongo-ingress
+  restapi    reaches only MongoDB: restapi-egress and mongo-ingress
+  observer   reaches the processor's metrics port and the REST API: observer-egress, processor-ingress and restapi-ingress
+
+The observer pod reads the processor's metrics port: processor_messages_total 5001; processor_alerts_total 1967; processor_ready 1
+
+Clean-up: no probe pod and no namespace ca2-intruder left
+
+RESULT: PASS - all 30 connections behave as the policies say (13 allowed, 17 blocked)

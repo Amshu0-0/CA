@@ -1,0 +1,39 @@
+=== The five questions of make rbac-check ===
+pipeline-viewer   can list pods?       yes
+pipeline-viewer   can delete pods?     no
+pipeline-operator can scale producers? yes
+pipeline-operator can read secrets?    no
+processor pod     can read secrets?    no
+
+=== The same rules as real requests: kubectl --as=<account> sends the request as that account ===
+(--dry-run=server makes the cluster check the request, permissions included, without changing anything)
+
+$ kubectl -n ca2 get pods --as=system:serviceaccount:ca2:pipeline-viewer
+NAME                         READY   STATUS      RESTARTS   AGE
+kafka-0                      1/1     Running     0          139m
+mongo-0                      1/1     Running     0          139m
+processor-7fb4b958cb-dvs9d   1/1     Running     0          139m
+producer-replay-r86d4        0/1     Completed   0          139m
+restapi-c8cd576c4-ddd7r      1/1     Running     0          139m
+restapi-c8cd576c4-z2cm8      1/1     Running     0          139m
+
+$ kubectl -n ca2 delete pod kafka-0 --dry-run=server --as=system:serviceaccount:ca2:pipeline-viewer
+Error from server (Forbidden): pods "kafka-0" is forbidden: User "system:serviceaccount:ca2:pipeline-viewer" cannot delete resource "pods" in API group "" in the namespace "ca2"
+
+$ kubectl -n ca2 scale deployment/processor --replicas=2 --dry-run=server --as=system:serviceaccount:ca2:pipeline-viewer
+Error from server (Forbidden): deployments.apps "processor" is forbidden: User "system:serviceaccount:ca2:pipeline-viewer" cannot patch resource "deployments/scale" in API group "apps" in the namespace "ca2"
+
+$ kubectl -n ca2 scale deployment/processor --replicas=1 --dry-run=server --as=system:serviceaccount:ca2:pipeline-operator
+deployment.apps/processor scaled (server dry run)
+
+$ kubectl -n ca2 delete pod kafka-0 --dry-run=server --as=system:serviceaccount:ca2:pipeline-operator
+Error from server (Forbidden): pods "kafka-0" is forbidden: User "system:serviceaccount:ca2:pipeline-operator" cannot delete resource "pods" in API group "" in the namespace "ca2"
+
+$ kubectl -n ca2 get secret mongo-credentials --as=system:serviceaccount:ca2:pipeline-operator
+Error from server (Forbidden): secrets "mongo-credentials" is forbidden: User "system:serviceaccount:ca2:pipeline-operator" cannot get resource "secrets" in API group "" in the namespace "ca2"
+
+$ kubectl -n kube-system get pods --as=system:serviceaccount:ca2:pipeline-viewer
+Error from server (Forbidden): pods is forbidden: User "system:serviceaccount:ca2:pipeline-viewer" cannot list resource "pods" in API group "" in the namespace "kube-system"
+
+$ kubectl -n ca2 get secrets --as=system:serviceaccount:ca2:processor
+Error from server (Forbidden): secrets is forbidden: User "system:serviceaccount:ca2:processor" cannot list resource "secrets" in API group "" in the namespace "ca2"

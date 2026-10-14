@@ -1,0 +1,35 @@
+NS=ca2 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/smoke-test.py --save evidence/step6-smoke-response.json
+Smoke test: one tagged event through the whole pipeline (namespace ca2)
+
+[1/6] The stack is running
+      kafka-0 and mongo-0 are ready; 1 processor pod and 2 REST API pods are ready
+
+[2/6] Send one event with a unique trace id
+      trace id: smoke-1014-165801-c52d
+      the producer pod finished after 15 s and printed:
+        sent trace_id=smoke-1014-165801-c52d topic=network-flows partition=0 offset=1664
+      Kafka stored the event in partition 0 at offset 1664 of topic network-flows
+
+[3/6] Kafka holds it
+      read back from partition 0, offset 1664 with kafka-console-consumer:
+        {"trace_id": "smoke-1014-165801-c52d", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      topic network-flows: 3 partitions, replication factor 1, 5001 messages in total (1665 + 1744 + 1592)
+
+[4/6] The processor read it and stored it
+      [pod/processor-7fb4b958cb-dvs9d/processor] [TRACE] trace_id=smoke-1014-165801-c52d partition=0 offset=1664 stored
+      it is the same partition and offset that the producer was told
+      consumer group processor-group: partition 0 at 1665 of 1665 (behind: 0), partition 1 at 1744 of 1744 (behind: 0), partition 2 at 1592 of 1592 (behind: 0)
+
+[5/6] MongoDB holds the record
+      1 record with this trace id: {"trace_id": "smoke-1014-165801-c52d", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      the collection holds 5001 records in total
+
+[6/6] The REST API returns it to this computer
+      GET /events/smoke-1014-165801-c52d    (node port 30080 of the server)
+      the same request with curl:  curl -s http://<server-public-ip>:30080/events/smoke-1014-165801-c52d
+      answer: HTTP 200
+        {"found": true, "event": {"trace_id": "smoke-1014-165801-c52d", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}}
+      the complete answer (86 fields) is saved in evidence/step6-smoke-response.json
+      GET /stats  ->  HTTP 200 {"collection":"flows","database":"ca2","documents":5001}
+
+RESULT: PASS - event smoke-1014-165801-c52d went producer -> Kafka (partition 0, offset 1664) -> processor -> MongoDB -> REST API in 35 s

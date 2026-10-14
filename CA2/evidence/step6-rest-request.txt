@@ -1,0 +1,29 @@
+request:   GET /events/smoke-1014-165801-c52d
+           the same with curl:  curl -s http://<server-public-ip>:30080/events/smoke-1014-165801-c52d
+response:  HTTP 200, 2207 bytes, 1.038715 s
+body:      the first 25 lines (all of it is in evidence/step6-smoke-response.json)
+{
+    "event": {
+        "ACK Flag Count": "1",
+        "Active Max": "0.0",
+        "Active Mean": "0.0",
+        "Active Min": "0.0",
+        "Active Std": "0.0",
+        "Average Packet Size": "21.33333333",
+        "Avg Bwd Segment Size": "0.0",
+        "Avg Fwd Segment Size": "19.33333333",
+        "Bwd Avg Bulk Rate": "0",
+        "Bwd Avg Bytes/Bulk": "0",
+        "Bwd Avg Packets/Bulk": "0",
+        "Bwd Header Length": "0",
+        "Bwd IAT Max": "0.0",
+        "Bwd IAT Mean": "0.0",
+        "Bwd IAT Min": "0.0",
+        "Bwd IAT Std": "0.0",
+        "Bwd IAT Total": "0.0",
+        "Bwd PSH Flags": "0",
+        "Bwd Packet Length Max": "0",
+        "Bwd Packet Length Mean": "0.0",
+        "Bwd Packet Length Min": "0",
+        "Bwd Packet Length Std": "0.0",
+        "Bwd Packets/s": "0.0",

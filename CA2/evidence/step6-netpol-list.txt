@@ -1,0 +1,12 @@
+NAME                POD-SELECTOR                           AGE
+allow-dns-egress    <none>                                 3h12m
+default-deny-all    <none>                                 3h12m
+kafka-ingress       app.kubernetes.io/name=kafka           3h12m
+kafka-self          app.kubernetes.io/name=kafka           3h12m
+mongo-ingress       app.kubernetes.io/name=mongo           3h12m
+observer-egress     app.kubernetes.io/component=observer   3h12m
+processor-egress    app.kubernetes.io/name=processor       3h12m
+processor-ingress   app.kubernetes.io/name=processor       3h12m
+producer-egress     app.kubernetes.io/name=producer        3h12m
+restapi-egress      app.kubernetes.io/name=restapi         3h12m
+restapi-ingress     app.kubernetes.io/name=restapi         3h12m

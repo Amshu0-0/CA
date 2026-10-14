@@ -1,0 +1,31 @@
+NS=ca2 KUBECTL=kubectl python3 scripts/netpol-check.py --control
+NetworkPolicy test: 11 policies in namespace ca2, control experiment
+
+Starting 2 probe pods (a stranger in ca2 and an intruder in ca2-intruder)...
+
+Phase 1: the 11 policies are in place
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8080    
+  stranger (no role, in ca2)                  blocked         blocked         blocked         blocked         
+  intruder (another namespace)                blocked         blocked         blocked         open            
+
+  kubectl delete networkpolicy --all     (11 deleted)
+
+Phase 2: no policies
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8080    
+  stranger (no role, in ca2)                  open            open            open            open            
+  intruder (another namespace)                open            open            open            open            
+
+  every connection was accepted after at most 1 s
+
+  kubectl apply -f policies/networkpolicies.yaml     (11 created, 0 unchanged)
+
+Phase 3: the policies are back
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8080    
+  stranger (no role, in ca2)                  blocked         blocked         blocked         blocked         
+  intruder (another namespace)                blocked         blocked         blocked         open            
+
+  the original answers were back after at most 2 s
+
+Clean-up: no probe pod and no namespace ca2-intruder left
+
+RESULT: PASS - without the policies every connection worked, with them only the allowed ones do: the policies are what blocks
