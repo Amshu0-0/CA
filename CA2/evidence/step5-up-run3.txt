@@ -1,0 +1,59 @@
+kubectl context: ca2-k3s   (kubeconfig: ~/Desktop/CA/CA2/.secrets/kubeconfig.yaml)
+bash scripts/create-secrets.sh
+secret/mongo-credentials created
+Created mongo-credentials Secret.
+kubectl apply -k . && \
+    ( kubectl -n ca2 rollout status statefulset/mongo --timeout=300s && \
+      kubectl -n ca2 rollout status statefulset/kafka --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/processor --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/restapi --timeout=300s && \
+      kubectl -n ca2 wait --for=condition=complete job/producer-replay --timeout=600s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
+namespace/ca2 unchanged
+serviceaccount/kafka created
+serviceaccount/mongo created
+serviceaccount/pipeline-operator created
+serviceaccount/pipeline-viewer created
+serviceaccount/processor created
+serviceaccount/producer created
+serviceaccount/restapi created
+role.rbac.authorization.k8s.io/pipeline-operator created
+role.rbac.authorization.k8s.io/pipeline-viewer created
+rolebinding.rbac.authorization.k8s.io/pipeline-operator created
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer created
+configmap/pipeline-config created
+configmap/processor-config created
+service/kafka created
+service/kafka-headless created
+service/mongo created
+service/mongo-headless created
+service/processor created
+service/restapi created
+deployment.apps/processor created
+deployment.apps/restapi created
+statefulset.apps/kafka created
+statefulset.apps/mongo created
+horizontalpodautoscaler.autoscaling/processor created
+job.batch/producer-replay created
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/kafka-ingress created
+networkpolicy.networking.k8s.io/kafka-self created
+networkpolicy.networking.k8s.io/mongo-ingress created
+networkpolicy.networking.k8s.io/observer-egress created
+networkpolicy.networking.k8s.io/processor-egress created
+networkpolicy.networking.k8s.io/processor-ingress created
+networkpolicy.networking.k8s.io/producer-egress created
+networkpolicy.networking.k8s.io/restapi-egress created
+networkpolicy.networking.k8s.io/restapi-ingress created
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+Waiting for deployment "processor" rollout to finish: 0 of 1 updated replicas are available...
+deployment "processor" successfully rolled out
+deployment "restapi" successfully rolled out
+job.batch/producer-replay condition met
+Stack is up. Call the REST API from this computer with:  make rest-check
+make up, third run, after deleting everything, took 0 min 41 s

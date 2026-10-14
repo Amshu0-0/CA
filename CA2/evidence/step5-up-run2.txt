@@ -1,0 +1,55 @@
+kubectl context: ca2-k3s   (kubeconfig: ~/Desktop/CA/CA2/.secrets/kubeconfig.yaml)
+bash scripts/create-secrets.sh
+Secret mongo-credentials already exists in namespace ca2.
+kubectl apply -k . && \
+    ( kubectl -n ca2 rollout status statefulset/mongo --timeout=300s && \
+      kubectl -n ca2 rollout status statefulset/kafka --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/processor --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/restapi --timeout=300s && \
+      kubectl -n ca2 wait --for=condition=complete job/producer-replay --timeout=600s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
+namespace/ca2 unchanged
+serviceaccount/kafka unchanged
+serviceaccount/mongo unchanged
+serviceaccount/pipeline-operator unchanged
+serviceaccount/pipeline-viewer unchanged
+serviceaccount/processor unchanged
+serviceaccount/producer unchanged
+serviceaccount/restapi unchanged
+role.rbac.authorization.k8s.io/pipeline-operator unchanged
+role.rbac.authorization.k8s.io/pipeline-viewer unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-operator unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer unchanged
+configmap/pipeline-config unchanged
+configmap/processor-config unchanged
+service/kafka unchanged
+service/kafka-headless unchanged
+service/mongo unchanged
+service/mongo-headless unchanged
+service/processor unchanged
+service/restapi unchanged
+deployment.apps/processor unchanged
+deployment.apps/restapi unchanged
+statefulset.apps/kafka unchanged
+statefulset.apps/mongo unchanged
+horizontalpodautoscaler.autoscaling/processor unchanged
+job.batch/producer-replay unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/kafka-ingress unchanged
+networkpolicy.networking.k8s.io/kafka-self unchanged
+networkpolicy.networking.k8s.io/mongo-ingress unchanged
+networkpolicy.networking.k8s.io/observer-egress unchanged
+networkpolicy.networking.k8s.io/processor-egress unchanged
+networkpolicy.networking.k8s.io/processor-ingress unchanged
+networkpolicy.networking.k8s.io/producer-egress unchanged
+networkpolicy.networking.k8s.io/restapi-egress unchanged
+networkpolicy.networking.k8s.io/restapi-ingress unchanged
+partitioned roll out complete: 1 new pods have been updated...
+partitioned roll out complete: 1 new pods have been updated...
+deployment "processor" successfully rolled out
+deployment "restapi" successfully rolled out
+job.batch/producer-replay condition met
+Stack is up. Call the REST API from this computer with:  make rest-check
+objects created: 0   configured: 0   unchanged: 37

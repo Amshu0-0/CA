@@ -1,0 +1,56 @@
+kubectl delete -f producer/scaling/ --ignore-not-found ; kubectl delete -k . --ignore-not-found --wait=true && echo "Deleted. Check:  kubectl get namespace ca2   (it should say NotFound)"
+namespace "ca2" deleted
+serviceaccount "kafka" deleted from ca2 namespace
+serviceaccount "mongo" deleted from ca2 namespace
+serviceaccount "pipeline-operator" deleted from ca2 namespace
+serviceaccount "pipeline-viewer" deleted from ca2 namespace
+serviceaccount "processor" deleted from ca2 namespace
+serviceaccount "producer" deleted from ca2 namespace
+serviceaccount "restapi" deleted from ca2 namespace
+role.rbac.authorization.k8s.io "pipeline-operator" deleted from ca2 namespace
+role.rbac.authorization.k8s.io "pipeline-viewer" deleted from ca2 namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-operator" deleted from ca2 namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-viewer" deleted from ca2 namespace
+configmap "pipeline-config" deleted from ca2 namespace
+configmap "processor-config" deleted from ca2 namespace
+service "kafka" deleted from ca2 namespace
+service "kafka-headless" deleted from ca2 namespace
+service "mongo" deleted from ca2 namespace
+service "mongo-headless" deleted from ca2 namespace
+service "processor" deleted from ca2 namespace
+service "restapi" deleted from ca2 namespace
+deployment.apps "processor" deleted from ca2 namespace
+deployment.apps "restapi" deleted from ca2 namespace
+statefulset.apps "kafka" deleted from ca2 namespace
+statefulset.apps "mongo" deleted from ca2 namespace
+horizontalpodautoscaler.autoscaling "processor" deleted from ca2 namespace
+job.batch "producer-replay" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "allow-dns-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "default-deny-all" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "kafka-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "kafka-self" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "mongo-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "observer-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "processor-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "processor-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "producer-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "restapi-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "restapi-ingress" deleted from ca2 namespace
+Deleted. Check:  kubectl get namespace ca2   (it should say NotFound)
+make down took 0 min 48 s
+
+=== Is anything of the stack left? ===
+--- namespace ca2 (it must say NotFound):
+Error from server (NotFound): namespaces "ca2" not found
+--- disks (PersistentVolumes). The storage provisioner cleans up a few seconds later, so wait up to 2 minutes:
+No resources found
+--- anything labelled as part of the pipeline, in any namespace:
+No resources found
+--- the cluster itself must still be healthy:
+ca2-agent-1 Ready
+ca2-agent-2 Ready
+ca2-server Ready
+coredns-577d995dff-n8sj2 Running
+helm-install-gateway-api-crd-hwmmr Completed
+local-path-provisioner-6858d854cf-jqq4v Running
+metrics-server-778c4649b4-9t5dj Running

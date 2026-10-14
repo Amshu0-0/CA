@@ -1,0 +1,27 @@
+CA2 cluster facts, recorded 2026-10-14 04:33 UTC
+
+Cluster type: k3s, a small certified Kubernetes distribution, built from code with Terraform and Ansible
+Machines:     3 x AWS EC2 t3.medium in us-east-2: 1 server (control plane) and 2 agents (workers)
+
+=== Versions ===
+Client Version: v1.37.1
+Kustomize Version: v5.8.1
+Server Version: v1.37.1+k3s1
+
+=== Nodes and roles ===
+NAME          STATUS   ROLES           AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION           CONTAINER-RUNTIME
+ca2-agent-1   Ready    worker          98m   v1.37.1+k3s1   10.20.1.34    <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-agent-2   Ready    worker          98m   v1.37.1+k3s1   10.20.1.184   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-server    Ready    control-plane   99m   v1.37.1+k3s1   10.20.1.174   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+
+=== Namespaces ===
+NAME              STATUS   AGE    LABELS
+ca2               Active   2m1s   app.kubernetes.io/part-of=ca2-pipeline,kubernetes.io/metadata.name=ca2,pod-security.kubernetes.io/enforce=baseline
+default           Active   99m    kubernetes.io/metadata.name=default
+kube-node-lease   Active   99m    kubernetes.io/metadata.name=kube-node-lease
+kube-public       Active   99m    kubernetes.io/metadata.name=kube-public
+kube-system       Active   99m    kubernetes.io/metadata.name=kube-system
+
+ca2           the pipeline: Kafka, MongoDB, processor, REST API, the producer job, network policies, access rules
+kube-system   Kubernetes' own parts: DNS (CoreDNS), metrics-server, the storage provisioner
+default, kube-public, kube-node-lease   created by Kubernetes, not used by this project

@@ -1,0 +1,48 @@
+kubectl get all -A
+NAMESPACE     NAME                                          READY   STATUS      RESTARTS   AGE
+ca2           pod/kafka-0                                   1/1     Running     0          5m19s
+ca2           pod/mongo-0                                   1/1     Running     0          5m19s
+ca2           pod/processor-7fb4b958cb-nhnzn                1/1     Running     0          5m19s
+ca2           pod/producer-replay-69cr7                     0/1     Completed   0          5m19s
+ca2           pod/restapi-c8cd576c4-6pjd6                   1/1     Running     0          5m19s
+ca2           pod/restapi-c8cd576c4-glcfg                   1/1     Running     0          5m19s
+kube-system   pod/coredns-577d995dff-n8sj2                  1/1     Running     0          34m
+kube-system   pod/helm-install-gateway-api-crd-hwmmr        0/1     Completed   0          34m
+kube-system   pod/local-path-provisioner-6858d854cf-jqq4v   1/1     Running     0          34m
+kube-system   pod/metrics-server-778c4649b4-9t5dj           1/1     Running     0          34m
+
+NAMESPACE     NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+ca2           service/kafka            ClusterIP   10.43.203.133   <none>        9092/TCP                 5m21s
+ca2           service/kafka-headless   ClusterIP   None            <none>        9092/TCP                 5m21s
+ca2           service/mongo            ClusterIP   10.43.137.243   <none>        27017/TCP                5m21s
+ca2           service/mongo-headless   ClusterIP   None            <none>        27017/TCP                5m21s
+ca2           service/processor        ClusterIP   10.43.117.157   <none>        8000/TCP                 5m21s
+ca2           service/restapi          NodePort    10.43.184.174   <none>        8080:30080/TCP           5m20s
+default       service/kubernetes       ClusterIP   10.43.0.1       <none>        443/TCP                  34m
+kube-system   service/kube-dns         ClusterIP   10.43.0.10      <none>        53/UDP,53/TCP,9153/TCP   34m
+kube-system   service/metrics-server   ClusterIP   10.43.38.207    <none>        443/TCP                  34m
+
+NAMESPACE     NAME                                     READY   UP-TO-DATE   AVAILABLE   AGE
+ca2           deployment.apps/processor                1/1     1            1           5m20s
+ca2           deployment.apps/restapi                  2/2     2            2           5m20s
+kube-system   deployment.apps/coredns                  1/1     1            1           34m
+kube-system   deployment.apps/local-path-provisioner   1/1     1            1           34m
+kube-system   deployment.apps/metrics-server           1/1     1            1           34m
+
+NAMESPACE     NAME                                                DESIRED   CURRENT   READY   AGE
+ca2           replicaset.apps/processor-7fb4b958cb                1         1         1       5m20s
+ca2           replicaset.apps/restapi-c8cd576c4                   2         2         2       5m20s
+kube-system   replicaset.apps/coredns-577d995dff                  1         1         1       34m
+kube-system   replicaset.apps/local-path-provisioner-6858d854cf   1         1         1       34m
+kube-system   replicaset.apps/metrics-server-778c4649b4           1         1         1       34m
+
+NAMESPACE   NAME                     READY   AGE
+ca2         statefulset.apps/kafka   1/1     5m20s
+ca2         statefulset.apps/mongo   1/1     5m20s
+
+NAMESPACE   NAME                                            REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+ca2         horizontalpodautoscaler.autoscaling/processor   Deployment/processor   cpu: 6%/70%   1         3         1          5m20s
+
+NAMESPACE     NAME                                     STATUS     COMPLETIONS   DURATION   AGE
+ca2           job.batch/producer-replay                Complete   1/1           54s        5m20s
+kube-system   job.batch/helm-install-gateway-api-crd   Complete   1/1           23s        34m

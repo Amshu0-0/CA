@@ -1,0 +1,14 @@
+=== 1. Turn Service links ON for Kafka only, the opposite of what the manifest says ===
+statefulset.apps/kafka patched
+
+=== 2. Wait (up to 2 minutes) until the new kafka-0 has stopped once ===
+exit code of the stopped Kafka container: 1
+NAME      READY   STATUS    RESTARTS     AGE
+kafka-0   0/1     Running   1 (0s ago)   3s
+
+=== 3. What Kafka printed before it stopped ===
+===> User
+uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
+===> Configuring ...
+Running in KRaft mode...
+port is deprecated. Please use KAFKA_ADVERTISED_LISTENERS instead.

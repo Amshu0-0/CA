@@ -1,0 +1,74 @@
+kubectl -n ca2 get all,pvc,configmap,hpa,networkpolicy,serviceaccount,role,rolebinding -o wide
+NAME                             READY   STATUS      RESTARTS   AGE     IP          NODE          NOMINATED NODE   READINESS GATES
+pod/kafka-0                      1/1     Running     0          3m58s   10.42.2.5   ca2-agent-2   <none>           <none>
+pod/mongo-0                      1/1     Running     0          3m58s   10.42.1.5   ca2-agent-1   <none>           <none>
+pod/processor-7fb4b958cb-nhnzn   1/1     Running     0          3m58s   10.42.1.2   ca2-agent-1   <none>           <none>
+pod/producer-replay-69cr7        0/1     Completed   0          3m58s   10.42.2.3   ca2-agent-2   <none>           <none>
+pod/restapi-c8cd576c4-6pjd6      1/1     Running     0          3m58s   10.42.1.3   ca2-agent-1   <none>           <none>
+pod/restapi-c8cd576c4-glcfg      1/1     Running     0          3m58s   10.42.2.2   ca2-agent-2   <none>           <none>
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE     SELECTOR
+service/kafka            ClusterIP   10.43.203.133   <none>        9092/TCP         3m59s   app.kubernetes.io/name=kafka
+service/kafka-headless   ClusterIP   None            <none>        9092/TCP         3m59s   app.kubernetes.io/name=kafka
+service/mongo            ClusterIP   10.43.137.243   <none>        27017/TCP        3m59s   app.kubernetes.io/name=mongo
+service/mongo-headless   ClusterIP   None            <none>        27017/TCP        3m59s   app.kubernetes.io/name=mongo
+service/processor        ClusterIP   10.43.117.157   <none>        8000/TCP         3m59s   app.kubernetes.io/name=processor
+service/restapi          NodePort    10.43.184.174   <none>        8080:30080/TCP   3m58s   app.kubernetes.io/name=restapi
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES                                 SELECTOR
+deployment.apps/processor   1/1     1            1           3m58s   processor    ghcr.io/amshu0-0/ca2-processor:1.0.0   app.kubernetes.io/name=processor
+deployment.apps/restapi     2/2     2            2           3m58s   restapi      ghcr.io/amshu0-0/ca2-restapi:1.0.0     app.kubernetes.io/name=restapi
+
+NAME                                   DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                 SELECTOR
+replicaset.apps/processor-7fb4b958cb   1         1         1       3m58s   processor    ghcr.io/amshu0-0/ca2-processor:1.0.0   app.kubernetes.io/name=processor,pod-template-hash=7fb4b958cb
+replicaset.apps/restapi-c8cd576c4      2         2         2       3m58s   restapi      ghcr.io/amshu0-0/ca2-restapi:1.0.0     app.kubernetes.io/name=restapi,pod-template-hash=c8cd576c4
+
+NAME                     READY   AGE     CONTAINERS   IMAGES
+statefulset.apps/kafka   1/1     3m58s   kafka        confluentinc/cp-kafka:7.7.1
+statefulset.apps/mongo   1/1     3m58s   mongo        mongo:7.0
+
+NAME                                            REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/processor   Deployment/processor   cpu: 6%/70%   1         3         1          3m58s
+
+NAME                        STATUS     COMPLETIONS   DURATION   AGE     CONTAINERS   IMAGES                                SELECTOR
+job.batch/producer-replay   Complete   1/1           54s        3m58s   producer     ghcr.io/amshu0-0/ca2-producer:1.0.0   batch.kubernetes.io/controller-uid=61901df1-72d7-46d1-a82c-16e05bd0676f
+
+NAME                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE     VOLUMEMODE
+persistentvolumeclaim/data-kafka-0   Bound    pvc-54d6f5ad-5a1d-4d6d-a7b8-733044f2e92c   5Gi        RWO            local-path     <unset>                 3m58s   Filesystem
+persistentvolumeclaim/data-mongo-0   Bound    pvc-3afd5fbc-03c6-4b9c-8f0a-76ff27d8e08c   5Gi        RWO            local-path     <unset>                 3m58s   Filesystem
+
+NAME                         DATA   AGE
+configmap/kube-root-ca.crt   1      4m2s
+configmap/pipeline-config    8      3m59s
+configmap/processor-config   2      3m59s
+
+NAME                                                POD-SELECTOR                           AGE
+networkpolicy.networking.k8s.io/allow-dns-egress    <none>                                 3m58s
+networkpolicy.networking.k8s.io/default-deny-all    <none>                                 3m58s
+networkpolicy.networking.k8s.io/kafka-ingress       app.kubernetes.io/name=kafka           3m58s
+networkpolicy.networking.k8s.io/kafka-self          app.kubernetes.io/name=kafka           3m57s
+networkpolicy.networking.k8s.io/mongo-ingress       app.kubernetes.io/name=mongo           3m57s
+networkpolicy.networking.k8s.io/observer-egress     app.kubernetes.io/component=observer   3m57s
+networkpolicy.networking.k8s.io/processor-egress    app.kubernetes.io/name=processor       3m57s
+networkpolicy.networking.k8s.io/processor-ingress   app.kubernetes.io/name=processor       3m57s
+networkpolicy.networking.k8s.io/producer-egress     app.kubernetes.io/name=producer        3m57s
+networkpolicy.networking.k8s.io/restapi-egress      app.kubernetes.io/name=restapi         3m57s
+networkpolicy.networking.k8s.io/restapi-ingress     app.kubernetes.io/name=restapi         3m57s
+
+NAME                               AGE
+serviceaccount/default             4m2s
+serviceaccount/kafka               4m
+serviceaccount/mongo               4m
+serviceaccount/pipeline-operator   4m
+serviceaccount/pipeline-viewer     4m
+serviceaccount/processor           4m
+serviceaccount/producer            3m59s
+serviceaccount/restapi             3m59s
+
+NAME                                               CREATED AT
+role.rbac.authorization.k8s.io/pipeline-operator   2026-10-14T03:22:59Z
+role.rbac.authorization.k8s.io/pipeline-viewer     2026-10-14T03:22:59Z
+
+NAME                                                      ROLE                     AGE     USERS   GROUPS   SERVICEACCOUNTS
+rolebinding.rbac.authorization.k8s.io/pipeline-operator   Role/pipeline-operator   3m59s                    ca2/pipeline-operator
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer     Role/pipeline-viewer     3m59s                    ca2/pipeline-viewer

@@ -1,0 +1,42 @@
+=== 1. Inbound rules of the firewall (the security group ca2-cluster) ===
+-------------------------------------------------------------------------------------------------------------------------------------
+|                                                    DescribeSecurityGroupRules                                                     |
++------------------+-----------------------+--------+-----------+-------------------------------------------------------------------+
+|       from       |       fromGroup       | port   | protocol  |                               what                                |
++------------------+-----------------------+--------+-----------+-------------------------------------------------------------------+
+|  <my-ip>/32|  None                 |  22    |  tcp      |  SSH, used by Ansible and for debugging                           |
+|  <my-ip>/32|  None                 |  6443  |  tcp      |  Kubernetes API, used by kubectl on the admin computer            |
+|  None            |  sg-0ff3ff4a2b458b88d |  8472  |  udp      |  pod-to-pod traffic between nodes (VXLAN overlay network)         |
+|  None            |  sg-0ff3ff4a2b458b88d |  10250 |  tcp      |  the control plane and metrics-server read each node kubelet      |
+|  <my-ip>/32|  None                 |  30080 |  tcp      |  REST API node port: the one application port that is published   |
+|  None            |  sg-0ff3ff4a2b458b88d |  6443  |  tcp      |  agents talk to the Kubernetes API on the server                  |
+|  None            |  sg-0ff3ff4a2b458b88d |  -1    |  icmp     |  ping, for troubleshooting                                        |
++------------------+-----------------------+--------+-----------+-------------------------------------------------------------------+
+
+=== 2. Every security group in the project network: name, id, inbound entries, outbound entries ===
+default	sg-0cd7dd280369ff0df	0	0
+ca2-cluster	sg-0ff3ff4a2b458b88d	6	1
+
+=== 3. Services reachable from outside the cluster, then a port check from this computer ===
+kubectl get svc -A --field-selector spec.type!=ClusterIP     (every Service that is reachable from outside the cluster)
+NAMESPACE   NAME      TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+ca2         restapi   NodePort   10.43.184.174   <none>        8080:30080/TCP   58m
+
+Port check from this computer: 3 nodes x 11 ports (connection timeout 3 s)
+
+  port  what                                  server     agent-1    agent-2    
+  22    SSH                                   open       open       open       
+  2379  etcd                                  no answer  no answer  no answer  
+  6443  Kubernetes API                        open       no answer* no answer* 
+  8000  processor metrics                     no answer  no answer  no answer  
+  8080  REST API (container port)             no answer  no answer  no answer  
+  9092  Kafka                                 no answer  no answer  no answer  
+  10250 kubelet                               no answer  no answer  no answer  
+  27017 MongoDB                               no answer  no answer  no answer  
+  30080 REST API node port                    open       open       open       
+  30081 another node port                     no answer  no answer  no answer  
+  32767 last node port                        no answer  no answer  no answer  
+
+  * not judged: only the server runs the Kubernetes API, so the other machines have nothing to show on port 6443
+
+RESULT: PASS - on all 3 nodes only 22 (SSH), 6443 (Kubernetes API, server only), 30080 (REST API node port) answer; the other 8 ports are dropped

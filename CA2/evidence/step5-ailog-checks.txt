@@ -1,0 +1,26 @@
+=== Row 12: Pod Security Admission. The label on the namespace ===
+NAME   STATUS   AGE   LABELS
+ca2    Active   60m   app.kubernetes.io/part-of=ca2-pipeline,kubernetes.io/metadata.name=ca2,pod-security.kubernetes.io/enforce=baseline
+
+=== Row 12 again: a privileged pod must be refused ===
+Error from server (Forbidden): pods "psa-test" is forbidden: violates PodSecurity "baseline:latest": privileged (container "psa-test" must not set securityContext.privileged=true)
+
+=== Rows 4 and 23: who owns the MongoDB password files, and which user runs mongod ===
+total 8
+-r--r----- 1 0 999 45 Oct 14 03:23 password
+-r--r----- 1 0 999  8 Oct 14 03:23 username
+Name:	mongod
+Uid:	999	999	999	999
+Gid:	999	999	999	999
+
+=== Row 4: MongoDB refuses a client that has no password ===
+Unauthorized: Command listDatabases requires authentication
+
+=== Row 7: the init container that waits for Kafka and MongoDB (busybox nc -z) ===
+wait-for-kafka-and-mongo: Completed, exit code 0
+it printed the word waiting 9 times before Kafka and MongoDB answered
+
+=== Row 13, first half: the disks that exist now ===
+NAME           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+data-kafka-0   Bound    pvc-54d6f5ad-5a1d-4d6d-a7b8-733044f2e92c   5Gi        RWO            local-path     <unset>                 60m
+data-mongo-0   Bound    pvc-3afd5fbc-03c6-4b9c-8f0a-76ff27d8e08c   5Gi        RWO            local-path     <unset>                 60m
