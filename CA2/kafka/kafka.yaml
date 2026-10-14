@@ -166,8 +166,12 @@ spec:
               memory: 1536Mi
 
   # Each Kafka pod gets its own persistent disk from this template.
+  # apiVersion, kind, volumeMode and status are the values Kubernetes fills in anyway. Writing them out keeps
+  # "kubectl apply" from reporting "configured" on every run, so a second "make up" says "unchanged".
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         labels:
           app.kubernetes.io/name: kafka
@@ -181,6 +185,11 @@ spec:
         resources:
           requests:
             storage: 5Gi
+
+        volumeMode: Filesystem
+
+      status:
+        phase: Pending
 
 ---
 # Headless Service:

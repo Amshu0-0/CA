@@ -163,6 +163,20 @@ else:
         if needed not in env:
             fails.append(needed + " is missing: MongoDB would start without authentication, or with a password in the manifest")
     judge(G, "MongoDB: password from a mounted file, and a PersistentVolumeClaim", fails)
+    # The official image starts as root and then drops to the user "mongodb" (user ID 999, group ID 999) before it reads the password
+    # files. The drop also removes any extra group, so the files must belong to group 999, and Kubernetes does that only through fsGroup.
+    group = pod(mongo).get("securityContext", {}).get("fsGroup")
+    judge(G, "MongoDB: the password files belong to group 999, the group mongod runs as", [] if group == 999 else ["fsGroup is " + str(group) + ": the mongodb user (999) could not read the password files and MongoDB would crash at start"])
+
+# Kubernetes fills in four values in every disk template. If the manifest leaves them out, "kubectl apply" sees a difference on every run,
+# prints "configured", and a second "make up" looks as if it changed something.
+fails = []
+for ss in of("StatefulSet"):
+    for disk in ss["spec"].get("volumeClaimTemplates", []):
+        complete = disk.get("apiVersion") == "v1" and disk.get("kind") == "PersistentVolumeClaim" and disk.get("spec", {}).get("volumeMode") == "Filesystem" and disk.get("status", {}).get("phase") == "Pending"
+        if not complete:
+            fails.append(name(ss) + ": disk template " + disk["metadata"]["name"] + " must spell out apiVersion, kind, volumeMode and status")
+judge(G, "StatefulSet disk templates spell out the values Kubernetes fills in, so a second apply says unchanged", fails)
 
 # ------------------------------------------------------------ 4. the programs get everything they require
 G = "4. Each program gets everything it requires"
@@ -286,6 +300,20 @@ else:
             fails.append(name(b) + " refers to Role " + b["roleRef"]["name"] + ", which is not defined")
         fails += [name(b) + " gives a Role to ServiceAccount " + s_["name"] + ", which is not defined" for s_ in b.get("subjects", []) if s_["name"] not in service_accounts]
     judge(G, str(len(roles)) + " Roles, " + str(len(of("RoleBinding"))) + " RoleBindings: none can read Secrets, all bindings resolve", fails)
+# The files of a Secret volume belong to root. A program that does not run as root can read them only through the group (fsGroup),
+# so every pod that mounts a Secret needs an fsGroup, and the files need the group-read permission but not the world-read one.
+fails = []
+for w in workloads:
+    for v in pod(w).get("volumes", []):
+        if "secret" in v:
+            mode, group = v["secret"].get("defaultMode", 0o644), pod(w).get("securityContext", {}).get("fsGroup")
+            if not isinstance(group, int):
+                fails.append(name(w) + ": volume " + v["name"] + " belongs to root and the pod sets no fsGroup, so a program that does not run as root cannot read it")
+            if not mode & 0o040:
+                fails.append(name(w) + ": volume " + v["name"] + " has mode " + oct(mode) + ", which the group cannot read")
+            if mode & 0o007:
+                fails.append(name(w) + ": volume " + v["name"] + " has mode " + oct(mode) + ", which every user on the machine can read")
+judge(G, "every Secret volume can be read by the pod's group and by nobody else", fails)
 hpas = of("HorizontalPodAutoscaler")
 if not hpas:
     todo(G, "HorizontalPodAutoscalers", "added in the scaling step")

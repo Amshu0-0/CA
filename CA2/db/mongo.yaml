@@ -46,7 +46,11 @@ spec:
 
       terminationGracePeriodSeconds: 60
 
+      # The official image starts as root, takes ownership of the data disk, and then runs mongod as the user
+      # "mongodb" (user and group ID 999). Kubernetes gives the files of a Secret to root and to nobody else, so
+      # mongod could not read its password files. fsGroup makes group 999 the group of those files (see defaultMode below).
       securityContext:
+        fsGroup: 999
         seccompProfile:
           type: RuntimeDefault
 
@@ -104,11 +108,16 @@ spec:
         - name: mongo-credentials
           secret:
             secretName: mongo-credentials
-            defaultMode: 256
+            # 288 is the octal number 0440: the owner and the group (999, from fsGroup above) may read the files, nobody else.
+            defaultMode: 288
 
   # Kubernetes creates a PersistentVolumeClaim from this template for the Mongo pod.
+  # apiVersion, kind, volumeMode and status are the values Kubernetes fills in anyway. Writing them out keeps
+  # "kubectl apply" from reporting "configured" on every run, so a second "make up" says "unchanged".
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
         labels:
           app.kubernetes.io/name: mongo
@@ -122,6 +131,11 @@ spec:
         resources:
           requests:
             storage: 5Gi
+
+        volumeMode: Filesystem
+
+      status:
+        phase: Pending
 
 ---
 # Headless Service:

@@ -2,6 +2,7 @@
 #
 #   make cluster-up    Terraform builds the network and 3 machines, Ansible installs Kubernetes (k3s) on them
 #   make up            create the Secret, apply the stack, wait until it is running
+#   make rest-check    call the REST API from this computer, through every node
 #   make down          delete the stack, including the disks and the Secret
 #   make cluster-down  destroy the machines and the network
 #   make validate      check every manifest against the Kubernetes schemas (needs no cluster)
@@ -27,7 +28,7 @@ export KUBECONFIG
 
 .DEFAULT_GOAL := help
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
-    context secrets up status logs rbac-check scale-up scale-down images-info down
+    context secrets up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -40,7 +41,11 @@ help: ; @printf '%s\n' \
     "  Stack (on the cluster)" \
     "  make up              create the Secret, apply the whole stack and wait until it is running" \
     "  make status          show everything in the namespace" \
+    "  make get-all         show everything in every namespace (kubectl get all -A)" \
     "  make logs            show the processor logs" \
+    "  make diagnose        explain why a pod is not ready: states, events and logs (read-only)" \
+    "  make rest-check      call the REST API from this computer, through the node port of every node" \
+    "  make exposure-check  show which ports of the nodes answer from this computer" \
     "  make rbac-check      prove the access rules with kubectl auth can-i" \
     "  make scale-up        start the load generator and its autoscaler (the scaling demonstration)" \
     "  make scale-down      stop the load generator and its autoscaler" \
@@ -89,16 +94,27 @@ context: ; @if [ ! -f "$(KUBECONFIG)" ]; then echo "There is no cluster yet: $(K
 secrets: ; bash scripts/create-secrets.sh
 
 up: context secrets ; $(KUBECTL) apply -k . && \
-    $(KUBECTL) -n $(NS) rollout status statefulset/mongo --timeout=300s && \
-    $(KUBECTL) -n $(NS) rollout status statefulset/kafka --timeout=300s && \
-    $(KUBECTL) -n $(NS) rollout status deployment/processor --timeout=300s && \
-    $(KUBECTL) -n $(NS) rollout status deployment/restapi --timeout=300s && \
-    $(KUBECTL) -n $(NS) wait --for=condition=complete job/producer-replay --timeout=600s && \
-    echo "Stack is up. REST API on every node at port 30080:  curl http://<node-ip>:30080/health"
+    ( $(KUBECTL) -n $(NS) rollout status statefulset/mongo --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status statefulset/kafka --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/processor --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/restapi --timeout=300s && \
+      $(KUBECTL) -n $(NS) wait --for=condition=complete job/producer-replay --timeout=600s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
 
 status: ; $(KUBECTL) -n $(NS) get all,pvc,configmap,hpa,networkpolicy,serviceaccount,role,rolebinding -o wide
 
+get-all: ; $(KUBECTL) get all -A
+
 logs: ; $(KUBECTL) -n $(NS) logs deployment/processor --tail=40
+
+diagnose: ; NS=$(NS) KUBECTL=$(KUBECTL) bash scripts/diagnose.sh
+
+rest-check: ; TERRAFORM=$(TERRAFORM) python3 scripts/rest-check.py
+
+exposure-check: ; @echo "kubectl get svc -A --field-selector spec.type!=ClusterIP     (every Service that is reachable from outside the cluster)" ; \
+    $(KUBECTL) get svc -A --field-selector 'spec.type!=ClusterIP' && echo && \
+    TERRAFORM=$(TERRAFORM) python3 scripts/exposure-check.py
 
 rbac-check: ; @echo "pipeline-viewer   can list pods?       $$($(KUBECTL) auth can-i list pods --as=system:serviceaccount:$(NS):pipeline-viewer -n $(NS))" ; \
     echo "pipeline-viewer   can delete pods?     $$($(KUBECTL) auth can-i delete pods --as=system:serviceaccount:$(NS):pipeline-viewer -n $(NS))" ; \
