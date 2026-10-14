@@ -1,0 +1,89 @@
+# Smoke-test producer: sends ONE tagged event into the pipeline.
+# It is not part of "make up". "make smoke" (scripts/smoke-test.py) replaces __TRACE_ID__ with a new unique value,
+# creates this Job, and then follows the event through Kafka, the processor, MongoDB and the REST API.
+#
+# The pod carries the label app.kubernetes.io/name: producer, so the NetworkPolicies treat it like every other producer:
+# it may reach Kafka on port 9092 (and the DNS server) and nothing else.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: producer-smoke
+  namespace: ca2
+  labels:
+    app.kubernetes.io/name: producer
+    app.kubernetes.io/component: smoke-test
+    app.kubernetes.io/part-of: ca2-pipeline
+
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 300
+
+  # The finished Job and its pod remove themselves after 30 minutes, so no test leftovers pile up.
+  ttlSecondsAfterFinished: 1800
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: producer
+        app.kubernetes.io/component: smoke-test
+        app.kubernetes.io/part-of: ca2-pipeline
+
+    spec:
+      serviceAccountName: producer
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: OnFailure
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Wait until Kafka accepts connections before starting the producer.
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.36
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}
+          command:
+            - sh
+            - -c
+            - until nc -z -w 2 kafka 9092; do echo waiting for kafka; sleep 3; done
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      containers:
+        - name: producer
+          image: ghcr.io/amshu0-0/ca2-producer:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          # The same program as the replay Job. With --trace-id it sends a single event that carries the trace id
+          # (a copy of the first dataset row, with Label SMOKE-TEST), prints where Kafka stored it, and stops.
+          command: ["python", "-u", "producer.py", "--trace-id", "__TRACE_ID__"]
+
+          # Load the shared pipeline settings from the ConfigMap.
+          envFrom:
+            - configMapRef:
+                name: pipeline-config
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

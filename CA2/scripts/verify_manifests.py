@@ -26,9 +26,10 @@ if out.returncode != 0:
     sys.exit("kubectl kustomize failed:\n" + out.stderr)
 docs = [d for d in yaml.safe_load_all(out.stdout) if d]
 
-# The scaling manifests are applied on demand (make scale-up), but they are part of the project, so they are checked too.
+# The scaling manifests (make scale-up) and the smoke-test Job (make smoke) are applied on demand, but they are part of the project,
+# so they are checked too.
 scaling = []
-for f in sorted((ROOT / "producer" / "scaling").glob("*.yaml")):
+for f in sorted((ROOT / "producer" / "scaling").glob("*.yaml")) + sorted((ROOT / "producer" / "smoke").glob("*.yaml")):
     scaling += [d for d in yaml.safe_load_all(f.read_text()) if d]
 objects = docs + scaling
 
@@ -49,7 +50,7 @@ services = {name(s): s for s in of("Service")}
 config_maps = {name(d): d.get("data", {}) for d in of("ConfigMap")}
 service_accounts = {name(d) for d in of("ServiceAccount")}
 SECRET = "mongo-credentials"   # made by scripts/create-secrets.sh and never stored in git, so it is not among the manifests
-OWN_CODE = {"processor", "restapi", "producer-replay", "producer-load"}   # the workloads that run our own code
+OWN_CODE = {"processor", "restapi", "producer-replay", "producer-load", "producer-smoke"}   # the workloads that run our own code
 
 rows = []
 
@@ -180,7 +181,7 @@ judge(G, "StatefulSet disk templates spell out the values Kubernetes fills in, s
 
 # ------------------------------------------------------------ 4. the programs get everything they require
 G = "4. Each program gets everything it requires"
-PROGRAMS = {"processor/processor.py": ["processor"], "producer/producer.py": ["producer-replay", "producer-load"], "restapi/rest_app.py": ["restapi"]}
+PROGRAMS = {"processor/processor.py": ["processor"], "producer/producer.py": ["producer-replay", "producer-load", "producer-smoke"], "restapi/rest_app.py": ["restapi"]}
 script = ROOT / "scripts" / "create-secrets.sh"
 secret_keys = set(re.findall(r"--from-file=(\w+)=", script.read_text())) if script.exists() else set()
 for program, names in PROGRAMS.items():
@@ -379,6 +380,10 @@ checks = [
     ("A REST endpoint declared and exposed", services.get("restapi", {}).get("spec", {}).get("type") in ("NodePort", "LoadBalancer"), False),
     ("Secrets mounted, not embedded in manifests", all(not (re.search(r"PASSWORD|SECRET|TOKEN", e["name"]) and "value" in e and not e["name"].endswith("_FILE")) for w in workloads for c in containers(w) for e in c.get("env", [])), False),
     ("Only the necessary ports are exposed", published == ["restapi"], False),
+    ("Tests: make smoke, make netpol-check and make heal-check exist (the smoke Job stays out of make up)",
+     has("Job", "producer-smoke") and ("Job", "producer-smoke") not in {(kind(d), name(d)) for d in docs}
+     and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("smoke", "netpol-check", "heal-check"))
+     and all((ROOT / "scripts" / f).is_file() for f in ("smoke-test.py", "netpol-check.py", "heal-check.py", "ca2lib.py")), False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
     ("Dockerfiles and a registry push for the three custom images", all((ROOT / c / "Dockerfile").exists() for c in ("producer", "processor", "restapi")) and workflow.exists(), False),
     ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),

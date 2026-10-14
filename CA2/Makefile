@@ -7,6 +7,9 @@
 #   make cluster-down  destroy the machines and the network
 #   make validate      check every manifest against the Kubernetes schemas (needs no cluster)
 #   make verify        check that manifests, programs, cluster code and CA2 requirements agree (needs no cluster)
+#   make smoke         send one tagged event through producer, Kafka, processor, MongoDB and REST API
+#   make netpol-check  test what each kind of pod can and cannot reach (the NetworkPolicy test)
+#   make heal-check    delete pods on purpose and check that Kubernetes brings them back with their data
 #
 # Needs: terraform, ansible, kubectl, bash, openssl and ssh-keygen, plus AWS credentials, for the cluster targets;
 # kubeconform for "make validate"; python3 with PyYAML for "make verify".
@@ -21,6 +24,10 @@ TF         = $(TERRAFORM) -chdir=infra/terraform
 TF_CLI_ARGS ?= -no-color
 export TF_CLI_ARGS
 
+# Extra options for the test scripts, for example:  make smoke SMOKE_ARGS="--save evidence/step6-smoke-response.json"
+SMOKE_ARGS ?=
+HEAL_ARGS  ?=
+
 # The stack targets use the cluster that "make cluster-up" built (its kubeconfig lives in .secrets/).
 # To use another cluster instead, run for example:  make up KUBECONFIG=$HOME/.kube/config
 KUBECONFIG ?= $(CURDIR)/.secrets/kubeconfig.yaml
@@ -28,7 +35,8 @@ export KUBECONFIG
 
 .DEFAULT_GOAL := help
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
-    context secrets up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down
+    context secrets up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
+    smoke netpol-check netpol-control heal-check
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -47,6 +55,10 @@ help: ; @printf '%s\n' \
     "  make rest-check      call the REST API from this computer, through the node port of every node" \
     "  make exposure-check  show which ports of the nodes answer from this computer" \
     "  make rbac-check      prove the access rules with kubectl auth can-i" \
+    "  make smoke           send one tagged event through producer, Kafka, processor, MongoDB and REST API" \
+    "  make netpol-check    test what each kind of pod can reach (30 connections, compared with the policies)" \
+    "  make netpol-control  the same test, then again with the policies deleted: proves the policies do the blocking" \
+    "  make heal-check      delete pods on purpose and check that they come back with their data" \
     "  make scale-up        start the load generator and its autoscaler (the scaling demonstration)" \
     "  make scale-down      stop the load generator and its autoscaler" \
     "  make down            delete everything: workloads, disks, Secret, namespace" \
@@ -80,7 +92,7 @@ cluster-down: ; $(TF) init -input=false > /dev/null && $(TF) destroy -input=fals
 
 # ---------------------------------------------------------------- checks that need no cluster
 
-validate: ; $(KUBECTL) kustomize . | kubeconform -strict -summary - && kubeconform -strict -summary producer/scaling
+validate: ; $(KUBECTL) kustomize . | kubeconform -strict -summary - && kubeconform -strict -summary producer/scaling producer/smoke
 
 verify: ; python3 scripts/verify_manifests.py
 
@@ -122,8 +134,17 @@ rbac-check: ; @echo "pipeline-viewer   can list pods?       $$($(KUBECTL) auth c
     echo "pipeline-operator can read secrets?    $$($(KUBECTL) auth can-i get secrets --as=system:serviceaccount:$(NS):pipeline-operator -n $(NS))" ; \
     echo "processor pod     can read secrets?    $$($(KUBECTL) auth can-i get secrets --as=system:serviceaccount:$(NS):processor -n $(NS))"
 
+# The tests need the running stack ("make up"). Whatever they create is removed again when they end.
+smoke: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/smoke-test.py $(SMOKE_ARGS)
+
+netpol-check: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py
+
+netpol-control: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py --control
+
+heal-check: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/heal-check.py $(HEAL_ARGS)
+
 scale-up: ; $(KUBECTL) apply -f producer/scaling/
 
 scale-down: ; $(KUBECTL) delete -f producer/scaling/ --ignore-not-found
 
-down: ; $(KUBECTL) delete -f producer/scaling/ --ignore-not-found ; $(KUBECTL) delete -k . --ignore-not-found --wait=true && echo "Deleted. Check:  kubectl get namespace $(NS)   (it should say NotFound)"
+down: ; $(KUBECTL) delete -f producer/scaling/ --ignore-not-found ; $(KUBECTL) delete namespace ca2-intruder --ignore-not-found --wait=false ; $(KUBECTL) delete -k . --ignore-not-found --wait=true && echo "Deleted. Check:  kubectl get namespace $(NS)   (it should say NotFound)"
