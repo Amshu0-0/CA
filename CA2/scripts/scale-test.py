@@ -1,6 +1,6 @@
 # Scaling test: what happens when the autoscaler adds producer pods, measured before and after.
 #
-#   make scale-test                                          the whole test, about 10 minutes
+#   make scale-test                                          the whole test, about 5 minutes
 #   make scale-test SCALE_ARGS="--before 30 --after 30"      shorter measuring windows
 #   make scale-report                                        draw the table and the chart again from the saved files
 #

@@ -10,7 +10,7 @@
 #   make smoke         send one tagged event through producer, Kafka, processor, MongoDB and REST API
 #   make netpol-check  test what each kind of pod can and cannot reach (the NetworkPolicy test)
 #   make heal-check    delete pods on purpose and check that Kubernetes brings them back with their data
-#   make scale-test    scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 10 minutes)
+#   make scale-test    scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 5 minutes)
 #   make scale-report  rebuild the results table and chart from the saved samples of the last scaling test
 #
 # Needs: terraform, ansible, kubectl, bash, openssl and ssh-keygen, plus AWS credentials, for the cluster targets;
@@ -64,7 +64,7 @@ help: ; @printf '%s\n' \
     "  make heal-check      delete pods on purpose and check that they come back with their data" \
     "  make scale-up        start the load generator and its autoscaler (the scaling demonstration)" \
     "  make scale-down      stop the load generator and its autoscaler" \
-    "  make scale-test      scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 10 minutes)" \
+    "  make scale-test      scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 5 minutes)" \
     "  make scale-report    rebuild the results table and chart from the saved samples of the last scaling test" \
     "  make down            delete everything: workloads, disks, Secret, namespace" \
     "" \

@@ -64,6 +64,13 @@ def average(values):
     return mean(values) if values else None
 
 
+# The smallest and the largest value seen in a window, or None if the value never changed.
+def changed_between(values):
+    values = [v for v in values if v is not None]
+
+    return (min(values), max(values)) if values and min(values) != max(values) else None
+
+
 def window_numbers(rows, t0, t1):
     inside = [r for r in rows if t0 <= r["t"] <= t1]
     span = 0.5 * (t1 - t0)       # the values used must cover at least half of the window
@@ -83,6 +90,8 @@ def window_numbers(rows, t0, t1):
         "producer_cpu_pct": average([r["producer_cpu_pct"] for r in inside]),
         "processor_cpu_pct": average([r["processor_cpu_pct"] for r in inside]),
         "agent_cpu_pct": average([r["agent_cpu_pct"] for r in inside]),
+        "server_cpu_pct": average([r["server_cpu_pct"] for r in inside]),
+        "processor_pods_changed": changed_between([r["processor_pods_ready"] for r in inside]),
     }
 
 
@@ -191,6 +200,7 @@ def results_table(rows, summary):
         row("Producer pods' CPU, % of their request (from the autoscaler)", "producer_cpu_pct", change=False)
         row("Processor pods' CPU, % of their request (from their autoscaler)", "processor_cpu_pct", change=False)
         row("Worker nodes' CPU, % (average of the workers, from kubectl top nodes)", "agent_cpu_pct", change=False)
+        row("Control-plane node's CPU, % (the server also runs pods, from kubectl top nodes)", "server_cpu_pct", change=False)
 
     steps = timeline(rows, summary)
 
@@ -249,11 +259,22 @@ def conclusions(b, a, summary, rows):
             less = "- That is less than " + format(pods_ratio, ".0f") + " times the rate of one pod"
 
             if workers is not None and workers >= 85:
-                out.append(less + ": the pods share the CPU of the two worker nodes with Kafka, MongoDB and the processors (the workers were at " + num(workers) + "% CPU).")
+                out.append(less + ". The worker nodes were nearly full (" + num(workers) + "% CPU on average), and the producer pods share them with Kafka, MongoDB and the processors.")
             elif workers is not None:
-                out.append(less + ", and the workers were only at " + num(workers) + "% CPU, so their CPU was not the limit: the producers were waiting for something else, for example Kafka accepting the messages.")
+                out.append(less + ". The worker nodes averaged " + num(workers) + "% CPU, so they were busy but not full. This test did not measure what held the producers back"
+                           " (the CPU limit of each pod, the shared nodes or Kafka), so no cause is claimed.")
             else:
                 out.append(less + ". There are no CPU numbers for the workers, so the cause is not known.")
+
+    if b and b.get("processor_pods_changed"):
+        low, high = b["processor_pods_changed"]
+        extra = ""
+
+        if b["stored_msg_s"] is not None and b["kafka_msg_s"] and b["stored_msg_s"] > 1.05 * b["kafka_msg_s"]:
+            extra = (" MongoDB stored more per second (" + num(b["stored_msg_s"]) + ") than Kafka received (" + num(b["kafka_msg_s"])
+                     + "), which is only possible while the processors work off messages that were already waiting.")
+
+        out.append("- The processors were still scaling during the 'before' window (from " + pods(low) + " to " + pods(high) + " pods), so 'before' is not a steady state." + extra)
 
     if a and a["stored_msg_s"] is not None and a["producers_msg_s"]:
         if a["stored_msg_s"] < 0.9 * a["producers_msg_s"]:

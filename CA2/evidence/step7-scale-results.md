@@ -19,6 +19,7 @@ Autoscaler `producer-load`: 1 to 5 pods, target 50% of the CPU request.  Process
 | Producer pods' CPU, % of their request (from the autoscaler) | n/a | 490 |  |
 | Processor pods' CPU, % of their request (from their autoscaler) | 355 | 461 |  |
 | Worker nodes' CPU, % (average of the workers, from kubectl top nodes) | 35 | 77 |  |
+| Control-plane node's CPU, % (the server also runs pods, from kubectl top nodes) | 21 | 78 |  |
 
 ## How the autoscaler added pods
 
@@ -36,7 +37,8 @@ The tagged event is the one the smoke test sends. Its time runs from the moment 
 ## What the numbers say
 
 - The producers' combined rate went from 656 to 2,369 messages per second (x3.6) when the autoscaler took the producers from 1 to 5 pods.
-- That is less than 5 times the rate of one pod, and the workers were only at 77% CPU, so their CPU was not the limit: the producers were waiting for something else, for example Kafka accepting the messages.
+- That is less than 5 times the rate of one pod. The worker nodes averaged 77% CPU, so they were busy but not full. This test did not measure what held the producers back (the CPU limit of each pod, the shared nodes or Kafka), so no cause is claimed.
+- The processors were still scaling during the 'before' window (from 1 to 3 pods), so 'before' is not a steady state. MongoDB stored more per second (737) than Kafka received (625), which is only possible while the processors work off messages that were already waiting.
 - MongoDB stored 1,138 messages per second while the producers sent 2,369. The difference waits in Kafka (117,483 messages at the end of the window), so after the producers the next limit is the part that reads from Kafka and writes to MongoDB: 3 processor pods and MongoDB. The processors were busy (461% of their CPU request, the target is 70%); their autoscaler stops at 3 pods, one per partition of the topic.
 - The processors have an autoscaler of their own. It took them from 1 to 3 pods, the first extra pod 30 s after the first producer pod was ready (their CPU was 355% of the request, the target is 70%).
 - A tagged event needed 0.1 s to get from Kafka to the REST API before scaling and 46.1 s after, because it queued behind the backlog.
