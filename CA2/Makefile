@@ -5,6 +5,9 @@
 #   make rest-check    call the REST API from this computer, through every node
 #   make down          delete the stack, including the disks and the Secret
 #   make cluster-down  destroy the machines and the network
+#   make scan          look in AWS for anything left from this project (after cluster-down it must find nothing)
+#   make teardown      make down, make cluster-down, then make scan: everything removed, and the proof
+#   make dry-run       ask the cluster what the next "make up" would change, without changing anything
 #   make validate      check every manifest against the Kubernetes schemas (needs no cluster)
 #   make verify        check that manifests, programs, cluster code and CA2 requirements agree (needs no cluster)
 #   make smoke         send one tagged event through producer, Kafka, processor, MongoDB and REST API
@@ -30,16 +33,18 @@ export TF_CLI_ARGS
 SMOKE_ARGS ?=
 HEAL_ARGS  ?=
 SCALE_ARGS ?=
+SCAN_ARGS  ?=
 
 # The stack targets use the cluster that "make cluster-up" built (its kubeconfig lives in .secrets/).
 # To use another cluster instead, run for example:  make up KUBECONFIG=$HOME/.kube/config
-KUBECONFIG ?= $(CURDIR)/.secrets/kubeconfig.yaml
+# A KUBECONFIG that is left over in your terminal is ignored on purpose: a second copy of this repository must use its own cluster.
+KUBECONFIG = $(CURDIR)/.secrets/kubeconfig.yaml
 export KUBECONFIG
 
 .DEFAULT_GOAL := help
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context secrets up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
-    smoke netpol-check netpol-control heal-check scale-test scale-report
+    smoke netpol-check netpol-control heal-check scale-test scale-report scan teardown dry-run
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -48,9 +53,12 @@ help: ; @printf '%s\n' \
     "  make cluster-check   static checks of the cluster code: terraform fmt and validate, ansible syntax" \
     "  make cluster-status  show the nodes, all pods, and node CPU and memory" \
     "  make cluster-down    destroy the machines and the network" \
+    "  make scan            look in AWS for anything left from this project (after cluster-down it must find nothing)" \
+    "  make teardown        make down, then cluster-down, then scan: remove everything and prove it" \
     "" \
     "  Stack (on the cluster)" \
     "  make up              create the Secret, apply the whole stack and wait until it is running" \
+    "  make dry-run         ask the cluster what the next make up would change, without changing anything (after make up: all unchanged)" \
     "  make status          show everything in the namespace" \
     "  make get-all         show everything in every namespace (kubectl get all -A)" \
     "  make logs            show the processor logs" \
@@ -94,6 +102,24 @@ cluster-status: ; $(KUBECTL) get nodes -o wide && $(KUBECTL) get pods -A && \
 cluster-down: ; $(TF) init -input=false > /dev/null && $(TF) destroy -input=false -auto-approve && \
     rm -f infra/ansible/inventory.ini infra/ansible/known_hosts "$(CURDIR)/.secrets/kubeconfig.yaml" && \
     echo "Cluster destroyed."
+
+# Looks in AWS for anything that is left from this project: everything tagged Project=<project_tag> (infra/config.yml), and everything that costs money.
+# Exit code 0 = nothing is left. Options, for example:  make scan SCAN_ARGS="--all-regions"
+scan: ; python3 scripts/cleanup-scan.py $(SCAN_ARGS)
+
+# Everything away, and the proof. The stack is deleted only if the cluster still answers; the machines and the network are always destroyed;
+# then the scan waits up to 3 minutes for AWS's tag index to catch up. The command fails if anything is left.
+teardown: ; if $(KUBECTL) --request-timeout=10s get namespace kube-system > /dev/null 2>&1; then \
+        $(MAKE) --no-print-directory down || echo "make down did not finish. The machines are destroyed next, and that removes the stack with them."; \
+        echo; echo "What is left inside Kubernetes (no ca2 namespace, no volumes):"; $(KUBECTL) get namespace; $(KUBECTL) get pv; echo; \
+    else echo "The cluster does not answer, so there is no stack to delete: going on to destroy the machines."; fi ; \
+    $(MAKE) --no-print-directory cluster-down && python3 scripts/cleanup-scan.py --wait 180 $(SCAN_ARGS)
+
+# Asks the cluster's API server what "kubectl apply -k ." would change, and changes nothing (a server-side dry run: the cluster's own
+# validation and admission rules run, including Pod Security). Run it after "make up": every object must say "unchanged".
+# "make dry-run DRY_RUN=client" is the form that the assignment's tip names: kubectl validates and prints, and sends nothing.
+DRY_RUN ?= server
+dry-run: context ; $(KUBECTL) apply -k . --dry-run=$(DRY_RUN)
 
 # ---------------------------------------------------------------- checks that need no cluster
 

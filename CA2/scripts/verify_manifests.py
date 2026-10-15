@@ -366,6 +366,22 @@ else:
     ignored = {line.strip() for line in ((ROOT / ".gitignore").read_text().splitlines() if (ROOT / ".gitignore").exists() else [])}
     judge(G, "keys, Terraform state and the generated inventory cannot be committed (.gitignore)", [x + " is not a line in .gitignore" for x in (".secrets/", "infra/terraform/*.tfstate", "infra/ansible/inventory.ini") if x not in ignored])
     infra_ok = all(row[0] == "PASS" for row in rows if row[1] == G)
+    # The cleanup scan finds resources by their tag. If it looked for a tag that Terraform never sets, it would say CLEAN while things are left.
+    scan_file, tf_dir = ROOT / "scripts" / "cleanup-scan.py", INFRA / "terraform"
+    scan_key = re.search(r'^TAG_KEY\s*=\s*"(\w+)"', scan_file.read_text() if scan_file.is_file() else "", flags=re.M)
+    config_tf = (tf_dir / "config.tf").read_text() if (tf_dir / "config.tf").is_file() else ""
+    versions_tf = (tf_dir / "versions.tf").read_text() if (tf_dir / "versions.tf").is_file() else ""
+    tf_tags = re.search(r"\btags\s*=\s*\{(.*?)\}", config_tf, flags=re.S)
+    fails = []
+    if not scan_file.is_file():
+        fails.append("scripts/cleanup-scan.py is missing")
+    elif not scan_key:
+        fails.append("scripts/cleanup-scan.py has no TAG_KEY line")
+    elif not tf_tags or not re.search(r"^\s*" + scan_key.group(1) + r"\s*=\s*local\.config\.project_tag\s*$", tf_tags.group(1), flags=re.M):
+        fails.append("the scan looks for the tag " + scan_key.group(1) + ", but Terraform does not set that tag from project_tag, so the scan could say CLEAN while things are left")
+    if not re.search(r"default_tags\s*\{\s*tags\s*=\s*local\.tags", versions_tf):
+        fails.append("versions.tf does not put local.tags on every resource (default_tags), so the scan could not find them")
+    judge(G, "the cleanup scan looks for the tag that Terraform puts on every resource (it cannot say CLEAN by looking for the wrong tag)", fails)
 
 # ------------------------------------------------------------ 8. progress against the CA2 assignment
 G = "8. The CA2 assignment, requirement by requirement"
@@ -390,6 +406,8 @@ checks = [
      and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scale-test", "scale-report"))
      and all((ROOT / "scripts" / f).is_file() for f in ("scale-test.py", "scalereport.py")), False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
+    ("Cleanup: make teardown deletes the stack, destroys the cluster and then scans AWS for leftovers (make scan)",
+     all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scan", "teardown")) and (ROOT / "scripts" / "cleanup-scan.py").is_file(), False),
     ("Dockerfiles and a registry push for the three custom images", all((ROOT / c / "Dockerfile").exists() for c in ("producer", "processor", "restapi")) and workflow.exists(), False),
     ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),
     ("NetworkPolicy restricting traffic between services", bool(policies), True),
