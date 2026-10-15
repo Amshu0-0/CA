@@ -10,6 +10,8 @@
 #   make smoke         send one tagged event through producer, Kafka, processor, MongoDB and REST API
 #   make netpol-check  test what each kind of pod can and cannot reach (the NetworkPolicy test)
 #   make heal-check    delete pods on purpose and check that Kubernetes brings them back with their data
+#   make scale-test    scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 10 minutes)
+#   make scale-report  rebuild the results table and chart from the saved samples of the last scaling test
 #
 # Needs: terraform, ansible, kubectl, bash, openssl and ssh-keygen, plus AWS credentials, for the cluster targets;
 # kubeconform for "make validate"; python3 with PyYAML for "make verify".
@@ -27,6 +29,7 @@ export TF_CLI_ARGS
 # Extra options for the test scripts, for example:  make smoke SMOKE_ARGS="--save evidence/step6-smoke-response.json"
 SMOKE_ARGS ?=
 HEAL_ARGS  ?=
+SCALE_ARGS ?=
 
 # The stack targets use the cluster that "make cluster-up" built (its kubeconfig lives in .secrets/).
 # To use another cluster instead, run for example:  make up KUBECONFIG=$HOME/.kube/config
@@ -36,7 +39,7 @@ export KUBECONFIG
 .DEFAULT_GOAL := help
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context secrets up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
-    smoke netpol-check netpol-control heal-check
+    smoke netpol-check netpol-control heal-check scale-test scale-report
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -61,6 +64,8 @@ help: ; @printf '%s\n' \
     "  make heal-check      delete pods on purpose and check that they come back with their data" \
     "  make scale-up        start the load generator and its autoscaler (the scaling demonstration)" \
     "  make scale-down      stop the load generator and its autoscaler" \
+    "  make scale-test      scaling test: 1 producer pod, then the autoscaler adds pods; measured before and after (about 10 minutes)" \
+    "  make scale-report    rebuild the results table and chart from the saved samples of the last scaling test" \
     "  make down            delete everything: workloads, disks, Secret, namespace" \
     "" \
     "  Checks that need no cluster" \
@@ -142,6 +147,12 @@ netpol-check: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py
 netpol-control: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py --control
 
 heal-check: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/heal-check.py $(HEAL_ARGS)
+
+# The scaling test starts the load itself and removes it again when it ends, also when it stops early. Options: SCALE_ARGS="--help".
+scale-test: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/scale-test.py $(SCALE_ARGS)
+
+# Needs no cluster: it reads evidence/step7-scale-samples.csv and writes the table and the chart again.
+scale-report: ; python3 scripts/scalereport.py
 
 scale-up: ; $(KUBECTL) apply -f producer/scaling/
 

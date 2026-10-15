@@ -384,6 +384,11 @@ checks = [
      has("Job", "producer-smoke") and ("Job", "producer-smoke") not in {(kind(d), name(d)) for d in docs}
      and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("smoke", "netpol-check", "heal-check"))
      and all((ROOT / "scripts" / f).is_file() for f in ("smoke-test.py", "netpol-check.py", "heal-check.py", "ca2lib.py")), False),
+    ("Scaling test: make scale-test measures the pipeline before and after the producers' autoscaler (the load stays out of make up)",
+     has("Deployment", "producer-load") and ("Deployment", "producer-load") not in {(kind(d), name(d)) for d in docs}
+     and any(h["spec"]["scaleTargetRef"]["name"] == "producer-load" for h in hpas)
+     and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scale-test", "scale-report"))
+     and all((ROOT / "scripts" / f).is_file() for f in ("scale-test.py", "scalereport.py")), False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
     ("Dockerfiles and a registry push for the three custom images", all((ROOT / c / "Dockerfile").exists() for c in ("producer", "processor", "restapi")) and workflow.exists(), False),
     ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),
