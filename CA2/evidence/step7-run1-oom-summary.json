@@ -1,0 +1,73 @@
+{
+  "started": "2026-10-15 01:57",
+  "args": {
+    "before": 60,
+    "after": 60,
+    "settle": 20,
+    "settle_limit": 240,
+    "interval": 5.0,
+    "lag_every": 20.0,
+    "ramp_timeout": 300,
+    "hpa_wait": 90,
+    "drain_timeout": 240,
+    "cooldown": 0,
+    "max_messages": 1500000,
+    "max_minutes": 25,
+    "no_latency": false,
+    "out": "evidence",
+    "prefix": "step7-scale",
+    "host": null,
+    "port": null
+  },
+  "phases": [
+    {
+      "name": "warmup",
+      "t0": 9.1,
+      "t1": 35.6
+    },
+    {
+      "name": "before",
+      "t0": 35.6,
+      "t1": 95.6
+    },
+    {
+      "name": "ramp",
+      "t0": 95.6,
+      "t1": 194.9
+    },
+    {
+      "name": "end",
+      "t0": 194.9,
+      "t1": null
+    }
+  ],
+  "windows": {
+    "before": {
+      "t0": 35.6,
+      "t1": 95.6
+    }
+  },
+  "probes": {
+    "before": {
+      "seconds": 0.06,
+      "trace_id": "smoke-1015-015739-e9b0",
+      "partition": 1,
+      "offset": 2706
+    }
+  },
+  "aborted": "after 90 s the autoscaler still has no CPU number for the producer pods, so it cannot scale. What it said about itself is in evidence/step7-scale-hpa.txt (look for ScalingActive and FailedGetResourceMetric)",
+  "baseline": {
+    "docs": 5003,
+    "kafka_end": 5003
+  },
+  "samples": 38,
+  "trace_index": "created",
+  "hpa": {
+    "min": 1,
+    "max": 5,
+    "cpu_target": 50,
+    "processor_min": 1,
+    "processor_max": 3,
+    "processor_target": 70
+  }
+}

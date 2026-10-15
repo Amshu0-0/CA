@@ -1,0 +1,28 @@
+deployment.apps/producer-load created
+Waiting for deployment "producer-load" rollout to finish: 0 of 1 updated replicas are available...
+deployment "producer-load" successfully rolled out
+--- about 30 seconds after the pod started ---
+NAME                             READY   STATUS    RESTARTS   AGE
+producer-load-78979d884b-6q5f8   1/1     Running   0          34s
+NAME                             CPU(cores)   MEMORY(bytes)   
+producer-load-78979d884b-6q5f8   500m         48Mi            
+Defaulted container "producer" out of: producer, wait-for-kafka (init)
+sent 16000 rows total, 761 msg/s
+sent 19931 rows total, 786 msg/s
+--- about 60 seconds after the pod started ---
+NAME                             READY   STATUS    RESTARTS   AGE
+producer-load-78979d884b-6q5f8   1/1     Running   0          65s
+NAME                             CPU(cores)   MEMORY(bytes)   
+producer-load-78979d884b-6q5f8   500m         49Mi            
+Defaulted container "producer" out of: producer, wait-for-kafka (init)
+sent 38839 rows total, 767 msg/s
+sent 42187 rows total, 670 msg/s
+--- about 90 seconds after the pod started ---
+NAME                             READY   STATUS    RESTARTS   AGE
+producer-load-78979d884b-6q5f8   1/1     Running   0          96s
+NAME                             CPU(cores)   MEMORY(bytes)   
+producer-load-78979d884b-6q5f8   498m         49Mi            
+Defaulted container "producer" out of: producer, wait-for-kafka (init)
+sent 57500 rows total, 524 msg/s
+sent 60500 rows total, 585 msg/s
+deployment.apps "producer-load" deleted from ca2 namespace

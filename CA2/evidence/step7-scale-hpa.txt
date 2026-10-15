@@ -1,0 +1,65 @@
+$ kubectl -n ca2 describe hpa
+Name:                                                  processor
+Namespace:                                             ca2
+Labels:                                                app.kubernetes.io/component=autoscaler
+                                                       app.kubernetes.io/name=processor
+                                                       app.kubernetes.io/part-of=ca2-pipeline
+Annotations:                                           <none>
+CreationTimestamp:                                     Wed, 14 Oct 2026 11:06:57 -0500
+Reference:                                             Deployment/processor
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  459% (459m) / 70%
+Min replicas:                                          1
+Max replicas:                                          3
+Behavior:
+  Scale Up:
+    Stabilization Window: 0 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Pods  Value: 1  Period: 30 seconds
+  Scale Down:
+    Stabilization Window: 120 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Pods  Value: 1  Period: 60 seconds
+Deployment pods:    3 current / 3 desired
+Conditions:
+  Type            Status  Reason            Message
+  ----            ------  ------            -------
+  AbleToScale     True    ReadyForNewScale  recommended size matches current size
+  ScalingActive   True    ValidMetricFound  the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  True    TooManyReplicas   the desired replica count is more than the maximum replica count
+  ScaledToZero    False   NotScaledToZero   the HPA controller did not scale the workload to zero
+
+
+Name:                                                  producer-load
+Namespace:                                             ca2
+Labels:                                                app.kubernetes.io/component=autoscaler
+                                                       app.kubernetes.io/name=producer
+                                                       app.kubernetes.io/part-of=ca2-pipeline
+Annotations:                                           <none>
+CreationTimestamp:                                     Wed, 14 Oct 2026 23:01:50 -0500
+Reference:                                             Deployment/producer-load
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  491% (491m) / 50%
+Min replicas:                                          1
+Max replicas:                                          5
+Behavior:
+  Scale Up:
+    Stabilization Window: 0 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Percent  Value: 100  Period: 15 seconds
+  Scale Down:
+    Stabilization Window: 60 seconds
+    Select Policy: Max
+    Policies:
+      - Type: Pods  Value: 1  Period: 30 seconds
+Deployment pods:    5 current / 5 desired
+Conditions:
+  Type            Status  Reason            Message
+  ----            ------  ------            -------
+  AbleToScale     True    ReadyForNewScale  recommended size matches current size
+  ScalingActive   True    ValidMetricFound  the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  True    TooManyReplicas   the desired replica count is more than the maximum replica count
+  ScaledToZero    False   NotScaledToZero   the HPA controller did not scale the workload to zero

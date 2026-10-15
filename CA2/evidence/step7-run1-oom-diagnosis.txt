@@ -1,0 +1,120 @@
+# Step 7, first run: why the producer pod never stayed up.
+# Copied from the terminal of Wed 2026-10-14, about 21:10 to 21:17 CDT. Only the shell prompt was removed: a line that starts with "$ " is the first line of a block of commands that was pasted.
+# Part 1 is the event list of the namespace after the first test run. Part 2 starts one load pod by hand and prints its state.
+# The container state in part 2 says: reason OOMKilled, exit code 137, memory limit 256Mi, running for 13 to 14 seconds each time.
+# The other step7-run1-oom-* files are the output of the first test run itself. They were renamed from step7-scale-* afterwards, so the names printed inside run.txt and summary.json still say step7-scale-*.
+
+$ cd ~/Desktop/CA/CA2
+export KUBECONFIG=$PWD/.secrets/kubeconfig.yaml
+kubectl -n ca2 get events --sort-by=.lastTimestamp | tail -30
+17m         Normal    Created                        pod/processor-7fb4b958cb-9thj4          Container created
+17m         Normal    Started                        pod/processor-7fb4b958cb-9thj4          Container started
+17m         Normal    Pulled                         pod/processor-7fb4b958cb-9thj4          Container image "ghcr.io/amshu0-0/ca2-processor:1.0.0" already present on machine and can be accessed by the pod
+17m         Normal    Started                        pod/processor-7fb4b958cb-9thj4          Container started
+17m         Normal    Created                        pod/processor-7fb4b958cb-9thj4          Container created
+17m         Warning   Unhealthy                      pod/processor-7fb4b958cb-9thj4          Readiness probe failed: Get "http://10.42.1.9:8000/readyz": dial tcp 10.42.1.9:8000: connect: connection refused
+15m         Normal    Pulled                         pod/producer-load-857564c65f-jbhsl      Container image "ghcr.io/amshu0-0/ca2-producer:1.0.0" already present on machine and can be accessed by the pod
+15m         Normal    Created                        pod/producer-load-857564c65f-jbhsl      Container created
+15m         Normal    Started                        pod/producer-load-857564c65f-jbhsl      Container started
+15m         Warning   FailedGetResourceMetric        horizontalpodautoscaler/producer-load   failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+15m         Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/producer-load   invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+15m         Warning   BackOff                        pod/producer-load-857564c65f-jbhsl      Back-off restarting failed container producer in pod producer-load-857564c65f-jbhsl_ca2(8a277389-63dd-4aa6-bd90-96c67e13d5d7)
+14m         Normal    SuccessfulRescale              horizontalpodautoscaler/processor       New size: 3; reason: cpu resource utilization (percentage of request) above target
+14m         Normal    ScalingReplicaSet              deployment/processor                    Scaled up replica set processor-7fb4b958cb from 2 to 3
+14m         Normal    SuccessfulCreate               replicaset/processor-7fb4b958cb         Created pod: processor-7fb4b958cb-vthzj
+14m         Normal    Started                        pod/processor-7fb4b958cb-vthzj          Container started
+14m         Warning   Unhealthy                      pod/processor-7fb4b958cb-vthzj          Readiness probe failed: Get "http://10.42.2.10:8000/readyz": dial tcp 10.42.2.10:8000: connect: connection refused
+14m         Normal    Pulled                         pod/processor-7fb4b958cb-vthzj          Container image "busybox:1.36" already present on machine and can be accessed by the pod
+14m         Normal    Created                        pod/processor-7fb4b958cb-vthzj          Container created
+14m         Normal    Pulled                         pod/processor-7fb4b958cb-vthzj          Container image "ghcr.io/amshu0-0/ca2-processor:1.0.0" already present on machine and can be accessed by the pod
+14m         Normal    Created                        pod/processor-7fb4b958cb-vthzj          Container created
+14m         Normal    Started                        pod/processor-7fb4b958cb-vthzj          Container started
+12m         Normal    Killing                        pod/processor-7fb4b958cb-vthzj          Stopping container processor
+12m         Normal    ScalingReplicaSet              deployment/processor                    Scaled down replica set processor-7fb4b958cb from 3 to 2
+12m         Normal    SuccessfulDelete               replicaset/processor-7fb4b958cb         Deleted pod: processor-7fb4b958cb-vthzj
+12m         Normal    SuccessfulRescale              horizontalpodautoscaler/processor       New size: 2; reason: All metrics below target
+11m         Normal    SuccessfulDelete               replicaset/processor-7fb4b958cb         Deleted pod: processor-7fb4b958cb-9thj4
+11m         Normal    SuccessfulRescale              horizontalpodautoscaler/processor       New size: 1; reason: All metrics below target
+11m         Normal    ScalingReplicaSet              deployment/processor                    Scaled down replica set processor-7fb4b958cb from 2 to 1
+11m         Normal    Killing                        pod/processor-7fb4b958cb-9thj4          Stopping container processor
+$ cd ~/Desktop/CA/CA2
+export KUBECONFIG=$PWD/.secrets/kubeconfig.yaml
+
+kubectl apply -f producer/scaling/deployment-load.yaml
+sleep 35
+
+POD=$(kubectl -n ca2 get pod -l 'app.kubernetes.io/name=producer,app.kubernetes.io/component=load-generator' -o jsonpath='{.items[0].metadata.name}')
+
+echo "=== POD ==="
+kubectl -n ca2 get pod "$POD"
+
+echo "=== CONTAINER STATE ==="
+kubectl -n ca2 get pod "$POD" -o jsonpath='{.status.containerStatuses[0]}' | python3 -m json.tool
+
+echo "=== PREVIOUS CRASH LOG ==="
+kubectl -n ca2 logs "$POD" -c producer --previous --tail=80 2>&1 || true
+
+echo "=== CURRENT LOG ==="
+kubectl -n ca2 logs "$POD" -c producer --tail=40 2>&1 || true
+
+kubectl delete -f producer/scaling/deployment-load.yaml --ignore-not-found
+deployment.apps/producer-load created
+=== POD ===
+NAME                             READY   STATUS      RESTARTS      AGE
+producer-load-857564c65f-zb45t   0/1     OOMKilled   1 (20s ago)   35s
+=== CONTAINER STATE ===
+{
+    "allocatedResources": {
+        "cpu": "100m",
+        "memory": "64Mi"
+    },
+    "containerID": "containerd://f46471ac3d8f0f1b0e6b439a64b3f568a31863d180cbf63a99261875cbb1441b",
+    "image": "ghcr.io/amshu0-0/ca2-producer:1.0.0",
+    "imageID": "ghcr.io/amshu0-0/ca2-producer@sha256:55acbb05ddb23dab5acaf6d14ddaf79b9da250ce485879100484796eb01704d3",
+    "lastState": {
+        "terminated": {
+            "containerID": "containerd://2bd61033f006b3444a23c5e85b04b79e4ea7f917edc385fb04ce4e45d1114cdc",
+            "exitCode": 137,
+            "finishedAt": "2026-10-15T02:16:59Z",
+            "reason": "OOMKilled",
+            "startedAt": "2026-10-15T02:16:46Z"
+        }
+    },
+    "name": "producer",
+    "ready": false,
+    "resources": {
+        "limits": {
+            "cpu": "500m",
+            "memory": "256Mi"
+        },
+        "requests": {
+            "cpu": "100m",
+            "memory": "64Mi"
+        }
+    },
+    "restartCount": 1,
+    "started": false,
+    "state": {
+        "terminated": {
+            "containerID": "containerd://f46471ac3d8f0f1b0e6b439a64b3f568a31863d180cbf63a99261875cbb1441b",
+            "exitCode": 137,
+            "finishedAt": "2026-10-15T02:17:14Z",
+            "reason": "OOMKilled",
+            "startedAt": "2026-10-15T02:17:00Z"
+        }
+    },
+    "user": {
+        "linux": {
+            "gid": 1000,
+            "supplementalGroups": [
+                1000
+            ],
+            "uid": 1000
+        }
+    }
+}
+=== PREVIOUS CRASH LOG ===
+unable to retrieve container logs for containerd://2bd61033f006b3444a23c5e85b04b79e4ea7f917edc385fb04ce4e45d1114cdc=== CURRENT LOG ===
+sent 21773 rows total, 4354 msg/s
+sent 44473 rows total, 4534 msg/s
+deployment.apps "producer-load" deleted from ca2 namespace

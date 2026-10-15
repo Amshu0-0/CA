@@ -1,0 +1,108 @@
+NS=ca2 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/scale-test.py 
+Scaling test: 1 producer pod, then the autoscaler (namespace ca2)
+Limits: 1,500,000 messages, 25 minutes, any restart of kafka-0 or mongo-0. Ctrl-C stops the test and removes the load.
+
+[1] Checks before anything is started
+    MongoDB: created an index on trace_id (only tagged events are in it), so finding a tagged event stays fast however many records the load adds
+    stack is ready; 5,003 records are in MongoDB; the REST API answers; 2 worker nodes and 1 server node report CPU
+
+[2] Starting ONE producer pod (producer/scaling/deployment-load.yaml). There is no autoscaler yet.
+     9 s  warmup  producers 0/0 pods              send      - msg/s   stored      - msg/s   backlog       399   processors 1/1   workers cpu 1%
+    14 s  warmup  producers 1/1 pods              send      - msg/s   stored    102 msg/s   backlog       399   processors 1/1   workers cpu 1%
+    19 s  warmup  producers 1/1 pods              send  4,218 msg/s   stored     62 msg/s   backlog       399   processors 1/1   workers cpu 1%
+    24 s  warmup  producers 1/1 pods              send  4,638 msg/s   stored     46 msg/s   backlog       399   processors 1/1   workers cpu 1%
+    29 s  warmup  producers 1/1 pods              send  4,638 msg/s   stored     58 msg/s   backlog       767   processors 1/1   workers cpu 26%
+    34 s  warmup  producers 1/1 pods              send  4,638 msg/s   stored    191 msg/s   backlog       767   processors 1/1   workers cpu 26%
+    the number of pods has not changed for 20 s (producers 1, processors 1)
+
+    measuring 'before' for 60 s
+    39 s  before  producers 1/1 pods              send      0 msg/s   stored     92 msg/s   backlog       767   processors 1/1   workers cpu 26%
+    44 s  before  producers 0/1 pods              send      0 msg/s   stored     35 msg/s   backlog       767   processors 1/1   workers cpu 18%
+      [before] tagged event smoke-1015-015739-e9b0 is in Kafka (partition 1, offset 2706); waiting for the REST API to return it
+      [before] the REST API returned it after 0.1 s
+    49 s  before  producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 1/1   workers cpu 18%
+    54 s  before  producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 1/1   workers cpu 12%
+    59 s  before  producers 1/1 pods              send      0 msg/s   stored     58 msg/s   backlog         0   processors 1/1   workers cpu 12%
+    64 s  before  producers 1/1 pods              send      0 msg/s   stored     80 msg/s   backlog         0   processors 1/1   workers cpu 12%
+    69 s  before  producers 1/1 pods              send  4,650 msg/s   stored     62 msg/s   backlog         0   processors 1/2   workers cpu 12%
+    74 s  before  producers 0/1 pods              send  4,650 msg/s   stored      0 msg/s   backlog         0   processors 1/2   workers cpu 11%
+    79 s  before  producers 0/1 pods              send  4,650 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 11%
+    84 s  before  producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 11%
+    89 s  before  producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 15%
+    94 s  before  producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 15%
+
+[3] Creating the autoscaler (producer/scaling/hpa.yaml). From here Kubernetes decides how many producer pods run.
+    waiting until 5 producer pods are ready (at most 300 s)
+    99 s  ramp    producers 1/1 pods              send      0 msg/s   stored     43 msg/s   backlog         0   processors 2/2   workers cpu 4%
+   104 s  ramp    producers 1/1 pods              send      0 msg/s   stored    126 msg/s   backlog         0   processors 2/2   workers cpu 4%
+   109 s  ramp    producers 1/1 pods              send      0 msg/s   stored     95 msg/s   backlog       251   processors 2/2   workers cpu 4%
+   114 s  ramp    producers 0/1 pods              send  3,498 msg/s   stored    162 msg/s   backlog       251   processors 2/2   workers cpu 4%
+   119 s  ramp    producers 0/1 pods              send  3,498 msg/s   stored      0 msg/s   backlog       251   processors 2/2   workers cpu 14%
+   124 s  ramp    producers 0/1 pods              send  3,498 msg/s   stored      0 msg/s   backlog       251   processors 2/2   workers cpu 14%
+   129 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 14%
+   134 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 12%
+   139 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 12%
+   144 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 8%
+   149 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 8%
+   154 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 8%
+   159 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 8%
+   164 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 4%
+   169 s  ramp    producers 0/1 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 4%
+   174 s  ramp    producers 1/1 pods              send      0 msg/s   stored     15 msg/s   backlog         0   processors 2/2   workers cpu 4%
+   179 s  ramp    producers 1/1 pods              send      0 msg/s   stored     93 msg/s   backlog         0   processors 2/2   workers cpu 1%
+   184 s  ramp    producers 1/1 pods              send      0 msg/s   stored     81 msg/s   backlog         0   processors 2/2   workers cpu 1%
+   189 s  ramp    producers 0/1 pods              send      0 msg/s   stored     23 msg/s   backlog         0   processors 2/2   workers cpu 15%
+   194 s  ramp    producers 0/0 pods              send      0 msg/s   stored      0 msg/s   backlog         0   processors 2/2   workers cpu 15%
+
+# Step 7: scaling test results
+
+Run started 2026-10-15 01:57 (UTC). The load is the Deployment `producer-load`: producer pods that replay the dataset in a loop.
+Autoscaler `producer-load`: 1 to 5 pods, target 50% of the CPU request.  Processor autoscaler: 1 to 3 pods, target 70%.
+
+**The test stopped early:** after 90 s the autoscaler still has no CPU number for the producer pods, so it cannot scale. What it said about itself is in evidence/step7-scale-hpa.txt (look for ScalingActive and FailedGetResourceMetric)
+
+## Before and after
+
+| Measurement | Before: 1 producer pod, no autoscaler | After: ? producer pods, autoscaler working | Change |
+|---|---:|---:|---:|
+| Producer pods ready | 0 | n/a |  |
+| Messages per second from one producer pod | n/a | n/a | |
+| Producers send, messages per second (all pods together, reported by the pods) | 1,162 | n/a |  |
+| Kafka receives, messages per second (growth of the topic) | 25 | n/a |  |
+| MongoDB stores, messages per second (growth of the record count) | 21 | n/a |  |
+| Backlog in Kafka at the end of the window, messages | 0 | n/a |  |
+| Time a new message would wait in the backlog, seconds (backlog / storing rate) | 0.0 | n/a |  |
+| One tagged event: stored in Kafka until the REST API returns it, seconds | 0.1 | n/a | |
+| Processor pods ready | 1 | n/a |  |
+| Producer pods' CPU, % of their request (from the autoscaler) | n/a | n/a |  |
+| Processor pods' CPU, % of their request (from their autoscaler) | 75 | n/a |  |
+| Worker nodes' CPU, % (average of the workers, from kubectl top nodes) | 14 | n/a |  |
+
+## How the autoscaler added pods
+
+| Seconds after the autoscaler was created | Producer pods ready | Producer pods wanted by the autoscaler | Producer pods' CPU, % of request | Processor pods ready |
+|---:|---:|---:|---:|---:|
+| 4 | 1 | 1 | n/a | 2 |
+| 14 | 1 | 1 | n/a | 2 |
+| 24 | 0 | 1 | n/a | 2 |
+| 34 | 0 | 1 | n/a | 2 |
+| 44 | 0 | 1 | n/a | 2 |
+| 54 | 0 | 1 | n/a | 2 |
+| 64 | 0 | 1 | n/a | 2 |
+| 74 | 0 | 1 | n/a | 2 |
+| 84 | 1 | 1 | n/a | 2 |
+| 94 | 0 | 1 | n/a | 2 |
+
+The tagged event is the one the smoke test sends. Its time runs from the moment the producer Job reported that Kafka had stored it until the REST API returned it (asked every second), so it is accurate to about 2 seconds. The REST API finds the event by its trace_id; before the test the script gave MongoDB a small index on that field, so the lookup does not read every stored record.
+
+## What the numbers say
+
+- The processors have an autoscaler of their own. It took them from 1 to 2 pods, the first extra pod 65 s after the first producer pod was ready (their CPU was 75% of the request, the target is 70%).
+
+![chart](step7-scale-chart.svg)
+
+Files in evidence/:  step7-scale-samples.csv, step7-scale-summary.json, step7-scale-results.md, step7-scale-chart.svg, step7-scale-hpa.txt, step7-scale-producer-log.txt
+
+RESULT: STOPPED EARLY - after 90 s the autoscaler still has no CPU number for the producer pods, so it cannot scale. What it said about itself is in evidence/step7-scale-hpa.txt (look for ScalingActive and FailedGetResourceMetric)
+make: *** [scale-test] Error 1
+the scaling test took 3 min 15 s

@@ -1,0 +1,6 @@
+The lines the load-generating producer pods printed (kubectl logs), in the order the test saw them.
+
++  19 s  [pod/producer-load-857564c65f-jbhsl/producer] sent 21089 rows total, 4218 msg/s
++  24 s  [pod/producer-load-857564c65f-jbhsl/producer] sent 44279 rows total, 4638 msg/s
++  69 s  [pod/producer-load-857564c65f-jbhsl/producer] sent 46840 rows total, 4650 msg/s
++ 114 s  [pod/producer-load-857564c65f-jbhsl/producer] sent 61419 rows total, 3498 msg/s

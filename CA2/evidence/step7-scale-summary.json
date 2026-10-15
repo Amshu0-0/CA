@@ -1,0 +1,109 @@
+{
+  "started": "2026-10-15 04:00",
+  "args": {
+    "before": 60,
+    "after": 60,
+    "settle": 20,
+    "settle_limit": 240,
+    "interval": 5.0,
+    "lag_every": 20.0,
+    "ramp_timeout": 300,
+    "hpa_wait": 90,
+    "drain_timeout": 240,
+    "cooldown": 0,
+    "max_messages": 1500000,
+    "max_minutes": 25,
+    "no_latency": false,
+    "out": "evidence",
+    "prefix": "step7-scale",
+    "host": null,
+    "port": null
+  },
+  "phases": [
+    {
+      "name": "warmup",
+      "t0": 8.0,
+      "t1": 35.4
+    },
+    {
+      "name": "before",
+      "t0": 35.4,
+      "t1": 95.4
+    },
+    {
+      "name": "ramp",
+      "t0": 95.4,
+      "t1": 135.2
+    },
+    {
+      "name": "settle",
+      "t0": 135.2,
+      "t1": 155.3
+    },
+    {
+      "name": "after",
+      "t0": 155.3,
+      "t1": 215.6
+    },
+    {
+      "name": "cleanup",
+      "t0": 215.6,
+      "t1": 216.0
+    },
+    {
+      "name": "drain",
+      "t0": 216.0,
+      "t1": 295.2
+    },
+    {
+      "name": "end",
+      "t0": 295.2,
+      "t1": null
+    }
+  ],
+  "windows": {
+    "before": {
+      "t0": 35.4,
+      "t1": 95.4
+    },
+    "after": {
+      "t0": 155.3,
+      "t1": 215.3
+    }
+  },
+  "probes": {
+    "before": {
+      "seconds": 0.06,
+      "trace_id": "smoke-1015-040050-b48a",
+      "partition": 2,
+      "offset": 35240
+    },
+    "after": {
+      "seconds": 46.1,
+      "trace_id": "smoke-1015-040250-7808",
+      "partition": 1,
+      "offset": 87467
+    }
+  },
+  "aborted": null,
+  "baseline": {
+    "docs": 82359,
+    "kafka_end": 82359
+  },
+  "samples": 58,
+  "trace_index": "existed",
+  "hpa": {
+    "min": 1,
+    "max": 5,
+    "cpu_target": 50,
+    "processor_min": 1,
+    "processor_max": 3,
+    "processor_target": 70
+  },
+  "reached_max_after": 39.8,
+  "load_pods_per_node": {
+    "ca2-server": 2,
+    "ca2-agent-2": 1,
+    "ca2-agent-1": 2
+  }
+}

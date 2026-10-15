@@ -1,0 +1,138 @@
+NS=ca2 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/scale-test.py 
+Scaling test: 1 producer pod, then the autoscaler (namespace ca2)
+Limits: 1,500,000 messages, 25 minutes, any restart of kafka-0 or mongo-0. Ctrl-C stops the test and removes the load.
+
+[1] Checks before anything is started
+    MongoDB: the index on trace_id exists (only tagged events are in it), so finding a tagged event stays fast however many records the load adds
+    stack is ready; 82,359 records are in MongoDB; the REST API answers; 2 worker nodes and 1 server node report CPU
+
+[2] Starting ONE producer pod (producer/scaling/deployment-load.yaml). There is no autoscaler yet.
+     8 s  warmup  producers 0/0 pods              send      - msg/s   stored      - msg/s   backlog     1,500   processors 1/1   workers cpu 1%
+    13 s  warmup  producers 1/1 pods              send      - msg/s   stored    303 msg/s   backlog     1,500   processors 1/1   workers cpu 7%
+    18 s  warmup  producers 1/1 pods              send    770 msg/s   stored    639 msg/s   backlog     1,500   processors 1/1   workers cpu 7%
+    23 s  warmup  producers 1/1 pods              send    767 msg/s   stored    766 msg/s   backlog     1,500   processors 1/1   workers cpu 7%
+    28 s  warmup  producers 1/1 pods              send    759 msg/s   stored    424 msg/s   backlog     5,335   processors 1/1   workers cpu 34%
+    33 s  warmup  producers 1/1 pods              send    770 msg/s   stored    527 msg/s   backlog     5,335   processors 1/1   workers cpu 34%
+    the number of pods has not changed for 20 s (producers 1, processors 1)
+
+    measuring 'before' for 60 s
+    38 s  before  producers 1/1 pods              send    718 msg/s   stored    573 msg/s   backlog     5,335   processors 1/2   workers cpu 34%
+    43 s  before  producers 1/1 pods              send    696 msg/s   stored    712 msg/s   backlog     5,335   processors 2/2   workers cpu 36%
+      [before] tagged event smoke-1015-040050-b48a is in Kafka (partition 2, offset 35240); waiting for the REST API to return it
+      [before] the REST API returned it after 0.1 s
+    48 s  before  producers 1/1 pods              send    649 msg/s   stored    608 msg/s   backlog     7,559   processors 2/2   workers cpu 36%
+    53 s  before  producers 1/1 pods              send    745 msg/s   stored    739 msg/s   backlog     7,559   processors 2/2   workers cpu 36%
+    58 s  before  producers 1/1 pods              send    690 msg/s   stored    833 msg/s   backlog     7,559   processors 2/2   workers cpu 32%
+    63 s  before  producers 1/1 pods              send    720 msg/s   stored    837 msg/s   backlog     7,559   processors 2/2   workers cpu 32%
+    68 s  before  producers 1/1 pods              send    650 msg/s   stored    809 msg/s   backlog     3,026   processors 2/3   workers cpu 32%
+    73 s  before  producers 1/1 pods              send    666 msg/s   stored    862 msg/s   backlog     3,026   processors 2/3   workers cpu 32%
+    78 s  before  producers 1/1 pods              send    666 msg/s   stored    925 msg/s   backlog     3,026   processors 2/3   workers cpu 32%
+    83 s  before  producers 1/1 pods              send    489 msg/s   stored    594 msg/s   backlog     3,026   processors 3/3   workers cpu 32%
+    88 s  before  producers 1/1 pods              send    595 msg/s   stored    592 msg/s   backlog       310   processors 3/3   workers cpu 42%
+    93 s  before  producers 1/1 pods              send    593 msg/s   stored    596 msg/s   backlog       310   processors 3/3   workers cpu 42%
+
+[3] Creating the autoscaler (producer/scaling/hpa.yaml). From here Kubernetes decides how many producer pods run.
+    waiting until 5 producer pods are ready (at most 300 s)
+    98 s  ramp    producers 2/2 pods (cpu 499%)   send    593 msg/s   stored    607 msg/s   backlog       310   processors 3/3   workers cpu 42%
+   103 s  ramp    producers 2/2 pods (cpu 499%)   send    584 msg/s   stored    982 msg/s   backlog       310   processors 3/3   workers cpu 38%
+   108 s  ramp    producers 2/2 pods (cpu 499%)   send  1,172 msg/s   stored    927 msg/s   backlog     1,138   processors 3/3   workers cpu 38%
+   113 s  ramp    producers 2/4 pods (cpu 498%)   send    904 msg/s   stored    976 msg/s   backlog     1,138   processors 3/3   workers cpu 38%
+   119 s  ramp    producers 4/4 pods (cpu 498%)   send  1,023 msg/s   stored  1,047 msg/s   backlog     1,138   processors 3/3   workers cpu 46%
+   124 s  ramp    producers 4/4 pods (cpu 498%)   send  2,009 msg/s   stored  1,494 msg/s   backlog     1,138   processors 3/3   workers cpu 46%
+   129 s  ramp    producers 4/5 pods (cpu 495%)   send  2,009 msg/s   stored    895 msg/s   backlog    18,931   processors 3/3   workers cpu 46%
+   134 s  ramp    producers 5/5 pods (cpu 495%)   send  1,820 msg/s   stored  1,101 msg/s   backlog    18,931   processors 3/3   workers cpu 75%
+    all 5 producer pods are ready 40 s after the autoscaler was created
+   139 s  settle  producers 5/5 pods (cpu 495%)   send  2,393 msg/s   stored  1,230 msg/s   backlog    18,931   processors 3/3   workers cpu 75%
+   144 s  settle  producers 5/5 pods (cpu 492%)   send  2,462 msg/s   stored  1,166 msg/s   backlog    18,931   processors 3/3   workers cpu 75%
+   149 s  settle  producers 5/5 pods (cpu 492%)   send  2,455 msg/s   stored  1,179 msg/s   backlog    39,608   processors 3/3   workers cpu 80%
+   154 s  settle  producers 5/5 pods (cpu 492%)   send  2,294 msg/s   stored  1,152 msg/s   backlog    39,608   processors 3/3   workers cpu 80%
+    the number of pods has not changed for 20 s (producers 5, processors 3)
+
+    measuring 'after' for 60 s
+   159 s  after   producers 5/5 pods (cpu 489%)   send  2,357 msg/s   stored  1,128 msg/s   backlog    39,608   processors 3/3   workers cpu 80%
+   164 s  after   producers 5/5 pods (cpu 489%)   send  2,389 msg/s   stored  1,077 msg/s   backlog    39,608   processors 3/3   workers cpu 77%
+      [after] tagged event smoke-1015-040250-7808 is in Kafka (partition 1, offset 87467); waiting for the REST API to return it
+   169 s  after   producers 5/5 pods (cpu 489%)   send  2,209 msg/s   stored  1,087 msg/s   backlog    67,941   processors 3/3   workers cpu 77%
+   174 s  after   producers 5/5 pods (cpu 492%)   send  2,252 msg/s   stored  1,073 msg/s   backlog    67,941   processors 3/3   workers cpu 77%
+   179 s  after   producers 5/5 pods (cpu 492%)   send  2,473 msg/s   stored  1,180 msg/s   backlog    67,941   processors 3/3   workers cpu 74%
+   184 s  after   producers 5/5 pods (cpu 492%)   send  2,408 msg/s   stored  1,163 msg/s   backlog    67,941   processors 3/3   workers cpu 74%
+   189 s  after   producers 5/5 pods (cpu 487%)   send  2,471 msg/s   stored  1,201 msg/s   backlog    89,358   processors 3/3   workers cpu 74%
+   194 s  after   producers 5/5 pods (cpu 487%)   send  2,300 msg/s   stored  1,155 msg/s   backlog    89,358   processors 3/3   workers cpu 76%
+   199 s  after   producers 5/5 pods (cpu 487%)   send  2,460 msg/s   stored  1,146 msg/s   backlog    89,358   processors 3/3   workers cpu 76%
+   204 s  after   producers 5/5 pods (cpu 491%)   send  2,392 msg/s   stored  1,176 msg/s   backlog    89,358   processors 3/3   workers cpu 76%
+      [after] the REST API returned it after 46.1 s
+   209 s  after   producers 5/5 pods (cpu 491%)   send  2,394 msg/s   stored  1,159 msg/s   backlog   117,483   processors 3/3   workers cpu 80%
+   215 s  after   producers 5/5 pods (cpu 491%)   send  2,324 msg/s   stored  1,103 msg/s   backlog   117,483   processors 3/3   workers cpu 80%
+
+[4] Removing the load and the autoscaler
+
+[5] Waiting for the processors to store the backlog (at most 240 s)
+   220 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,337 msg/s   backlog   108,314   processors 3/3   workers cpu 80%
+   225 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,712 msg/s   backlog   108,314   processors 3/3   workers cpu 75%
+   230 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,514 msg/s   backlog    93,698   processors 3/3   workers cpu 75%
+   235 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,675 msg/s   backlog    93,698   processors 3/3   workers cpu 75%
+   240 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,739 msg/s   backlog    78,657   processors 3/3   workers cpu 48%
+   245 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,706 msg/s   backlog    78,657   processors 3/3   workers cpu 48%
+   250 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,779 msg/s   backlog    60,488   processors 3/3   workers cpu 48%
+   255 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,680 msg/s   backlog    60,488   processors 3/3   workers cpu 46%
+   260 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,723 msg/s   backlog    41,910   processors 3/3   workers cpu 46%
+   265 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,673 msg/s   backlog    41,910   processors 3/3   workers cpu 46%
+   270 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,771 msg/s   backlog    23,306   processors 3/3   workers cpu 46%
+   275 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,633 msg/s   backlog    23,306   processors 3/3   workers cpu 46%
+   280 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,433 msg/s   backlog     8,449   processors 3/3   workers cpu 46%
+   285 s  drain   producers 0/0 pods              send      0 msg/s   stored  1,116 msg/s   backlog     8,449   processors 3/3   workers cpu 44%
+   290 s  drain   producers 0/0 pods              send      0 msg/s   stored    787 msg/s   backlog         0   processors 3/3   workers cpu 44%
+    the backlog is gone
+   295 s  drain   producers 0/0 pods              send      0 msg/s   stored    193 msg/s   backlog         0   processors 3/3   workers cpu 44%
+
+# Step 7: scaling test results
+
+Run started 2026-10-15 04:00 (UTC). The load is the Deployment `producer-load`: producer pods that replay the dataset in a loop.
+Autoscaler `producer-load`: 1 to 5 pods, target 50% of the CPU request.  Processor autoscaler: 1 to 3 pods, target 70%.
+
+## Before and after
+
+| Measurement | Before: 1 producer pod, no autoscaler | After: 5 producer pods, autoscaler working | Change |
+|---|---:|---:|---:|
+| Producer pods ready | 1 | 5 | x5.0 |
+| Messages per second from one producer pod | 656 | 474 | |
+| Producers send, messages per second (all pods together, reported by the pods) | 656 | 2,369 | x3.6 |
+| Kafka receives, messages per second (growth of the topic) | 625 | 2,399 | x3.8 |
+| MongoDB stores, messages per second (growth of the record count) | 737 | 1,138 | x1.5 |
+| Backlog in Kafka at the end of the window, messages | 310 | 117,483 |  |
+| Time a new message would wait in the backlog, seconds (backlog / storing rate) | 0.4 | 103.3 |  |
+| One tagged event: stored in Kafka until the REST API returns it, seconds | 0.1 | 46.1 | |
+| Processor pods ready | 2 | 3 | x1.5 |
+| Producer pods' CPU, % of their request (from the autoscaler) | n/a | 490 |  |
+| Processor pods' CPU, % of their request (from their autoscaler) | 355 | 461 |  |
+| Worker nodes' CPU, % (average of the workers, from kubectl top nodes) | 35 | 77 |  |
+
+## How the autoscaler added pods
+
+| Seconds after the autoscaler was created | Producer pods ready | Producer pods wanted by the autoscaler | Producer pods' CPU, % of request | Processor pods ready |
+|---:|---:|---:|---:|---:|
+| 3 | 2 | 2 | 499 | 3 |
+| 13 | 2 | 2 | 499 | 3 |
+| 23 | 4 | 4 | 498 | 3 |
+| 33 | 4 | 5 | 495 | 3 |
+| 44 | 5 | 5 | 495 | 3 |
+| 54 | 5 | 5 | 492 | 3 |
+
+The tagged event is the one the smoke test sends. Its time runs from the moment the producer Job reported that Kafka had stored it until the REST API returned it (asked every second), so it is accurate to about 2 seconds. The second event was sent in the middle of the second window; the load was removed at the end of that window. The REST API finds the event by its trace_id; before the test the script gave MongoDB a small index on that field, so the lookup does not read every stored record.
+
+## What the numbers say
+
+- The producers' combined rate went from 656 to 2,369 messages per second (x3.6) when the autoscaler took the producers from 1 to 5 pods.
+- That is less than 5 times the rate of one pod, and the workers were only at 77% CPU, so their CPU was not the limit: the producers were waiting for something else, for example Kafka accepting the messages.
+- MongoDB stored 1,138 messages per second while the producers sent 2,369. The difference waits in Kafka (117,483 messages at the end of the window), so after the producers the next limit is the part that reads from Kafka and writes to MongoDB: 3 processor pods and MongoDB. The processors were busy (461% of their CPU request, the target is 70%); their autoscaler stops at 3 pods, one per partition of the topic.
+- The processors have an autoscaler of their own. It took them from 1 to 3 pods, the first extra pod 30 s after the first producer pod was ready (their CPU was 355% of the request, the target is 70%).
+- A tagged event needed 0.1 s to get from Kafka to the REST API before scaling and 46.1 s after, because it queued behind the backlog.
+- The autoscaler needed 40 s from its creation to have all 5 producer pods ready.
+- At the end the producer pods ran on: ca2-agent-1 2, ca2-agent-2 1, ca2-server 2.
+
+![chart](step7-scale-chart.svg)
+
+Files in evidence/:  step7-scale-samples.csv, step7-scale-summary.json, step7-scale-results.md, step7-scale-chart.svg, step7-scale-hpa.txt, step7-scale-producer-log.txt
+
+RESULT: DONE - producers sent 656 msg/s with 1 pod and 2,369 msg/s with 5 pods; MongoDB stored 737 and 1,138 msg/s
+the scaling test took 4 min 55 s
