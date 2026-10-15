@@ -9,3 +9,5 @@ metadata:
     # Pod Security Admission: the API server refuses pods that break the "baseline" profile
     # (privileged containers, hostPath volumes, host networking and similar).
     pod-security.kubernetes.io/enforce: baseline
+  annotations:
+    description: "The namespace of the whole stack. Roles, network rules and one delete all work per namespace. Pod Security Admission enforces the baseline profile here"

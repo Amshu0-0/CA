@@ -48,4 +48,8 @@ mkdir -p "$SECRETS_DIR"
   app.kubernetes.io/part-of=ca2-pipeline \
   --overwrite >/dev/null
 
+"$KUBECTL" -n "$NS" annotate secret mongo-credentials \
+  description='MongoDB administrator name and password. Made by scripts/create-secrets.sh and never stored in git. Mounted as read-only files into mongo, processor and restapi' \
+  --overwrite >/dev/null
+
 echo "Created mongo-credentials Secret."

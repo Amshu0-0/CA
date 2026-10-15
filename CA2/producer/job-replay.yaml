@@ -15,6 +15,8 @@ metadata:
     app.kubernetes.io/name: producer
     app.kubernetes.io/component: replay-job
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The producer stage of the stack: replays the 5,000-row dataset into Kafka once and ends. Delete the Job and apply again to replay"
 
 spec:
   backoffLimit: 6

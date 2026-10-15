@@ -17,6 +17,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Blocks all traffic into and out of every pod in the namespace. The other policies then allow, one by one, only the connections the pipeline needs"
 spec:
   podSelector: {}
   policyTypes:
@@ -31,6 +33,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Lets every pod ask the cluster DNS (CoreDNS in kube-system, port 53) to turn a Service name into an address"
 spec:
   podSelector: {}
   policyTypes:
@@ -57,6 +61,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Kafka accepts connections only from the producer and the processor, on port 9092"
 spec:
   podSelector:
     matchLabels:
@@ -83,6 +89,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The Kafka pod may talk to itself on ports 9092 and 9093 (broker and controller)"
 spec:
   podSelector:
     matchLabels:
@@ -119,6 +127,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "MongoDB accepts connections only from the processor and the REST API, on port 27017"
 spec:
   podSelector:
     matchLabels:
@@ -146,6 +156,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The processor's metrics port 8000 may be read only by pods labelled component observer"
 spec:
   podSelector:
     matchLabels:
@@ -170,6 +182,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The REST API accepts connections on port 8080 from any source. The AWS firewall limits who can reach the node port in front of it"
 spec:
   podSelector:
     matchLabels:
@@ -189,6 +203,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The producer may connect only to Kafka, on port 9092"
 spec:
   podSelector:
     matchLabels:
@@ -212,6 +228,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The processor may connect only to Kafka (port 9092) and MongoDB (port 27017)"
 spec:
   podSelector:
     matchLabels:
@@ -242,6 +260,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The REST API may connect only to MongoDB, on port 27017"
 spec:
   podSelector:
     matchLabels:
@@ -257,7 +277,7 @@ spec:
         - protocol: TCP
           port: 27017
 ---
-# 10. An "observer" pod (the smoke test) may call the processor's metrics port and the REST API.
+# 10. An "observer" pod (the role of a monitoring tool; "make netpol-check" plays it) may call the processor's metrics port and the REST API.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -265,6 +285,8 @@ metadata:
   namespace: ca2
   labels:
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Pods with the label component=observer (the role of a monitoring tool; make netpol-check plays it) may call only the processor's port 8000 and the REST API's port 8080"
 spec:
   podSelector:
     matchLabels:

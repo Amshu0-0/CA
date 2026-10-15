@@ -11,6 +11,8 @@ metadata:
     app.kubernetes.io/name: processor
     app.kubernetes.io/component: autoscaler
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Keeps the processor between 1 and 3 pods and adds pods above 70 percent CPU. The maximum is 3 because the topic has 3 partitions"
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

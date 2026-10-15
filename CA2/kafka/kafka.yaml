@@ -14,6 +14,8 @@ metadata:
     app.kubernetes.io/name: kafka
     app.kubernetes.io/component: broker
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Kafka broker in KRaft mode (no ZooKeeper), one node. New topics get 3 partitions. Messages are kept on a PersistentVolumeClaim"
 
 spec:
   # The headless Service gives kafka-0 its stable DNS name.
@@ -206,6 +208,8 @@ metadata:
     app.kubernetes.io/name: kafka
     app.kubernetes.io/component: broker
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Gives the Kafka StatefulSet pod a stable DNS name (kafka-0.kafka-headless) instead of a virtual IP. Kafka advertises this name to its clients"
 
 spec:
   clusterIP: None
@@ -234,6 +238,8 @@ metadata:
     app.kubernetes.io/name: kafka
     app.kubernetes.io/component: broker
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Address of the Kafka broker inside the cluster (kafka:9092). Not reachable from outside the cluster"
 
 spec:
   type: ClusterIP

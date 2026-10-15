@@ -14,6 +14,8 @@ metadata:
     app.kubernetes.io/name: mongo
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "MongoDB 7 with its data on a PersistentVolumeClaim. The administrator name and password are read from files mounted from the Secret mongo-credentials"
 
 spec:
   # The StatefulSet uses the headless Service for its stable network identity.
@@ -152,6 +154,8 @@ metadata:
     app.kubernetes.io/name: mongo
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Gives the MongoDB StatefulSet pod a stable DNS name (mongo-0.mongo-headless) instead of a virtual IP"
 
 spec:
   clusterIP: None
@@ -179,6 +183,8 @@ metadata:
     app.kubernetes.io/name: mongo
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Address of MongoDB inside the cluster (mongo:27017). Not reachable from outside the cluster"
 
 spec:
   type: ClusterIP

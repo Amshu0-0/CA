@@ -406,6 +406,9 @@ checks = [
      and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scale-test", "scale-report"))
      and all((ROOT / "scripts" / f).is_file() for f in ("scale-test.py", "scalereport.py")), False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
+    ("Tip of the assignment: every object has the label app.kubernetes.io/part-of=ca2-pipeline and a description annotation, and so does the Secret that the script makes (group and filter with kubectl -l)",
+     all(d["metadata"].get("labels", {}).get("app.kubernetes.io/part-of") == "ca2-pipeline" and len(d["metadata"].get("annotations", {}).get("description", "")) >= 20 for d in objects)
+     and (ROOT / "scripts" / "create-secrets.sh").is_file() and "annotate secret mongo-credentials" in (ROOT / "scripts" / "create-secrets.sh").read_text(), False),
     ("Cleanup: make teardown deletes the stack, destroys the cluster and then scans AWS for leftovers (make scan)",
      all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scan", "teardown")) and (ROOT / "scripts" / "cleanup-scan.py").is_file(), False),
     ("Dockerfiles and a registry push for the three custom images", all((ROOT / c / "Dockerfile").exists() for c in ("producer", "processor", "restapi")) and workflow.exists(), False),

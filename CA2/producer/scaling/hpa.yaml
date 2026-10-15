@@ -10,6 +10,8 @@ metadata:
     app.kubernetes.io/name: producer
     app.kubernetes.io/component: autoscaler
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Scales the load-generating producers from 1 to 5 pods at 50 percent CPU. Created by make scale-up and by the scaling test, not by make up"
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

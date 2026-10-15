@@ -11,6 +11,8 @@ metadata:
     app.kubernetes.io/name: pipeline-config
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Settings shared by the producer, processor and REST API: Kafka address and topic, MongoDB address, database and collection, REST port and dataset file"
 data:
   KAFKA_BROKER: "kafka:9092"
   KAFKA_TOPIC: "network-flows"

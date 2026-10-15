@@ -13,6 +13,8 @@ metadata:
     app.kubernetes.io/name: restapi
     app.kubernetes.io/component: api
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "REST API that serves the stored flows from MongoDB: /health, /ready, /stats, /alerts and /events/TRACE_ID. Two stateless replicas"
 
 spec:
   replicas: 2
@@ -152,6 +154,8 @@ metadata:
     app.kubernetes.io/name: restapi
     app.kubernetes.io/component: api
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "The only Service published outside the cluster: node port 30080 on every node, forwarding to port 8080 of the REST API pods"
 
 spec:
   type: NodePort

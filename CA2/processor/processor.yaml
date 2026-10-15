@@ -18,6 +18,8 @@ metadata:
     app.kubernetes.io/name: processor
     app.kubernetes.io/component: config
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Settings only the processor needs: its Kafka consumer group and the port of its health and metrics server"
 
 data:
   # Multiple processors using the same consumer group share Kafka partitions.
@@ -37,6 +39,8 @@ metadata:
     app.kubernetes.io/name: processor
     app.kubernetes.io/component: consumer
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "Reads network flow messages from Kafka and stores them in MongoDB. Stateless; its replica count belongs to the HorizontalPodAutoscaler (1 to 3)"
 
 spec:
   # There is intentionally no replicas field here.
@@ -175,6 +179,8 @@ metadata:
     app.kubernetes.io/name: processor
     app.kubernetes.io/component: consumer
     app.kubernetes.io/part-of: ca2-pipeline
+  annotations:
+    description: "ClusterIP Service for the processor's health and metrics port (8000). Only pods labelled component observer may call it"
 
 spec:
   type: ClusterIP
