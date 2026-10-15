@@ -3,7 +3,7 @@
 # It is written to run in a Kubernetes pod. The default behaviour is simple: replay the file once and stop.
 #   1. REPLAY_FOREVER=true keeps replaying the file until Kubernetes stops the pod. The scaling test uses this
 #      to create sustained load, so the Horizontal Pod Autoscaler has something to react to.
-#   2. SEND_DELAY_SECONDS and MAX_ROWS are optional tuning settings (they change how it behaves, not where it connects).
+#   2. SEND_DELAY_SECONDS, MAX_ROWS and FLUSH_EVERY_ROWS are optional tuning settings (they change how it behaves, not where it connects).
 #   3. It stops cleanly when Kubernetes asks it to (SIGTERM).
 
 import argparse
@@ -43,6 +43,9 @@ CSV_FILE = require("DATASET_FILE")
 REPLAY_FOREVER = os.environ.get("REPLAY_FOREVER", "false").lower() == "true"
 DELAY_SECONDS = float(os.environ.get("SEND_DELAY_SECONDS", "0"))
 LIMIT = int(os.environ["MAX_ROWS"]) if os.environ.get("MAX_ROWS") else None
+
+# Replay-forever mode only: after this many rows, wait until Kafka has confirmed them (see the loop below).
+FLUSH_EVERY = int(os.environ.get("FLUSH_EVERY_ROWS", "500"))
 
 
 # Kubernetes sends SIGTERM to stop a pod. Finish the current row, flush, and leave.
@@ -104,6 +107,13 @@ def main():
             producer.send(TOPIC, value=row)
 
             sent += 1
+
+            # producer.send() only puts the row into a queue in memory and returns at once, and this version of the Kafka library
+            # has no limit on that queue. A loop that never waits therefore fills the memory of the pod in seconds: the scaling
+            # test found exactly this (the pod was killed with OOMKilled after 13 seconds). So in replay-forever mode we wait for
+            # Kafka's confirmation every FLUSH_EVERY rows. The queue stays small, and "msg/s" is the speed Kafka really accepts.
+            if REPLAY_FOREVER and sent % FLUSH_EVERY == 0:
+                producer.flush()
 
             if not REPLAY_FOREVER and sent % 500 == 0:
                 print(f"sent {sent} rows...", flush=True)

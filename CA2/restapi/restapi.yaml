@@ -73,7 +73,7 @@ spec:
 
       containers:
         - name: restapi
-          image: ghcr.io/amshu0-0/ca2-restapi:1.0.0
+          image: ghcr.io/amshu0-0/ca2-restapi:1.0.1
           imagePullPolicy: IfNotPresent
 
           # Shared non-secret settings come from pipeline-config.

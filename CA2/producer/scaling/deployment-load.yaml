@@ -57,7 +57,7 @@ spec:
             capabilities: {drop: ["ALL"]}
       containers:
         - name: producer
-          image: ghcr.io/amshu0-0/ca2-producer:1.0.0
+          image: ghcr.io/amshu0-0/ca2-producer:1.0.1
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:

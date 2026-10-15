@@ -62,7 +62,7 @@ spec:
 
       containers:
         - name: producer
-          image: ghcr.io/amshu0-0/ca2-producer:1.0.0
+          image: ghcr.io/amshu0-0/ca2-producer:1.0.1
           imagePullPolicy: IfNotPresent
 
           # The same program as the replay Job. With --trace-id it sends a single event that carries the trace id

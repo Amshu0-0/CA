@@ -88,7 +88,7 @@ spec:
 
       containers:
         - name: processor
-          image: ghcr.io/amshu0-0/ca2-processor:1.0.0
+          image: ghcr.io/amshu0-0/ca2-processor:1.0.1
           imagePullPolicy: IfNotPresent
 
           # Load the shared pipeline settings and the processor-only settings.
