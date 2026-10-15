@@ -1,0 +1,50 @@
+python3 scripts/cleanup-scan.py 
+CA2 cleanup scan
+  time    : 2026-10-15 19:40 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-CA2
+
+Created by this project (tagged Project=CS5287-CA2)
+  [FOUND] EC2 instances (3)
+            ca2-agent-2  i-02e4c4c7c8d983994  (running)
+            ca2-server  i-0149f3916722eeb19  (running)
+            ca2-agent-1  i-0cb04fd3d63d032dd  (running)
+  [FOUND] EBS volumes (3)
+            ca2-agent-1-root  vol-018ad765d1354142a  (in-use, 30 GiB)
+            ca2-agent-2-root  vol-041aeeee39a93c803  (in-use, 30 GiB)
+            ca2-server-root  vol-049742c5404d0226f  (in-use, 30 GiB)
+  [FOUND] VPCs (1)
+            vpc-0f68cb0ae91bbf293  (10.20.0.0/16)
+  [FOUND] Subnets (1)
+            subnet-05de738af151adecf  (10.20.1.0/24)
+  [FOUND] Security groups (2)
+            sg-071c2f6adac55b488  (ca2-cluster)
+            sg-034f9bdef443d8415  (default)
+  [FOUND] Internet gateways (1)
+            igw-079cbfd31e4c3c50b
+  [FOUND] Route tables (1)
+            rtb-0a4e2d13028c1e9a2
+  [FOUND] Key pairs (1)
+            ca2-key
+
+Anything else with that tag, in any AWS service
+  [skip ] Tagged resources (permission denied: tag:GetResources)
+
+Resources that cost money, tagged or not, in us-east-2
+  [FOUND] EC2 instances (3)
+            ca2-agent-2  i-02e4c4c7c8d983994  (running)
+            ca2-server  i-0149f3916722eeb19  (running)
+            ca2-agent-1  i-0cb04fd3d63d032dd  (running)
+  [FOUND] EBS volumes (3)
+            ca2-agent-1-root  vol-018ad765d1354142a  (in-use, 30 GiB)
+            ca2-agent-2-root  vol-041aeeee39a93c803  (in-use, 30 GiB)
+            ca2-server-root  vol-049742c5404d0226f  (in-use, 30 GiB)
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+RESULT: LEFTOVERS FOUND - the resources listed above are still in AWS.
+        While the cluster exists, that is expected. After "make cluster-down" it is not: run it again, then scan again.
+        Not checked, because this AWS user is not allowed to: Tagged resources (tag:GetResources).
+make: *** [scan] Error 1

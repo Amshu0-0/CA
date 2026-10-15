@@ -1,0 +1,162 @@
+=== 1. make up, the first time on this new cluster
+kubectl context: ca2-k3s   (kubeconfig: ~/ca2-rebuild/CA2/.secrets/kubeconfig.yaml)
+bash scripts/create-secrets.sh
+secret/mongo-credentials created
+Created mongo-credentials Secret.
+kubectl apply -k . && \
+    ( kubectl -n ca2 rollout status statefulset/mongo --timeout=300s && \
+      kubectl -n ca2 rollout status statefulset/kafka --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/processor --timeout=300s && \
+      kubectl -n ca2 rollout status deployment/restapi --timeout=300s && \
+      kubectl -n ca2 wait --for=condition=complete job/producer-replay --timeout=600s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
+namespace/ca2 unchanged
+serviceaccount/kafka created
+serviceaccount/mongo created
+serviceaccount/pipeline-operator created
+serviceaccount/pipeline-viewer created
+serviceaccount/processor created
+serviceaccount/producer created
+serviceaccount/restapi created
+role.rbac.authorization.k8s.io/pipeline-operator created
+role.rbac.authorization.k8s.io/pipeline-viewer created
+rolebinding.rbac.authorization.k8s.io/pipeline-operator created
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer created
+configmap/pipeline-config created
+configmap/processor-config created
+service/kafka created
+service/kafka-headless created
+service/mongo created
+service/mongo-headless created
+service/processor created
+service/restapi created
+deployment.apps/processor created
+deployment.apps/restapi created
+statefulset.apps/kafka created
+statefulset.apps/mongo created
+horizontalpodautoscaler.autoscaling/processor created
+job.batch/producer-replay created
+networkpolicy.networking.k8s.io/allow-dns-egress created
+networkpolicy.networking.k8s.io/default-deny-all created
+networkpolicy.networking.k8s.io/kafka-ingress created
+networkpolicy.networking.k8s.io/kafka-self created
+networkpolicy.networking.k8s.io/mongo-ingress created
+networkpolicy.networking.k8s.io/observer-egress created
+networkpolicy.networking.k8s.io/processor-egress created
+networkpolicy.networking.k8s.io/processor-ingress created
+networkpolicy.networking.k8s.io/producer-egress created
+networkpolicy.networking.k8s.io/restapi-egress created
+networkpolicy.networking.k8s.io/restapi-ingress created
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+Waiting for deployment "processor" rollout to finish: 0 of 1 updated replicas are available...
+deployment "processor" successfully rolled out
+deployment "restapi" successfully rolled out
+job.batch/producer-replay condition met
+Stack is up. Call the REST API from this computer with:  make rest-check
+the stack came up in 1 min 7 s
+
+=== 2. make up again: nothing may change
+Stack is up. Call the REST API from this computer with:  make rest-check
+objects created: 0   configured: 0   unchanged: 37
+
+=== 3. make rest-check
+TERRAFORM=terraform python3 scripts/rest-check.py
+REST API check from this computer: 3 nodes, node port 30080, expecting 5000 flows in MongoDB
+node server (<public-ip>)
+  GET /health  -> 200 {"status":"ok"}
+  GET /ready   -> 200 {"status":"ready"}
+  GET /stats   -> 200 {"collection":"flows","database":"ca2","documents":5000}
+  GET /alerts  -> 200 count=50, first Label=Bot
+  GET /events/no-such-id -> 404 {"found":false,"trace_id":"no-such-id"}
+node agent-1 (<public-ip>)
+  GET /health  -> 200 {"status":"ok"}
+  GET /ready   -> 200 {"status":"ready"}
+  GET /stats   -> 200 {"collection":"flows","database":"ca2","documents":5000}
+  GET /alerts  -> 200 count=50, first Label=Bot
+  GET /events/no-such-id -> 404 {"found":false,"trace_id":"no-such-id"}
+node agent-2 (<public-ip>)
+  GET /health  -> 200 {"status":"ok"}
+  GET /ready   -> 200 {"status":"ready"}
+  GET /stats   -> 200 {"collection":"flows","database":"ca2","documents":5000}
+  GET /alerts  -> 200 count=50, first Label=Bot
+  GET /events/no-such-id -> 404 {"found":false,"trace_id":"no-such-id"}
+
+RESULT: PASS - 3 of 3 nodes answered correctly and MongoDB holds 5000 flows
+
+=== 4. make smoke
+NS=ca2 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/smoke-test.py 
+Smoke test: one tagged event through the whole pipeline (namespace ca2)
+
+[1/6] The stack is running
+      kafka-0 and mongo-0 are ready; 1 processor pod and 2 REST API pods are ready
+
+[2/6] Send one event with a unique trace id
+      trace id: smoke-1015-213651-de66
+      the producer pod finished after 9 s and printed:
+        sent trace_id=smoke-1015-213651-de66 topic=network-flows partition=1 offset=1676
+      Kafka stored the event in partition 1 at offset 1676 of topic network-flows
+
+[3/6] Kafka holds it
+      read back from partition 1, offset 1676 with kafka-console-consumer:
+        {"trace_id": "smoke-1015-213651-de66", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "<public-ip>", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      topic network-flows: 3 partitions, replication factor 1, 5001 messages in total (1672 + 1677 + 1652)
+
+[4/6] The processor read it and stored it
+      [pod/processor-77d44bc5d5-8q9sd/processor] [TRACE] trace_id=smoke-1015-213651-de66 partition=1 offset=1676 stored
+      it is the same partition and offset that the producer was told
+      consumer group processor-group: partition 0 at 1672 of 1672 (behind: 0), partition 1 at 1677 of 1677 (behind: 0), partition 2 at 1652 of 1652 (behind: 0)
+
+[5/6] MongoDB holds the record
+      1 record with this trace id: {"trace_id": "smoke-1015-213651-de66", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "<public-ip>", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      the collection holds 5001 records in total
+
+[6/6] The REST API returns it to this computer
+      GET /events/smoke-1015-213651-de66    (node port 30080 of the server)
+      the same request with curl:  curl -s http://<server-public-ip>:30080/events/smoke-1015-213651-de66
+      answer: HTTP 200
+        {"found": true, "event": {"trace_id": "smoke-1015-213651-de66", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "<public-ip>", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}}
+      GET /stats  ->  HTTP 200 {"collection":"flows","database":"ca2","documents":5001}
+
+RESULT: PASS - event smoke-1015-213651-de66 went producer -> Kafka (partition 1, offset 1676) -> processor -> MongoDB -> REST API in 30 s
+
+=== 5. make netpol-check
+NS=ca2 KUBECTL=kubectl python3 scripts/netpol-check.py
+NetworkPolicy test: 11 policies in namespace ca2
+
+Starting 6 probe pods (busybox; one of them in the namespace ca2-intruder)...
+Trying 30 connections (a blocked one can take up to 3 seconds to give up)...
+
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8080    DNS:53          
+  stranger (no role, in ca2)                  blocked         blocked         blocked         blocked         open            
+  intruder (another namespace)                blocked         blocked         blocked         open            open            
+  producer (wears the producer label)         open            blocked         blocked         blocked         open            
+  processor (wears the processor label)       open            open            blocked         blocked         open            
+  restapi (wears the REST API label)          blocked         open            blocked         blocked         open            
+  observer (the monitoring role)              blocked         blocked         open            open            open            
+
+  open = the connection was accepted; blocked = it did not get through; ! = not what the policies say
+
+What that shows:
+  stranger   reaches nothing but DNS: default-deny-all blocks the rest, and allow-dns-egress opens only the DNS server
+  intruder   (another namespace) reaches only the REST API: restapi-ingress is the one policy that accepts any sender
+  producer   reaches only Kafka: producer-egress lets it out, kafka-ingress lets it in
+  processor  reaches Kafka and MongoDB: processor-egress, kafka-ingress and mongo-ingress
+  restapi    reaches only MongoDB: restapi-egress and mongo-ingress
+  observer   reaches the processor's metrics port and the REST API: observer-egress, processor-ingress and restapi-ingress
+
+The observer pod reads the processor's metrics port: processor_messages_total 5001; processor_alerts_total 1967; processor_ready 1
+
+Clean-up: no probe pod and no namespace ca2-intruder left
+
+RESULT: PASS - all 30 connections behave as the policies say (13 allowed, 17 blocked)
+
+=== 6. make rbac-check
+pipeline-viewer   can list pods?       yes
+pipeline-viewer   can delete pods?     no
+pipeline-operator can scale producers? yes
+pipeline-operator can read secrets?    no
+processor pod     can read secrets?    no

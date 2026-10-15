@@ -1,0 +1,47 @@
+== A second make teardown, now that nothing exists any more: it must change nothing and must not fail
+if kubectl --request-timeout=10s get namespace kube-system > /dev/null 2>&1; then \
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory down || echo "make down did not finish. The machines are destroyed next, and that removes the stack with them."; \
+        echo; echo "What is left inside Kubernetes (no ca2 namespace, no volumes):"; kubectl get namespace; kubectl get pv; echo; \
+    else echo "The cluster does not answer, so there is no stack to delete: going on to destroy the machines."; fi ; \
+    /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory cluster-down && python3 scripts/cleanup-scan.py --wait 180 
+The cluster does not answer, so there is no stack to delete: going on to destroy the machines.
+terraform -chdir=infra/terraform init -input=false > /dev/null && terraform -chdir=infra/terraform destroy -input=false -auto-approve && \
+    rm -f infra/ansible/inventory.ini infra/ansible/known_hosts "~/ca2-rebuild/CA2/.secrets/kubeconfig.yaml" && \
+    echo "Cluster destroyed."
+
+No changes. No objects need to be destroyed.
+
+Either you have not created any objects yet or the existing objects were
+already deleted outside of Terraform.
+
+Destroy complete! Resources: 0 destroyed.
+Cluster destroyed.
+CA2 cleanup scan
+  time    : 2026-10-15 21:57 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-CA2
+
+Created by this project (tagged Project=CS5287-CA2)
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] VPCs
+  [none ] Subnets
+  [none ] Security groups
+  [none ] Internet gateways
+  [none ] Route tables
+  [none ] Key pairs
+
+Anything else with that tag, in any AWS service
+  [skip ] Tagged resources (permission denied: tag:GetResources)
+
+Resources that cost money, tagged or not, in us-east-2
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+RESULT: CLEAN - nothing tagged Project=CS5287-CA2 is left, and no billable resources are running in us-east-2.
+        Not checked, because this AWS user is not allowed to: Tagged resources (tag:GetResources).
+exit code of the second make teardown: 0

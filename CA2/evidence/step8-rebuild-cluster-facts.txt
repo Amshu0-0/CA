@@ -1,0 +1,69 @@
+=== kubectl version
+Client Version: v1.37.1
+Kustomize Version: v5.8.1
+Server Version: v1.37.1+k3s1
+
+=== kubectl get nodes -o wide
+NAME          STATUS   ROLES           AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION           CONTAINER-RUNTIME
+ca2-agent-1   Ready    worker          11m   v1.37.1+k3s1   10.20.1.207   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-agent-2   Ready    worker          11m   v1.37.1+k3s1   10.20.1.30    <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca2-server    Ready    control-plane   11m   v1.37.1+k3s1   10.20.1.206   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+
+=== kubectl get namespaces
+NAME              STATUS   AGE
+ca2               Active   5m29s
+default           Active   11m
+kube-node-lease   Active   11m
+kube-public       Active   11m
+kube-system       Active   11m
+
+=== kubectl get all -A
+NAMESPACE     NAME                                          READY   STATUS      RESTARTS   AGE
+ca2           pod/kafka-0                                   1/1     Running     0          5m25s
+ca2           pod/mongo-0                                   1/1     Running     0          5m25s
+ca2           pod/processor-77d44bc5d5-8q9sd                1/1     Running     0          5m26s
+ca2           pod/producer-replay-tx626                     0/1     Completed   0          5m25s
+ca2           pod/producer-smoke-b5lqs                      0/1     Completed   0          4m13s
+ca2           pod/restapi-cbbcff7c5-jv78v                   1/1     Running     0          5m26s
+ca2           pod/restapi-cbbcff7c5-l8jkt                   1/1     Running     0          5m26s
+kube-system   pod/coredns-577d995dff-bjwx9                  1/1     Running     0          11m
+kube-system   pod/helm-install-gateway-api-crd-k5l8p        0/1     Completed   0          11m
+kube-system   pod/local-path-provisioner-6858d854cf-xbvx5   1/1     Running     0          11m
+kube-system   pod/metrics-server-778c4649b4-8qm72           1/1     Running     0          11m
+
+NAMESPACE     NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+ca2           service/kafka            ClusterIP   10.43.217.80    <none>        9092/TCP                 5m27s
+ca2           service/kafka-headless   ClusterIP   None            <none>        9092/TCP                 5m27s
+ca2           service/mongo            ClusterIP   10.43.162.126   <none>        27017/TCP                5m27s
+ca2           service/mongo-headless   ClusterIP   None            <none>        27017/TCP                5m27s
+ca2           service/processor        ClusterIP   10.43.250.218   <none>        8000/TCP                 5m27s
+ca2           service/restapi          NodePort    10.43.32.196    <none>        8080:30080/TCP           5m27s
+default       service/kubernetes       ClusterIP   10.43.0.1       <none>        443/TCP                  11m
+kube-system   service/kube-dns         ClusterIP   10.43.0.10      <none>        53/UDP,53/TCP,9153/TCP   11m
+kube-system   service/metrics-server   ClusterIP   10.43.202.75    <none>        443/TCP                  11m
+
+NAMESPACE     NAME                                     READY   UP-TO-DATE   AVAILABLE   AGE
+ca2           deployment.apps/processor                1/1     1            1           5m27s
+ca2           deployment.apps/restapi                  2/2     2            2           5m27s
+kube-system   deployment.apps/coredns                  1/1     1            1           11m
+kube-system   deployment.apps/local-path-provisioner   1/1     1            1           11m
+kube-system   deployment.apps/metrics-server           1/1     1            1           11m
+
+NAMESPACE     NAME                                                DESIRED   CURRENT   READY   AGE
+ca2           replicaset.apps/processor-77d44bc5d5                1         1         1       5m27s
+ca2           replicaset.apps/restapi-cbbcff7c5                   2         2         2       5m27s
+kube-system   replicaset.apps/coredns-577d995dff                  1         1         1       11m
+kube-system   replicaset.apps/local-path-provisioner-6858d854cf   1         1         1       11m
+kube-system   replicaset.apps/metrics-server-778c4649b4           1         1         1       11m
+
+NAMESPACE   NAME                     READY   AGE
+ca2         statefulset.apps/kafka   1/1     5m26s
+ca2         statefulset.apps/mongo   1/1     5m26s
+
+NAMESPACE   NAME                                            REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+ca2         horizontalpodautoscaler.autoscaling/processor   Deployment/processor   cpu: 7%/70%   1         3         1          5m26s
+
+NAMESPACE     NAME                                     STATUS     COMPLETIONS   DURATION   AGE
+ca2           job.batch/producer-replay                Complete   1/1           62s        5m26s
+ca2           job.batch/producer-smoke                 Complete   1/1           9s         4m14s
+kube-system   job.batch/helm-install-gateway-api-crd   Complete   1/1           16s        11m

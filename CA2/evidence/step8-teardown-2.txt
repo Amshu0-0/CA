@@ -1,0 +1,1066 @@
+if kubectl --request-timeout=10s get namespace kube-system > /dev/null 2>&1; then \
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory down || echo "make down did not finish. The machines are destroyed next, and that removes the stack with them."; \
+        echo; echo "What is left inside Kubernetes (no ca2 namespace, no volumes):"; kubectl get namespace; kubectl get pv; echo; \
+    else echo "The cluster does not answer, so there is no stack to delete: going on to destroy the machines."; fi ; \
+    /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory cluster-down && python3 scripts/cleanup-scan.py --wait 180 
+kubectl delete -f producer/scaling/ --ignore-not-found ; kubectl delete namespace ca2-intruder --ignore-not-found --wait=false ; kubectl delete -k . --ignore-not-found --wait=true && echo "Deleted. Check:  kubectl get namespace ca2   (it should say NotFound)"
+namespace "ca2" deleted
+serviceaccount "kafka" deleted from ca2 namespace
+serviceaccount "mongo" deleted from ca2 namespace
+serviceaccount "pipeline-operator" deleted from ca2 namespace
+serviceaccount "pipeline-viewer" deleted from ca2 namespace
+serviceaccount "processor" deleted from ca2 namespace
+serviceaccount "producer" deleted from ca2 namespace
+serviceaccount "restapi" deleted from ca2 namespace
+role.rbac.authorization.k8s.io "pipeline-operator" deleted from ca2 namespace
+role.rbac.authorization.k8s.io "pipeline-viewer" deleted from ca2 namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-operator" deleted from ca2 namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-viewer" deleted from ca2 namespace
+configmap "pipeline-config" deleted from ca2 namespace
+configmap "processor-config" deleted from ca2 namespace
+service "kafka" deleted from ca2 namespace
+service "kafka-headless" deleted from ca2 namespace
+service "mongo" deleted from ca2 namespace
+service "mongo-headless" deleted from ca2 namespace
+service "processor" deleted from ca2 namespace
+service "restapi" deleted from ca2 namespace
+deployment.apps "processor" deleted from ca2 namespace
+deployment.apps "restapi" deleted from ca2 namespace
+statefulset.apps "kafka" deleted from ca2 namespace
+statefulset.apps "mongo" deleted from ca2 namespace
+horizontalpodautoscaler.autoscaling "processor" deleted from ca2 namespace
+job.batch "producer-replay" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "allow-dns-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "default-deny-all" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "kafka-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "kafka-self" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "mongo-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "observer-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "processor-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "processor-ingress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "producer-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "restapi-egress" deleted from ca2 namespace
+networkpolicy.networking.k8s.io "restapi-ingress" deleted from ca2 namespace
+Deleted. Check:  kubectl get namespace ca2   (it should say NotFound)
+
+What is left inside Kubernetes (no ca2 namespace, no volumes):
+NAME              STATUS   AGE
+default           Active   22m
+kube-node-lease   Active   22m
+kube-public       Active   22m
+kube-system       Active   22m
+No resources found
+
+terraform -chdir=infra/terraform init -input=false > /dev/null && terraform -chdir=infra/terraform destroy -input=false -auto-approve && \
+    rm -f infra/ansible/inventory.ini infra/ansible/known_hosts "~/ca2-rebuild/CA2/.secrets/kubeconfig.yaml" && \
+    echo "Cluster destroyed."
+data.http.my_ip[0]: Reading...
+data.http.my_ip[0]: Read complete after 1s [id=https://checkip.amazonaws.com]
+data.aws_availability_zones.available[0]: Reading...
+data.aws_ami.ubuntu[0]: Reading...
+aws_key_pair.cluster: Refreshing state... [id=ca2-key]
+aws_vpc.main: Refreshing state... [id=vpc-0933edcee68820e35]
+data.aws_availability_zones.available[0]: Read complete after 0s [id=us-east-2]
+data.aws_ami.ubuntu[0]: Read complete after 0s [id=ami-09519cc56eb20524a]
+aws_default_security_group.default: Refreshing state... [id=sg-02cb8f03e319b1473]
+aws_internet_gateway.main: Refreshing state... [id=igw-0cd66d49067eece5a]
+aws_subnet.nodes: Refreshing state... [id=subnet-0061050b9dd5a28bd]
+aws_security_group.cluster: Refreshing state... [id=sg-0872fef59b8763da3]
+aws_route_table.public: Refreshing state... [id=rtb-07e86a70d11024e22]
+aws_route_table_association.nodes: Refreshing state... [id=rtbassoc-0b2de413296f0be0a]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Refreshing state... [id=sgr-0e436767fd871f84b]
+aws_vpc_security_group_egress_rule.all_out: Refreshing state... [id=sgr-08e6db3270fa6afb5]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Refreshing state... [id=sgr-0ef26c210e7abf831]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Refreshing state... [id=sgr-0d6428d3b57468351]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Refreshing state... [id=sgr-0624b9483a19b1838]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Refreshing state... [id=sgr-01f7fc94d0a93eed4]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Refreshing state... [id=sgr-04dcf600ad5a2ca74]
+aws_instance.agent[1]: Refreshing state... [id=i-0faefaed1a7178d88]
+aws_instance.server: Refreshing state... [id=i-0bc85840fbb0872b4]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Refreshing state... [id=sgr-0aafb12108802f2e4]
+aws_instance.agent[0]: Refreshing state... [id=i-006540ad94a1b95e5]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_default_security_group.default will be destroyed
+  - resource "aws_default_security_group" "default" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group/sg-02cb8f03e319b1473" -> null
+      - description            = "default VPC security group" -> null
+      - egress                 = [] -> null
+      - id                     = "sg-02cb8f03e319b1473" -> null
+      - ingress                = [] -> null
+      - name                   = "default" -> null
+      - owner_id               = "<account-number>" -> null
+      - region                 = "us-east-2" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "ca2-default-locked"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-default-locked"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_id                 = "vpc-0933edcee68820e35" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_instance.agent[0] will be destroyed
+  - resource "aws_instance" "agent" {
+      - ami                                  = "ami-09519cc56eb20524a" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<account-number>:instance/i-006540ad94a1b95e5" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-006540ad94a1b95e5" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "ca2-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-0f449a496b96c21b8" -> null
+      - private_dns                          = "ip-10-20-1-207.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.207" -> null
+      - public_dns                           = "ec2-<public-ip>.us-east-2.compute.amazonaws.com" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-0061050b9dd5a28bd" -> null
+      - tags                                 = {
+          - "Name" = "ca2-agent-1"
+          - "Role" = "k3s-agent"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-agent-1"
+          - "Project"    = "CS5287-CA2"
+          - "Role"       = "k3s-agent"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-agent-1-root"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-0872fef59b8763da3",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-0f449a496b96c21b8" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<account-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-08293d6e5064efc0b" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_instance.agent[1] will be destroyed
+  - resource "aws_instance" "agent" {
+      - ami                                  = "ami-09519cc56eb20524a" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<account-number>:instance/i-0faefaed1a7178d88" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-0faefaed1a7178d88" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "ca2-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-0a8551cfd9325f323" -> null
+      - private_dns                          = "ip-10-20-1-30.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.30" -> null
+      - public_dns                           = "ec2-<public-ip>.us-east-2.compute.amazonaws.com" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-0061050b9dd5a28bd" -> null
+      - tags                                 = {
+          - "Name" = "ca2-agent-2"
+          - "Role" = "k3s-agent"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-agent-2"
+          - "Project"    = "CS5287-CA2"
+          - "Role"       = "k3s-agent"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-agent-2-root"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-0872fef59b8763da3",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-0a8551cfd9325f323" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<account-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-05cd9e997355dd2b5" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_instance.server will be destroyed
+  - resource "aws_instance" "server" {
+      - ami                                  = "ami-09519cc56eb20524a" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<account-number>:instance/i-0bc85840fbb0872b4" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-0bc85840fbb0872b4" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "ca2-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-013979d566464aa1c" -> null
+      - private_dns                          = "ip-10-20-1-206.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.206" -> null
+      - public_dns                           = "ec2-<public-ip>.us-east-2.compute.amazonaws.com" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-0061050b9dd5a28bd" -> null
+      - tags                                 = {
+          - "Name" = "ca2-server"
+          - "Role" = "k3s-server"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-server"
+          - "Project"    = "CS5287-CA2"
+          - "Role"       = "k3s-server"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-server-root"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-0872fef59b8763da3",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-013979d566464aa1c" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<account-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-0fc8d23dcf1ece99d" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_internet_gateway.main will be destroyed
+  - resource "aws_internet_gateway" "main" {
+      - arn      = "arn:aws:ec2:us-east-2:<account-number>:internet-gateway/igw-0cd66d49067eece5a" -> null
+      - id       = "igw-0cd66d49067eece5a" -> null
+      - owner_id = "<account-number>" -> null
+      - region   = "us-east-2" -> null
+      - tags     = {
+          - "Name" = "ca2-igw"
+        } -> null
+      - tags_all = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-igw"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_id   = "vpc-0933edcee68820e35" -> null
+    }
+
+  # aws_key_pair.cluster will be destroyed
+  - resource "aws_key_pair" "cluster" {
+      - arn             = "arn:aws:ec2:us-east-2:<account-number>:key-pair/ca2-key" -> null
+      - fingerprint     = "YYYnwWG2SoHUNcz72huykk8M69U8Gt1AKT6sF0sSYpo=" -> null
+      - id              = "ca2-key" -> null
+      - key_name        = "ca2-key" -> null
+      - key_pair_id     = "key-05bc40c7b4dea32cc" -> null
+      - key_type        = "ed25519" -> null
+      - public_key      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKw0aWGjOmz8EIDn2QejuieCYjV4gTksIFRfyoYDRqYW ca2-cluster" -> null
+      - region          = "us-east-2" -> null
+      - tags            = {} -> null
+      - tags_all        = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_route_table.public will be destroyed
+  - resource "aws_route_table" "public" {
+      - arn              = "arn:aws:ec2:us-east-2:<account-number>:route-table/rtb-07e86a70d11024e22" -> null
+      - id               = "rtb-07e86a70d11024e22" -> null
+      - owner_id         = "<account-number>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-2" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - gateway_id                 = "igw-0cd66d49067eece5a"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "ca2-public-rt"
+        } -> null
+      - tags_all         = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-public-rt"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_id           = "vpc-0933edcee68820e35" -> null
+    }
+
+  # aws_route_table_association.nodes will be destroyed
+  - resource "aws_route_table_association" "nodes" {
+      - id             = "rtbassoc-0b2de413296f0be0a" -> null
+      - region         = "us-east-2" -> null
+      - route_table_id = "rtb-07e86a70d11024e22" -> null
+      - subnet_id      = "subnet-0061050b9dd5a28bd" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_security_group.cluster will be destroyed
+  - resource "aws_security_group" "cluster" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group/sg-0872fef59b8763da3" -> null
+      - description            = "CA2 k3s cluster: admin access from one address, node-to-node traffic only inside the group" -> null
+      - egress                 = [
+          - {
+              - cidr_blocks      = [
+                  - "0.0.0.0/0",
+                ]
+              - description      = "Outbound: image pulls, package downloads and the k3s installer"
+              - from_port        = 0
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "-1"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 0
+            },
+        ] -> null
+      - id                     = "sg-0872fef59b8763da3" -> null
+      - ingress                = [
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "Kubernetes API, used by kubectl on the admin computer"
+              - from_port        = 6443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 6443
+            },
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "REST API node port: the one application port that is published"
+              - from_port        = 30080
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 30080
+            },
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "SSH, used by Ansible and for debugging"
+              - from_port        = 22
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 22
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "agents talk to the Kubernetes API on the server"
+              - from_port        = 6443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 6443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "ping, for troubleshooting"
+              - from_port        = -1
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "icmp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = -1
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "pod-to-pod traffic between nodes (VXLAN overlay network)"
+              - from_port        = 8472
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "udp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 8472
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "the control plane and metrics-server read each node kubelet"
+              - from_port        = 10250
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 10250
+            },
+        ] -> null
+      - name                   = "ca2-cluster" -> null
+      - owner_id               = "<account-number>" -> null
+      - region                 = "us-east-2" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "ca2-cluster-sg"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-cluster-sg"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_id                 = "vpc-0933edcee68820e35" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_subnet.nodes will be destroyed
+  - resource "aws_subnet" "nodes" {
+      - arn                                            = "arn:aws:ec2:us-east-2:<account-number>:subnet/subnet-0061050b9dd5a28bd" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-2a" -> null
+      - availability_zone_id                           = "use2-az1" -> null
+      - cidr_block                                     = "10.20.1.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-0061050b9dd5a28bd" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = true -> null
+      - owner_id                                       = "<account-number>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-2" -> null
+      - tags                                           = {
+          - "Name" = "ca2-nodes-subnet"
+        } -> null
+      - tags_all                                       = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-nodes-subnet"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - vpc_id                                         = "vpc-0933edcee68820e35" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # aws_vpc.main will be destroyed
+  - resource "aws_vpc" "main" {
+      - arn                                  = "arn:aws:ec2:us-east-2:<account-number>:vpc/vpc-0933edcee68820e35" -> null
+      - assign_generated_ipv6_cidr_block     = false -> null
+      - cidr_block                           = "10.20.0.0/16" -> null
+      - default_network_acl_id               = "acl-0b3daa3ecef0dabac" -> null
+      - default_route_table_id               = "rtb-0d9356f57040315da" -> null
+      - default_security_group_id            = "sg-02cb8f03e319b1473" -> null
+      - dhcp_options_id                      = "dopt-04d422551fc74e766" -> null
+      - enable_dns_hostnames                 = true -> null
+      - enable_dns_support                   = true -> null
+      - enable_network_address_usage_metrics = false -> null
+      - id                                   = "vpc-0933edcee68820e35" -> null
+      - instance_tenancy                     = "default" -> null
+      - ipv6_netmask_length                  = 0 -> null
+      - main_route_table_id                  = "rtb-0d9356f57040315da" -> null
+      - owner_id                             = "<account-number>" -> null
+      - region                               = "us-east-2" -> null
+      - tags                                 = {
+          - "Name" = "ca2-vpc"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-vpc"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_egress_rule.all_out will be destroyed
+  - resource "aws_vpc_security_group_egress_rule" "all_out" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-08e6db3270fa6afb5" -> null
+      - cidr_ipv4              = "0.0.0.0/0" -> null
+      - description            = "Outbound: image pulls, package downloads and the k3s installer" -> null
+      - id                     = "sgr-08e6db3270fa6afb5" -> null
+      - ip_protocol            = "-1" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id = "sgr-08e6db3270fa6afb5" -> null
+      - tags                   = {
+          - "Name" = "ca2-all-out"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-all-out"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["flannel"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-0aafb12108802f2e4" -> null
+      - description                  = "pod-to-pod traffic between nodes (VXLAN overlay network)" -> null
+      - from_port                    = 8472 -> null
+      - id                           = "sgr-0aafb12108802f2e4" -> null
+      - ip_protocol                  = "udp" -> null
+      - referenced_security_group_id = "sg-0872fef59b8763da3" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id       = "sgr-0aafb12108802f2e4" -> null
+      - tags                         = {
+          - "Name" = "ca2-flannel"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-flannel"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                      = 8472 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kube_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-0ef26c210e7abf831" -> null
+      - description                  = "agents talk to the Kubernetes API on the server" -> null
+      - from_port                    = 6443 -> null
+      - id                           = "sgr-0ef26c210e7abf831" -> null
+      - ip_protocol                  = "tcp" -> null
+      - referenced_security_group_id = "sg-0872fef59b8763da3" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id       = "sgr-0ef26c210e7abf831" -> null
+      - tags                         = {
+          - "Name" = "ca2-kube_api"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-kube_api"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                      = 6443 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kubelet"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-0e436767fd871f84b" -> null
+      - description                  = "the control plane and metrics-server read each node kubelet" -> null
+      - from_port                    = 10250 -> null
+      - id                           = "sgr-0e436767fd871f84b" -> null
+      - ip_protocol                  = "tcp" -> null
+      - referenced_security_group_id = "sg-0872fef59b8763da3" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id       = "sgr-0e436767fd871f84b" -> null
+      - tags                         = {
+          - "Name" = "ca2-kubelet"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-kubelet"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                      = 10250 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["ping"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-01f7fc94d0a93eed4" -> null
+      - description                  = "ping, for troubleshooting" -> null
+      - from_port                    = -1 -> null
+      - id                           = "sgr-01f7fc94d0a93eed4" -> null
+      - ip_protocol                  = "icmp" -> null
+      - referenced_security_group_id = "sg-0872fef59b8763da3" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id       = "sgr-01f7fc94d0a93eed4" -> null
+      - tags                         = {
+          - "Name" = "ca2-ping"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-ping"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                      = -1 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["kube_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-0624b9483a19b1838" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "Kubernetes API, used by kubectl on the admin computer" -> null
+      - from_port              = 6443 -> null
+      - id                     = "sgr-0624b9483a19b1838" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id = "sgr-0624b9483a19b1838" -> null
+      - tags                   = {
+          - "Name" = "ca2-kube_api"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-kube_api"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                = 6443 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["rest_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-0d6428d3b57468351" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "REST API node port: the one application port that is published" -> null
+      - from_port              = 30080 -> null
+      - id                     = "sgr-0d6428d3b57468351" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id = "sgr-0d6428d3b57468351" -> null
+      - tags                   = {
+          - "Name" = "ca2-rest_api"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-rest_api"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                = 30080 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["ssh"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<account-number>:security-group-rule/sgr-04dcf600ad5a2ca74" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "SSH, used by Ansible and for debugging" -> null
+      - from_port              = 22 -> null
+      - id                     = "sgr-04dcf600ad5a2ca74" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-0872fef59b8763da3" -> null
+      - security_group_rule_id = "sgr-04dcf600ad5a2ca74" -> null
+      - tags                   = {
+          - "Name" = "ca2-ssh"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "CA2"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "ca2-ssh"
+          - "Project"    = "CS5287-CA2"
+        } -> null
+      - to_port                = 22 -> null
+    }
+
+Plan: 0 to add, 0 to change, 19 to destroy.
+
+Changes to Outputs:
+  - admin_cidr_in_use = "<public-ip>/32" -> null
+  - agent_public_ips  = [
+      - "<public-ip>",
+      - "<public-ip>",
+    ] -> null
+  - ami_in_use        = "ami-09519cc56eb20524a" -> null
+  - ansible_inventory = <<-EOT
+        # Generated by Terraform ("make cluster-up"). Do not edit: it is rewritten on every run.
+        [server]
+        ca2-server ansible_host=<public-ip> node_ip=10.20.1.206
+        
+        [agents]
+        ca2-agent-1 ansible_host=<public-ip> node_ip=10.20.1.207
+        ca2-agent-2 ansible_host=<public-ip> node_ip=10.20.1.30
+        
+        [k3s:children]
+        server
+        agents
+        
+        [k3s:vars]
+        ansible_user=ubuntu
+        ansible_ssh_private_key_file=~/ca2-rebuild/CA2/.secrets/ca2-key
+    EOT -> null
+  - server_public_ip  = "<public-ip>" -> null
+  - vpc_id            = "vpc-0933edcee68820e35" -> null
+aws_default_security_group.default: Destroying... [id=sg-02cb8f03e319b1473]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Destroying... [id=sgr-0aafb12108802f2e4]
+aws_route_table_association.nodes: Destroying... [id=rtbassoc-0b2de413296f0be0a]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Destroying... [id=sgr-01f7fc94d0a93eed4]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Destroying... [id=sgr-0d6428d3b57468351]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Destroying... [id=sgr-0ef26c210e7abf831]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Destroying... [id=sgr-0624b9483a19b1838]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Destroying... [id=sgr-0e436767fd871f84b]
+aws_instance.agent[0]: Destroying... [id=i-006540ad94a1b95e5]
+aws_instance.agent[1]: Destroying... [id=i-0faefaed1a7178d88]
+aws_default_security_group.default: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Destroying... [id=sgr-04dcf600ad5a2ca74]
+aws_route_table_association.nodes: Destruction complete after 0s
+aws_vpc_security_group_egress_rule.all_out: Destroying... [id=sgr-08e6db3270fa6afb5]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Destruction complete after 0s
+aws_instance.server: Destroying... [id=i-0bc85840fbb0872b4]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Destruction complete after 0s
+aws_route_table.public: Destroying... [id=rtb-07e86a70d11024e22]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Destruction complete after 0s
+aws_vpc_security_group_egress_rule.all_out: Destruction complete after 0s
+aws_route_table.public: Destruction complete after 1s
+aws_internet_gateway.main: Destroying... [id=igw-0cd66d49067eece5a]
+aws_instance.agent[0]: Still destroying... [id=i-006540ad94a1b95e5, 00m10s elapsed]
+aws_instance.agent[1]: Still destroying... [id=i-0faefaed1a7178d88, 00m10s elapsed]
+aws_instance.server: Still destroying... [id=i-0bc85840fbb0872b4, 00m10s elapsed]
+aws_internet_gateway.main: Still destroying... [id=igw-0cd66d49067eece5a, 00m10s elapsed]
+aws_internet_gateway.main: Destruction complete after 17s
+aws_instance.agent[0]: Still destroying... [id=i-006540ad94a1b95e5, 00m20s elapsed]
+aws_instance.agent[1]: Still destroying... [id=i-0faefaed1a7178d88, 00m20s elapsed]
+aws_instance.server: Still destroying... [id=i-0bc85840fbb0872b4, 00m20s elapsed]
+aws_instance.agent[1]: Destruction complete after 30s
+aws_instance.agent[0]: Still destroying... [id=i-006540ad94a1b95e5, 00m30s elapsed]
+aws_instance.agent[0]: Destruction complete after 30s
+aws_instance.server: Destruction complete after 30s
+aws_subnet.nodes: Destroying... [id=subnet-0061050b9dd5a28bd]
+aws_key_pair.cluster: Destroying... [id=ca2-key]
+aws_security_group.cluster: Destroying... [id=sg-0872fef59b8763da3]
+aws_key_pair.cluster: Destruction complete after 0s
+aws_subnet.nodes: Destruction complete after 0s
+aws_security_group.cluster: Destruction complete after 0s
+aws_vpc.main: Destroying... [id=vpc-0933edcee68820e35]
+aws_vpc.main: Destruction complete after 1s
+
+Destroy complete! Resources: 19 destroyed.
+Cluster destroyed.
+CA2 cleanup scan
+  time    : 2026-10-15 21:52 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-CA2
+
+Created by this project (tagged Project=CS5287-CA2)
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] VPCs
+  [none ] Subnets
+  [none ] Security groups
+  [none ] Internet gateways
+  [none ] Route tables
+  [none ] Key pairs
+
+Anything else with that tag, in any AWS service
+  [skip ] Tagged resources (permission denied: tag:GetResources)
+
+Resources that cost money, tagged or not, in us-east-2
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+RESULT: CLEAN - nothing tagged Project=CS5287-CA2 is left, and no billable resources are running in us-east-2.
+        Not checked, because this AWS user is not allowed to: Tagged resources (tag:GetResources).
+make teardown took 1 min 44 s
+
+== What Terraform still manages (0 means nothing):
+0
+
+== Files that cluster-up made (all three must be gone):
+ls: .secrets/kubeconfig.yaml: No such file or directory
+ls: infra/ansible/inventory.ini: No such file or directory
+ls: infra/ansible/known_hosts: No such file or directory
+
+== The safety scan: the same question for every enabled region
+python3 scripts/cleanup-scan.py --all-regions
+CA2 cleanup scan
+  time    : 2026-10-15 21:52 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-CA2
+
+Created by this project (tagged Project=CS5287-CA2)
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] VPCs
+  [none ] Subnets
+  [none ] Security groups
+  [none ] Internet gateways
+  [none ] Route tables
+  [none ] Key pairs
+
+Anything else with that tag, in any AWS service
+  [skip ] Tagged resources (permission denied: tag:GetResources)
+
+Resources that cost money, tagged or not, in us-east-2
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+Resources that cost money, in the other 16 enabled regions
+  [none ] ap-northeast-1
+  [none ] ap-northeast-2
+  [none ] ap-northeast-3
+  [none ] ap-south-1
+  [none ] ap-southeast-1
+  [none ] ap-southeast-2
+  [none ] ca-central-1
+  [none ] eu-central-1
+  [none ] eu-north-1
+  [none ] eu-west-1
+  [none ] eu-west-2
+  [none ] eu-west-3
+  [none ] sa-east-1
+  [none ] us-east-1
+  [none ] us-west-1
+  [none ] us-west-2
+
+RESULT: CLEAN - nothing tagged Project=CS5287-CA2 is left, and no billable resources are running in any region.
+        Not checked, because this AWS user is not allowed to: Tagged resources (tag:GetResources).

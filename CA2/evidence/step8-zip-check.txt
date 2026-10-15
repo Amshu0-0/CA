@@ -1,0 +1,9 @@
+== The route a reviewer may take: download the repository as a ZIP, unzip it, run the checks (no git, no clone)
+downloaded main.zip: 30460490 bytes
+commit named inside the ZIP: a4cf3b401fdfd0bb03679eca68da202663e96647
+commit of main on GitHub:    a4cf3b401fdfd0bb03679eca68da202663e96647
+top folder inside the ZIP: CA-main
+folders named .git in the unzipped copy: 0
+RESULT: 61 passed, 0 failed, 0 warnings, 0 still to do (later steps)
+Summary: 37 resources found parsing stdin - Valid: 37, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 3 resources found in 3 files - Valid: 3, Invalid: 0, Errors: 0, Skipped: 0

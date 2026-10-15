@@ -1,0 +1,120 @@
+=== Everything that carries the label app.kubernetes.io/part-of=ca2-pipeline (pods, replica sets and volumes too)
+NAME                             READY   STATUS      RESTARTS   AGE
+pod/kafka-0                      1/1     Running     0          4m15s
+pod/mongo-0                      1/1     Running     0          4m15s
+pod/processor-77d44bc5d5-8q9sd   1/1     Running     0          4m16s
+pod/producer-replay-tx626        0/1     Completed   0          4m15s
+pod/producer-smoke-b5lqs         0/1     Completed   0          3m3s
+pod/restapi-cbbcff7c5-jv78v      1/1     Running     0          4m16s
+pod/restapi-cbbcff7c5-l8jkt      1/1     Running     0          4m16s
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/kafka            ClusterIP   10.43.217.80    <none>        9092/TCP         4m16s
+service/kafka-headless   ClusterIP   None            <none>        9092/TCP         4m16s
+service/mongo            ClusterIP   10.43.162.126   <none>        27017/TCP        4m16s
+service/mongo-headless   ClusterIP   None            <none>        27017/TCP        4m16s
+service/processor        ClusterIP   10.43.250.218   <none>        8000/TCP         4m16s
+service/restapi          NodePort    10.43.32.196    <none>        8080:30080/TCP   4m16s
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/processor   1/1     1            1           4m16s
+deployment.apps/restapi     2/2     2            2           4m16s
+
+NAME                                   DESIRED   CURRENT   READY   AGE
+replicaset.apps/processor-77d44bc5d5   1         1         1       4m16s
+replicaset.apps/restapi-cbbcff7c5      2         2         2       4m16s
+
+NAME                     READY   AGE
+statefulset.apps/kafka   1/1     4m15s
+statefulset.apps/mongo   1/1     4m15s
+
+NAME                                            REFERENCE              TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/processor   Deployment/processor   cpu: 6%/70%   1         3         1          4m15s
+
+NAME                        STATUS     COMPLETIONS   DURATION   AGE
+job.batch/producer-replay   Complete   1/1           62s        4m15s
+job.batch/producer-smoke    Complete   1/1           9s         3m3s
+
+NAME                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-kafka-0   Bound    pvc-8434c58e-92f9-4de2-b887-bbb2cc232447   5Gi        RWO            local-path     <unset>                 4m15s
+persistentvolumeclaim/data-mongo-0   Bound    pvc-4be31533-3a6a-45f6-a95a-006bb04ba0f3   5Gi        RWO            local-path     <unset>                 4m15s
+
+NAME                         DATA   AGE
+configmap/pipeline-config    8      4m16s
+configmap/processor-config   2      4m16s
+
+NAME                                                POD-SELECTOR                           AGE
+networkpolicy.networking.k8s.io/allow-dns-egress    <none>                                 4m15s
+networkpolicy.networking.k8s.io/default-deny-all    <none>                                 4m15s
+networkpolicy.networking.k8s.io/kafka-ingress       app.kubernetes.io/name=kafka           4m15s
+networkpolicy.networking.k8s.io/kafka-self          app.kubernetes.io/name=kafka           4m15s
+networkpolicy.networking.k8s.io/mongo-ingress       app.kubernetes.io/name=mongo           4m15s
+networkpolicy.networking.k8s.io/observer-egress     app.kubernetes.io/component=observer   4m15s
+networkpolicy.networking.k8s.io/processor-egress    app.kubernetes.io/name=processor       4m15s
+networkpolicy.networking.k8s.io/processor-ingress   app.kubernetes.io/name=processor       4m14s
+networkpolicy.networking.k8s.io/producer-egress     app.kubernetes.io/name=producer        4m14s
+networkpolicy.networking.k8s.io/restapi-egress      app.kubernetes.io/name=restapi         4m14s
+networkpolicy.networking.k8s.io/restapi-ingress     app.kubernetes.io/name=restapi         4m14s
+
+NAME                               AGE
+serviceaccount/kafka               4m17s
+serviceaccount/mongo               4m17s
+serviceaccount/pipeline-operator   4m17s
+serviceaccount/pipeline-viewer     4m17s
+serviceaccount/processor           4m17s
+serviceaccount/producer            4m17s
+serviceaccount/restapi             4m17s
+
+NAME                                               CREATED AT
+role.rbac.authorization.k8s.io/pipeline-operator   2026-10-15T21:35:37Z
+role.rbac.authorization.k8s.io/pipeline-viewer     2026-10-15T21:35:37Z
+
+NAME                                                      ROLE                     AGE
+rolebinding.rbac.authorization.k8s.io/pipeline-operator   Role/pipeline-operator   4m16s
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer     Role/pipeline-viewer     4m16s
+
+NAME                       TYPE     DATA   AGE
+secret/mongo-credentials   Opaque   2      4m20s
+
+=== The description of every object that the YAML files and the script create
+KIND                      NAME                DESCRIPTION
+Deployment                processor           Reads network flow messages from Kafka and stores them in MongoDB. Stateless; its replica count belongs to the HorizontalPodAutoscaler (1 to 3)
+Deployment                restapi             REST API that serves the stored flows from MongoDB: /health, /ready, /stats, /alerts and /events/TRACE_ID. Two stateless replicas
+StatefulSet               kafka               Kafka broker in KRaft mode (no ZooKeeper), one node. New topics get 3 partitions. Messages are kept on a PersistentVolumeClaim
+StatefulSet               mongo               MongoDB 7 with its data on a PersistentVolumeClaim. The administrator name and password are read from files mounted from the Secret mongo-credentials
+Job                       producer-replay     The producer stage of the stack: replays the 5,000-row dataset into Kafka once and ends. Delete the Job and apply again to replay
+Job                       producer-smoke      Sends one tagged event through the pipeline for make smoke. Not part of make up
+HorizontalPodAutoscaler   processor           Keeps the processor between 1 and 3 pods and adds pods above 70 percent CPU. The maximum is 3 because the topic has 3 partitions
+Service                   kafka               Address of the Kafka broker inside the cluster (kafka:9092). Not reachable from outside the cluster
+Service                   kafka-headless      Gives the Kafka StatefulSet pod a stable DNS name (kafka-0.kafka-headless) instead of a virtual IP. Kafka advertises this name to its clients
+Service                   mongo               Address of MongoDB inside the cluster (mongo:27017). Not reachable from outside the cluster
+Service                   mongo-headless      Gives the MongoDB StatefulSet pod a stable DNS name (mongo-0.mongo-headless) instead of a virtual IP
+Service                   processor           ClusterIP Service for the processor's health and metrics port (8000). Only pods labelled component observer may call it
+Service                   restapi             The only Service published outside the cluster: node port 30080 on every node, forwarding to port 8080 of the REST API pods
+ConfigMap                 kube-root-ca.crt    <none>
+ConfigMap                 pipeline-config     Settings shared by the producer, processor and REST API: Kafka address and topic, MongoDB address, database and collection, REST port and dataset file
+ConfigMap                 processor-config    Settings only the processor needs: its Kafka consumer group and the port of its health and metrics server
+NetworkPolicy             allow-dns-egress    Lets every pod ask the cluster DNS (CoreDNS in kube-system, port 53) to turn a Service name into an address
+NetworkPolicy             default-deny-all    Blocks all traffic into and out of every pod in the namespace. The other policies then allow, one by one, only the connections the pipeline needs
+NetworkPolicy             kafka-ingress       Kafka accepts connections only from the producer and the processor, on port 9092
+NetworkPolicy             kafka-self          The Kafka pod may talk to itself on ports 9092 and 9093 (broker and controller)
+NetworkPolicy             mongo-ingress       MongoDB accepts connections only from the processor and the REST API, on port 27017
+NetworkPolicy             observer-egress     Pods with the label component=observer (the role of a monitoring tool; make netpol-check plays it) may call only the processor's port 8000 and the REST API's port 8080
+NetworkPolicy             processor-egress    The processor may connect only to Kafka (port 9092) and MongoDB (port 27017)
+NetworkPolicy             processor-ingress   The processor's metrics port 8000 may be read only by pods labelled component observer
+NetworkPolicy             producer-egress     The producer may connect only to Kafka, on port 9092
+NetworkPolicy             restapi-egress      The REST API may connect only to MongoDB, on port 27017
+NetworkPolicy             restapi-ingress     The REST API accepts connections on port 8080 from any source. The AWS firewall limits who can reach the node port in front of it
+ServiceAccount            default             <none>
+ServiceAccount            kafka               Identity of the Kafka pod. Its Kubernetes API token is not mounted, because Kafka never calls the Kubernetes API
+ServiceAccount            mongo               Identity of the MongoDB pod. Its Kubernetes API token is not mounted, because MongoDB never calls the Kubernetes API
+ServiceAccount            pipeline-operator   Can run the producer and scale the pipeline, but cannot read Secrets
+ServiceAccount            pipeline-viewer     Read-only access to the pipeline
+ServiceAccount            processor           Identity of the processor pods. Its Kubernetes API token is not mounted, because the processor never calls the Kubernetes API
+ServiceAccount            producer            Identity of the producer Jobs and pods. Its Kubernetes API token is not mounted, because the producer never calls the Kubernetes API
+ServiceAccount            restapi             Identity of the REST API pods. Its Kubernetes API token is not mounted, because the REST API never calls the Kubernetes API
+Role                      pipeline-operator   Everything the viewer can read, plus create and delete Jobs and change the replica count of a Deployment. Secrets are not included
+Role                      pipeline-viewer     Read-only: pods, logs, Services, ConfigMaps, volume claims, events, workloads, Jobs, autoscalers and network policies. Secrets are not included
+RoleBinding               pipeline-operator   Gives the Role pipeline-operator to the ServiceAccount pipeline-operator
+RoleBinding               pipeline-viewer     Gives the Role pipeline-viewer to the ServiceAccount pipeline-viewer
+Secret                    mongo-credentials   MongoDB administrator name and password. Made by scripts/create-secrets.sh and never stored in git. Mounted as read-only files into mongo, processor and restapi
