@@ -5,13 +5,13 @@
 
 This project runs the CA0/CA1 pipeline on a three-node Kubernetes cluster: a producer replays 5,000 labelled network-flow records onto a Kafka topic, a processor reads them and stores them in MongoDB, and a REST API serves them. Everything that makes it run is written down in this folder. `infra/` builds the cluster itself (Terraform creates a dedicated VPC, subnet, firewall and three AWS machines; Ansible installs k3s, a certified Kubernetes distribution, on them). The YAML manifests in the other folders declare the pipeline, its network rules, its access rules, the handling of its secrets and its autoscalers. Nothing is created by hand.
 
-The work followed the checklist from the CA1 debrief (see below): a disposable network, parameters written once and consumed by every tool, a second run that changes nothing, one tagged event traced through every stage, and an independent scan that proves `destroy` left nothing behind. Every claim in this README points to a file in [`evidence/`](evidence/), and [`integritypacket.md`](integritypacket.md) says which test proves which claim. The files in `evidence/` are the saved output of real runs on AWS. The files of Steps 4 to 7 come from the clusters I built and destroyed while developing. In Step 8 the first cluster was destroyed and scanned (`step8-dry-run-*`, `step8-scan-1-*`, `step8-teardown-1`), then a second cluster was built from a fresh `git clone` (`step8-rebuild-*`, `step8-scan-2-*`) and destroyed again (`step8-teardown-2`, `step8-teardown-3-again`); see *Rebuild from nothing*.
+The work followed the checklist from the CA1 debrief (see below): a disposable network, parameters written once and consumed by every tool, a second run that changes nothing, one tagged event traced through every stage, and an independent scan that proves `destroy` left nothing behind. Every claim in this README points to a file in [`evidence/`](evidence/), and [`integritypacket.md`](integritypacket.md) says which test proves which claim. The `evidence/` folder includes saved output from real AWS and Kubernetes runs, local verification results, and generated reports, charts, and measurements. The source of each piece of evidence is described in the relevant section. The files of Steps 4 to 7 come from the clusters I built and destroyed while developing. In Step 8 the first cluster was destroyed and scanned (`step8-dry-run-*`, `step8-scan-1-*`, `step8-teardown-1`), then a second cluster was built from a fresh `git clone` (`step8-rebuild-*`, `step8-scan-2-*`) and destroyed again (`step8-teardown-2`, `step8-teardown-3-again`); see *Rebuild from nothing*.
 
 | Stage | Command | What it does | Proof |
 |---|---|---|---|
 | Check the files | `make validate`, `make verify` | Manifests against the Kubernetes schemas; manifests, programs, cluster code, this README and the Integrity Packet against each other. Needs no cluster. | [step6-validate.txt](evidence/step6-validate.txt), [step9-verify.txt](evidence/step9-verify.txt) |
 | Build the cluster | `make cluster-up` | Terraform: VPC, subnet, firewall, 3 machines. Ansible: k3s. | [step4-cluster-up.txt](evidence/step4-cluster-up.txt) |
-| Deploy the stack | `make up` | Creates the Secret, applies every manifest (`kubectl apply -k .`), waits until everything runs. | [step5-up-run1.txt](evidence/step5-up-run1.txt) |
+| Deploy the stack | `make up` | Creates the Secret, applies the 37 Kubernetes objects rendered by `kustomization.yaml` (`kubectl apply -k .`), and waits until the stack is ready. Smoke-test and scaling workloads run separately when requested. | [step5-up-run1.txt](evidence/step5-up-run1.txt) |
 | See what would change | `make dry-run` | Asks the cluster what the next `make up` would change, and changes nothing. | [step8-dry-run-server.txt](evidence/step8-dry-run-server.txt), [step8-dry-run-client.txt](evidence/step8-dry-run-client.txt) |
 | Validate | `make rest-check`, `make smoke`, `make netpol-check`, `make rbac-check`, `make heal-check` | REST call from outside; one tagged event through all stages; 30 network connections; access rules; self-healing. | [step5-rest-check.txt](evidence/step5-rest-check.txt), [step6-smoke.txt](evidence/step6-smoke.txt), [step6-netpol-check.txt](evidence/step6-netpol-check.txt), [step6-rbac.txt](evidence/step6-rbac.txt), [step6-heal.txt](evidence/step6-heal.txt) |
 | Scale | `make scale-test` | Producers 1 → 5 pods under an autoscaler; messages per second before and after. | [step7-scale-results.md](evidence/step7-scale-results.md) |
@@ -193,7 +193,7 @@ CA2/
 │   ├── terraform/             VPC, subnet, internet gateway, route table, firewall, 3 machines
 │   └── ansible/               installs k3s on the machines and fetches the kubeconfig
 ├── scripts/                   the tests and helpers behind the make commands
-├── evidence/                  the saved output of every test (plain text)
+├── evidence/                  terminal output, reports, charts and measurements
 └── images/                    all screenshots
 ```
 
@@ -908,7 +908,7 @@ These are documented instead of hidden:
 - [x] Everything rebuilt from a fresh clone and destroyed again, with a scan of every region ([step8-rebuild-stack.txt](evidence/step8-rebuild-stack.txt), [step8-teardown-2.txt](evidence/step8-teardown-2.txt))
 - [x] Every object has a label and a description; the dry run changes nothing ([step8-rebuild-labels.txt](evidence/step8-rebuild-labels.txt), [step8-dry-run-server.txt](evidence/step8-dry-run-server.txt))
 - [x] The README, the Integrity Packet and the AI log agree with the repository and the evidence: links, file names, `make` commands, quoted lines and counts ([step9-verify.txt](evidence/step9-verify.txt), section 9 of `make verify`)
-- [x] Nothing private in the saved evidence or the documents: no public address of mine or of a machine, no account number, no home folder, no key (`make verify` checks it, and also that no value from `.secrets/` is in a published file); no secret, key or state file in the repository or in its history (searched before the last push). The old addresses of the terminated machines are still in earlier commits; see AI-log row 45
+- [x] Current repository files passed the privacy checks in `make verify`: no secret value from `.secrets/`, account number, key, home-folder path or current public machine address was detected in the checked files. Older public addresses of terminated machines remain in earlier Git commits (AI-log row 45). These checks do not establish that the entire Git history is free of sensitive data.
 
 ![make verify: 61 checks passed, 0 failed; make validate: all objects valid](images/verify-and-validate.png)
 
