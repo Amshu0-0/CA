@@ -1,6 +1,5 @@
 # CA2 — PaaS Orchestration: the intrusion-detection pipeline on Kubernetes
 
-*Last updated: October 17, 2026*
 
 ## Overview
 
@@ -34,8 +33,7 @@ make teardown        # delete everything, then scan AWS to prove nothing is left
 
 `make` with no argument lists every command. Details, expected output and troubleshooting are below. If you do not want to use AWS, the next section runs the same stack on a cluster you already have.
 
-## Use your own cluster (you only need kubectl)
-
+## Use your own Kubernetes cluster
 The Kubernetes part of this project does not need the AWS cluster that `infra/` builds. If you have a Kubernetes cluster and `kubectl` points at it, these commands run the whole stack:
 
 ```bash
@@ -196,7 +194,7 @@ CA2/
 │   └── ansible/               installs k3s on the machines and fetches the kubeconfig
 ├── scripts/                   the tests and helpers behind the make commands
 ├── evidence/                  the saved output of every test (plain text)
-└── images/                    the kubectl get all -A screenshot
+└── images/                    all screenshots
 ```
 
 The programs are built into images by a GitHub Actions workflow (`.github/workflows/ca2-images.yml` at the root of the repository, where GitHub requires workflows to live). It builds for `linux/amd64` and `linux/arm64`, tags the images with the number in [`VERSION`](VERSION) and pushes them to `ghcr.io/amshu0-0/ca2-producer`, `ca2-processor` and `ca2-restapi`. No Docker installation is needed on the laptop and no registry password is stored: the workflow uses the temporary token that GitHub gives every run.
