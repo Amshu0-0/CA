@@ -1,0 +1,69 @@
+Excerpt of my terminal log of October 14, 2026 (Step 6). The lines are copied unchanged, with four exceptions:
+trailing spaces are removed, my two public addresses are written as <old-address> and <new-address>, the shell
+prompt is written as $, and [...] marks lines that I left out. The first request failed (HTTP 000, no answer)
+because my address had changed; make cluster-up changed three firewall rules in place, and the same request was
+then answered (HTTP 200).
+
+request:   GET /events/smoke-1014-165801-c52d
+           the same with curl:  curl -s http://<server-public-ip>:30080/events/smoke-1014-165801-c52d
+response:  HTTP 000, 0 bytes, 10.005096 s
+body:      the first 25 lines (all of it is in evidence/step6-smoke-response.json)
+Expecting value: line 1 column 1 (char 0)
+$ make cluster-up
+[...]
+data.http.my_ip[0]: Read complete after 1s [id=https://checkip.amazonaws.com]
+[...]
+Terraform will perform the following actions:
+
+  # aws_vpc_security_group_ingress_rule.from_admin["kube_api"] will be updated in-place
+  ~ resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      ~ cidr_ipv4              = "<old-address>/32" -> "<new-address>/32"
+        id                     = "sgr-021931d4d8b6bb3d0"
+        tags                   = {
+            "Name" = "ca2-kube_api"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["rest_api"] will be updated in-place
+  ~ resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      ~ cidr_ipv4              = "<old-address>/32" -> "<new-address>/32"
+        id                     = "sgr-079b89008520d07fd"
+        tags                   = {
+            "Name" = "ca2-rest_api"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["ssh"] will be updated in-place
+  ~ resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      ~ cidr_ipv4              = "<old-address>/32" -> "<new-address>/32"
+        id                     = "sgr-093659a88a018ba23"
+        tags                   = {
+            "Name" = "ca2-ssh"
+        }
+        # (9 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.
+
+Changes to Outputs:
+  ~ admin_cidr_in_use = "<old-address>/32" -> "<new-address>/32"
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Modifying... [id=sgr-021931d4d8b6bb3d0]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Modifying... [id=sgr-093659a88a018ba23]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Modifying... [id=sgr-079b89008520d07fd]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Modifications complete after 1s [id=sgr-093659a88a018ba23]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Modifications complete after 1s [id=sgr-021931d4d8b6bb3d0]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Modifications complete after 1s [id=sgr-079b89008520d07fd]
+
+Apply complete! Resources: 0 added, 3 changed, 0 destroyed.
+[...]
+PLAY RECAP ******************************************************************************************************************************************************
+ca2-agent-1                : ok=8    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+ca2-agent-2                : ok=7    changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+ca2-server                 : ok=13   changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+[...]
+request:   GET /events/smoke-1014-165801-c52d
+           the same with curl:  curl -s http://<server-public-ip>:30080/events/smoke-1014-165801-c52d
+response:  HTTP 200, 2207 bytes, 1.038715 s
+body:      the first 25 lines (all of it is in evidence/step6-smoke-response.json)

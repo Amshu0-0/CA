@@ -1,0 +1,28 @@
+First line of the output of each version command, saved on October 17, 2026.
+
+$ sw_vers -productVersion
+26.5
+$ make --version
+GNU Make 3.81
+$ terraform version
+Terraform v1.16.3
+$ ansible --version
+ansible [core 2.21.4]
+$ kubectl version --client
+Client Version: v1.37.1
+$ kubeconform -v
+v0.8.0
+$ aws --version
+aws-cli/2.36.49 Python/3.14.7 Darwin/25.5.0 source/arm64
+$ python3 --version
+Python 3.13.2
+$ python3 -c "import yaml; print(yaml.__version__)"
+6.0.2
+$ openssl version
+OpenSSL 3.0.16 11 Feb 2025 (Library: OpenSSL 3.0.16 11 Feb 2025)
+$ ssh -V
+OpenSSH_10.2p1, LibreSSL 3.3.6
+$ git --version
+git version 2.50.1 (Apple Git-155)
+$ docker --version
+not installed

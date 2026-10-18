@@ -1,5 +1,6 @@
 # Checks that the Kubernetes manifests, the programs and the CA2 requirements agree with each other.
 # It needs no cluster: it renders the manifests with "kubectl kustomize" and reads the result as data.
+# Section 9 also reads the README, the Integrity Packet, the AI log and the evidence folder, and compares what they say with the files.
 #
 #   make verify          (or:  python3 scripts/verify_manifests.py)
 #
@@ -8,9 +9,13 @@
 #   WARN  it works, but it is weaker than the design (for example, a container that runs as root)
 #   TODO  a requirement that a later step adds, so it is not an error yet
 
+import fnmatch
+import os
 import re
+import struct
 import subprocess
 import sys
+import urllib.parse
 from pathlib import Path
 
 try:
@@ -420,6 +425,273 @@ checks = [
 ]
 for label, passed, later in checks:
     rows.append(("PASS" if passed else ("TODO" if later else "FAIL"), G, label, []))
+
+# ------------------------------------------------------------ 9. the documents agree with the files and the evidence
+# The README, the Integrity Packet and the AI log make claims about the files and the saved evidence. These checks read the documents
+# as data and compare every claim that a program can compare. They cannot tell whether a sentence is well written or true in spirit.
+G = "9. The documents agree with the files and the evidence (README, Integrity Packet, AI log)"
+DOC_NAMES = ("README.md", "integritypacket.md", "ai-guidance-log.md")
+SHOT = "images/kubectl-get-all.png"
+
+
+UNREADABLE = []   # a file that cannot be read must never count as "nothing found" (it is reported by the privacy checks)
+
+
+def read_text(p):
+    try:
+        return p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        UNREADABLE.append(str(p.relative_to(ROOT)) if str(p).startswith(str(ROOT)) else str(p))
+        return ""
+
+
+def no_fences(t): return re.sub(r"```.*?```", "", t, flags=re.S)
+def no_code(t): return re.sub(r"`[^`\n]*`", "", no_fences(t))
+def cap(items, n=8): return list(items[:n]) + (["... and " + str(len(items) - n) + " more"] if len(items) > n else [])
+
+
+# What Git would publish: every file that no line of .gitignore (here or one folder up) matches.
+IGNORE = [l.strip() for f in (ROOT / ".gitignore", ROOT.parent / ".gitignore") for l in read_text(f).splitlines() if l.strip() and l.strip()[0] not in "#!"]
+
+
+def ignored(rel, is_dir=False):
+    parts = rel.split("/")
+    for pat in IGNORE:
+        only_dir, p = pat.endswith("/"), pat.strip("/")
+        if "/" in p:
+            if any(fnmatch.fnmatch("/".join(parts[:i]), p) and (not only_dir or i < len(parts) or is_dir) for i in range(1, len(parts) + 1)):
+                return True
+        elif any(fnmatch.fnmatch(part, p) and (not only_dir or i < len(parts) - 1 or is_dir) for i, part in enumerate(parts)):
+            return True
+    return False
+
+
+published = []
+for dirpath, dirnames, filenames in os.walk(str(ROOT), onerror=lambda e: UNREADABLE.append(str(e.filename))):
+    here = Path(dirpath).relative_to(ROOT).as_posix()
+    here = "" if here == "." else here + "/"
+    dirnames[:] = sorted(d for d in dirnames if d != ".git" and not ignored(here + d, True))
+    published += [here + f for f in sorted(filenames) if not ignored(here + f)]
+
+doc = {n: read_text(ROOT / n) for n in DOC_NAMES}
+readme, packet, ailog = doc["README.md"], doc["integritypacket.md"], doc["ai-guidance-log.md"]
+top = {p.name for p in ROOT.iterdir()}
+
+# 9.1 the three documents and the screenshot
+fails, note = ["missing " + n for n in DOC_NAMES if not (ROOT / n).is_file()], ""
+if not (ROOT / SHOT).is_file():
+    fails.append(SHOT + " is missing (the assignment asks for a screenshot of kubectl get all -A)")
+else:
+    data = (ROOT / SHOT).read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+        fails.append(SHOT + " is not a PNG image")
+    else:
+        width, height = struct.unpack(">II", data[16:24])
+        note = " (" + str(width) + " x " + str(height) + " pixels, " + str(len(data) // 1024) + " KB)"
+        if width < 600 or height < 300:
+            fails.append(SHOT + " is only " + str(width) + " x " + str(height) + " pixels, too small to read")
+        if len(data) > 10 * 1024 * 1024:
+            fails.append(SHOT + " is larger than 10 MB")
+    if not re.search(r"!\[[^\]]*\]\(" + re.escape(SHOT) + r"\)", readme):
+        fails.append("the README does not show " + SHOT)
+judge(G, "README.md, integritypacket.md and ai-guidance-log.md exist; " + SHOT + " is a PNG image and the README shows it" + note, fails)
+
+# 9.2 nothing unfinished
+fails = []
+for n in DOC_NAMES:
+    if "\t" in doc[n]:
+        fails.append(n + ": contains a TAB character")
+    fails += [n + ": unfinished text " + m for m in sorted(set(re.findall(r"\{\{[^}]*\}\}|\bTODO\b|\bTBD\b|\bFIXME\b", doc[n])))]
+judge(G, "no unfilled placeholder ({{ }}, TODO, TBD, FIXME) and no TAB character in the three documents", fails)
+
+# 9.3 the sections that the assignment and the packet guidance ask for
+wanted = {
+    "README.md": ("prerequisites", "how to deploy", "how to destroy", "scaling test", "where to find logs", "deviations from ca0", "known limitations", "smoke test", "security", "integrity packet"),
+    "integritypacket.md": ("outcome", "claims", "assumptions", "failures found and fixed", "escalation", "risks that remain", "ai-assisted work", "ownership", "evidence index"),
+    "ai-guidance-log.md": ("decisions the ai recommended", "where the ai was wrong"),
+}
+fails = []
+for n, words in wanted.items():
+    heads = [h.lower() for h in re.findall(r"^#{1,6}[ ]+(.+?)[ #]*$", no_fences(doc[n]), flags=re.M)]
+    fails += [n + ": no heading with '" + w + "'" for w in words if not any(w in h for h in heads)]
+judge(G, "the README, the packet and the AI log have the sections that were asked for (" + str(sum(len(v) for v in wanted.values())) + " headings)", fails)
+
+
+# 9.4 every link points to something inside this folder
+def slugs(t):
+    seen, found = {}, set()
+    for h in re.findall(r"^#{1,6}[ ]+(.+?)[ #]*$", no_fences(t), flags=re.M):
+        s = re.sub(r"[^\w\- ]", "", h.strip().lower()).replace(" ", "-")
+        seen[s] = seen.get(s, 0) + 1
+        found.add(s if seen[s] == 1 else s + "-" + str(seen[s] - 1))
+    return found
+
+
+fails, links = [], 0
+for n in DOC_NAMES:
+    for target in re.findall(r"!?\[[^\]]*\]\(([^)\s]+)\)", no_code(doc[n])):
+        links += 1
+        if target.startswith(("http://", "https://", "mailto:")):
+            continue
+        path, _, frag = urllib.parse.unquote(target).partition("#")
+        if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path):
+            fails.append(n + ": " + target + " is not a link inside this folder")
+        elif path.startswith("/") or ".." in path.split("/"):
+            fails.append(n + ": " + target + " leaves the CA2 folder, so it breaks when the folder is downloaded alone")
+        elif path and not (ROOT / path).exists():
+            fails.append(n + ": " + target + " does not exist")
+        elif frag and (not path or path.endswith(".md")) and frag.lower() not in slugs(doc[n] if not path else read_text(ROOT / path)):
+            fails.append(n + ": " + target + " points to a heading that does not exist")
+judge(G, "every link points to a file or folder inside CA2 that exists (" + str(links) + " links)", cap(fails))
+
+# 9.5 every file name in backticks exists (or is a file that .gitignore keeps out of Git)
+fails, names = [], 0
+for n in DOC_NAMES:
+    for span in sorted(set(re.findall(r"`([^`\n]+)`", no_fences(doc[n])))):
+        span = span.rstrip(".,:;")
+        if not re.fullmatch(r"[\w.*/-]+", span):
+            continue
+        if "/" in span and span.split("/")[0] in top:
+            names += 1
+            rel = span.rstrip("/")
+            if ignored(rel, span.endswith("/")):
+                continue
+            found = list(ROOT.glob(rel)) if "*" in rel else ([ROOT / rel] if (ROOT / rel).exists() else [])
+            if not found:
+                fails.append(n + ": `" + span + "` does not exist")
+        elif "/" not in span and re.fullmatch(r"[\w.-]+\.(md|yaml|yml|py|sh|tf|tpl|j2|txt|csv|json|svg|png)|Makefile|VERSION|Dockerfile", span):
+            names += 1
+            if span not in top and not any(p.rsplit("/", 1)[-1] == span for p in published) and not ignored(span):
+                fails.append(n + ": `" + span + "` is not a file of this repository")
+judge(G, "every file name written in backticks exists (" + str(names) + " names)", cap(fails))
+
+# 9.6 every "make X" written in the documents is a target of the Makefile
+mk_text = (ROOT / "Makefile").read_text() if (ROOT / "Makefile").exists() else ""
+mk_targets = set(re.findall(r"^([a-z][a-z0-9-]*):", mk_text, flags=re.M))
+fails, used = [], set()
+for n in DOC_NAMES:
+    lines = re.findall(r"`([^`\n]+)`", no_fences(doc[n]))
+    for info, body in re.findall(r"```([A-Za-z]*)\n(.*?)\n```", doc[n], flags=re.S):
+        if info in ("", "bash", "sh", "shell", "console"):
+            lines += [l.split("#")[0] for l in body.splitlines()]
+    for l in lines:
+        for m in re.finditer(r"\bmake\s+([a-z][a-z0-9-]*)", l):
+            used.add(m.group(1))
+            if m.group(1) not in mk_targets:
+                fails.append(n + ": 'make " + m.group(1) + "' is not a target of the Makefile")
+judge(G, "every make command written in the documents is a target of the Makefile (" + str(len(used)) + " different commands)", cap(sorted(set(fails))))
+
+# 9.7 every quoted line is a line of the evidence file named above it
+fails, blocks, quoted = [], 0, 0
+for n in DOC_NAMES:
+    found = re.findall(r"<!-- from: (\S+) -->\n```text\n(.*?)\n```", doc[n], flags=re.S)
+    if len(found) != len(re.findall(r"<!-- from: ", doc[n])):
+        fails.append(n + ": a '<!-- from: file -->' comment is not followed by a text block")
+    for f, body in found:
+        blocks += 1
+        if not (ROOT / f).is_file():
+            fails.append(n + ": the quoted file " + f + " does not exist")
+            continue
+        have = {l.rstrip() for l in read_text(ROOT / f).splitlines()}
+        for line in body.splitlines():
+            if line.strip() and line.strip() not in ("...", "…"):
+                quoted += 1
+                if line.rstrip() not in have:
+                    fails.append(n + ": the line '" + line.strip()[:60] + "' is not in " + f)
+judge(G, "every line of the " + str(blocks) + " quoted blocks (" + str(quoted) + " lines) is a line of the evidence file named above it", cap(fails))
+
+# 9.8 the numbers in the documents agree with the manifests and with the AI log
+fails = []
+kinds_n = {}
+for d in docs:
+    kinds_n[kind(d)] = kinds_n.get(kind(d), 0) + 1
+want = "(" + str(len(docs)) + " objects: namespace, " + str(kinds_n.get("NetworkPolicy", 0)) + " NetworkPolicies, " + str(kinds_n.get("ServiceAccount", 0)) + " service accounts, " + \
+    str(kinds_n.get("Role", 0)) + " roles and " + str(kinds_n.get("RoleBinding", 0)) + " role bindings, " + str(kinds_n.get("ConfigMap", 0)) + " ConfigMaps, " + \
+    str(kinds_n.get("Service", 0)) + " Services, " + str(kinds_n.get("StatefulSet", 0)) + " StatefulSets, " + str(kinds_n.get("Deployment", 0)) + " Deployments, the autoscaler and the replay Job)"
+if want not in readme:
+    fails.append("README.md has no sentence that lists the objects like this: " + want)
+policy_names = sorted(name(d) for d in docs if kind(d) == "NetworkPolicy")
+table = readme.split("| Policy | What it allows (everything else is dropped) |", 1)
+if len(table) < 2:
+    fails.append("README.md has no policy table that starts with '| Policy | What it allows (everything else is dropped) |'")
+elif sorted(re.findall(r"^\| `([a-z-]+)` \|", table[1].split("\n\n", 1)[0], flags=re.M)) != policy_names:
+    fails.append("the policy table of README.md does not list exactly the " + str(len(policy_names)) + " NetworkPolicies of the manifests")
+for n in ("README.md", "integritypacket.md"):
+    fails += [n + ": '" + m.group(0) + "' but the manifests hold " + str(len(policy_names)) + " NetworkPolicies" for m in re.finditer(r"\b(\d+) (?:NetworkPolicies|policies)\b", no_code(doc[n])) if int(m.group(1)) != len(policy_names)]
+log_rows = [r for r in ailog.splitlines() if re.match(r"^\| \d+ \|", r)]
+log_mistakes = [r for r in ailog.splitlines() if re.match(r"^\| [A-Z] \|", r)]
+log_ticked = [r for r in log_rows if re.search(r"☑|✅|✔|\[[xX]\]", r.rsplit("|", 2)[-2])]
+stated = {"recommendations": re.search(r"holds (\d+) consequential recommendations", packet), "mistakes": re.search(r"holds (\d+) mistakes", packet), "ticked": re.search(r"Rows ticked: \*\*(\d+) of (\d+)\*\*", packet)}
+for key, m in stated.items():
+    if m is None:
+        fails.append("integritypacket.md has no sentence with the number of " + key + " in the AI log")
+if stated["recommendations"] and int(stated["recommendations"].group(1)) != len(log_rows):
+    fails.append("the packet says " + stated["recommendations"].group(1) + " recommendations, the AI log has " + str(len(log_rows)))
+if stated["mistakes"] and int(stated["mistakes"].group(1)) != len(log_mistakes):
+    fails.append("the packet says " + stated["mistakes"].group(1) + " mistakes, the AI log has " + str(len(log_mistakes)))
+if stated["ticked"] and (int(stated["ticked"].group(1)), int(stated["ticked"].group(2))) != (len(log_ticked), len(log_rows)):
+    fails.append("the packet says " + stated["ticked"].group(1) + " of " + stated["ticked"].group(2) + " rows ticked, the AI log has " + str(len(log_ticked)) + " of " + str(len(log_rows)) + " (run the refresh block of Step 9)")
+judge(G, "the numbers agree: " + str(len(docs)) + " objects and " + str(len(policy_names)) + " policies against the manifests; " + str(len(log_rows)) + " recommendations, " + str(len(log_mistakes)) + " mistakes and " + str(len(log_ticked)) + " ticked rows against the AI log", cap(fails))
+
+# 9.9 every evidence file is listed in the packet
+evidence_files = [p for p in published if p.startswith("evidence/") and not p.rsplit("/", 1)[-1].startswith(".")]
+judge(G, "every file in evidence/ is listed in the Integrity Packet (" + str(len(evidence_files)) + " files)", cap([p + " is not mentioned in integritypacket.md" for p in evidence_files if p.rsplit("/", 1)[-1] not in packet]))
+
+# 9.10 nothing private in the evidence or in the documents
+PRIVATE = re.compile(r"^(10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0$|255\.|192\.0\.2\.|198\.51\.100\.|203\.0\.113\.)")
+IPV4 = re.compile(r"(?<![\w.])(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?!\.?\d)")
+dataset_ips = set()
+for csv_file in sorted((ROOT / "producer").glob("*.csv")):
+    dataset_ips |= {m.group(0) for m in IPV4.finditer(read_text(csv_file))}
+home = str(Path.home())
+scan_files = evidence_files
+fails = []
+for rel in scan_files + list(DOC_NAMES):
+    text = read_text(ROOT / rel)
+    pub = [m.group(0) for m in IPV4.finditer(text) if all(int(g) <= 255 for g in m.groups()) and not PRIVATE.match(m.group(0)) and m.group(0) not in dataset_ips]
+    if pub:
+        fails.append(rel + ": " + str(len(pub)) + " public IP address(es) that are not in the dataset")
+    if re.search(r"\bec2-(?:\d{1,3}-){3}\d{1,3}\b", text):
+        fails.append(rel + ": an EC2 host name (it contains the machine's public address)")
+    if re.search(r"(?<!\d)\d{12}(?!\d)", text):
+        fails.append(rel + ": a 12-digit number (an AWS account number looks like this)")
+    if re.search(r"/Users/[\w.-]+", text) or (len(home) > 6 and home in text):
+        fails.append(rel + ": a path into a home folder")
+    if re.search(r"\b(AKIA|ASIA)[0-9A-Z]{16}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----", text):
+        fails.append(rel + ": an AWS access key or a private key")
+fails += ["could not read " + u + ", so it was not checked" for u in sorted(set(UNREADABLE))]
+judge(G, "nothing private in the evidence or in the documents: no public address outside the dataset, host name, account number, home folder or key (" + str(len(scan_files) + len(DOC_NAMES)) + " files)", cap(fails))
+
+# 9.11 no value from .secrets/ in any file that Git would publish
+needles, secret_files = set(), 0
+secrets_dir = ROOT / ".secrets"
+for f in sorted(secrets_dir.iterdir()) if secrets_dir.is_dir() else []:
+    if f.is_file() and not f.name.endswith(".pub") and f.name != "known_hosts":
+        secret_files += 1
+        try:
+            body = f.read_bytes()
+        except OSError:
+            UNREADABLE.append(".secrets/" + f.name)
+            continue
+        # A value that looks random: 20 or more letters and digits with at least two digits and two capitals (a word such as "certificate-authority-data" is not a secret).
+        needles |= {m.group(0) for m in re.finditer(rb"[A-Za-z0-9+/=_-]{20,}", body) if len(re.findall(rb"[0-9]", m.group(0))) >= 2 and len(re.findall(rb"[A-Z]", m.group(0))) >= 2}
+        if len(body.strip()) >= 12 and b"\n" not in body.strip():
+            needles.add(body.strip())
+fails = []
+for rel in published:
+    try:
+        if (ROOT / rel).stat().st_size > 40 * 1024 * 1024:
+            continue
+        blob = (ROOT / rel).read_bytes()
+    except OSError:
+        UNREADABLE.append(rel)
+        continue
+    fails += [rel + " contains a value that is also in .secrets/" for n_ in needles if n_ in blob][:1]
+fails += ["could not read " + u + ", so it was not searched" for u in sorted(set(UNREADABLE))]
+if secret_files:
+    judge(G, "no value from .secrets/ is in any file that Git would publish (" + str(secret_files) + " secret files, " + str(len(published)) + " files searched)", cap(fails))
+else:
+    judge(G, "no value from .secrets/ is in a published file (this computer has no .secrets/ folder, so there was nothing to search for)", cap(fails))
 
 # ------------------------------------------------------------ the report
 counts, kinds = {"PASS": 0, "FAIL": 0, "WARN": 0, "TODO": 0}, {}
