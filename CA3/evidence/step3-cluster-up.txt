@@ -4,13 +4,13 @@ terraform -chdir=infra/terraform init -input=false > /dev/null && \
     terraform -chdir=infra/terraform apply -input=false -auto-approve && \
     terraform -chdir=infra/terraform output -raw ansible_inventory > infra/ansible/inventory.ini && \
     cd infra/ansible && ansible-playbook site.yml && \
-    echo "Cluster is up. Next: make up   (the kubeconfig is /Users/<user>/Desktop/CA/CA3/.secrets/kubeconfig.yaml)"
+    echo "Cluster is up. Next: make up   (the kubeconfig is /Users/amshu/Desktop/CA/CA3/.secrets/kubeconfig.yaml)"
 data.http.my_ip[0]: Reading...
 data.http.my_ip[0]: Read complete after 0s [id=https://checkip.amazonaws.com]
 data.aws_availability_zones.available[0]: Reading...
 data.aws_ami.ubuntu[0]: Reading...
-data.aws_availability_zones.available[0]: Read complete after 0s [id=us-east-2]
-data.aws_ami.ubuntu[0]: Read complete after 0s [id=ami-0fc53b217ec1ad816]
+data.aws_availability_zones.available[0]: Read complete after 1s [id=us-east-2]
+data.aws_ami.ubuntu[0]: Read complete after 1s [id=ami-0fc53b217ec1ad816]
 
 Terraform used the selected providers to generate the following execution
 plan. Resource actions are indicated with the following symbols:
@@ -648,7 +648,7 @@ Terraform will perform the following actions:
   # aws_vpc_security_group_ingress_rule.from_admin["kube_api"] will be created
   + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
       + arn                    = (known after apply)
-      + cidr_ipv4              = "<public-ip>/32"
+      + cidr_ipv4              = "50.231.153.4/32"
       + description            = "Kubernetes API, used by kubectl on the admin computer"
       + from_port              = 6443
       + id                     = (known after apply)
@@ -672,7 +672,7 @@ Terraform will perform the following actions:
   # aws_vpc_security_group_ingress_rule.from_admin["rest_api"] will be created
   + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
       + arn                    = (known after apply)
-      + cidr_ipv4              = "<public-ip>/32"
+      + cidr_ipv4              = "50.231.153.4/32"
       + description            = "REST API node port: the one application port that is published"
       + from_port              = 30080
       + id                     = (known after apply)
@@ -696,7 +696,7 @@ Terraform will perform the following actions:
   # aws_vpc_security_group_ingress_rule.from_admin["ssh"] will be created
   + resource "aws_vpc_security_group_ingress_rule" "from_admin" {
       + arn                    = (known after apply)
-      + cidr_ipv4              = "<public-ip>/32"
+      + cidr_ipv4              = "50.231.153.4/32"
       + description            = "SSH, used by Ansible and for debugging"
       + from_port              = 22
       + id                     = (known after apply)
@@ -720,7 +720,7 @@ Terraform will perform the following actions:
 Plan: 19 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  + admin_cidr_in_use = "<public-ip>/32"
+  + admin_cidr_in_use = "50.231.153.4/32"
   + agent_public_ips  = [
       + (known after apply),
       + (known after apply),
@@ -732,64 +732,64 @@ Changes to Outputs:
 aws_key_pair.cluster: Creating...
 aws_vpc.main: Creating...
 aws_key_pair.cluster: Creation complete after 0s [id=ca3-key]
-aws_vpc.main: Creation complete after 2s [id=vpc-0724ac3f35d8aa47e]
+aws_vpc.main: Creation complete after 2s [id=vpc-0bb969ab72a3e08f2]
 aws_internet_gateway.main: Creating...
 aws_subnet.nodes: Creating...
-aws_default_security_group.default: Creating...
 aws_security_group.cluster: Creating...
-aws_internet_gateway.main: Creation complete after 0s [id=igw-0d38a0ffa64104309]
+aws_default_security_group.default: Creating...
+aws_internet_gateway.main: Creation complete after 0s [id=igw-037ddf78182ee520f]
 aws_route_table.public: Creating...
-aws_default_security_group.default: Creation complete after 1s [id=sg-061be4ccf187258d7]
-aws_route_table.public: Creation complete after 1s [id=rtb-0f17b2b073d0acd7e]
-aws_security_group.cluster: Creation complete after 2s [id=sg-02d21123f043fb2d6]
-aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creating...
-aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creating...
-aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creating...
+aws_default_security_group.default: Creation complete after 1s [id=sg-06686d30c4f9871e5]
+aws_route_table.public: Creation complete after 1s [id=rtb-0c96ac02d8e9c6806]
+aws_security_group.cluster: Creation complete after 2s [id=sg-006c7da19f3dc58fb]
 aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Creating...
-aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creating...
-aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creating...
 aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Creating...
 aws_vpc_security_group_egress_rule.all_out: Creating...
-aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creation complete after 0s [id=sgr-06a90405d9bc52bae]
-aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Creation complete after 0s [id=sgr-0da69d00b71be1c4a]
-aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Creation complete after 0s [id=sgr-07454424e5c592424]
-aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creation complete after 0s [id=sgr-0de476469b8d3bf9e]
-aws_vpc_security_group_egress_rule.all_out: Creation complete after 0s [id=sgr-08e875196f628d03f]
-aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creation complete after 0s [id=sgr-0bdee9fa0aa9e3c00]
-aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creation complete after 0s [id=sgr-09273a7afb98576e0]
-aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creation complete after 1s [id=sgr-0262aa3e1f2818b7d]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creating...
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creating...
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Creation complete after 0s [id=sgr-082e69f2ecd94139d]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Creation complete after 0s [id=sgr-03bf6bbc4103f1e88]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Creation complete after 0s [id=sgr-063776c6a0cd81a40]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Creation complete after 0s [id=sgr-0ed58e3f39986bd12]
+aws_vpc_security_group_egress_rule.all_out: Creation complete after 0s [id=sgr-0e50570a7304c45f9]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Creation complete after 0s [id=sgr-0800d998ce9955e1e]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Creation complete after 0s [id=sgr-08f5fe950acacc4b0]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Creation complete after 0s [id=sgr-07991b3d5d71671d6]
 aws_subnet.nodes: Still creating... [00m10s elapsed]
-aws_subnet.nodes: Creation complete after 11s [id=subnet-04e8995dc30e054ff]
+aws_subnet.nodes: Creation complete after 11s [id=subnet-09bb539c38d725812]
 aws_route_table_association.nodes: Creating...
+aws_instance.agent[1]: Creating...
 aws_instance.server: Creating...
 aws_instance.agent[0]: Creating...
-aws_instance.agent[1]: Creating...
-aws_route_table_association.nodes: Creation complete after 0s [id=rtbassoc-0647efca0056f65f3]
+aws_route_table_association.nodes: Creation complete after 0s [id=rtbassoc-064510746a9712eaa]
 aws_instance.server: Still creating... [00m10s elapsed]
-aws_instance.agent[0]: Still creating... [00m10s elapsed]
 aws_instance.agent[1]: Still creating... [00m10s elapsed]
-aws_instance.agent[0]: Creation complete after 13s [id=i-0d5255e8c0dc7e003]
-aws_instance.agent[1]: Creation complete after 13s [id=i-0987a4aafebb6c232]
-aws_instance.server: Creation complete after 13s [id=i-0797b6aec1eea5796]
+aws_instance.agent[0]: Still creating... [00m10s elapsed]
+aws_instance.agent[1]: Creation complete after 13s [id=i-0733b6570d17ad8ef]
+aws_instance.server: Creation complete after 13s [id=i-0acdb06886e30a234]
+aws_instance.agent[0]: Creation complete after 13s [id=i-06f7c4572e7eb9185]
 
 Apply complete! Resources: 19 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-admin_cidr_in_use = "<public-ip>/32"
+admin_cidr_in_use = "50.231.153.4/32"
 agent_public_ips = [
-  "<public-ip>",
-  "<public-ip>",
+  "3.135.202.114",
+  "52.15.171.235",
 ]
 ami_in_use = "ami-0fc53b217ec1ad816"
 ansible_inventory = <<EOT
 # Generated by Terraform ("make cluster-up"). Do not edit: it is rewritten on every run.
 [server]
-ca3-server ansible_host=<public-ip> node_ip=10.20.1.195
+ca3-server ansible_host=18.191.218.79 node_ip=10.20.1.109
 
 [agents]
-ca3-agent-1 ansible_host=<public-ip> node_ip=10.20.1.128
-ca3-agent-2 ansible_host=<public-ip> node_ip=10.20.1.248
+ca3-agent-1 ansible_host=3.135.202.114 node_ip=10.20.1.217
+ca3-agent-2 ansible_host=52.15.171.235 node_ip=10.20.1.243
 
 [k3s:children]
 server
@@ -797,18 +797,18 @@ agents
 
 [k3s:vars]
 ansible_user=ubuntu
-ansible_ssh_private_key_file=/Users/<user>/Desktop/CA/CA3/.secrets/ca3-key
+ansible_ssh_private_key_file=/Users/amshu/Desktop/CA/CA3/.secrets/ca3-key
 
 EOT
-server_public_ip = "<public-ip>"
-vpc_id = "vpc-0724ac3f35d8aa47e"
+server_public_ip = "18.191.218.79"
+vpc_id = "vpc-0bb969ab72a3e08f2"
 
 PLAY [Wait until every machine accepts SSH] ************************************
 
 TASK [Wait for SSH to come up on the new machine] ******************************
+ok: [ca3-agent-1]
 ok: [ca3-server]
 ok: [ca3-agent-2]
-ok: [ca3-agent-1]
 
 PLAY [Install the k3s server (control plane)] **********************************
 
@@ -853,24 +853,24 @@ ok: [ca3-agent-1]
 ok: [ca3-agent-2]
 
 TASK [k3s_agent : Download the pinned k3s installer (a changed or tampered script fails the checksum)] ***
-changed: [ca3-agent-1]
 changed: [ca3-agent-2]
+changed: [ca3-agent-1]
 
 TASK [k3s_agent : Create the k3s configuration folder] *************************
-changed: [ca3-agent-1]
 changed: [ca3-agent-2]
+changed: [ca3-agent-1]
 
 TASK [k3s_agent : Write the k3s agent configuration (it contains the join token, so only root can read it)] ***
-changed: [ca3-agent-1]
 changed: [ca3-agent-2]
+changed: [ca3-agent-1]
 
 TASK [k3s_agent : Install k3s as an agent and join the cluster (skipped when this exact version is already installed)] ***
-changed: [ca3-agent-2]
 changed: [ca3-agent-1]
+changed: [ca3-agent-2]
 
 TASK [k3s_agent : Make sure the k3s agent is enabled and running] **************
-ok: [ca3-agent-1]
 ok: [ca3-agent-2]
+ok: [ca3-agent-1]
 
 TASK [k3s_agent : Apply a changed configuration now] ***************************
 
@@ -908,5 +908,5 @@ ca3-agent-1                : ok=10   changed=5    unreachable=0    failed=0    s
 ca3-agent-2                : ok=9    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 ca3-server                 : ok=15   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 
-Cluster is up. Next: make up   (the kubeconfig is /Users/<user>/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
-make cluster-up took 2 min 14 s
+Cluster is up. Next: make up   (the kubeconfig is /Users/amshu/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
+make cluster-up took 1 min 48 s
