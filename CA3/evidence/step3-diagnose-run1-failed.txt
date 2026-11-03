@@ -1,0 +1,368 @@
+NS=ca3 KUBECTL=kubectl bash scripts/diagnose.sh
+
+===== nodes =====
+NAME          STATUS   ROLES           AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION           CONTAINER-RUNTIME
+ca3-agent-1   Ready    worker          23m   v1.37.1+k3s1   10.20.1.128   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca3-agent-2   Ready    worker          23m   v1.37.1+k3s1   10.20.1.248   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca3-server    Ready    control-plane   23m   v1.37.1+k3s1   10.20.1.195   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+
+===== all pods in namespace ca3 =====
+NAME                             READY   STATUS             RESTARTS      AGE   IP          NODE          NOMINATED NODE   READINESS GATES
+bootstrap-956r2                  0/1     Completed          0             11m   10.42.2.2   ca3-agent-1   <none>           <none>
+kafka-0                          1/1     Running            0             11m   10.42.2.6   ca3-agent-1   <none>           <none>
+mongo-0                          0/1     CrashLoopBackOff   7 (53s ago)   11m   10.42.1.4   ca3-agent-2   <none>           <none>
+processor-6d4869f56b-vc8r8       0/1     Init:0/1           0             11m   10.42.1.6   ca3-agent-2   <none>           <none>
+producer-load-66dcbb6f55-rrkzj   1/1     Running            0             11m   10.42.2.4   ca3-agent-1   <none>           <none>
+producer-replay-qcdj5            0/1     Completed          0             11m   10.42.1.5   ca3-agent-2   <none>           <none>
+restapi-5f54fc9f7b-5mvf9         0/1     Init:0/1           0             11m   10.42.2.5   ca3-agent-1   <none>           <none>
+restapi-5f54fc9f7b-zcw49         0/1     Init:0/1           0             11m   10.42.1.3   ca3-agent-2   <none>           <none>
+
+===== pods in every namespace that are not fully ready =====
+ca3           mongo-0                                   0/1   CrashLoopBackOff   7 (53s ago)   11m
+ca3           processor-6d4869f56b-vc8r8                0/1   Init:0/1           0             11m
+ca3           restapi-5f54fc9f7b-5mvf9                  0/1   Init:0/1           0             11m
+ca3           restapi-5f54fc9f7b-zcw49                  0/1   Init:0/1           0             11m
+
+===== volumes (PersistentVolumeClaims) in namespace ca3 =====
+NAME           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+data-kafka-0   Bound    pvc-181d7f71-c88b-46c2-8591-c38b91cca225   5Gi        RWO            local-path     <unset>                 11m
+data-mongo-0   Bound    pvc-72f080ac-0eae-4269-9547-936a47bdab29   5Gi        RWO            local-path     <unset>                 11m
+
+===== the setup Job bootstrap (makes the passwords and certificates): state and log =====
+NAME        STATUS     COMPLETIONS   DURATION   AGE
+bootstrap   Complete   1/1           10s        11m
+bootstrap: namespace ca3, API server https://kubernetes.default.svc
+bootstrap: CA: CN=ca3 pipeline CA,O=ca3-pipeline  valid until 2027-11-03  sha256 737a2c2cc71059ee34af6efdd8d509c786e5ba3d3c42709989cdcca29900eaa6
+bootstrap: kafka: CN=kafka  server certificate  names: kafka, kafka.ca3, kafka.ca3.svc, kafka.ca3.svc.cluster.local, kafka-headless.ca3.svc.cluster.local, kafka-0.kafka-headless.ca3.svc.cluster.local, localhost, 127.0.0.1
+bootstrap: kafka client producer: CN=producer  client certificate  names: (no names)
+bootstrap: kafka client processor: CN=processor  client certificate  names: (no names)
+bootstrap: kafka client exporter: CN=exporter  client certificate  names: (no names)
+bootstrap: mongo: CN=mongo  server certificate  names: mongo, mongo.ca3, mongo.ca3.svc, mongo.ca3.svc.cluster.local, mongo-headless.ca3.svc.cluster.local, mongo-0.mongo-headless.ca3.svc.cluster.local, localhost, 127.0.0.1
+bootstrap: restapi: CN=restapi  server certificate  names: restapi, restapi.ca3, restapi.ca3.svc, restapi.ca3.svc.cluster.local, restapi.ca3.test, localhost, 127.0.0.1
+bootstrap: created Secret mongo-root (password, username)
+bootstrap: created Secret mongo-processor (password, username)
+bootstrap: created Secret mongo-restapi (password, username)
+bootstrap: created Secret mongo-exporter (password, username)
+bootstrap: created Secret restapi-login (password, username)
+bootstrap: created Secret grafana-admin (password, username)
+bootstrap: created Secret pki-ca (ca.crt)
+bootstrap: created Secret kafka-tls (ca.pem, keystore.pem)
+bootstrap: created Secret kafka-client-producer (ca.crt, tls.crt, tls.key)
+bootstrap: created Secret kafka-client-processor (ca.crt, tls.crt, tls.key)
+bootstrap: created Secret kafka-client-exporter (ca.crt, tls.crt, tls.key)
+bootstrap: created Secret mongo-tls (ca.pem, mongo.pem)
+bootstrap: created Secret restapi-tls (tls.crt, tls.key)
+bootstrap: done. 13 Secrets created. The CA private key was not stored.
+
+===== Secrets in namespace ca3 (names only, never the values; 13 expected) =====
+NAME                     TYPE     DATA   AGE
+grafana-admin            Opaque   2      11m
+kafka-client-exporter    Opaque   3      11m
+kafka-client-processor   Opaque   3      11m
+kafka-client-producer    Opaque   3      11m
+kafka-tls                Opaque   2      11m
+mongo-exporter           Opaque   2      11m
+mongo-processor          Opaque   2      11m
+mongo-restapi            Opaque   2      11m
+mongo-root               Opaque   2      11m
+mongo-tls                Opaque   2      11m
+pki-ca                   Opaque   1      11m
+restapi-login            Opaque   2      11m
+restapi-tls              Opaque   2      11m
+
+===== the last 25 events in namespace ca3 (newest last) =====
+11m         Normal    Started                        pod/processor-6d4869f56b-vc8r8          Container started
+11m         Normal    Pulled                         pod/mongo-0                             Successfully pulled image "mongo:7.0" in 11.351s (11.351s including waiting). Image size: 297150423 bytes.
+11m         Normal    Created                        pod/kafka-0                             Container created
+11m         Normal    Pulled                         pod/kafka-0                             Successfully pulled image "confluentinc/cp-kafka:7.7.1" in 14.777s (14.777s including waiting). Image size: 483613257 bytes.
+11m         Normal    Started                        pod/kafka-0                             Container started
+11m         Warning   Unhealthy                      pod/kafka-0                             Startup probe failed: dial tcp 10.42.2.6:9092: connect: connection refused
+11m         Normal    Pulling                        pod/producer-replay-qcdj5               Pulling image "ghcr.io/amshu0-0/ca3-producer:1.0.0"
+11m         Normal    Pulling                        pod/producer-load-66dcbb6f55-rrkzj      Pulling image "ghcr.io/amshu0-0/ca3-producer:1.0.0"
+11m         Normal    Started                        pod/producer-load-66dcbb6f55-rrkzj      Container started
+11m         Normal    Created                        pod/producer-load-66dcbb6f55-rrkzj      Container created
+11m         Normal    Pulled                         pod/producer-load-66dcbb6f55-rrkzj      Successfully pulled image "ghcr.io/amshu0-0/ca3-producer:1.0.0" in 1.192s (1.192s including waiting). Image size: 52146613 bytes.
+11m         Normal    Pulled                         pod/producer-replay-qcdj5               Successfully pulled image "ghcr.io/amshu0-0/ca3-producer:1.0.0" in 3.281s (3.281s including waiting). Image size: 52146613 bytes.
+11m         Normal    Started                        pod/producer-replay-qcdj5               Container started
+11m         Normal    Created                        pod/producer-replay-qcdj5               Container created
+11m         Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/producer-load   invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+11m         Warning   FailedGetResourceMetric        horizontalpodautoscaler/producer-load   failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready)
+10m         Normal    Completed                      job/producer-replay                     Job completed
+10m         Warning   FailedGetResourceMetric        horizontalpodautoscaler/producer-load   failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+10m         Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/producer-load   invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+9m5s        Warning   FailedComputeMetricsReplicas   horizontalpodautoscaler/processor       invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+110s        Warning   FailedGetResourceMetric        horizontalpodautoscaler/processor       failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+55s         Normal    Pulled                         pod/mongo-0                             Container image "mongo:7.0" already present on machine and can be accessed by the pod
+54s         Normal    Started                        pod/mongo-0                             Container started
+54s         Normal    Created                        pod/mongo-0                             Container created
+43s         Warning   BackOff                        pod/mongo-0                             Back-off restarting failed container mongo in pod mongo-0_ca3(1d805de2-7bb7-4a58-bd6a-2a245dfda135)
+
+===== which pods stand behind each Service =====
+NAME                   ADDRESSTYPE   PORTS   ENDPOINTS             AGE
+kafka-bf745            IPv4          9092    10.42.2.6             11m
+kafka-headless-bhl2t   IPv4          9092    10.42.2.6             11m
+mongo-bkjg4            IPv4          27017   10.42.1.4             11m
+mongo-headless-dgkvr   IPv4          27017   10.42.1.4             11m
+processor-fr5nm        IPv4          8000    10.42.1.6             11m
+restapi-hkmtp          IPv4          8443    10.42.2.5,10.42.1.3   11m
+
+===== node CPU and memory =====
+NAME          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+ca3-agent-1   41m          2%       743Mi           19%         
+ca3-agent-2   19m          0%       409Mi           10%         
+ca3-server    49m          2%       825Mi           21%         
+
+===== pod mongo-0: state of its containers, conditions and events =====
+Node:             ca3-agent-2/10.20.1.248
+Status:           Running
+Controlled By:  StatefulSet/mongo
+Containers:
+  mongo:
+    Container ID:  containerd://b9e5284e320f365bbb6b15ad45cff864c3558edbe2984cb960fad90de140f722
+    Image:         mongo:7.0
+    Image ID:      docker.io/library/mongo@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+    Port:          27017/TCP (mongo)
+    Host Port:     0/TCP (mongo)
+    Args:
+      mongod
+      --tlsMode=requireTLS
+      --tlsCertificateKeyFile=/etc/mongo-tls/mongo.pem
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Mon, 02 Nov 2026 22:20:40 -0600
+      Finished:     Mon, 02 Nov 2026 22:20:40 -0600
+    Ready:          False
+    Restart Count:  7
+    Limits:
+      cpu:     1
+      memory:  1Gi
+    Requests:
+      cpu:      250m
+      memory:   512Mi
+    Liveness:   tcp-socket :mongo delay=45s timeout=1s period=20s successThreshold=1 failureThreshold=6
+    Readiness:  tcp-socket :mongo delay=10s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE:  /etc/secrets/mongo-root/username
+      MONGO_INITDB_ROOT_PASSWORD_FILE:  /etc/secrets/mongo-root/password
+    Mounts:
+      /data/db from data (rw)
+      /docker-entrypoint-initdb.d from mongo-init (ro)
+      /etc/mongo-tls from mongo-tls (ro)
+      /etc/secrets/mongo-exporter from mongo-exporter (ro)
+      /etc/secrets/mongo-processor from mongo-processor (ro)
+      /etc/secrets/mongo-restapi from mongo-restapi (ro)
+      /etc/secrets/mongo-root from mongo-root (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Events:
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  11m                 default-scheduler  running PreBind plugin "VolumeBinding": Operation cannot be fulfilled on persistentvolumeclaims "data-mongo-0": the object has been modified; please apply your changes to the latest version and try again
+  Normal   Scheduled         11m                 default-scheduler  Successfully assigned ca3/mongo-0 to ca3-agent-2
+  Warning  FailedMount       11m                 kubelet            MountVolume.SetUp failed for volume "mongo-tls" : secret "mongo-tls" not found
+  Normal   Pulling           11m                 kubelet            spec.containers{mongo}: Pulling image "mongo:7.0"
+  Normal   Pulled            11m                 kubelet            spec.containers{mongo}: Successfully pulled image "mongo:7.0" in 11.351s (11.351s including waiting). Image size: 297150423 bytes.
+  Normal   Pulled            56s (x7 over 11m)   kubelet            spec.containers{mongo}: Container image "mongo:7.0" already present on machine and can be accessed by the pod
+  Normal   Created           55s (x8 over 11m)   kubelet            spec.containers{mongo}: Container created
+  Normal   Started           55s (x8 over 11m)   kubelet            spec.containers{mongo}: Container started
+  Warning  BackOff           44s (x24 over 11m)  kubelet            spec.containers{mongo}: Back-off restarting failed container mongo in pod mongo-0_ca3(1d805de2-7bb7-4a58-bd6a-2a245dfda135)
+
+===== pod mongo-0: last log lines of every container, init containers included =====
+[pod/mongo-0/mongo] {"t":{"$date":"2026-11-03T04:20:40.131Z"},"s":"F",  "c":"CONTROL",  "id":20574,   "ctx":"main","msg":"Error during global initialization","attr":{"error":{"code":72,"codeName":"InvalidOptions","errmsg":"The use of TLS without specifying a chain of trust is no longer supported. See https://jira.mongodb.org/browse/SERVER-72839 for details."}}}
+
+===== pod mongo-0: log lines of the previous run, if the container was restarted =====
+[pod/mongo-0/mongo] {"t":{"$date":"2026-11-03T04:20:40.131Z"},"s":"F",  "c":"CONTROL",  "id":20574,   "ctx":"main","msg":"Error during global initialization","attr":{"error":{"code":72,"codeName":"InvalidOptions","errmsg":"The use of TLS without specifying a chain of trust is no longer supported. See https://jira.mongodb.org/browse/SERVER-72839 for details."}}}
+
+===== pod processor-6d4869f56b-vc8r8: state of its containers, conditions and events =====
+Node:             ca3-agent-2/10.20.1.248
+Status:           Pending
+Controlled By:  ReplicaSet/processor-6d4869f56b
+Init Containers:
+  wait-for-kafka-and-mongo:
+    Container ID:  containerd://751de6c1763791dfcefe1fcbe3529b9eb79379db11842701ddeb00b394fba094
+    Image:         busybox:1.36
+    Image ID:      docker.io/library/busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -z -w 2 kafka 9092 && nc -z -w 2 mongo 27017; do echo waiting for kafka and mongo; sleep 3; done
+    State:          Running
+      Started:      Mon, 02 Nov 2026 22:10:00 -0600
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     100m
+      memory:  32Mi
+    Requests:
+      cpu:        10m
+      memory:     16Mi
+    Environment:  <none>
+    Mounts:       <none>
+Containers:
+  processor:
+    Container ID:   
+    Image:          ghcr.io/amshu0-0/ca3-processor:1.0.0
+    Image ID:       
+    Port:           8000/TCP (metrics)
+    Host Port:      0/TCP (metrics)
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  384Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   http-get http://:metrics/healthz delay=30s timeout=1s period=20s successThreshold=1 failureThreshold=3
+    Readiness:  http-get http://:metrics/readyz delay=0s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Environment Variables from:
+      pipeline-config   ConfigMap  Optional: false
+      processor-config  ConfigMap  Optional: false
+    Environment:
+      MONGO_USER_FILE:      /etc/secrets/mongo/username
+      MONGO_PASSWORD_FILE:  /etc/secrets/mongo/password
+    Mounts:
+      /etc/pki/ca from pki-ca (ro)
+      /etc/pki/kafka-client from kafka-client-processor (ro)
+      /etc/secrets/mongo from mongo-processor (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 False 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Events:
+  Type     Reason       Age                From               Message
+  ----     ------       ----               ----               -------
+  Normal   Scheduled    11m                default-scheduler  Successfully assigned ca3/processor-6d4869f56b-vc8r8 to ca3-agent-2
+  Warning  FailedMount  11m (x4 over 11m)  kubelet            MountVolume.SetUp failed for volume "mongo-processor" : secret "mongo-processor" not found
+  Warning  FailedMount  11m (x5 over 11m)  kubelet            MountVolume.SetUp failed for volume "pki-ca" : secret "pki-ca" not found
+  Warning  FailedMount  11m (x5 over 11m)  kubelet            MountVolume.SetUp failed for volume "kafka-client-processor" : secret "kafka-client-processor" not found
+  Normal   Pulled       11m                kubelet            spec.initContainers{wait-for-kafka-and-mongo}: Container image "busybox:1.36" already present on machine and can be accessed by the pod
+  Normal   Created      11m                kubelet            spec.initContainers{wait-for-kafka-and-mongo}: Container created
+  Normal   Started      11m                kubelet            spec.initContainers{wait-for-kafka-and-mongo}: Container started
+
+===== pod processor-6d4869f56b-vc8r8: last log lines of every container, init containers included =====
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+[pod/processor-6d4869f56b-vc8r8/wait-for-kafka-and-mongo] waiting for kafka and mongo
+Error from server (BadRequest): container "processor" in pod "processor-6d4869f56b-vc8r8" is waiting to start: PodInitializing
+
+===== pod processor-6d4869f56b-vc8r8: log lines of the previous run, if the container was restarted =====
+Error from server (BadRequest): previous terminated container "wait-for-kafka-and-mongo" in pod "processor-6d4869f56b-vc8r8" not found
+
+===== pod restapi-5f54fc9f7b-5mvf9: state of its containers, conditions and events =====
+Node:             ca3-agent-1/10.20.1.128
+Status:           Pending
+Controlled By:  ReplicaSet/restapi-5f54fc9f7b
+Init Containers:
+  wait-for-mongo:
+    Container ID:  containerd://2df5186fbfcea6f9ee3bcbd8f7967dfd0775d9b8376d76e5c780c3ec56922479
+    Image:         busybox:1.36
+    Image ID:      docker.io/library/busybox@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -z -w 2 mongo 27017; do echo waiting for mongo; sleep 3; done
+    State:          Running
+      Started:      Mon, 02 Nov 2026 22:09:52 -0600
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     100m
+      memory:  32Mi
+    Requests:
+      cpu:        10m
+      memory:     16Mi
+    Environment:  <none>
+    Mounts:       <none>
+Containers:
+  restapi:
+    Container ID:   
+    Image:          ghcr.io/amshu0-0/ca3-restapi:1.0.0
+    Image ID:       
+    Ports:          8443/TCP (https), 9102/TCP (metrics)
+    Host Ports:     0/TCP (https), 0/TCP (metrics)
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  256Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   http-get https://:https/health delay=20s timeout=1s period=20s successThreshold=1 failureThreshold=3
+    Readiness:  http-get https://:https/ready delay=0s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Environment Variables from:
+      pipeline-config  ConfigMap  Optional: false
+    Environment:
+      MONGO_USER_FILE:      /etc/secrets/mongo/username
+      MONGO_PASSWORD_FILE:  /etc/secrets/mongo/password
+      REST_USER_FILE:       /etc/secrets/login/username
+      REST_PASSWORD_FILE:   /etc/secrets/login/password
+      REST_TLS_CERT_FILE:   /etc/pki/restapi/tls.crt
+      REST_TLS_KEY_FILE:    /etc/pki/restapi/tls.key
+    Mounts:
+      /etc/pki/ca from pki-ca (ro)
+      /etc/pki/restapi from restapi-tls (ro)
+      /etc/secrets/login from restapi-login (ro)
+      /etc/secrets/mongo from mongo-restapi (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 False 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Events:
+  Type     Reason       Age                From               Message
+  ----     ------       ----               ----               -------
+  Normal   Scheduled    11m                default-scheduler  Successfully assigned ca3/restapi-5f54fc9f7b-5mvf9 to ca3-agent-1
+  Warning  FailedMount  11m (x4 over 11m)  kubelet            MountVolume.SetUp failed for volume "mongo-restapi" : secret "mongo-restapi" not found
+  Warning  FailedMount  11m (x4 over 11m)  kubelet            MountVolume.SetUp failed for volume "restapi-login" : secret "restapi-login" not found
+  Warning  FailedMount  11m (x4 over 11m)  kubelet            MountVolume.SetUp failed for volume "restapi-tls" : secret "restapi-tls" not found
+  Warning  FailedMount  11m (x4 over 11m)  kubelet            MountVolume.SetUp failed for volume "pki-ca" : secret "pki-ca" not found
+  Normal   Pulling      11m                kubelet            spec.initContainers{wait-for-mongo}: Pulling image "busybox:1.36"
+  Normal   Pulled       11m                kubelet            spec.initContainers{wait-for-mongo}: Successfully pulled image "busybox:1.36" in 661ms (661ms including waiting). Image size: 2217006 bytes.
+  Normal   Created      11m                kubelet            spec.initContainers{wait-for-mongo}: Container created
+  Normal   Started      11m                kubelet            spec.initContainers{wait-for-mongo}: Container started
+

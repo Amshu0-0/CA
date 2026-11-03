@@ -15,6 +15,11 @@
 #      not list one by one (network interfaces, snapshots, images, launch templates ...). Everything this project builds is an EC2 kind.
 #   4. The resources that cost money, tagged or not: machines, disks, Elastic IPs, NAT gateways and load balancers.
 #
+# The tag lists of 2 and 3 are not always up to date: AWS keeps naming a disk or a firewall rule for a while after it was deleted (the first
+# real test saw it for more than eight minutes, while checks 1 and 4 already said "none"). So every EC2 item that those two lists name is
+# also asked for directly, by its id. Only AWS's own answer "not found" (or "deleted") counts as gone; such an item is shown as
+# "no longer exists" and is not a leftover. Any other answer, an error included, keeps the item in the list of leftovers.
+#
 # Exit code: 0 = nothing is left, 1 = something is left, 2 = the scan itself could not run.
 #
 # A check that did not run must never look like a clean result. If AWS refuses a call because this user is not allowed
@@ -160,6 +165,53 @@ def describe_arn(arn):
     return f"{parts[2]}  {parts[5]}" if len(parts) == 6 else hide_account_numbers(arn)
 
 
+# What the tag lists named although the thing no longer exists: {title of the check: ["kind  id", ...]}, and every such item once (kind, id).
+STALE = {}
+STALE_ITEMS = set()
+
+# For each kind of EC2 resource that a tag list can name: the question that asks for ONE of them by its id
+# (command, option that takes the id, name of the list in the answer, "State" values that mean deleted).
+BY_ID = {
+    "volume": ("describe-volumes", "--volume-ids", "Volumes", ("deleted",)),
+    "vpc": ("describe-vpcs", "--vpc-ids", "Vpcs", ()),
+    "subnet": ("describe-subnets", "--subnet-ids", "Subnets", ()),
+    "security-group": ("describe-security-groups", "--group-ids", "SecurityGroups", ()),
+    "security-group-rule": ("describe-security-group-rules", "--security-group-rule-ids", "SecurityGroupRules", ()),
+    "internet-gateway": ("describe-internet-gateways", "--internet-gateway-ids", "InternetGateways", ()),
+    "route-table": ("describe-route-tables", "--route-table-ids", "RouteTables", ()),
+    "network-interface": ("describe-network-interfaces", "--network-interface-ids", "NetworkInterfaces", ()),
+    "key-pair": ("describe-key-pairs", "--key-pair-ids", "KeyPairs", ()),
+}
+
+_known_gone = set()
+
+
+# True only when AWS itself says that this thing does not exist (the answer "not found", an empty answer, or the state "deleted").
+# Everything else is False: a kind of resource that is not in the table above, an error of any other kind (no permission, too many questions,
+# no network), an answer that does not look as expected. The scan then keeps the item as a leftover. Better a false alarm than a false CLEAN.
+def is_gone(region, kind, ident):
+    spec = BY_ID.get(kind)
+    if spec is None or not ident:
+        return False
+
+    if (kind, ident) in _known_gone:
+        return True
+
+    command, option, list_name, deleted_states = spec
+    try:
+        data = aws(["ec2", command, option, ident], region)
+    except ScanError as error:
+        gone = "NotFound" in str(error)
+    else:
+        items = data.get(list_name)
+        gone = isinstance(items, list) and (not items or (bool(deleted_states) and all(item.get("State") in deleted_states for item in items)))
+
+    if gone:
+        _known_gone.add((kind, ident))
+        STALE_ITEMS.add((kind, ident))
+    return gone
+
+
 # AWS keeps listing a terminated machine for about an hour, and its tag index can do the same. Only a machine that is still alive
 # is a leftover, so ask EC2 which of the machines named by the tag index are alive and drop the others.
 def drop_dead_machines(region, arns):
@@ -176,16 +228,22 @@ def drop_dead_machines(region, arns):
     return [a for a in arns if not resource_of(a).startswith("instance/") or resource_of(a).split("/", 1)[1] in alive]
 
 
-# Everything with the tag, in any service. AWS's tag index can be a little behind a deletion, so it is asked again
-# every few seconds for up to "wait" seconds, as long as it still names something.
+# Everything with the tag, in any service. AWS's tag index can be a little behind a deletion, so every EC2 item that it names is asked
+# for directly; an item that does not exist is "stale" and not a leftover. What is still named is asked again every few seconds for up
+# to "wait" seconds.
 def find_tagged_anywhere(region, tag_value, wait):
     deadline = time.time() + wait
     while True:
         data = aws(["resourcegroupstaggingapi", "get-resources", "--tag-filters", f"Key={TAG_KEY},Values={tag_value}"], region)
         named = [item["ResourceARN"] for item in data.get("ResourceTagMappingList", [])]
-        arns = [describe_arn(a) for a in drop_dead_machines(region, named)]
-        if not arns or time.time() >= deadline:
-            return arns
+        kept, stale = [], []
+        for arn in drop_dead_machines(region, named):
+            parts = arn.split(":", 5)
+            kind, _, ident = parts[5].partition("/") if len(parts) == 6 and parts[2] == "ec2" else ("", "", "")
+            (stale if kind and is_gone(region, kind, ident) else kept).append(describe_arn(arn))
+        STALE["Tagged resources"] = stale
+        if not kept or time.time() >= deadline:
+            return kept
         time.sleep(POLL_SECONDS)
 
 
@@ -208,7 +266,14 @@ def find_tagged_by_ec2(region, tag_value, wait):
                 for instance in reservation.get("Instances", [])
             }
 
-        found = [f"{rtype}  {rid}" for rtype, rid in items if rtype != "instance" or rid in alive]
+        found, stale = [], []
+        for rtype, rid in items:
+            if rtype == "instance":
+                if rid in alive:
+                    found.append(f"{rtype}  {rid}")
+            else:
+                (stale if is_gone(region, rtype, rid) else found).append(f"{rtype}  {rid}")
+        STALE["Tagged EC2 resources"] = stale
         if not found or time.time() >= deadline:
             return found
         time.sleep(POLL_SECONDS)
@@ -250,6 +315,13 @@ def show(title, found):
     print(f"  [{'FOUND' if found else 'none '}] {title}" + (f" ({len(found)})" if found else ""))
     for item in found:
         print(f"            {item}")
+
+    stale = STALE.get(title) or []
+    if stale:
+        also = "also " if found else ""
+        print(f"            (AWS's tag list {also}names {len(stale)} item{'s' if len(stale) != 1 else ''} that {'do' if len(stale) != 1 else 'does'} not exist any more. Asked for each one directly,")
+        print(f"             AWS says 'not found', so {'they are' if len(stale) != 1 else 'it is'} not left over; AWS removes such entries from its list by itself.")
+        print(f"             The entries: {', '.join(s.split()[-1] for s in stale[:12])}{', ...' if len(stale) > 12 else ''})")
     return len(found)
 
 
@@ -332,6 +404,9 @@ def run_scan(region, tag_value, wait, all_regions):
     else:
         print("RESULT: LEFTOVERS FOUND - the resources listed above are still in AWS.")
         print('        While the cluster exists, that is expected. After "make cluster-down" it is not: run it again, then scan again.')
+
+    if STALE_ITEMS:
+        print(f"        AWS's tag lists still name {len(STALE_ITEMS)} deleted item{'s' if len(STALE_ITEMS) != 1 else ''}; each was asked for directly and does not exist, so none of them is a leftover.")
 
     if skipped:
         print(f"        Not checked, because this AWS user is not allowed to: {'; '.join(skipped)}.")

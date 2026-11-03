@@ -6,8 +6,9 @@
 # The StatefulSet gives the pod a stable name (mongo-0) and a PVC that survives pod restarts.
 #
 # How MongoDB is locked down:
-#   - TLS is required (--tlsMode=requireTLS): a connection that does not start with a TLS handshake is refused. The certificate comes from
-#     the Secret mongo-tls, and the clients check it against the CA certificate and the name "mongo".
+#   - TLS is required (--tlsMode=requireTLS): a connection that does not start with a TLS handshake is refused. The certificate and the CA
+#     certificate come from the Secret mongo-tls, and the clients check the certificate against the CA certificate and the name "mongo".
+#     Clients do not need a certificate of their own (--tlsAllowConnectionsWithoutCertificates): their password is their proof.
 #   - Four accounts, not one. The administrator (Secret mongo-root) is used only for the first start and by the tests that run inside
 #     this pod. The processor has its own account that may read and write the database ca3 and nothing else (Secret mongo-processor).
 #     The REST API has its own account that may only READ the database ca3 (Secret mongo-restapi). The metrics reader (mongodb-exporter) has an
@@ -120,14 +121,22 @@ spec:
         - name: mongo
           image: mongo:7.0
 
-          # The image's start script adds --auth by itself because an administrator is given below. These two options turn TLS on:
-          # requireTLS refuses every connection that is not TLS, and the file holds the server certificate and its key.
-          # --tlsCAFile is left out on purpose: then MongoDB does not ask clients for a certificate. The clients prove who they are with a
-          # password, and they check MongoDB's certificate with the CA certificate.
+          # The image's start script adds --auth by itself because an administrator is given below. These options turn TLS on:
+          #   --tlsMode=requireTLS            refuses every connection that is not TLS
+          #   --tlsCertificateKeyFile         the server certificate and its key
+          #   --tlsCAFile                     the CA certificate. MongoDB 7.0.6 and newer refuse to start with TLS and no chain of trust
+          #                                   ("The use of TLS without specifying a chain of trust is no longer supported", SERVER-72839).
+          #                                   The first version of this file left it out and MongoDB crashed at once.
+          #   --tlsAllowConnectionsWithoutCertificates
+          #                                   with a CA file MongoDB would otherwise demand a certificate from every client. The clients
+          #                                   (processor, REST API, exporter) prove who they are with a password, as before, and they check
+          #                                   MongoDB's certificate with the CA certificate. A client that does bring a certificate is checked.
           args:
             - mongod
             - --tlsMode=requireTLS
             - --tlsCertificateKeyFile=/etc/mongo-tls/mongo.pem
+            - --tlsCAFile=/etc/mongo-tls/ca.pem
+            - --tlsAllowConnectionsWithoutCertificates
 
           ports:
             - name: mongo

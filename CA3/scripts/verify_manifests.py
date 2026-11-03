@@ -290,12 +290,22 @@ else:
         fails.append("runAsUser is " + str(sc.get("runAsUser")) + ": MongoDB's data folder belongs to the user 999")
     judge(G, "MongoDB: runs as the user 999 with group 999, so it can read its Secret files and write its data", fails)
     # TLS is mandatory: mongod refuses a client that does not use it.
+    # MongoDB 7.0.6 and newer also refuse to start with TLS and no chain of trust (SERVER-72839: "The use of TLS without specifying a chain
+    # of trust is no longer supported"), so the CA file is required. With a CA file mongod asks every client for a certificate, unless it is
+    # told that none is needed: none of our clients has one (they log in with a password), so that option is required too.
     args = containers(mongo)[0].get("args", [])
     key_file = next((a.split("=", 1)[1] for a in args if a.startswith("--tlsCertificateKeyFile=")), "")
+    ca_file = next((a.split("=", 1)[1] for a in args if a.startswith("--tlsCAFile=")), "")
     fails = [] if "--tlsMode=requireTLS" in args else ["mongod is not started with --tlsMode=requireTLS: it would also accept connections without TLS"]
     if secret_of_file(mongo, key_file) != "mongo-tls":
         fails.append("--tlsCertificateKeyFile=" + key_file + " is not a file of the Secret mongo-tls (mounted, and made by bootstrap.py)")
-    judge(G, "MongoDB: TLS is required (--tlsMode=requireTLS), with the certificate of the Secret mongo-tls", fails)
+    if not ca_file:
+        fails.append("mongod has no --tlsCAFile: MongoDB 7.0.6 and newer stop at once with 'The use of TLS without specifying a chain of trust is no longer supported'")
+    elif secret_of_file(mongo, ca_file) != "mongo-tls" or not ca_file.endswith("/ca.pem"):
+        fails.append("--tlsCAFile=" + ca_file + " is not the file ca.pem of the Secret mongo-tls (mounted, and made by bootstrap.py)")
+    if "--tlsAllowConnectionsWithoutCertificates" not in args:
+        fails.append("mongod has --tlsCAFile but not --tlsAllowConnectionsWithoutCertificates: it would demand a client certificate that the processor, the REST API and the exporter do not have")
+    judge(G, "MongoDB: TLS is required (--tlsMode=requireTLS), with the certificate and the CA certificate of the Secret mongo-tls, and no client certificate needed", fails)
     # Four accounts: the administrator, the processor (read and write on ca3), the REST API (read only on ca3) and the metrics reader
     # (monitoring numbers only, no flows). Each line of the init script is:  create_user <folder of the Secret> '[ { role: "x", db: "y" }, ... ]'
     init = config_maps.get("mongo-init", {})
