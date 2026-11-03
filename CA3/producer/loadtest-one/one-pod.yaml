@@ -1,0 +1,8 @@
+# Strategic merge patch: the autoscaler of the producers may not go above 1 pod.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: producer-load
+  namespace: ca3
+spec:
+  maxReplicas: 1

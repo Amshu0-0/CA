@@ -1,0 +1,343 @@
+# NetworkPolicies: a firewall between the pods, inside the cluster.
+#
+# Without any policy every pod can talk to every other pod. These rules flip that around:
+#   1. default-deny-all blocks all traffic into and out of every pod in the namespace.
+#   2. Every other policy below then ADDS one allowed connection (policies only ever add allowed traffic).
+# Result: the only traffic that works is exactly the pipeline  producer -> kafka -> processor -> mongo <- restapi,
+# plus DNS, plus the REST API port for the outside world, plus the one connection of the setup Job to the Kubernetes API server.
+# Anything else (a stray pod, another namespace) is dropped.
+#
+# These rules decide who may CONNECT. TLS decides who may TALK: Kafka and MongoDB answer only encrypted connections, Kafka also
+# demands a client certificate, MongoDB a password, and the REST API a login. Two layers, so one mistake in one of them is not enough.
+#
+# A NetworkPolicy only does something if the cluster's network plugin enforces it. k3s does (its built-in
+# network-policy controller). Kubernetes health probes come from the node itself, which the network plugin lets through.
+---
+# 1. Deny everything, in both directions, for every pod in the namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Blocks all traffic into and out of every pod in the namespace. The other policies then allow, one by one, only the connections the pipeline needs"
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# 2. Every pod may ask the cluster DNS (CoreDNS in kube-system) to turn a name like "kafka" into an address.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Lets every pod ask the cluster DNS (CoreDNS in kube-system, port 53) to turn a Service name into an address"
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# 3. Kafka accepts connections only from the producer and the processor (port 9092).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Kafka accepts connections only from the producer and the processor, on port 9092"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: producer
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: processor
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+# 3b. The Kafka pod may talk to itself over its own pod IP (a harmless safety net for the port that clients use). The controller (9093)
+#     and the administration listener (9094) are bound to the loopback address inside the pod, so no network rule is involved.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-self
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The Kafka pod may talk to itself on port 9092. The controller and administration listeners are loopback-only and need no rule"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+# 4. MongoDB accepts connections only from the processor and the REST API (port 27017).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongo-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "MongoDB accepts connections only from the processor and the REST API, on port 27017"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: processor
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: restapi
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+# 5. The processor's metrics port (the ClusterIP Service) may be read only by "observer" pods,
+#    for example the smoke test, or a monitoring tool that carries this label.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: processor-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The processor's metrics port 8000 may be read only by pods labelled component observer"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: processor
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: observer
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# 6. The REST API is the one thing the outside world may reach: port 8443 (HTTPS, with a login), from any source.
+#    (On AWS the security group limits who can reach the node port in front of it.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restapi-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The REST API accepts connections on port 8443 (HTTPS) from any source. The AWS firewall limits who can reach the node port in front of it"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: restapi
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8443
+---
+# 7. The producer may only connect to Kafka.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: producer-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The producer may connect only to Kafka, on port 9092"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: producer
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+# 8. The processor may connect to Kafka (to read) and to MongoDB (to write), nothing else.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: processor-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The processor may connect only to Kafka (port 9092) and MongoDB (port 27017)"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: processor
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongo
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+# 9. The REST API may only connect to MongoDB.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restapi-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The REST API may connect only to MongoDB, on port 27017"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: restapi
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongo
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+# 10. An "observer" pod (the role of a monitoring tool; "make netpol-check" plays it) may call the processor's metrics port and the REST API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: observer-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Pods with the label component=observer (the role of a monitoring tool; make netpol-check plays it) may call only the processor's port 8000 and the REST API's port 8443"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: observer
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: processor
+      ports:
+        - protocol: TCP
+          port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: restapi
+      ports:
+        - protocol: TCP
+          port: 8443
+---
+# 11. The setup Job may reach the Kubernetes API server, and nothing else (the DNS rule above lets it look up the server's name).
+#     The API server runs on the first machine of the cluster. A pod does not talk to the Service address of the API server (10.43.0.1,
+#     port 443) directly: the node rewrites that address to the machine's own address in the subnet below, port 6443, and the network
+#     rules see the rewritten one. Both ports and both kinds of address are listed so that either way of seeing the packet is covered.
+#     The subnet must equal subnet_cidr in infra/config.yml ("make verify" checks that).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The setup Job may connect only to the Kubernetes API server (the machines' subnet, port 6443, or the API Service address, port 443) and to DNS"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.20.1.0/24
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 6443
+        - protocol: TCP
+          port: 443

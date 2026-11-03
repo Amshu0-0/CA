@@ -1,0 +1,8 @@
+# Overlay "load on, one pod": the same as producer/loadtest, but the autoscaler may not add pods (maximum 1). The scaling test measures the
+# pipeline in this state first (the "before"), then switches to producer/loadtest and measures again (the "after").
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../loadtest
+patches:
+  - path: one-pod.yaml

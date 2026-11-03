@@ -1,0 +1,22 @@
+# One entry point for the whole stack:   kubectl apply -k .        (and   kubectl delete -k .   to remove it)
+# Kustomize is built into kubectl. It reads this list, collects all the manifests, and applies them together.
+# Nothing else is needed: the passwords and certificates are made inside the cluster by the Job in bootstrap/ (no script, no Secret on
+# anybody's computer), and the producer autoscaler and load generator are in the list (idle until the scaling test switches the load on).
+# producer/loadtest and producer/loadtest-one are overlays on this file for the scaling test: "kubectl apply -k producer/loadtest".
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - policies/networkpolicies.yaml
+  - config/pipeline-config.yaml
+  - rbac/serviceaccounts.yaml
+  - rbac/roles.yaml
+  - rbac/bootstrap.yaml
+  - bootstrap/job.yaml
+  - db/mongo.yaml
+  - kafka/kafka.yaml
+  - processor/processor.yaml
+  - processor/hpa.yaml
+  - restapi/restapi.yaml
+  - producer/job-replay.yaml
+  - producer/load

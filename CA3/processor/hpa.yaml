@@ -1,0 +1,44 @@
+# Horizontal Pod Autoscaler for the processor (the optional "scale the processor tier" part of the assignment).
+# Every 15 seconds the autoscaler compares the pods' average CPU use with the target and adds or removes replicas.
+# The topic has 3 partitions, and one consumer per partition is the most that can work in parallel, so the maximum is 3.
+# CPU numbers come from metrics-server, which must be running in the cluster (k3s ships it).
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: processor
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: autoscaler
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Keeps the processor between 1 and 3 pods and adds pods above 70 percent CPU. The maximum is 3 because the topic has 3 partitions"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: processor
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+    # After 60 seconds of low CPU the autoscaler removes one pod every 30 seconds (3 pods -> 1 pod in about 2 minutes), so that the scaling
+    # test can show the whole way back down. A longer wait would be the safer choice for a service whose load rises and falls in short waves.
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30

@@ -1,0 +1,45 @@
+# Horizontal Pod Autoscaler for the producers: scales the load generator from 1 up to 5 replicas.
+# Target: average CPU at 50% of the request. A producer in a tight loop is far above that, so the autoscaler
+# adds replicas (up to doubling every 15 seconds) until the maximum. When the load stops (the pods are idle again) the CPU is near zero,
+# and the autoscaler removes the extra replicas: after 30 seconds of low CPU it may remove all of them but one, every 15 seconds.
+# Idle pods use almost no CPU, so with PRODUCER_IDLE=true (the default in deployment.yaml) this autoscaler keeps one pod and does nothing else.
+# The numbers come from metrics-server (k3s ships it), which measures CPU and memory of pods. A load generator that sends as fast as it can is
+# CPU-bound by design, so CPU is the right signal for it; the README says why the processors' autoscaler is CPU-based too, and what that misses.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: producer-load
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: producer
+    app.kubernetes.io/component: autoscaler
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Scales the load-generating producers from 1 to 5 pods at 50 percent CPU, and back to 1 within about a minute of the load stopping. Part of make up; it keeps one pod while the load is off"
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: producer-load
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15

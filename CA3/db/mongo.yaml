@@ -1,0 +1,321 @@
+# MongoDB: the database stage of the pipeline.
+# This file creates one ConfigMap, one StatefulSet and two Services.
+#
+# Why StatefulSet instead of Deployment?
+# MongoDB needs a stable identity and its own persistent disk.
+# The StatefulSet gives the pod a stable name (mongo-0) and a PVC that survives pod restarts.
+#
+# How MongoDB is locked down:
+#   - TLS is required (--tlsMode=requireTLS): a connection that does not start with a TLS handshake is refused. The certificate comes from
+#     the Secret mongo-tls, and the clients check it against the CA certificate and the name "mongo".
+#   - Four accounts, not one. The administrator (Secret mongo-root) is used only for the first start and by the tests that run inside
+#     this pod. The processor has its own account that may read and write the database ca3 and nothing else (Secret mongo-processor).
+#     The REST API has its own account that may only READ the database ca3 (Secret mongo-restapi). The metrics reader (mongodb-exporter) has an
+#     account that may only read monitoring numbers, not the flows (Secret mongo-exporter). The ConfigMap mongo-init holds the small script
+#     that creates the three accounts on the first start (the official image runs every .sh file in /docker-entrypoint-initdb.d once, so
+#     an account that is not in the script when the disk is first used is only added by wiping the disk: make down, then make up).
+#   - mongod runs as the user "mongodb" (number 999), not as root, and the pod passes the "restricted" Pod Security profile.
+#
+# Not done, and said so in the README: a read-only root file system, and encryption of the data on the disk (the cluster's disks are
+# encrypted by AWS only if the volume type says so; see the README).
+
+# The script that creates the processor's, the REST API's and the metrics reader's MongoDB accounts.
+#
+# The official image runs every .sh file of /docker-entrypoint-initdb.d on the first start only, while a temporary mongod listens on
+# 127.0.0.1 (without the TLS requirement, which is why the script can use plain "mongosh"). "$mongo" is the shell command that the image's
+# script prepared, and _js_escape quotes a value for JavaScript. The passwords are read from the mounted Secrets and are never written
+# into this file, so this ConfigMap holds no secret. The accounts are created in the database "admin" with these rights:
+#   processor  readWrite on ca3   (stores the flows)
+#   restapi    read on ca3        (cannot write, update or delete anything)
+#   exporter   clusterMonitor     (reads server statistics: how many inserts, connections, memory. It cannot read the flows)
+#              and read on local  (the small database where MongoDB keeps its own start-up information)
+# If the script fails, the container stops with the error, so a missing account is never silent.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-init
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Script that creates the MongoDB accounts of the processor (read and write on ca3), of the REST API (read only on ca3) and of the metrics reader (monitoring numbers only) on the first start. Holds no password"
+data:
+  10-create-users.sh: |
+    create_user() {
+      local dir="$1" roles="$2" user pass
+      user="$(< "$dir/username")"
+      pass="$(< "$dir/password")"
+      "${mongo[@]}" admin <<EOJS
+    db.createUser({
+      user: $(_js_escape "$user"),
+      pwd: $(_js_escape "$pass"),
+      roles: $roles
+    })
+    EOJS
+    }
+
+    create_user /etc/secrets/mongo-processor '[ { role: "readWrite", db: "ca3" } ]'
+    create_user /etc/secrets/mongo-restapi '[ { role: "read", db: "ca3" } ]'
+    create_user /etc/secrets/mongo-exporter '[ { role: "clusterMonitor", db: "admin" }, { role: "read", db: "local" } ]'
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "MongoDB 7 with its data on a PersistentVolumeClaim. TLS is required; the administrator, the processor, the REST API and the metrics reader each have their own account (read-only for the REST API, monitoring numbers only for the metrics reader)"
+
+spec:
+  # The StatefulSet uses the headless Service for its stable network identity.
+  serviceName: mongo-headless
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongo
+
+  # Delete the disk when the StatefulSet is deleted,
+  # but keep it if the StatefulSet is only scaled down.
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Retain
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongo
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: ca3-pipeline
+
+    spec:
+      serviceAccountName: mongo
+      automountServiceAccountToken: false
+
+      # Do not automatically inject environment variables for other Kubernetes Services.
+      enableServiceLinks: false
+
+      terminationGracePeriodSeconds: 60
+
+      # The official image starts as root when nobody tells it otherwise, takes ownership of the data disk, and then steps down to the
+      # user "mongodb" (user and group ID 999). Here the pod starts as 999 from the first instruction, so it never is root: the
+      # image's start script detects that and skips the step. fsGroup 999 makes the data disk and the files of the Secrets belong to
+      # the group 999 (see defaultMode below), so mongod can write the disk and read its password and certificate files.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: mongo
+          image: mongo:7.0
+
+          # The image's start script adds --auth by itself because an administrator is given below. These two options turn TLS on:
+          # requireTLS refuses every connection that is not TLS, and the file holds the server certificate and its key.
+          # --tlsCAFile is left out on purpose: then MongoDB does not ask clients for a certificate. The clients prove who they are with a
+          # password, and they check MongoDB's certificate with the CA certificate.
+          args:
+            - mongod
+            - --tlsMode=requireTLS
+            - --tlsCertificateKeyFile=/etc/mongo-tls/mongo.pem
+
+          ports:
+            - name: mongo
+              containerPort: 27017
+
+          env:
+            # The official Mongo image reads the administrator's login from these files (the Secret mongo-root, mounted below).
+            # It creates the administrator on the first start and then removes these variables from mongod's environment.
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/secrets/mongo-root/username
+
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/secrets/mongo-root/password
+
+          volumeMounts:
+            # Persistent database storage.
+            - name: data
+              mountPath: /data/db
+
+            # The administrator's login.
+            - name: mongo-root
+              mountPath: /etc/secrets/mongo-root
+              readOnly: true
+
+            # The logins of the processor, of the REST API and of the metrics reader. Only the script in mongo-init reads them, once,
+            # to create the three accounts.
+            - name: mongo-processor
+              mountPath: /etc/secrets/mongo-processor
+              readOnly: true
+
+            - name: mongo-restapi
+              mountPath: /etc/secrets/mongo-restapi
+              readOnly: true
+
+            - name: mongo-exporter
+              mountPath: /etc/secrets/mongo-exporter
+              readOnly: true
+
+            # The server certificate and key (mongo.pem) and the CA certificate (ca.pem).
+            - name: mongo-tls
+              mountPath: /etc/mongo-tls
+              readOnly: true
+
+            # The script that creates the two accounts on the first start.
+            - name: mongo-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+
+          # Ready when MongoDB is accepting connections. (A TCP connection is enough to know that mongod listens; it needs no TLS handshake.)
+          readinessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          # Restart the container if MongoDB stops responding.
+          livenessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 45
+            periodSeconds: 20
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:
+        # 288 is the octal number 0440: the owner and the group (999, from fsGroup above) may read the files, nobody else.
+        - name: mongo-root
+          secret:
+            secretName: mongo-root
+            defaultMode: 288
+
+        - name: mongo-processor
+          secret:
+            secretName: mongo-processor
+            defaultMode: 288
+
+        - name: mongo-restapi
+          secret:
+            secretName: mongo-restapi
+            defaultMode: 288
+
+        - name: mongo-exporter
+          secret:
+            secretName: mongo-exporter
+            defaultMode: 288
+
+        - name: mongo-tls
+          secret:
+            secretName: mongo-tls
+            defaultMode: 288
+
+        - name: mongo-init
+          configMap:
+            name: mongo-init
+
+  # Kubernetes creates a PersistentVolumeClaim from this template for the Mongo pod.
+  # apiVersion, kind, volumeMode and status are the values Kubernetes fills in anyway. Writing them out keeps
+  # "kubectl apply" from reporting "configured" on every run, so a second "make up" says "unchanged".
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: mongo
+          app.kubernetes.io/component: database
+          app.kubernetes.io/part-of: ca3-pipeline
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 5Gi
+
+        volumeMode: Filesystem
+
+      status:
+        phase: Pending
+
+---
+# Headless Service:
+# clusterIP: None means there is no virtual Service IP.
+# It gives the StatefulSet pod a stable DNS identity such as
+# mongo-0.mongo-headless.ca3.svc.cluster.local.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-headless
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Gives the MongoDB StatefulSet pod a stable DNS name (mongo-0.mongo-headless) instead of a virtual IP"
+
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+
+  selector:
+    app.kubernetes.io/name: mongo
+
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo
+
+---
+# ClusterIP Service:
+# The other applications use the stable name "mongo" instead of knowing the Mongo pod's IP.
+# This Service is reachable only from inside the Kubernetes cluster.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: mongo
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Address of MongoDB inside the cluster (mongo:27017, TLS required). Not reachable from outside the cluster"
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app.kubernetes.io/name: mongo
+
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo

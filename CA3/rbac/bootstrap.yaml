@@ -1,0 +1,39 @@
+# What the setup Job "bootstrap" may do in Kubernetes: create Secrets in this namespace. That is all.
+#
+# Not "get", not "list", not "update", not "delete": a Job that is broken or hijacked cannot read a password or a key that exists,
+# and cannot replace one. (Creating a Secret that already exists fails with "409 exists": the program uses exactly that answer, in a
+# "dry run" that stores nothing, to find out which Secrets are there.)
+# The rule that allows "create" on Secrets is the only one in this namespace that mentions Secrets at all, and "make verify" checks it.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bootstrap
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: bootstrap
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Create Secrets in the namespace ca3, nothing else. Used only by the setup Job"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bootstrap
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: bootstrap
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Gives the Role bootstrap to the ServiceAccount bootstrap"
+subjects:
+  - kind: ServiceAccount
+    name: bootstrap
+    namespace: ca3
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bootstrap

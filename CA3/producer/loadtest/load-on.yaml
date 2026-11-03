@@ -1,0 +1,15 @@
+# Strategic merge patch: the container "producer" of the Deployment "producer-load" gets PRODUCER_IDLE=false.
+# SEND_DELAY_SECONDS (a pause after every row, in seconds) can be added here to slow each producer down; 0 means as fast as possible.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer-load
+  namespace: ca3
+spec:
+  template:
+    spec:
+      containers:
+        - name: producer
+          env:
+            - name: PRODUCER_IDLE
+              value: "false"

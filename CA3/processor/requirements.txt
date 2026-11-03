@@ -1,0 +1,4 @@
+kafka-python==3.0.11
+pymongo==4.18.2
+cryptography==50.0.1
+prometheus-client==0.26.0

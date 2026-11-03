@@ -1,0 +1,8 @@
+# The producer load generator and its autoscaler, as a unit of their own. The stack's kustomization.yaml lists this folder, and the overlays
+# producer/loadtest and producer/loadtest-one build on it (an overlay cannot build on the whole stack: Kustomize does not allow a folder to
+# use as its base a folder that contains it). "kubectl apply -k producer/load" alone switches the load off.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - hpa.yaml
