@@ -1,4 +1,4 @@
-kubectl context: ca3-k3s   (kubeconfig: /Users/amshu/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
+kubectl context: ca3-k3s   (kubeconfig: /Users/<user>/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
 ( kubectl apply -k . || { echo "kubectl reported an error. If it says that the Job bootstrap cannot be changed, the finished Job is replaced and the stack applied again:" ; \
       kubectl -n ca3 delete job bootstrap --ignore-not-found && kubectl apply -k . ; } ) && \
     ( kubectl -n ca3 wait --for=condition=complete job/bootstrap --timeout=300s && \
