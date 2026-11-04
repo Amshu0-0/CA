@@ -1,0 +1,31 @@
+NS=ca3 KUBECTL=kubectl python3 scripts/netpol-check.py
+NetworkPolicy test: 12 policies in namespace ca3
+
+Starting 7 probe pods (busybox; one of them in the namespace ca3-intruder)...
+Trying 42 connections (a blocked one can take up to 3 seconds to give up)...
+
+  from                                        kafka:9092      mongo:27017     processor:8000  restapi:8443    DNS:53          k8s-api:443     
+  stranger (no role, in ca3)                  blocked         blocked         blocked         blocked         open            blocked         
+  intruder (another namespace)                blocked         blocked         blocked         open            open            open            
+  producer (wears the producer label)         open            blocked         blocked         blocked         open            blocked         
+  processor (wears the processor label)       open            open            blocked         blocked         open            blocked         
+  restapi (wears the REST API label)          blocked         open            blocked         blocked         open            blocked         
+  observer (the monitoring role)              blocked         blocked         open            open            open            blocked         
+  bootstrap (wears the setup Job's label)     blocked         blocked         blocked         blocked         open            open            
+
+  open = the connection was accepted; blocked = it did not get through; ! = not what the policies say
+
+What that shows:
+  stranger   reaches nothing but DNS: default-deny-all blocks the rest, and allow-dns-egress opens only the DNS server
+  intruder   (another namespace) reaches only the REST API of the pipeline: restapi-ingress is the one policy that accepts any sender (the policies of ca3 do not govern the other namespace, so it also reaches the Kubernetes API, as any pod there would)
+  producer   reaches only Kafka: producer-egress lets it out, kafka-ingress lets it in
+  processor  reaches Kafka and MongoDB: processor-egress, kafka-ingress and mongo-ingress
+  restapi    reaches only MongoDB: restapi-egress and mongo-ingress
+  observer   reaches the processor's metrics port and the REST API: observer-egress, processor-ingress and restapi-ingress
+  bootstrap  reaches only the Kubernetes API server (and DNS): bootstrap-egress is the one rule that lets a pod out to it
+
+The observer pod reads the processor's metrics port: processor_messages_total 5001.0; processor_alerts_total 1967.0; processor_ready 1.0
+
+Clean-up: no probe pod and no namespace ca3-intruder left
+
+RESULT: PASS - all 42 connections behave as the policies say (16 allowed, 26 blocked)

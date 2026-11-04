@@ -1,0 +1,39 @@
+NS=ca3 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/heal-check.py 
+Self-healing test: rest, processor, mongo, kafka
+
+[1/4] A REST API pod dies
+      deleting restapi-5f54fc9f7b-dtqm2 while this computer calls GET /health every 0.4 seconds...
+      Kubernetes started a new pod (restapi-5f54fc9f7b-h5llz); both REST API pods are ready again 9 s after the delete
+      calls made meanwhile: 22, failed: 0
+
+[2/4] The processor is away, Kafka keeps the event
+      scaling the processor down to 0 pods...
+      with no processor running, the producer sent smoke-1104-174421-9bf0
+      Kafka stored it at partition 0, offset 1631
+      it is in Kafka (read back with kafka-console-consumer)
+      the REST API says: HTTP 404 (the event is not in MongoDB: nobody reads Kafka)
+      scaling the processor up to 1 pod...
+      HTTP 200: the new processor read the waiting event from Kafka and stored it, 5 s after it was started
+
+[3/4] MongoDB dies, the disk keeps the data
+      before: 5002 records in MongoDB, the disk is pvc-93628baa-6d67-40b1-a183-7668a53789e8 (Bound)
+      deleting mongo-0...
+      a new mongo-0 is ready after 13 s, and it uses the disk pvc-93628baa-6d67-40b1-a183-7668a53789e8 (Bound)
+      after: 5002 records; GET /events/smoke-1104-174421-9bf0 -> HTTP 200
+
+[4/4] Kafka dies, the log is on its disk
+      before: 5002 messages in topic network-flows, the disk is pvc-648e666a-38c8-4189-93b7-1198a40f1eed (Bound)
+      deleting kafka-0...
+      a new kafka-0 is ready after 24 s, and it uses the disk pvc-648e666a-38c8-4189-93b7-1198a40f1eed (Bound)
+      5002 messages in the topic
+      a new event went through the restarted broker: partition 0, offset 1632
+      HTTP 200 from the REST API: producer, Kafka, processor, MongoDB and REST API all work again
+
+Summary
+  PASS  rest       one REST pod deleted, 2 ready again after 9 s, 0 of 22 calls failed
+  PASS  processor  an event sent while the processor was away reached MongoDB 5 s after the processor started
+  PASS  mongo      mongo-0 deleted, a new pod was ready after 13 s with the same disk, all 5002 records still there
+  PASS  kafka      kafka-0 deleted, a new pod was ready after 24 s with the same disk and the same messages, and a new event went all the way through
+
+RESULT: PASS - 4 of 4 recovery tests passed
+the self-healing test took 1 min 47 s

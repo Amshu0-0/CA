@@ -1,0 +1,35 @@
+NS=ca3 KUBECTL=kubectl TERRAFORM=terraform python3 scripts/smoke-test.py --save evidence/step3-smoke-response.json
+Smoke test: one tagged event through the whole pipeline (namespace ca3)
+
+[1/6] The stack is running
+      kafka-0 and mongo-0 are ready; 1 processor pod and 2 REST API pods are ready
+
+[2/6] Send one event with a unique trace id
+      trace id: smoke-1104-173401-d788
+      the producer pod finished after 12 s and printed:
+        {"ts":"2026-11-04T17:34:09.933+00:00","level":"info","service":"producer","msg":"sent","trace_id":"smoke-1104-173401-d788","topic":"network-flows","partition":2,"offset":1670}
+      Kafka stored the event in partition 2 at offset 1670 of topic network-flows
+
+[3/6] Kafka holds it
+      read back from partition 2, offset 1670 with kafka-console-consumer:
+        {"trace_id": "smoke-1104-173401-d788", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      topic network-flows: 3 partitions, replication factor 1, 5001 messages in total (1631 + 1699 + 1671)
+
+[4/6] The processor read it and stored it
+      [pod/processor-6d4869f56b-qn2b7/processor] {"ts":"2026-11-04T17:34:09.933+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1104-173401-d788","topic":"network-flows","partition":2,"offset":1670}
+      it is the same partition and offset that the producer was told
+      consumer group processor: partition 0 at 1631 of 1631 (behind: 0), partition 1 at 1699 of 1699 (behind: 0), partition 2 at 1671 of 1671 (behind: 0)
+
+[5/6] MongoDB holds the record
+      1 record with this trace id: {"trace_id": "smoke-1104-173401-d788", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}
+      the collection holds 5001 records in total
+
+[6/6] The REST API returns it to this computer
+      GET /events/smoke-1104-173401-d788    (HTTPS, node port 30080 of the server; the login is read from the Secret restapi-login, the password is not printed)
+      the same request with curl:  curl -s --cacert ca.crt --resolve restapi.ca3.test:30080:<server-public-ip> -u USER:PASSWORD https://restapi.ca3.test:30080/events/smoke-1104-173401-d788   (README: Calling the API)
+      answer: HTTP 200
+        {"found": true, "event": {"trace_id": "smoke-1104-173401-d788", "Label": "SMOKE-TEST", "Source IP": "192.168.10.5", "Destination IP": "34.199.20.76", "Destination Port": "443", "Protocol": "6", "Timestamp": "7/7/2017 10:17", "...": "79 more fields"}}
+      the complete answer (86 fields) is saved in evidence/step3-smoke-response.json
+      GET /stats  ->  HTTP 200 {"collection":"flows","database":"ca3","documents":5001}
+
+RESULT: PASS - event smoke-1104-173401-d788 went producer -> Kafka (partition 2, offset 1670) -> processor -> MongoDB -> REST API in 33 s
