@@ -1,0 +1,239 @@
+# Grafana Alloy: the log collector. One pod on every machine (a DaemonSet) reads the logs of the pods that run on that machine and sends
+# them to Loki, with labels (namespace, pod, container, app, level, service) so that a search can pick them out.
+#
+# How the logs are read: through the Kubernetes API ("kubectl logs" does the same), not from the files on the machine. Reading the files would
+# need a hostPath volume, and the Pod Security level "restricted" that this namespace enforces forbids hostPath. The price: Alloy needs a
+# small Role (read pods and their logs, in this namespace only) and one network rule to the API server (alloy-egress). Alloy is the only
+# pod besides the setup Job that has a Kubernetes API token, and its Role cannot touch Secrets (make verify checks both).
+#
+# Each pod reads only its own machine's pods: the field selector spec.nodeName=<this machine> (NODE_NAME comes from the pod's own
+# description through the "downward API"). Every line arrives once, whatever the number of machines.
+#
+# The programs write one JSON object per line (ts, level, service, msg, and more). The "json" stage reads level and service out of it so
+# they become labels. A line that is not JSON (for example the start-up lines of gunicorn) is kept as it is, without those two labels.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alloy
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Identity of the Alloy pods. The token is off here and turned on only in the DaemonSet's pod (observability/alloy.yaml). Its Role may read pods and pod logs in this namespace, and nothing else"
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: alloy
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Read-only: pods and their logs in the namespace ca3. No Secrets, no other kind of object, no change of anything"
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: alloy
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Gives the Role alloy to the ServiceAccount alloy, in the namespace ca3 only"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: alloy
+subjects:
+  - kind: ServiceAccount
+    name: alloy
+    namespace: ca3
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The Alloy configuration: find the pods of this machine, read their logs through the Kubernetes API, label them, send them to Loki. Holds no secret"
+data:
+  config.alloy: |
+    logging {
+      level  = "info"
+      format = "logfmt"
+    }
+
+    // The pods of the namespace ca3 that run on this machine.
+    discovery.kubernetes "pods" {
+      role = "pod"
+
+      namespaces {
+        names = ["ca3"]
+      }
+
+      selectors {
+        role  = "pod"
+        field = "spec.nodeName=" + sys.env("NODE_NAME")
+      }
+    }
+
+    // The labels that a search can use.
+    discovery.relabel "pods" {
+      targets = discovery.kubernetes.pods.targets
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+        target_label  = "app"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        target_label  = "node"
+      }
+    }
+
+    // Read the logs of those pods through the Kubernetes API.
+    loki.source.kubernetes "pods" {
+      targets    = discovery.relabel.pods.output
+      forward_to = [loki.process.json.receiver]
+    }
+
+    // Take level and service out of the JSON line and make them labels. A line that is not JSON passes through unchanged.
+    loki.process "json" {
+      stage.json {
+        expressions    = { level = "level", service = "service" }
+        drop_malformed = false
+      }
+
+      stage.labels {
+        values = { level = "", service = "" }
+      }
+
+      forward_to = [loki.write.loki.receiver]
+    }
+
+    loki.write "loki" {
+      endpoint {
+        url = "http://loki:3100/loki/api/v1/push"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: alloy
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: alloy
+    app.kubernetes.io/component: log-collector
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Grafana Alloy v1.5.0, one pod per machine: reads the logs of the pods of that machine through the Kubernetes API and sends them to Loki"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alloy
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alloy
+        app.kubernetes.io/component: log-collector
+        app.kubernetes.io/part-of: ca3-pipeline
+    spec:
+      serviceAccountName: alloy
+      # Alloy calls the Kubernetes API, so this pod (and only this one, besides the setup Job) gets the token.
+      automountServiceAccountToken: true
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: alloy
+          image: grafana/alloy:v1.5.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - run
+            - /etc/alloy/config.alloy
+            - --storage.path=/tmp/alloy
+            - --server.http.listen-addr=0.0.0.0:12345
+            - --disable-reporting
+          env:
+            # The name of the machine this pod runs on, from the pod's own description.
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - name: http
+              containerPort: 12345
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+              readOnly: true
+            - name: storage
+              mountPath: /tmp/alloy
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config
+          configMap:
+            name: alloy-config
+        - name: storage
+          emptyDir:
+            sizeLimit: 256Mi

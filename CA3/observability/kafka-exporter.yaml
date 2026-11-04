@@ -1,0 +1,122 @@
+# kafka-exporter: asks Kafka how far behind the processor is, and turns the answer into numbers for Prometheus.
+#
+# The number that matters is kafka_consumergroup_lag: for every partition of the topic, how many messages are in Kafka that the group
+# "processor" has not read yet. Kafka knows it, but does not publish it as a metric. This small program connects to Kafka like any client
+# (over TLS, showing its own client certificate from the Secret kafka-client-exporter, which the setup Job made) and asks.
+#
+# It is the only pod besides the producers and the processor that may connect to Kafka (policies/observability.yaml), and the only thing it
+# does is read information about groups, topics and offsets. It never reads a message.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kafka-exporter
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: kafka-exporter
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Identity of the kafka-exporter pod. Its Kubernetes API token is not mounted, because the exporter never calls the Kubernetes API"
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-exporter
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: kafka-exporter
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "kafka-exporter v1.9.0: reads the consumer lag from Kafka (TLS with its own client certificate) and serves it to Prometheus on port 9308"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-exporter
+        app.kubernetes.io/component: exporter
+        app.kubernetes.io/part-of: ca3-pipeline
+    spec:
+      serviceAccountName: kafka-exporter
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kafka-exporter
+          image: danielqsj/kafka-exporter:v1.9.0
+          imagePullPolicy: IfNotPresent
+          # The broker is called by the name that is in its certificate (kafka-0 on the headless Service). The three tls files are the
+          # exporter's own certificate and key, and the CA certificate that it uses to check the broker's certificate.
+          args:
+            - --kafka.server=kafka-0.kafka-headless.ca3.svc.cluster.local:9092
+            - --tls.enabled
+            - --tls.ca-file=/etc/pki/kafka-client/ca.crt
+            - --tls.cert-file=/etc/pki/kafka-client/tls.crt
+            - --tls.key-file=/etc/pki/kafka-client/tls.key
+            - --web.listen-address=:9308
+          ports:
+            - name: metrics
+              containerPort: 9308
+          volumeMounts:
+            - name: kafka-client-exporter
+              mountPath: /etc/pki/kafka-client
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: kafka-client-exporter
+          secret:
+            secretName: kafka-client-exporter
+            defaultMode: 288
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-exporter
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: kafka-exporter
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Address of kafka-exporter inside the cluster (kafka-exporter:9308). Only Prometheus may call it"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: kafka-exporter
+  ports:
+    - name: metrics
+      port: 9308
+      targetPort: metrics

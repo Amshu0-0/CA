@@ -1,0 +1,176 @@
+# Loki: the place where the logs of all the pods end up, so that one search finds a line in any pod.
+#
+# Without it you would have to run "kubectl logs" on every pod, and the logs of a pod that was deleted are gone. Alloy (alloy.yaml) reads the
+# logs of every pod and sends them here; Grafana searches them (LogQL, for example {app="processor"} |= "stored").
+#
+# One single Loki pod, the "all in one" way of running it: it keeps the index and the log text in its own emptyDir for 24 hours. Like
+# Prometheus, it forgets everything when the pod is deleted (see the README: the evidence is exported to a file after each test).
+# There is no login (auth_enabled: false): only Alloy (to write) and Grafana (to read) may connect (policies/observability.yaml).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: loki
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Identity of the Loki pod. Its Kubernetes API token is not mounted, because Loki never calls the Kubernetes API"
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The Loki configuration: one pod, files on its emptyDir, 24 hours of logs. Holds no secret"
+data:
+  loki.yaml: |
+    auth_enabled: false
+
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+      log_level: warn
+
+    common:
+      instance_addr: 127.0.0.1
+      path_prefix: /loki
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+      storage:
+        filesystem:
+          chunks_directory: /loki/chunks
+          rules_directory: /loki/rules
+
+    schema_config:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+
+    limits_config:
+      retention_period: 24h
+      allow_structured_metadata: true
+      volume_enabled: true
+
+    compactor:
+      working_directory: /loki/compactor
+      retention_enabled: true
+      delete_request_store: filesystem
+
+    analytics:
+      reporting_enabled: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: logs
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Loki 3.3.0, one pod: stores the logs that Alloy sends for 24 hours (in an emptyDir) and answers Grafana's searches"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: loki
+        app.kubernetes.io/component: logs
+        app.kubernetes.io/part-of: ca3-pipeline
+    spec:
+      serviceAccountName: loki
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: loki
+          image: grafana/loki:3.3.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - -config.file=/etc/loki/loki.yaml
+          ports:
+            - name: http
+              containerPort: 3100
+          volumeMounts:
+            - name: config
+              mountPath: /etc/loki
+              readOnly: true
+            - name: data
+              mountPath: /loki
+          # /ready answers 200 only when Loki can take logs (it needs about 15 seconds after the start).
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 640Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config
+          configMap:
+            name: loki-config
+        - name: data
+          emptyDir:
+            sizeLimit: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/component: logs
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Address of Loki inside the cluster (loki:3100). Only Alloy (to write logs) and Grafana (to search them) may call it"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: loki
+  ports:
+    - name: http
+      port: 3100
+      targetPort: http

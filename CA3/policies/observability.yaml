@@ -1,0 +1,395 @@
+# NetworkPolicies of the monitoring part (Prometheus, Grafana, Loki, Alloy and the two exporters).
+#
+# default-deny-all (in networkpolicies.yaml) still blocks everything. Every connection below is one more hole in that wall, and each one
+# needs two permissions: the sender needs an egress rule and the receiver needs an ingress rule. In words, the connections that exist:
+#
+#   Prometheus -> producer :8001, processor :8000, REST API :9102, kafka-exporter :9308, mongodb-exporter :9216    (reading the numbers)
+#   kafka-exporter -> Kafka :9092                       (asking how far behind the processor is)
+#   mongodb-exporter -> MongoDB :27017                  (asking for the server statistics)
+#   Grafana -> Prometheus :9090 and Loki :3100          (drawing)
+#   Alloy -> Loki :3100, and Alloy -> the Kubernetes API server   (sending logs; reading them through the API)
+#
+# The two exporters are the one deliberate exception to "only the producers and the processor talk to Kafka, only the processor and the
+# REST API talk to MongoDB". They are listed in their own policies (kafka-exporter-to-kafka and mongodb-exporter-to-mongo) so that the exception
+# can be seen, and removed, by itself. They still need the TLS certificate (Kafka) or the password (MongoDB) to get any answer.
+#
+# Who may reach Prometheus: only Grafana. The pod is not reachable from any other pod. You look at Prometheus and Grafana from your computer with
+# kubectl port-forward, which goes through the Kubernetes API and is not a pod-to-pod connection.
+---
+# 12. Prometheus may connect only to the places it reads numbers from.
+#     The Prometheus pod also carries the label component=observer, so observer-egress (networkpolicies.yaml) applies to it as well: it
+#     adds the processor's port 8000 (listed again here on purpose, so that this list is complete) and the REST API's port 8443. Prometheus has
+#     no login for that port, so it only ever gets "401 unauthorized" there. The rest of this list is what makes it a monitoring tool.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Prometheus may connect to the producers (8001), the processor (8000), the REST API (9102), kafka-exporter (9308) and mongodb-exporter (9216). As an observer pod it may also reach the REST API's port 8443 (observer-egress), where it has no login"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: producer
+      ports:
+        - protocol: TCP
+          port: 8001
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: processor
+      ports:
+        - protocol: TCP
+          port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: restapi
+      ports:
+        - protocol: TCP
+          port: 9102
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka-exporter
+      ports:
+        - protocol: TCP
+          port: 9308
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongodb-exporter
+      ports:
+        - protocol: TCP
+          port: 9216
+---
+# 13. Only Grafana may query Prometheus.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Prometheus accepts connections only from Grafana, on port 9090"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+# 14. Grafana may connect only to Prometheus and Loki.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Grafana may connect only to Prometheus (9090) and Loki (3100)"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: loki
+      ports:
+        - protocol: TCP
+          port: 3100
+---
+# 15. Loki takes logs from Alloy and answers searches from Grafana, nobody else.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loki-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Loki accepts connections only from Alloy (to write logs) and Grafana (to search them), on port 3100"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+      ports:
+        - protocol: TCP
+          port: 3100
+---
+# 16. Alloy may send logs to Loki, and may reach the Kubernetes API server (to find the pods and read their logs). Nothing else.
+#     The API server runs on the first machine of the cluster. A pod does not talk to the Service address of the API server (10.43.0.1,
+#     port 443) directly: the node rewrites that address to the machine's own address in the subnet below, port 6443, and the network
+#     rules see the rewritten one (the same two address blocks as in bootstrap-egress). The subnet must equal subnet_cidr in
+#     infra/config.yml ("make verify" checks that).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alloy-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Alloy may connect only to Loki (3100) and to the Kubernetes API server (the machines' subnet, port 6443, or the API Service address, port 443)"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alloy
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: loki
+      ports:
+        - protocol: TCP
+          port: 3100
+    - to:
+        - ipBlock:
+            cidr: 10.20.1.0/24
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 6443
+        - protocol: TCP
+          port: 443
+---
+# 17. The producers' numbers (port 8001) may be read only by Prometheus.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: producer-metrics-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The producers' metrics port 8001 may be read only by Prometheus. Nothing else may connect to a producer"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: producer
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8001
+---
+# 18. The REST API's numbers (port 9102) may be read only by Prometheus. (Port 8443, the API itself, is restapi-ingress.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restapi-metrics-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The REST API's metrics port 9102 may be read only by Prometheus"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: restapi
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9102
+---
+# 19. kafka-exporter: Prometheus may read it (9308), and it may connect only to Kafka (9092).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-exporter-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "kafka-exporter accepts connections only from Prometheus, on port 9308"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9308
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-exporter-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "kafka-exporter may connect only to Kafka, on port 9092"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+# 20. mongodb-exporter: Prometheus may read it (9216), and it may connect only to MongoDB (27017).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-exporter-ingress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "mongodb-exporter accepts connections only from Prometheus, on port 9216"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb-exporter
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9216
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-exporter-egress
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "mongodb-exporter may connect only to MongoDB, on port 27017"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb-exporter
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongo
+      ports:
+        - protocol: TCP
+          port: 27017
+---
+# 21. The two exceptions: Kafka also accepts kafka-exporter, and MongoDB also accepts mongodb-exporter. Each has a policy of its own, added
+#     to kafka-ingress and mongo-ingress (a pod gets everything that any policy allows).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-exporter-to-kafka
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The one exception to kafka-ingress: Kafka also accepts kafka-exporter on port 9092 (it still needs a client certificate)"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka-exporter
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-exporter-to-mongo
+  namespace: ca3
+  labels:
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "The one exception to mongo-ingress: MongoDB also accepts mongodb-exporter on port 27017 (it still needs its monitoring-only account)"
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongodb-exporter
+      ports:
+        - protocol: TCP
+          port: 27017

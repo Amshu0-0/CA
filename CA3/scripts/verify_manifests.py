@@ -12,6 +12,7 @@
 import ast
 import copy
 import fnmatch
+import json
 import os
 import re
 import struct
@@ -56,7 +57,7 @@ def matches(selector, w): return all(labels(w).get(k) == v for k, v in selector.
 
 
 by = {(kind(d), name(d)): d for d in objects}
-workloads = of("Deployment") + of("StatefulSet") + of("Job")
+workloads = of("Deployment") + of("StatefulSet") + of("DaemonSet") + of("Job")
 services = {name(s): s for s in of("Service")}
 config_maps = {name(d): d.get("data", {}) for d in of("ConfigMap")}
 service_accounts = {name(d) for d in of("ServiceAccount")}
@@ -87,6 +88,22 @@ def secrets_made():
 
 
 SECRETS = secrets_made()
+
+
+# The Secrets whose values reach a pod through environment variables (secretKeyRef or secretRef): a list of (Secret, key). The key is None for secretRef.
+# Files are the better way (a file does not show up in "kubectl describe pod"), so every use of this is checked and named in the report.
+def secret_env_uses(w):
+    uses = []
+    for c in all_containers(w):
+        for e in c.get("env", []):
+            ref = e.get("valueFrom", {}).get("secretKeyRef")
+            if ref:
+                uses.append((ref["name"], ref["key"]))
+        for ef in c.get("envFrom", []):
+            if "secretRef" in ef:
+                uses.append((ef["secretRef"]["name"], None))
+    return uses
+
 
 rows = []
 
@@ -136,7 +153,7 @@ def restricted_problems(w):
 
 
 # ------------------------------------------------------------ 1. every workload
-G = "1. Every workload (Deployment, StatefulSet, Job)"
+G = "1. Every workload (Deployment, StatefulSet, DaemonSet, Job)"
 for w in workloads:
     n, ps, fails, warns = name(w), pod(w), [], []
     if ps.get("serviceAccountName") not in service_accounts:
@@ -166,17 +183,33 @@ for w in workloads:
     for v in ps.get("volumes", []):
         if "secret" in v and v["secret"]["secretName"] not in SECRETS:
             fails.append("volume " + v["name"] + " uses Secret " + v["secret"]["secretName"] + ", which processor/bootstrap.py does not create (it makes: " + ", ".join(sorted(SECRETS)) + ")")
+        if "configMap" in v:
+            cm_ = v["configMap"]
+            if cm_["name"] not in config_maps:
+                fails.append("volume " + v["name"] + " uses ConfigMap " + cm_["name"] + ", which is not defined")
+            else:
+                fails += ["volume " + v["name"] + " takes the file " + i_["key"] + " from ConfigMap " + cm_["name"] + ", which has no such file" for i_ in cm_.get("items", []) if i_["key"] not in config_maps[cm_["name"]]]
+    for secret_, key_ in sorted(secret_env_uses(w), key=str):
+        if secret_ not in SECRETS:
+            fails.append("a variable is read from Secret " + secret_ + ", which processor/bootstrap.py does not create")
+        elif key_ and key_ not in SECRETS[secret_]:
+            fails.append("a variable is read from key " + key_ + " of Secret " + secret_ + ", which bootstrap.py does not put in it (it puts: " + ", ".join(sorted(SECRETS[secret_])) + ")")
     if ps.get("enableServiceLinks") is not False:
         if n == "kafka":
             fails.append("enableServiceLinks must be false: the Confluent image reads every KAFKA_* variable as configuration")
         else:
             warns.append("enableServiceLinks is not false (Kubernetes injects variables about every Service)")
     if n == "bootstrap":
-        # The one pod that talks to the Kubernetes API: it needs the token, and the token must be switched on for this pod only.
+        # It talks to the Kubernetes API (to create the Secrets): it needs the token, and the token must be switched on for this pod.
         if ps.get("automountServiceAccountToken") is not True:
             fails.append("the setup Job needs automountServiceAccountToken: true, or it cannot call the Kubernetes API")
+    elif n == "alloy":
+        # The log collector reads the logs of the pods through the Kubernetes API (reading the files on the machine would need a hostPath
+        # volume, which Pod Security "restricted" forbids). Its Role can read pods and logs and nothing else (checked in group 6b).
+        if ps.get("automountServiceAccountToken") is not True:
+            fails.append("Alloy needs automountServiceAccountToken: true, or it cannot find the pods and read their logs")
     elif ps.get("automountServiceAccountToken") is not False:
-        fails.append("the Kubernetes API token is mounted, although no program here calls the Kubernetes API (only the setup Job may)")
+        fails.append("the Kubernetes API token is mounted, although no program here calls the Kubernetes API (only the setup Job and the log collector Alloy do)")
     fails += restricted_problems(w)
     judge(G, n + " (" + kind(w) + ")", fails, warns)
 
@@ -348,7 +381,7 @@ ALLOWED = {
     "mongo-restapi": {"mongo", "restapi"},
     "restapi-login": {"restapi"},
     "restapi-tls": {"restapi"},
-    "pki-ca": {"processor", "restapi"},
+    "pki-ca": {"processor", "restapi", "mongodb-exporter"},
     "kafka-tls": {"kafka"},
     "kafka-client-producer": {"producer-replay", "producer-load", "producer-smoke"},
     "kafka-client-processor": {"processor"},
@@ -357,24 +390,22 @@ ALLOWED = {
     "grafana-admin": {"grafana"},
     "mongo-tls": {"mongo"},
 }
-# The pods that mount these Secrets belong to the observability part of the stack. Until their Deployments exist, a Secret that nobody
-# mounts yet is reported as "still to do" and not as an error.
-LATER_MOUNTERS = {"kafka-client-exporter": "kafka-exporter", "grafana-admin": "grafana"}
+# A pod "uses" a Secret when it mounts it as files, or (only the MongoDB exporter, which takes its login from the environment and nowhere
+# else) reads one value of it into an environment variable.
 mounted_by = {}
 for w in workloads:
     for mount, (secret, _) in secret_mounts(w).items():
         mounted_by.setdefault(secret, set()).add(name(w))
+    for secret_, _ in secret_env_uses(w):
+        mounted_by.setdefault(secret_, set()).add(name(w))
 fails = []
 for secret, who in sorted(mounted_by.items()):
     extra = who - ALLOWED.get(secret, set())
     if extra:
-        fails.append("the Secret " + secret + " is mounted by " + ", ".join(sorted(extra)) + ", which does not need it")
-pending = sorted(s_ for s_, w_ in LATER_MOUNTERS.items() if s_ in SECRETS and s_ not in mounted_by and ("Deployment", w_) not in by)
-fails += ["bootstrap.py makes the Secret " + s_ + " but no pod mounts it" for s_ in sorted(set(SECRETS) - set(mounted_by) - set(pending))]
+        fails.append("the Secret " + secret + " is used by " + ", ".join(sorted(extra)) + ", which does not need it")
+fails += ["bootstrap.py makes the Secret " + s_ + " but no pod uses it" for s_ in sorted(set(SECRETS) - set(mounted_by))]
 fails += ["bootstrap.py does not make the Secret " + s_ + " that this check expects" for s_ in sorted(set(ALLOWED) - set(SECRETS))] if SECRETS else ["bootstrap.py makes no Secret (or the program cannot be read)"]
-judge(G, "each of the " + str(len(SECRETS)) + " Secrets is mounted only by the pods that need it (the administrator account only by MongoDB)", fails)
-if pending:
-    todo(G, "the Secrets of the observability pods are mounted: " + ", ".join(pending), "the pods that read them are added at Step 4")
+judge(G, "each of the " + str(len(SECRETS)) + " Secrets is used only by the pods that need it (the administrator account only by MongoDB)", fails)
 
 # Kubernetes fills in four values in every disk template. If the manifest leaves them out, "kubectl apply" sees a difference on every run,
 # prints "configured", and a second "make up" looks as if it changed something.
@@ -654,6 +685,280 @@ if not fails:
             fails.append("producer/" + n_ + " changes more than PRODUCER_IDLE and the autoscaler's maximum")
 judge(G, "the scaling test's three folders (load, loadtest, loadtest-one) differ only in PRODUCER_IDLE and the autoscaler's maximum; the stack holds the idle one", fails)
 
+# ------------------------------------------------------------ 6b. monitoring and logging
+# Prometheus (numbers), Grafana (the dashboard), Loki and Alloy (logs) and the two exporters refer to each other by Service name, port,
+# file path and label. A wrong one does not stop "kubectl apply": it shows up later as an empty dashboard. So every reference is checked here.
+G = "6b. Monitoring and logging (Prometheus, Grafana, Loki, Alloy, the two exporters)"
+
+
+def yaml_text(text):
+    try:
+        return yaml.safe_load(text) or {}
+    except yaml.YAMLError:
+        return {}
+
+
+def port_named(w, pname):
+    return next((p_["containerPort"] for c_ in containers(w) for p_ in c_.get("ports", []) if p_.get("name") == pname), None)
+
+
+def arg_value(w, flag):   # the value of "--flag=value" in the first container's args
+    return next((a_.split("=", 1)[1] for a_ in containers(w)[0].get("args", []) if a_.startswith(flag + "=")), None)
+
+
+def in_service(host_port):   # "name:port" is a Service of the stack with that port
+    host_, _, port_ = host_port.partition(":")
+    return host_ in services and port_.isdigit() and int(port_) in svc_ports(host_)
+
+
+def mounted_file(w, configmap, key):   # the path at which one file of a ConfigMap appears in the pod's first container, or None
+    vols = {v["name"]: v for v in pod(w).get("volumes", []) if v.get("configMap", {}).get("name") == configmap}
+    for vm in containers(w)[0].get("volumeMounts", []):
+        v = vols.get(vm["name"])
+        if v is None:
+            continue
+        items = v["configMap"].get("items")
+        if not items:
+            return vm["mountPath"].rstrip("/") + "/" + key
+        for i_ in items:
+            if i_["key"] == key:
+                return vm["mountPath"].rstrip("/") + "/" + i_["path"]
+    return None
+
+
+prom, graf, loki = by.get(("Deployment", "prometheus")), by.get(("Deployment", "grafana")), by.get(("Deployment", "loki"))
+kexp, mexp, alloy = by.get(("Deployment", "kafka-exporter")), by.get(("Deployment", "mongodb-exporter")), by.get(("DaemonSet", "alloy"))
+missing_ = [n_ for n_, w_ in (("prometheus", prom), ("grafana", graf), ("loki", loki), ("kafka-exporter", kexp), ("mongodb-exporter", mexp), ("alloy (DaemonSet)", alloy)) if w_ is None]
+judge(G, "the six monitoring workloads exist (Prometheus, Grafana, Loki, Alloy, kafka-exporter, mongodb-exporter)", ["missing: " + ", ".join(missing_)] if missing_ else [])
+
+# Prometheus: where it reads from. Each scrape job must lead to a real Service and the port that the pods declare under the name "metrics".
+prom_cfg = yaml_text(config_maps.get("prometheus-config", {}).get("prometheus.yml", ""))
+jobs_ = {j_.get("job_name"): j_ for j_ in prom_cfg.get("scrape_configs", [])}
+fails = []
+if prom is None or not jobs_:
+    fails.append("no Deployment prometheus, or the ConfigMap prometheus-config has no prometheus.yml with scrape_configs")
+else:
+    if arg_value(prom, "--config.file") != mounted_file(prom, "prometheus-config", "prometheus.yml"):
+        fails.append("--config.file=" + str(arg_value(prom, "--config.file")) + " is not where prometheus.yml is mounted (" + str(mounted_file(prom, "prometheus-config", "prometheus.yml")) + ")")
+    seconds_ = lambda t_: int(t_[:-1]) if re.fullmatch(r"\d+s", str(t_)) else None
+    g_ = prom_cfg.get("global", {})
+    if not seconds_(g_.get("scrape_interval")) or not seconds_(g_.get("scrape_timeout")) or seconds_(g_["scrape_timeout"]) >= seconds_(g_["scrape_interval"]):
+        fails.append("global.scrape_interval and scrape_timeout must be set in seconds, with the timeout below the interval (Prometheus refuses to start otherwise)")
+    for jname_, job_ in jobs_.items():
+        for dns_ in job_.get("dns_sd_configs", []):
+            if dns_.get("type") != "A":
+                fails.append(jname_ + ": dns_sd_configs must use type A (the pod addresses)")
+            for n_ in dns_.get("names", []):
+                svc_name_, _, rest_ = n_.partition(".")
+                svc_ = services.get(svc_name_)
+                if svc_ is None or rest_ != "ca3.svc.cluster.local":
+                    fails.append(jname_ + ": " + n_ + " is not <Service>.ca3.svc.cluster.local of a Service of the stack")
+                elif svc_["spec"].get("clusterIP") != "None":
+                    fails.append(jname_ + ": " + n_ + " is not a headless Service, so DNS would give one address and Prometheus would see one pod")
+                else:
+                    ports_ = {port_named(w_, "metrics") for w_ in workloads if matches(svc_["spec"].get("selector", {}), w_)} - {None}
+                    if dns_.get("port") not in ports_:
+                        fails.append(jname_ + ": port " + str(dns_.get("port")) + " is not the port named metrics of the pods behind " + svc_name_ + " (" + ", ".join(map(str, sorted(ports_))) + ")")
+        for st_ in job_.get("static_configs", []):
+            for t_ in st_.get("targets", []):
+                if t_.startswith("localhost:"):
+                    if t_ != "localhost:" + str(port_named(prom, "http")):
+                        fails.append(jname_ + ": " + t_ + " is not Prometheus's own port " + str(port_named(prom, "http")))
+                elif not in_service(t_):
+                    fails.append(jname_ + ": target " + t_ + " is not a Service and port of the stack")
+    fails += ["no scrape job named " + j_ for j_ in ("producer", "processor", "restapi", "kafka-exporter", "mongodb-exporter") if j_ not in jobs_]
+judge(G, "Prometheus: the config file is where Prometheus reads it, and every scrape target is a real Service port (headless Services for producer, processor and REST API)", fails)
+
+# The network rules, as a graph. Every pair of pods and every port the pods declare is run through the policies (the default is deny:
+# default-deny-all selects every pod). The result must be exactly the connections that the stack needs, no more.
+comp_labels, comp_ports = {}, {}
+for w_ in workloads:
+    n_ = labels(w_).get("app.kubernetes.io/name")
+    comp_labels.setdefault(n_, labels(w_))
+    comp_ports.setdefault(n_, set()).update(p_["containerPort"] for c_ in containers(w_) for p_ in c_.get("ports", []))
+
+
+def label_match(selector, lbls):
+    return all(lbls.get(k_) == v_ for k_, v_ in (selector or {}).get("matchLabels", {}).items())
+
+
+def side_allows(me, other, direction, port):
+    """Do the policies that select the pod `me` allow a connection on `port` to/from a pod with labels `other`?"""
+    here = [p_ for p_ in policies if direction.capitalize() in p_["spec"].get("policyTypes", []) and label_match(p_["spec"].get("podSelector"), me)]
+    if not here:
+        return True
+    for p_ in here:
+        for rule_ in p_["spec"].get(direction, []):
+            ports_ok = not rule_.get("ports") or any(pt_.get("port") == port for pt_ in rule_["ports"])
+            peers_ = rule_.get("from" if direction == "ingress" else "to")
+            peer_ok = peers_ is None or any("podSelector" in t_ and "namespaceSelector" not in t_ and label_match(t_["podSelector"], other) for t_ in peers_)
+            if ports_ok and peer_ok:
+                return True
+    return False
+
+
+allowed_ = {(s_, d_, p_) for s_ in comp_labels for d_ in comp_labels for p_ in comp_ports[d_]
+            if side_allows(comp_labels[s_], comp_labels[d_], "egress", p_) and side_allows(comp_labels[d_], comp_labels[s_], "ingress", p_)}
+outside_ = {(d_, p_) for d_ in comp_labels for p_ in comp_ports[d_] if side_allows(comp_labels[d_], {"somewhere": "else"}, "ingress", p_)}
+EXPECTED = {
+    ("producer", "kafka", 9092), ("processor", "kafka", 9092), ("processor", "mongo", 27017), ("restapi", "mongo", 27017), ("kafka", "kafka", 9092),   # the pipeline
+    ("prometheus", "producer", 8001), ("prometheus", "processor", 8000), ("prometheus", "restapi", 9102),                                          # Prometheus reads the numbers
+    ("prometheus", "kafka-exporter", 9308), ("prometheus", "mongodb-exporter", 9216),
+    ("kafka-exporter", "kafka", 9092), ("mongodb-exporter", "mongo", 27017),                                                                       # the two exporters (the only extra readers)
+    ("grafana", "prometheus", 9090), ("grafana", "loki", 3100), ("alloy", "loki", 3100),                                                           # the dashboard and the logs
+    ("prometheus", "restapi", 8443),   # Prometheus carries the label component=observer, which observer-egress lets call the REST API (it has no login there)
+}
+EXPECTED_OUTSIDE = {("restapi", 8443)}
+fails = ["the policies allow " + s_ + " -> " + d_ + ":" + str(p_) + ", which is not meant to be possible" for s_, d_, p_ in sorted(allowed_ - EXPECTED)]
+fails += ["the policies do not allow " + s_ + " -> " + d_ + ":" + str(p_) + ", which the stack needs" for s_, d_, p_ in sorted(EXPECTED - allowed_)]
+fails += ["a pod from outside the stack can reach " + d_ + ":" + str(p_) + ", which must stay closed" for d_, p_ in sorted(outside_ - EXPECTED_OUTSIDE)]
+fails += ["a pod from outside the stack cannot reach " + d_ + ":" + str(p_) for d_, p_ in sorted(EXPECTED_OUTSIDE - outside_)]
+judge(G, "the network rules allow exactly " + str(len(EXPECTED)) + " connections between pods (" + str(sum(len(v_) for v_ in comp_ports.values())) + " ports x " + str(len(comp_labels)) + " kinds of pod tried) and one from outside: the REST API", fails)
+
+# Alloy: a read-only Role, the right Loki address, the namespace, the node name, and the way out to the API server.
+alloy_cfg = config_maps.get("alloy-config", {}).get("config.alloy", "")
+alloy_role = by.get(("Role", "alloy"))
+subnet_ = yaml_text((ROOT / "infra" / "config.yml").read_text() if (ROOT / "infra" / "config.yml").is_file() else "").get("subnet_cidr")
+fails = []
+if alloy is None or alloy_role is None:
+    fails.append("no DaemonSet alloy or no Role alloy")
+else:
+    for rule_ in alloy_role.get("rules", []):
+        if set(rule_.get("verbs", [])) - {"get", "list", "watch"}:
+            fails.append("Role alloy allows " + "/".join(rule_["verbs"]) + ": the log collector may only read")
+        if not set(rule_.get("resources", [])) <= {"pods", "pods/log"}:
+            fails.append("Role alloy reaches " + ", ".join(rule_["resources"]) + ": it needs only pods and pods/log")
+    bound_ = [[s_["name"] for s_ in b_.get("subjects", [])] for b_ in of("RoleBinding") if b_["roleRef"]["name"] == "alloy"]
+    if bound_ != [["alloy"]]:
+        fails.append("the Role alloy must be bound to the ServiceAccount alloy and to nobody else, it is bound to " + str(bound_))
+    if mounted_file(alloy, "alloy-config", "config.alloy") not in containers(alloy)[0].get("args", []):
+        fails.append("the file config.alloy is not mounted where the arguments of Alloy say it is (" + str(mounted_file(alloy, "alloy-config", "config.alloy")) + ")")
+    node_env = [e_ for c_ in containers(alloy) for e_ in c_.get("env", []) if e_["name"] == "NODE_NAME"]
+    if not node_env or node_env[0].get("valueFrom", {}).get("fieldRef", {}).get("fieldPath") != "spec.nodeName":
+        fails.append("NODE_NAME must come from the field spec.nodeName (each Alloy pod reads only the pods of its own machine)")
+    if 'sys.env("NODE_NAME")' not in alloy_cfg or '"ca3"' not in alloy_cfg:
+        fails.append("config.alloy must read NODE_NAME and be limited to the namespace ca3")
+    url_ = re.search(r'url\s*=\s*"http://([^/"]+)/loki/api/v1/push"', alloy_cfg)
+    if not url_ or not in_service(url_.group(1)) or url_.group(1).split(":")[0] != "loki":
+        fails.append("config.alloy does not send to the Service loki and its port (found " + (url_.group(1) if url_ else "no url") + ")")
+    egress_ = by.get(("NetworkPolicy", "alloy-egress"), {}).get("spec", {}).get("egress", [])
+    blocks_ = [t_["ipBlock"]["cidr"] for r_ in egress_ for t_ in r_.get("to", []) if "ipBlock" in t_]
+    if not subnet_ or subnet_ not in blocks_ or 6443 not in {p_["port"] for r_ in egress_ for p_ in r_.get("ports", [])}:
+        fails.append("alloy-egress must allow the node subnet (" + str(subnet_) + " in infra/config.yml) on port 6443: the API server runs on a node")
+judge(G, "Alloy: a Role that only reads pods and their logs, the node name, the namespace, the address of Loki, and a way to the API server", fails)
+
+# Loki and the exporters.
+loki_cfg = yaml_text(config_maps.get("loki-config", {}).get("loki.yaml", ""))
+fails = []
+if loki is None:
+    fails.append("no Deployment loki")
+else:
+    if arg_value(loki, "-config.file") != mounted_file(loki, "loki-config", "loki.yaml"):
+        fails.append("-config.file=" + str(arg_value(loki, "-config.file")) + " is not where loki.yaml is mounted (" + str(mounted_file(loki, "loki-config", "loki.yaml")) + ")")
+    if loki_cfg.get("server", {}).get("http_listen_port") not in svc_ports("loki") or port_named(loki, "http") != loki_cfg.get("server", {}).get("http_listen_port"):
+        fails.append("http_listen_port in loki.yaml, the container port and the Service port of Loki are not the same number")
+    if not loki_cfg.get("limits_config", {}).get("retention_period"):
+        fails.append("loki.yaml sets no retention_period (the emptyDir would fill up)")
+judge(G, "Loki: the config file is where Loki reads it, one port number everywhere, retention set", fails)
+
+fails = []
+if kexp is None or mexp is None:
+    fails.append("no Deployment kafka-exporter or mongodb-exporter")
+else:
+    server_ = arg_value(kexp, "--kafka.server") or ""
+    host_, _, port_ = server_.rpartition(":")
+    headless_ = kafka["spec"].get("serviceName", "") if kafka else ""
+    if host_ != "kafka-0." + headless_ + ".ca3.svc.cluster.local" or port_ != "9092":
+        fails.append("kafka-exporter connects to " + server_ + ", expected kafka-0." + headless_ + ".ca3.svc.cluster.local:9092 (the name that is in the certificate of Kafka)")
+    if "--tls.enabled" not in containers(kexp)[0].get("args", []):
+        fails.append("kafka-exporter is not started with --tls.enabled")
+    for flag_ in ("--tls.ca-file", "--tls.cert-file", "--tls.key-file"):
+        if secret_of_file(kexp, arg_value(kexp, flag_) or "") != "kafka-client-exporter":
+            fails.append(flag_ + "=" + str(arg_value(kexp, flag_)) + " is not a file of the Secret kafka-client-exporter")
+    uri_ = urllib.parse.urlsplit(arg_value(mexp, "--mongodb.uri") or "")
+    query_ = urllib.parse.parse_qs(uri_.query)
+    if uri_.scheme != "mongodb" or not in_service((uri_.hostname or "") + ":" + str(uri_.port or "")) or (uri_.hostname or "") != "mongo":
+        fails.append("the MongoDB address of mongodb-exporter (" + str(uri_.hostname) + ":" + str(uri_.port) + ") is not the Service mongo")
+    if uri_.username or uri_.password or "@" in uri_.netloc:
+        fails.append("the MongoDB address of mongodb-exporter contains a login: it must come from the Secret")
+    if query_.get("tls") != ["true"] or secret_of_file(mexp, (query_.get("tlsCAFile") or [""])[0]) != "pki-ca":
+        fails.append("the MongoDB address of mongodb-exporter must use tls=true and a tlsCAFile that is a file of the Secret pki-ca")
+    login_ = {e_["name"]: e_.get("valueFrom", {}).get("secretKeyRef", {}) for c_ in containers(mexp) for e_ in c_.get("env", []) if e_["name"] in ("MONGODB_USER", "MONGODB_PASSWORD")}
+    if login_.get("MONGODB_USER") != {"name": "mongo-exporter", "key": "username"} or login_.get("MONGODB_PASSWORD") != {"name": "mongo-exporter", "key": "password"}:
+        fails.append("mongodb-exporter must take MONGODB_USER and MONGODB_PASSWORD from the keys username and password of the Secret mongo-exporter (the account with the monitoring role)")
+    for w_, flag_, svc_ in ((kexp, "--web.listen-address", "kafka-exporter"), (mexp, "--web.listen-address", "mongodb-exporter")):
+        if arg_value(w_, flag_) != ":" + str(port_named(w_, "metrics")) or port_named(w_, "metrics") not in svc_ports(svc_):
+            fails.append(svc_ + ": --web.listen-address, the container port named metrics and the Service port are not the same number")
+judge(G, "the exporters: kafka-exporter uses TLS with its own certificate and the name in Kafka's certificate; mongodb-exporter uses TLS and its own monitoring account", fails)
+
+# Grafana: the two data sources and the dashboard are provisioned from files, and every query uses a number that really exists.
+prov_ = config_maps.get("grafana-provisioning", {})
+ds_cfg = yaml_text(prov_.get("datasources.yaml", ""))
+dash_cfg = yaml_text(prov_.get("dashboards.yaml", ""))
+dash_file = config_maps.get("grafana-dashboards", {}).get("pipeline.json", "")
+try:
+    dashboard = json.loads(dash_file)
+except ValueError:
+    dashboard = {}
+datasources_ = {d_.get("uid"): d_ for d_ in ds_cfg.get("datasources", [])}
+fails = []
+if graf is None:
+    fails.append("no Deployment grafana")
+else:
+    for flag_, key_ in (("GF_SECURITY_ADMIN_USER__FILE", "username"), ("GF_SECURITY_ADMIN_PASSWORD__FILE", "password")):
+        path_ = env_of(graf).get(flag_, {}).get("value", "")
+        if secret_of_file(graf, path_) != "grafana-admin" or not path_.endswith("/" + key_):
+            fails.append(flag_ + "=" + path_ + " is not the file " + key_ + " of the Secret grafana-admin")
+    if mounted_file(graf, "grafana-provisioning", "datasources.yaml") != "/etc/grafana/provisioning/datasources/datasources.yaml":
+        fails.append("datasources.yaml is not mounted in /etc/grafana/provisioning/datasources/")
+    if mounted_file(graf, "grafana-provisioning", "dashboards.yaml") != "/etc/grafana/provisioning/dashboards/dashboards.yaml":
+        fails.append("dashboards.yaml is not mounted in /etc/grafana/provisioning/dashboards/")
+    dash_dir = (mounted_file(graf, "grafana-dashboards", "pipeline.json") or "").rsplit("/", 1)[0]
+    if [p_.get("options", {}).get("path") for p_ in dash_cfg.get("providers", [])] != [dash_dir] or not dash_dir:
+        fails.append("the dashboard provider's path is not the folder where the ConfigMap grafana-dashboards is mounted (" + dash_dir + ")")
+    if port_named(graf, "http") not in svc_ports("grafana"):
+        fails.append("the container port named http and the Service port of Grafana are not the same number")
+if set(datasources_) != {"prometheus", "loki"} or any(not in_service(re.sub(r"^https?://", "", d_.get("url", ""))) for d_ in datasources_.values()):
+    fails.append("the data sources must be exactly prometheus and loki, each with the address of a Service of the stack")
+if sum(1 for d_ in datasources_.values() if d_.get("isDefault")) != 1 or not datasources_.get("prometheus", {}).get("isDefault"):
+    fails.append("Prometheus must be the one default data source")
+if not dashboard.get("panels"):
+    fails.append("the ConfigMap grafana-dashboards has no readable pipeline.json with panels")
+judge(G, "Grafana: login from the Secret grafana-admin, data sources Prometheus and Loki and the dashboard are provisioned from files at the paths Grafana reads", fails)
+
+# What the dashboard asks for must exist: metric names come from the programs (Counter, Gauge, Histogram) or from the two exporters.
+declared_ = {"up"}
+for f_ in ("producer/producer.py", "processor/processor.py", "restapi/rest_app.py"):
+    for k_, n_ in re.findall(r'\b(Counter|Gauge|Histogram)\(\s*"([a-z_:0-9]+)"', (ROOT / f_).read_text() if (ROOT / f_).is_file() else ""):
+        declared_ |= {n_} | ({n_ + "_bucket", n_ + "_sum", n_ + "_count"} if k_ == "Histogram" else set())
+declared_ |= {"kafka_consumergroup_lag", "mongodb_ss_opcounters", "mongodb_ss_connections", "mongodb_up"}   # published by the exporters
+promql_words = {"sum", "count", "min", "max", "avg", "rate", "histogram_quantile", "vector", "time", "by", "without", "or", "and", "unless", "on", "ignoring"}
+exprs_, fails = [], []
+for p_ in dashboard.get("panels", []):
+    uid_ = p_.get("datasource", {}).get("uid")
+    if p_["type"] != "row" and uid_ not in datasources_:
+        fails.append("panel '" + p_.get("title", "?") + "' uses the data source " + str(uid_) + ", which is not provisioned")
+    for t_ in p_.get("targets", []):
+        if t_.get("datasource", {}).get("uid") not in datasources_:
+            fails.append("panel '" + p_.get("title", "?") + "' has a query on a data source that is not provisioned")
+        if t_.get("datasource", {}).get("type") == "prometheus":
+            exprs_.append((p_.get("title", "?"), t_["expr"]))
+        elif t_["expr"].count("{") != t_["expr"].count("}") or t_["expr"].count('"') % 2:
+            fails.append("panel '" + p_.get("title", "?") + "': the log query " + t_["expr"] + " has unbalanced brackets or quotes")
+for title_, expr_ in exprs_:
+    text_ = re.sub(r'"[^"]*"', '""', expr_.replace("$__rate_interval", "30s"))
+    if text_.count("(") != text_.count(")") or text_.count("[") != text_.count("]") or text_.count("{") != text_.count("}"):
+        fails.append("panel '" + title_ + "': unbalanced brackets in " + expr_)
+        continue
+    text_ = re.sub(r"\b(by|without)\s*\([^)]*\)", "", re.sub(r"\{[^}]*\}", "", re.sub(r"\[\d+[smhd]\]", "", text_)))
+    fails += ["panel '" + title_ + "': " + t_ + " is not a metric that a program or an exporter publishes" for t_ in sorted(set(re.findall(r"[A-Za-z_:][A-Za-z0-9_:]*", text_)) - promql_words - declared_)]
+    fails += ["panel '" + title_ + "': job=" + j_ + " is not a scrape job" for j_ in re.findall(r'job="([^"]+)"', expr_) if j_ not in jobs_]
+    fails += ["panel '" + title_ + "': group=" + g_ + " is not the consumer group (" + config_maps.get("processor-config", {}).get("CONSUMER_GROUP", "?") + ")" for g_ in re.findall(r'\bgroup="([^"]+)"', expr_) if g_ != config_maps.get("processor-config", {}).get("CONSUMER_GROUP")]
+ids_ = [p_["id"] for p_ in dashboard.get("panels", [])]
+if len(ids_) != len(set(ids_)):
+    fails.append("two panels have the same id")
+judge(G, "the dashboard: " + str(len(exprs_)) + " queries on Prometheus, every one uses a metric that exists, a real job and the real consumer group", fails)
+
 # ------------------------------------------------------------ 7. the cluster is built by code
 G = "7. Cluster as code (Terraform and Ansible)"
 INFRA = ROOT / "infra"
@@ -721,7 +1026,7 @@ checks = [
     ("A bare kubectl apply -k . is enough: no script has to make anything first, and the Makefile does not call one",
      has("Job", "bootstrap") and not (ROOT / "scripts" / "create-secrets.sh").exists() and "create-secrets" not in makefile, False),
     ("Hardening: TLS on Kafka (client certificates), MongoDB and the REST API; a login on the REST API; one MongoDB account per program; each Secret only where it is needed; Pod Security restricted enforced",
-     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[2].startswith(("HPA ", "the scaling test")))
+     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[1].startswith("6b") and not r_[2].startswith(("HPA ", "the scaling test")))
      and by.get(("Namespace", "ca3"), {"metadata": {"labels": {}}})["metadata"].get("labels", {}).get("pod-security.kubernetes.io/enforce") == "restricted", False),
     ("A REST endpoint declared and exposed", services.get("restapi", {}).get("spec", {}).get("type") in ("NodePort", "LoadBalancer"), False),
     ("Secrets mounted, not embedded in manifests", all(not (re.search(r"PASSWORD|SECRET|TOKEN", e["name"]) and "value" in e and not e["name"].endswith("_FILE")) for w in workloads for c in containers(w) for e in c.get("env", [])), False),
@@ -756,6 +1061,15 @@ checks = [
      config_maps.get("processor-config", {}).get("CONSUMER_GROUP") == "processor", False),
     ("Observability in the stack: Prometheus, Grafana, Loki, Alloy (a DaemonSet), kafka-exporter and mongodb-exporter are part of make up",
      all(has("Deployment", n_) for n_ in ("prometheus", "grafana", "loki", "kafka-exporter", "mongodb-exporter")) and has("DaemonSet", "alloy"), True),
+    ("Grafana dashboard: panels for the producer rate, kafka_consumergroup_lag{group=\"processor\"}, database inserts per second, and REST requests, errors and latency (the assignment asks for at least 3 panels)",
+     len([p_ for p_ in dashboard.get("panels", []) if p_["type"] != "row"]) >= 3
+     and all(any(m_ in t_["expr"] for p_ in dashboard.get("panels", []) for t_ in p_.get("targets", [])) for m_ in
+             ("producer_messages_sent_total", 'kafka_consumergroup_lag{group="processor"}', 'mongodb_ss_opcounters{legacy_op_type="insert"}', "restapi_requests_total",
+              'status=~"5.."', "restapi_request_duration_seconds_bucket")), False),
+    ("Logs in one place: Alloy (a DaemonSet) reads the logs of every pod and sends them to Loki, and Grafana can search them (a Loki data source and a log panel)",
+     has("DaemonSet", "alloy") and has("Deployment", "loki") and "loki" in datasources_ and any(p_["type"] == "logs" for p_ in dashboard.get("panels", [])), False),
+    ("Monitoring tests: make metrics-check asks Prometheus, Loki and Grafana, and make logs-trace follows one event id through the logs",
+     all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("metrics-check", "logs-trace")) and (ROOT / "scripts" / "metrics-check.py").is_file(), False),
     ("Resilience drill: a script deletes a pod in every tier (make drill) and the operator steps are written down",
      (ROOT / "scripts" / "drill.py").is_file() and bool(re.search(r"^drill:", makefile, flags=re.M)), True),
     ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),

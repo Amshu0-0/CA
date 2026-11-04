@@ -1,0 +1,68 @@
+# Three "headless" Services that exist only so that Prometheus can find every pod of a program.
+#
+# A normal Service has one address, and a call to it goes to ONE pod. Prometheus has to read the numbers of EVERY pod (when the
+# autoscaler runs five producers it must see five). A headless Service (clusterIP: None) has no address of its own: asking the cluster
+# DNS for its name returns the addresses of all the ready pods behind it, and Prometheus asks that question every few seconds
+# (see the dns_sd_configs in prometheus.yaml). A pod that starts shows up in the answer, a pod that is deleted disappears from it.
+#
+# No part of the cluster has to be given any right to do this: DNS is open to everybody. That is why Prometheus needs no Kubernetes API token.
+# The ports are the ones that the programs declare under the name "metrics".
+apiVersion: v1
+kind: Service
+metadata:
+  name: producer-metrics
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: producer
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Headless Service: the DNS answer lists every producer pod, so Prometheus can read the numbers of each one (port 8001). Not used for any other traffic"
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: producer
+  ports:
+    - name: metrics
+      port: 8001
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor-metrics
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Headless Service: the DNS answer lists every processor pod, so Prometheus can read the numbers of each one (port 8000). Not used for any other traffic"
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: processor
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restapi-metrics
+  namespace: ca3
+  labels:
+    app.kubernetes.io/name: restapi
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: ca3-pipeline
+  annotations:
+    description: "Headless Service: the DNS answer lists every REST API pod, so Prometheus can read the numbers of each one (port 9102). Not published outside the cluster"
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: restapi
+  ports:
+    - name: metrics
+      port: 9102
+      targetPort: metrics

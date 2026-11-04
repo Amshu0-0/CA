@@ -1,0 +1,6 @@
+exists     prom/prometheus:v2.55.1
+exists     grafana/grafana:11.3.0
+exists     grafana/loki:3.3.0
+exists     grafana/alloy:v1.5.0
+exists     danielqsj/kafka-exporter:v1.9.0
+exists     percona/mongodb_exporter:0.40.0

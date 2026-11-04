@@ -13,6 +13,10 @@
 #   make smoke         send one tagged event through producer, Kafka, processor, MongoDB and REST API
 #   make netpol-check  test what each kind of pod can and cannot reach (the NetworkPolicy test)
 #   make heal-check    delete pods on purpose and check that Kubernetes brings them back with their data
+#   make metrics-check ask Prometheus, Loki and Grafana if the numbers and the logs arrive and the dashboard is loaded
+#   make logs-trace    follow one event id through the logs of every program (TRACE=<id>, the smoke test prints one)
+#   make grafana       open the dashboard at http://localhost:3000 (log in with: make grafana-login)
+#   make prometheus    open Prometheus at http://localhost:9090
 #
 # Needs: terraform, ansible, kubectl, bash and ssh-keygen, plus AWS credentials, for the cluster targets;
 # kubeconform for "make validate"; python3 with PyYAML for "make verify".
@@ -31,6 +35,8 @@ export TF_CLI_ARGS
 SMOKE_ARGS ?=
 HEAL_ARGS  ?=
 REST_ARGS  ?=
+METRICS_ARGS ?=
+TRACE      ?=
 SCAN_ARGS  ?=
 FILES      ?=
 
@@ -43,7 +49,8 @@ export KUBECONFIG
 .DEFAULT_GOAL := help
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
-    smoke netpol-check netpol-control heal-check scan scrub teardown dry-run
+    smoke netpol-check netpol-control heal-check scan scrub teardown dry-run \
+    metrics-check logs-trace grafana grafana-login prometheus
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -69,6 +76,11 @@ help: ; @printf '%s\n' \
     "  make netpol-check    test what each kind of pod can reach (42 connections, compared with the policies)" \
     "  make netpol-control  the same test, then again with the policies deleted: proves the policies do the blocking" \
     "  make heal-check      delete pods on purpose and check that they come back with their data" \
+    "  make metrics-check   ask Prometheus, Loki and Grafana if the numbers and logs arrive and the dashboard is loaded" \
+    "  make logs-trace      follow one event id through the logs of every program:  make logs-trace TRACE=smoke-1a2b3c4d" \
+    "  make grafana         open the dashboard at http://localhost:3000 (leave the window open; log in with: make grafana-login)" \
+    "  make grafana-login   print the Grafana user name and password (they live in the Secret grafana-admin)" \
+    "  make prometheus      open Prometheus at http://localhost:9090 (leave the window open)" \
     "  make scale-up        switch the producer load on (the autoscaler adds producer pods while the CPU is busy)" \
     "  make scale-down      switch the producer load off (the autoscaler shrinks the producers back to one pod)" \
     "  make down            delete everything: workloads, disks, Secrets, namespace" \
@@ -135,7 +147,9 @@ context: ; @if [ ! -f "$(KUBECONFIG)" ]; then echo "There is no cluster yet: $(K
     echo "kubectl context: $$($(KUBECTL) config current-context)   (kubeconfig: $(KUBECONFIG))"
 
 # Nothing has to be prepared before this: the Job "bootstrap" in the stack makes the passwords and certificates (as Secrets) inside the cluster.
-# The pods that need them start by themselves a short while after the Job ends. A Job's pod template cannot be changed once it exists, so if
+# The pods that need them start by themselves a short while after the Job ends. The two exporters can restart once or twice while Kafka and
+# MongoDB are still starting (an exporter that cannot reach its target at the start stops, and Kubernetes starts it again); that is normal.
+# A Job's pod template cannot be changed once it exists, so if
 # kubectl refuses to apply a changed bootstrap Job, the finished Job is deleted and the stack applied again (the Job then finds all 13 Secrets
 # and changes nothing).
 up: context ; ( $(KUBECTL) apply -k . || { echo "kubectl reported an error. If it says that the Job bootstrap cannot be changed, the finished Job is replaced and the stack applied again:" ; \
@@ -146,7 +160,13 @@ up: context ; ( $(KUBECTL) apply -k . || { echo "kubectl reported an error. If i
       $(KUBECTL) -n $(NS) rollout status deployment/processor --timeout=300s && \
       $(KUBECTL) -n $(NS) rollout status deployment/restapi --timeout=300s && \
       $(KUBECTL) -n $(NS) wait --for=condition=complete job/producer-replay --timeout=600s && \
-      echo "Stack is up. Call the REST API from this computer with:  make rest-check" ) || \
+      $(KUBECTL) -n $(NS) rollout status deployment/kafka-exporter --timeout=420s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/mongodb-exporter --timeout=420s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/prometheus --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/loki --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status daemonset/alloy --timeout=300s && \
+      $(KUBECTL) -n $(NS) rollout status deployment/grafana --timeout=300s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check   and check the monitoring with:  make metrics-check" ) || \
     { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
 
 status: ; $(KUBECTL) -n $(NS) get all,pvc,configmap,secret,hpa,networkpolicy,serviceaccount,role,rolebinding -o wide
@@ -181,6 +201,23 @@ netpol-check: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py
 netpol-control: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py --control
 
 heal-check: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/heal-check.py $(HEAL_ARGS)
+
+# The monitoring tools answer only inside the cluster, so these ask from inside their pods (kubectl exec ... wget http://localhost:...).
+# Nothing is changed. The Grafana password is read inside the pod and never printed.
+metrics-check: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/metrics-check.py $(METRICS_ARGS)
+
+logs-trace: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/metrics-check.py --trace "$(TRACE)" $(METRICS_ARGS)
+
+# To look at Grafana or Prometheus in your browser: kubectl port-forward goes through the Kubernetes API (no node port, no firewall hole).
+# It runs until you press Ctrl-C, so it needs its own terminal window.
+grafana: context ; @echo "Grafana: open http://localhost:3000   Log in with the user and password from:  make grafana-login   (stop with Ctrl-C)" ; \
+    $(KUBECTL) -n $(NS) port-forward service/grafana 3000:3000
+
+prometheus: context ; @echo "Prometheus: open http://localhost:9090   (stop with Ctrl-C)" ; \
+    $(KUBECTL) -n $(NS) port-forward service/prometheus 9090:9090
+
+grafana-login: ; @echo "user:     $$($(KUBECTL) -n $(NS) get secret grafana-admin -o jsonpath='{.data.username}' | base64 --decode)" ; \
+    echo "password: $$($(KUBECTL) -n $(NS) get secret grafana-admin -o jsonpath='{.data.password}' | base64 --decode)"
 
 # Evidence files are published with the repository. This rewrites the files that you name, in place, without public addresses, EC2 host names,
 # 12-digit account numbers and home-folder paths (scripts/scrub-evidence.py says what it replaces; section 9 of make verify checks the result).

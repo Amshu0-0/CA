@@ -2,12 +2,15 @@
 # Kustomize is built into kubectl. It reads this list, collects all the manifests, and applies them together.
 # Nothing else is needed: the passwords and certificates are made inside the cluster by the Job in bootstrap/ (no script, no Secret on
 # anybody's computer), and the producer autoscaler and load generator are in the list (idle until the scaling test switches the load on).
+# The monitoring (Prometheus, Grafana, Loki, Alloy and the two exporters) is the folder observability/, with its own network rules in
+# policies/observability.yaml.
 # producer/loadtest and producer/loadtest-one are overlays on this file for the scaling test: "kubectl apply -k producer/loadtest".
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
   - policies/networkpolicies.yaml
+  - policies/observability.yaml
   - config/pipeline-config.yaml
   - rbac/serviceaccounts.yaml
   - rbac/roles.yaml
@@ -20,3 +23,4 @@ resources:
   - restapi/restapi.yaml
   - producer/job-replay.yaml
   - producer/load
+  - observability

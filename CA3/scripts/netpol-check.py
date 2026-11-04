@@ -251,8 +251,9 @@ def run_control(hosts, policies):
         print("\n  kubectl delete networkpolicy --all     (" + str(len([l for l in out.splitlines() if "deleted" in l])) + " deleted)")
         phase("Phase 2: no policies", without_policies, 90, "every connection was accepted")
     finally:
-        code, out, err = lib.kubectl("apply", "-f", str(lib.ROOT / "policies" / "networkpolicies.yaml"))
-        print("\n  kubectl apply -f policies/networkpolicies.yaml     (" + str(len([l for l in out.splitlines() if "created" in l])) + " created, " + str(len([l for l in out.splitlines() if "unchanged" in l])) + " unchanged)")
+        # Every file in policies/ goes back (the pipeline's rules and the monitoring's rules), because "delete networkpolicy --all" removed all of them.
+        code, out, err = lib.kubectl("apply", "-f", str(lib.ROOT / "policies"))
+        print("\n  kubectl apply -f policies/     (" + str(len([l for l in out.splitlines() if "created" in l])) + " created, " + str(len([l for l in out.splitlines() if "unchanged" in l])) + " unchanged)")
 
         if code != 0:
             failed.append("the policies could not be applied again (" + err.strip() + "). Run NOW:  make up")

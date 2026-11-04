@@ -25,6 +25,7 @@ import socket
 import ssl
 import subprocess
 import time
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -447,3 +448,76 @@ def trimmed(event, keep=("trace_id", "Label", "Source IP", "Destination IP", "De
     short["..."] = str(len(event) - len(short)) + " more fields"
 
     return short
+
+
+# ---------------------------------------------------------------- the monitoring tools, asked from inside their own pods
+# Prometheus, Loki and Grafana answer only on their own addresses inside the cluster, and the network rules admit only each other (and nothing
+# from outside). "kubectl exec" runs a command inside the pod, so the question is asked from the pod itself, on localhost, which no network rule
+# touches. The images of all three contain wget (BusyBox), which is all that is needed. Nothing is changed by any of these calls.
+
+# Run a command in a pod of a Deployment or DaemonSet, for example exec_in("deployment/prometheus", "wget", ...).
+def exec_in(target, *command, timeout=60):
+    return kubectl("-n", NS, "exec", target, "--", *command, timeout=timeout)
+
+
+# GET a path on localhost:<port> inside the pod of <target>. Returns the body; a failure is an exception that says which pod and path.
+def local_get(target, port, path, timeout=60):
+    code, out, err = exec_in(target, "wget", "-qO-", "http://localhost:" + str(port) + path, timeout=timeout)
+
+    if code != 0:
+        raise Fail("asking " + target + " for " + path.split("?")[0] + " did not work (exit code " + str(code) + "): " + (err.strip() or out.strip() or "no answer") + ". Is the pod running?  make status")
+
+    return out
+
+
+# An instant PromQL query. Returns the list of result series: [{"metric": {...}, "value": [time, "number"]}, ...] (empty when nothing matches).
+def prom_query(expression):
+    body = local_get("deployment/prometheus", 9090, "/api/v1/query?query=" + urllib.parse.quote(expression, safe=""))
+    answer = json.loads(body)
+
+    if answer.get("status") != "success":
+        raise Fail("Prometheus did not accept the query " + expression + ": " + str(answer.get("error", answer))[:300])
+
+    return answer["data"]["result"]
+
+
+# The number that an aggregate query such as sum(...) returns, or None when the query returns no series. "NaN" is returned as None too.
+def prom_number(expression):
+    result = prom_query(expression)
+
+    if not result:
+        return None
+
+    value = float(result[0]["value"][1])
+
+    return None if value != value else value
+
+
+# GET a path on Grafana, logged in as the administrator. The login is read from the mounted Secret by the shell inside the pod, so the
+# password never reaches this computer and is never printed. Only fixed paths are passed in.
+GRAFANA_GET = (r'''auth="$(printf '%s:%s' "$(cat /etc/secrets/grafana/username)" "$(cat /etc/secrets/grafana/password)" | base64 | tr -d '\n')"; '''
+               r'''wget -qO- --header "Authorization: Basic $auth" "http://localhost:3000@PATH@"''')
+
+
+def grafana_get(path):
+    code, out, err = exec_in("deployment/grafana", "sh", "-c", GRAFANA_GET.replace("@PATH@", path))
+
+    if code != 0:
+        raise Fail("asking Grafana (logged in) for " + path.split("?")[0] + " did not work (exit code " + str(code) + "): " + (err.strip() or out.strip() or "no answer"))
+
+    return out
+
+
+# The log lines in Loki that match a LogQL query, oldest first: a list of (time in nanoseconds, labels, line).
+def loki_lines(query, minutes=60, limit=500):
+    end = int(time.time() * 1e9)
+    start = end - minutes * 60 * 10**9
+    path = "/loki/api/v1/query_range?query=" + urllib.parse.quote(query, safe="") + "&start=" + str(start) + "&end=" + str(end) + "&limit=" + str(limit) + "&direction=forward"
+    answer = json.loads(local_get("deployment/loki", 3100, path))
+
+    if answer.get("status") != "success":
+        raise Fail("Loki did not accept the query " + query + ": " + str(answer)[:300])
+
+    lines = [(int(ts), stream["stream"], line) for stream in answer["data"]["result"] for ts, line in stream["values"]]
+
+    return sorted(lines, key=lambda x: x[0])

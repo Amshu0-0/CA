@@ -160,3 +160,4 @@ except Exception:
     sys.exit(1)
 
 print("\nRESULT: PASS - event " + trace + " went producer -> Kafka (partition " + str(sent["partition"]) + ", offset " + str(sent["offset"]) + ") -> processor -> MongoDB -> REST API in " + str(round(time.monotonic() - started)) + " s")
+print("        To follow the same event through the logs of every program (needs the monitoring):  make logs-trace TRACE=" + trace)
