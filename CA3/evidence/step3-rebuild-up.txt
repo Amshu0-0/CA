@@ -64,4 +64,4 @@ deployment "processor" successfully rolled out
 deployment "restapi" successfully rolled out
 job.batch/producer-replay condition met
 Stack is up. Call the REST API from this computer with:  make rest-check
-make up took 0 min 59 s
+make up took 1 min 0 s

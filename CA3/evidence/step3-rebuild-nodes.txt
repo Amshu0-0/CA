@@ -1,15 +1,15 @@
 kubectl get nodes -o wide && kubectl get pods -A && \
     (kubectl top nodes || echo "(metrics-server needs about a minute after the cluster starts; run: kubectl top nodes)")
 NAME          STATUS   ROLES           AGE     VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION           CONTAINER-RUNTIME
-ca3-agent-1   Ready    worker          5m7s    v1.37.1+k3s1   10.20.1.167   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
-ca3-agent-2   Ready    worker          5m8s    v1.37.1+k3s1   10.20.1.226   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
-ca3-server    Ready    control-plane   5m38s   v1.37.1+k3s1   10.20.1.129   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca3-agent-1   Ready    worker          6m16s   v1.37.1+k3s1   10.20.1.194   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca3-agent-2   Ready    worker          6m16s   v1.37.1+k3s1   10.20.1.95    <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
+ca3-server    Ready    control-plane   6m47s   v1.37.1+k3s1   10.20.1.238   <none>        Ubuntu 24.04.5 LTS   7.0.0-1014-aws (amd64)   containerd://2.3.4-k3s1
 NAMESPACE     NAME                                      READY   STATUS      RESTARTS   AGE
-kube-system   coredns-577d995dff-24kdz                  1/1     Running     0          5m22s
-kube-system   helm-install-gateway-api-crd-v4plx        0/1     Completed   0          5m22s
-kube-system   local-path-provisioner-6858d854cf-84sts   1/1     Running     0          5m22s
-kube-system   metrics-server-778c4649b4-5nlld           1/1     Running     0          5m22s
-NAME          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
-ca3-agent-1   12m          0%       345Mi           9%          
-ca3-agent-2   14m          0%       347Mi           9%          
-ca3-server    71m          3%       786Mi           20%         
+kube-system   coredns-577d995dff-nlbwk                  1/1     Running     0          6m32s
+kube-system   helm-install-gateway-api-crd-9rnz8        0/1     Completed   0          6m32s
+kube-system   local-path-provisioner-6858d854cf-nkngh   1/1     Running     0          6m32s
+kube-system   metrics-server-778c4649b4-xbsxm           1/1     Running     0          6m32s
+NAME          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)
+ca3-agent-1   12m          0%       347Mi           9%
+ca3-agent-2   11m          0%       347Mi           9%
+ca3-server    56m          2%       779Mi           20%
