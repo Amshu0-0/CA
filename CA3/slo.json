@@ -1,0 +1,68 @@
+{
+  "about": "The goals of the pipeline, as numbers (SLO = service level objective: a goal for the service that a test can measure). make scale-test (Step 6) measures them and says met or not met. Change a number here and run make scale-report: the saved test is judged again, the measurements stay the same. Each goal says which test measures it (the field test): make scale-test (Step 6) measures the ones marked scale-test.",
+  "objectives": [
+    {
+      "id": "rest-available",
+      "test": "scale-test",
+      "text": "The REST API answers (HTTP 200) when it is asked, also while the pipeline is under full load",
+      "direction": "at least",
+      "goal": 99,
+      "unit": "percent of the calls",
+      "why": "The REST API is the part that a person uses. 99 percent allows a hiccup of the internet now and then (one call in a hundred), but not a service that is down."
+    },
+    {
+      "id": "rest-fast",
+      "test": "scale-test",
+      "text": "The REST API answers quickly, measured from your computer over the internet",
+      "direction": "at most",
+      "goal": 1000,
+      "unit": "milliseconds, for 95 percent of the answers",
+      "why": "Past one second a person who waits for an answer thinks that something is broken. The number includes the trip over the internet (a new HTTPS connection every time costs about 0.1 to 0.3 s), so the REST API itself has about 0.7 s."
+    },
+    {
+      "id": "fresh-event",
+      "test": "scale-test",
+      "text": "A new event can be read from the REST API soon after Kafka has stored it, with one producer and with the autoscaler at its maximum",
+      "direction": "at most",
+      "goal": 60,
+      "unit": "seconds",
+      "why": "The pipeline exists so that an alert can be read soon after the traffic happened. A minute is soon enough for a person who looks at an alert; a system that must react by itself would need a much smaller number and a different design."
+    },
+    {
+      "id": "backlog-gone",
+      "test": "scale-test",
+      "text": "After the load stops, the processors catch up: the backlog in Kafka is below 1,000 messages",
+      "direction": "at most",
+      "goal": 300,
+      "unit": "seconds after the load was switched off",
+      "why": "A backlog is a debt: events wait for their turn. If the processors need an hour to catch up after every burst, the pipeline is as good as down for that hour."
+    },
+    {
+      "id": "scale-up",
+      "test": "scale-test",
+      "text": "With the load on, the producers' autoscaler has all its pods ready",
+      "direction": "at most",
+      "goal": 180,
+      "unit": "seconds after the autoscaler was freed",
+      "why": "An autoscaler that needs ten minutes to react is no help against a burst that lasts five."
+    },
+    {
+      "id": "scale-down",
+      "test": "scale-test",
+      "text": "After the load stops, the producers are back to the minimum of 1 pod",
+      "direction": "at most",
+      "goal": 180,
+      "unit": "seconds after the load was switched off",
+      "why": "Pods that stand idle still use CPU and memory on small machines that are paid for by the hour."
+    },
+    {
+      "id": "processors-down",
+      "test": "scale-test",
+      "text": "After the load stops, the processors are back to the minimum of 1 pod",
+      "direction": "at most",
+      "goal": 600,
+      "unit": "seconds after the load was switched off",
+      "why": "The processors shrink only after the backlog is gone (while they work, their CPU is high); then their autoscaler waits 60 seconds and removes one pod every 30 seconds."
+    }
+  ]
+}

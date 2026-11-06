@@ -2,7 +2,7 @@
 # (PRODUCER_IDLE=false) instead of waiting. The autoscaler is the one of the stack: 1 to 5 pods, 50 percent CPU.
 #   kubectl apply -k producer/loadtest      switch the load on
 #   kubectl apply -k producer/load          switch it off again (the idle producers; the autoscaler shrinks to one pod)
-# "make scale-test" (added at Step 6) does exactly this, and measures what happens.
+# "make scale-test" does exactly this, and measures what happens.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

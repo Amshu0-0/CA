@@ -12,6 +12,7 @@
 import ast
 import copy
 import fnmatch
+import importlib.util
 import json
 import os
 import re
@@ -959,6 +960,88 @@ if len(ids_) != len(set(ids_)):
     fails.append("two panels have the same id")
 judge(G, "the dashboard: " + str(len(exprs_)) + " queries on Prometheus, every one uses a metric that exists, a real job and the real consumer group", fails)
 
+# ------------------------------------------------------------ 6c. the scaling test: the goals file and the scripts
+# make scale-test judges the pipeline against the numbers in slo.json. These checks read that file, run the judging code of scalereport.py
+# on made-up measurements (no cluster needed), and read scale-test.py for the safety rules: the load is always switched off again.
+G = "6c. The scaling test: the goals (slo.json) and the scripts"
+objectives_, fails = [], []
+try:
+    objectives_ = json.loads((ROOT / "slo.json").read_text())["objectives"]
+except (OSError, ValueError, KeyError) as e_:
+    fails.append("slo.json cannot be read as JSON with a list called objectives (" + str(e_) + ")")
+seen_ = set()
+for o_ in objectives_:
+    who_ = "goal " + str(o_.get("id", "?")) + ": "
+    fails += [who_ + "no field " + k_ for k_ in ("id", "test", "text", "direction", "goal", "unit", "why") if k_ not in o_]
+    if o_.get("id") in seen_:
+        fails.append(who_ + "the id is used twice")
+    seen_.add(o_.get("id"))
+    if o_.get("direction") not in ("at least", "at most"):
+        fails.append(who_ + "direction must be 'at least' or 'at most'")
+    if isinstance(o_.get("goal"), bool) or not isinstance(o_.get("goal"), (int, float)) or o_["goal"] <= 0:
+        fails.append(who_ + "goal must be a number above 0")
+    if len(str(o_.get("why", ""))) < 20:
+        fails.append(who_ + "why: write a sentence that says why this number")
+if sum(1 for o_ in objectives_ if o_.get("test") == "scale-test") < 3:
+    fails.append("fewer than 3 goals are measured by the scaling test")
+judge(G, "slo.json: " + str(len(objectives_)) + " goals, each with a number above 0, a direction (at least / at most), a unit and a reason; no id twice", fails)
+
+# The judging code, run on made-up measurements: a goal is met exactly when the number reaches it in the direction that slo.json says.
+fails = []
+try:
+    spec_ = importlib.util.spec_from_file_location("scalereport", ROOT / "scripts" / "scalereport.py")
+    sr_ = importlib.util.module_from_spec(spec_)
+    spec_.loader.exec_module(sr_)
+
+    def verdicts_(rows, summary):
+        return {v["id"]: v["verdict"] for v in sr_.judge(rows, summary)}
+
+    def should_(o, value):
+        return "met" if (value >= o["goal"] if o["direction"] == "at least" else value <= o["goal"]) else "NOT met"
+
+    made_up_ = {   # goal id -> (value -> the rows and the summary a test with exactly that value would have saved)
+        "rest-available": lambda v: ([{"t": i, "rest_ok": 1 if i < v else 0, "rest_ms": 50.0} for i in range(100)], {}),
+        "rest-fast": lambda v: ([{"t": i, "rest_ok": 1, "rest_ms": float(v)} for i in range(100)], {}),
+        "fresh-event": lambda v: ([], {"probes": {"before": {"seconds": v}, "after": {"seconds": v}}}),
+        "scale-up": lambda v: ([], {"reached_max_after": v}),
+        "scale-down": lambda v: ([], {"producers_back_after": v}),
+        "backlog-gone": lambda v: ([], {"backlog_gone_after": v}),
+        "processors-down": lambda v: ([], {"processors_back_after": v}),
+    }
+    nothing_ = verdicts_([], {})
+    for o_ in (o_ for o_ in objectives_ if o_.get("test") == "scale-test" and "direction" in o_ and isinstance(o_.get("goal"), (int, float))):
+        if o_["id"] not in made_up_:
+            fails.append("the report cannot judge the goal " + o_["id"] + " (scalereport.py has no rule for it): give it test: something else, or add the rule")
+            continue
+        if nothing_.get(o_["id"]) != "not measured":
+            fails.append("goal " + o_["id"] + ": with no measurement at all the report says '" + str(nothing_.get(o_["id"])) + "' instead of 'not measured'")
+        for value_ in sorted({max(o_["goal"] - 1, 0), o_["goal"], o_["goal"] + 1}):
+            rows_, summary_ = made_up_[o_["id"]](value_)
+            got_, want_ = verdicts_(rows_, summary_).get(o_["id"]), should_(o_, min(value_, 100) if o_["id"] == "rest-available" else value_)
+            if got_ != want_:
+                fails.append("goal " + o_["id"] + ": a measurement of " + str(value_) + " gets '" + str(got_) + "' but the goal (" + o_["direction"] + " " + str(o_["goal"]) + ") says '" + want_ + "'")
+except Exception as e_:
+    fails.append("scalereport.py could not be run on made-up measurements: " + type(e_).__name__ + ": " + str(e_))
+judge(G, "scalereport.py judges every goal of the scaling test in slo.json the way slo.json says (tested on made-up measurements: on the goal, just under, just over, and none)", fails)
+
+fails = []
+test_py_ = ROOT / "scripts" / "scale-test.py"
+test_text_ = test_py_.read_text() if test_py_.is_file() else ""
+mk_ = (ROOT / "Makefile").read_text() if (ROOT / "Makefile").is_file() else ""
+for needle_, why_ in (('"one": "producer/loadtest-one"', "the folder of the 'before' measurement"), ('"on": "producer/loadtest"', "the folder that frees the autoscaler"), ('"off": "producer/load"', "the folder that switches the load off"),
+                      ('"--max-messages"', "the limit on the number of messages"), ('"--max-minutes"', "the limit on the running time"), ("except KeyboardInterrupt", "the reaction to Ctrl-C")):
+    if needle_ not in test_text_:
+        fails.append("scripts/scale-test.py has no " + needle_ + " (" + why_ + ")")
+after_finally_ = test_text_.split("\nfinally:\n", 1)[1].split("# ------", 1)[0] if "\nfinally:\n" in test_text_ else ""
+for call_ in ("save_hpa_evidence()", "switch_off()", "check_load_off()"):
+    if call_ not in after_finally_:
+        fails.append("scripts/scale-test.py: the clean-up that always runs (finally) does not call " + call_)
+if not re.search(r"^scale-down:.*apply -k producer/load\s*$", mk_, flags=re.M) or not re.search(r"^scale-up:.*apply -k producer/loadtest\s*$", mk_, flags=re.M):
+    fails.append("Makefile: scale-up must apply producer/loadtest and scale-down must apply producer/load (the test tells you to run make scale-down)")
+if not (ROOT / "scripts" / "set-goal.py").is_file() or not re.search(r"^goals:.*set-goal\.py", mk_, flags=re.M):
+    fails.append("make goals (scripts/set-goal.py) is missing: it is how a number in slo.json is changed without editing the file by hand")
+judge(G, "scripts/scale-test.py: three folders for the load, limits on messages and minutes, Ctrl-C handled, and the clean-up that always runs saves the autoscaler's account, switches the load off and checks it; make goals changes a goal", fails)
+
 # ------------------------------------------------------------ 7. the cluster is built by code
 G = "7. Cluster as code (Terraform and Ansible)"
 INFRA = ROOT / "infra"
@@ -1026,7 +1109,7 @@ checks = [
     ("A bare kubectl apply -k . is enough: no script has to make anything first, and the Makefile does not call one",
      has("Job", "bootstrap") and not (ROOT / "scripts" / "create-secrets.sh").exists() and "create-secrets" not in makefile, False),
     ("Hardening: TLS on Kafka (client certificates), MongoDB and the REST API; a login on the REST API; one MongoDB account per program; each Secret only where it is needed; Pod Security restricted enforced",
-     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[1].startswith("6b") and not r_[2].startswith(("HPA ", "the scaling test")))
+     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[1].startswith(("6b", "6c")) and not r_[2].startswith(("HPA ", "the scaling test")))
      and by.get(("Namespace", "ca3"), {"metadata": {"labels": {}}})["metadata"].get("labels", {}).get("pod-security.kubernetes.io/enforce") == "restricted", False),
     ("A REST endpoint declared and exposed", services.get("restapi", {}).get("spec", {}).get("type") in ("NodePort", "LoadBalancer"), False),
     ("Secrets mounted, not embedded in manifests", all(not (re.search(r"PASSWORD|SECRET|TOKEN", e["name"]) and "value" in e and not e["name"].endswith("_FILE")) for w in workloads for c in containers(w) for e in c.get("env", [])), False),
@@ -1040,7 +1123,7 @@ checks = [
      and ("HorizontalPodAutoscaler", "producer-load") in {(kind(d), name(d)) for d in docs}
      and all((ROOT / "producer" / f / "kustomization.yaml").is_file() for f in ("load", "loadtest", "loadtest-one"))
      and all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("scale-test", "scale-report"))
-     and all((ROOT / "scripts" / f).is_file() for f in ("scale-test.py", "scalereport.py")), True),
+     and all((ROOT / "scripts" / f).is_file() for f in ("scale-test.py", "scalereport.py")) and (ROOT / "slo.json").is_file(), False),
     ("One command to apply the stack and one to delete it (make up / make down)", bool(re.search(r"^up:", makefile, flags=re.M)) and bool(re.search(r"^down:", makefile, flags=re.M)), False),
     ("Tip of the assignment: every object has the label app.kubernetes.io/part-of=ca3-pipeline and a description annotation, and so does every Secret that the setup Job makes (group and filter with kubectl -l)",
      all(d["metadata"].get("labels", {}).get("app.kubernetes.io/part-of") == "ca3-pipeline" and len(d["metadata"].get("annotations", {}).get("description", "")) >= 20 for d in objects)

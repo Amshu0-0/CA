@@ -17,6 +17,9 @@
 #   make logs-trace    follow one event id through the logs of every program (TRACE=<id>, the smoke test prints one)
 #   make grafana       open the dashboard at http://localhost:3000 (log in with: make grafana-login)
 #   make prometheus    open Prometheus at http://localhost:9090
+#   make scale-test    switch the producer load on, let the autoscalers work, switch it off again, and measure all of it (about 12 minutes)
+#   make scale-report  draw the table, the goals and the chart of the last scale-test again (needs no cluster)
+#   make goals         list the goals in slo.json; change one with  make goals GOAL_ARGS="scale-up 120"
 #
 # Needs: terraform, ansible, kubectl, bash and ssh-keygen, plus AWS credentials, for the cluster targets;
 # kubeconform for "make validate"; python3 with PyYAML for "make verify".
@@ -36,6 +39,8 @@ SMOKE_ARGS ?=
 HEAL_ARGS  ?=
 REST_ARGS  ?=
 METRICS_ARGS ?=
+SCALE_ARGS ?=
+GOAL_ARGS ?=
 TRACE      ?=
 SCAN_ARGS  ?=
 FILES      ?=
@@ -50,7 +55,7 @@ export KUBECONFIG
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
     smoke netpol-check netpol-control heal-check scan scrub teardown dry-run \
-    metrics-check logs-trace grafana grafana-login prometheus
+    metrics-check logs-trace grafana grafana-login prometheus scale-test scale-report goals
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -81,8 +86,11 @@ help: ; @printf '%s\n' \
     "  make grafana         open the dashboard at http://localhost:3000 (leave the window open; log in with: make grafana-login)" \
     "  make grafana-login   print the Grafana user name and password (they live in the Secret grafana-admin)" \
     "  make prometheus      open Prometheus at http://localhost:9090 (leave the window open)" \
-    "  make scale-up        switch the producer load on (the autoscaler adds producer pods while the CPU is busy)" \
-    "  make scale-down      switch the producer load off (the autoscaler shrinks the producers back to one pod)" \
+    "  make scale-test      the scaling test: load on with one producer pod, then the autoscaler, then the load off; measures all of it (about 12 minutes)" \
+    "  make scale-report    draw the table, the goals and the chart of the last scale-test again (needs no cluster)" \
+    "  make goals           list the goals in slo.json (change one:  make goals GOAL_ARGS=\"scale-up 120\")" \
+    "  make scale-up        switch the producer load on by hand (the autoscaler adds producer pods while the CPU is busy)" \
+    "  make scale-down      switch the producer load off by hand (the autoscaler shrinks the producers back to one pod)" \
     "  make down            delete everything: workloads, disks, Secrets, namespace" \
     "  make scrub           remove public addresses, host names and account numbers from saved evidence files:  make scrub FILES=\"evidence/a.txt evidence/b.txt\"" \
     "" \
@@ -222,6 +230,17 @@ grafana-login: ; @echo "user:     $$($(KUBECTL) -n $(NS) get secret grafana-admi
 # Evidence files are published with the repository. This rewrites the files that you name, in place, without public addresses, EC2 host names,
 # 12-digit account numbers and home-folder paths (scripts/scrub-evidence.py says what it replaces; section 9 of make verify checks the result).
 scrub: ; python3 scripts/scrub-evidence.py $(FILES)
+
+# The scaling test switches the load on in two steps (one producer pod, then the autoscaler free), switches it off, and measures the way
+# up and the way down. It switches the load off by itself, also when it stops early or you press Ctrl-C. Results go to evidence/step6-scale-*.
+# Options, for example:  make scale-test SCALE_ARGS="--before 30 --after 30"   (the whole list:  python3 scripts/scale-test.py --help)
+scale-test: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/scale-test.py $(SCALE_ARGS)
+
+# Draws the table, the goals (slo.json) and the chart of the last scale-test again from the saved files. Needs no cluster.
+scale-report: ; python3 scripts/scalereport.py $(SCALE_ARGS)
+
+# Lists the goals in slo.json, or changes the number (or the reason) of one:  make goals GOAL_ARGS="scale-up 120"
+goals: ; python3 scripts/set-goal.py $(GOAL_ARGS)
 
 # The load generator and its autoscaler are part of the stack. They only send while the load is switched on.
 scale-up: ; $(KUBECTL) apply -k producer/loadtest
