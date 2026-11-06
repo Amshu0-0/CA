@@ -1,0 +1,51 @@
+[
+  {
+    "id": "rest-available",
+    "text": "The REST API answers (HTTP 200) when it is asked, also while the pipeline is under full load",
+    "goal": "at least 99 percent of the calls",
+    "measured": "100.0 percent (39 of 39 calls)",
+    "verdict": "met"
+  },
+  {
+    "id": "rest-fast",
+    "text": "The REST API answers quickly, measured from your computer over the internet",
+    "goal": "at most 1,000 milliseconds, for 95 percent of the answers",
+    "measured": "205 ms (slowest 210 ms)",
+    "verdict": "met"
+  },
+  {
+    "id": "fresh-event",
+    "text": "A new event can be read from the REST API soon after Kafka has stored it, with one producer and with the autoscaler at its maximum",
+    "goal": "at most 60 seconds",
+    "measured": "one producer: 0.1 s, autoscaler at its maximum: 16.0 s",
+    "verdict": "met"
+  },
+  {
+    "id": "scale-up",
+    "text": "With the load on, the producers' autoscaler has all its pods ready",
+    "goal": "at most 180 seconds after the autoscaler was freed",
+    "measured": "all producer pods were ready after 41 s",
+    "verdict": "met"
+  },
+  {
+    "id": "scale-down",
+    "text": "After the load stops, the producers are back to the minimum of 1 pod",
+    "goal": "at most 180 seconds after the load was switched off",
+    "measured": "the producers were back to the minimum after 36 s",
+    "verdict": "met"
+  },
+  {
+    "id": "backlog-gone",
+    "text": "After the load stops, the processors catch up: the backlog in Kafka is below 1,000 messages",
+    "goal": "at most 300 seconds after the load was switched off",
+    "measured": "the backlog was gone after 54 s",
+    "verdict": "met"
+  },
+  {
+    "id": "processors-down",
+    "text": "After the load stops, the processors are back to the minimum of 1 pod",
+    "goal": "at most 600 seconds after the load was switched off",
+    "measured": "the processors were back to the minimum after 175 s (2.9 min)",
+    "verdict": "met"
+  }
+]

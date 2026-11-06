@@ -1,0 +1,128 @@
+{
+  "started": "2026-11-06 21:16",
+  "args": {
+    "before": 45,
+    "after": 60,
+    "settle": 20,
+    "settle_limit": 240,
+    "interval": 5.0,
+    "lag_every": 20.0,
+    "cpu_every": 10.0,
+    "hpa_every": 15.0,
+    "ramp_timeout": 300,
+    "hpa_wait": 90,
+    "shrink_timeout": 300,
+    "drain_timeout": 300,
+    "cooldown": 420,
+    "max_messages": 1000000,
+    "max_minutes": 30,
+    "no_latency": false,
+    "out": "evidence",
+    "prefix": "step6-scale",
+    "host": null,
+    "port": null
+  },
+  "phases": [
+    {
+      "name": "warmup",
+      "t0": 9.5,
+      "t1": 35.3
+    },
+    {
+      "name": "before",
+      "t0": 35.3,
+      "t1": 80.9
+    },
+    {
+      "name": "ramp",
+      "t0": 80.9,
+      "t1": 121.7
+    },
+    {
+      "name": "settle",
+      "t0": 121.7,
+      "t1": 141.8
+    },
+    {
+      "name": "after",
+      "t0": 141.8,
+      "t1": 202.3
+    },
+    {
+      "name": "shrink",
+      "t0": 202.3,
+      "t1": 238.8
+    },
+    {
+      "name": "drain",
+      "t0": 238.8,
+      "t1": 256.8
+    },
+    {
+      "name": "cooldown",
+      "t0": 256.8,
+      "t1": 377.6
+    },
+    {
+      "name": "end",
+      "t0": 377.6,
+      "t1": null
+    }
+  ],
+  "windows": {
+    "before": {
+      "t0": 35.3,
+      "t1": 80.4
+    },
+    "after": {
+      "t0": 141.8,
+      "t1": 201.8
+    }
+  },
+  "probes": {
+    "before": {
+      "seconds": 0.13,
+      "trace_id": "smoke-1106-211640-a0ae",
+      "partition": 1,
+      "offset": 8248
+    },
+    "after": {
+      "seconds": 15.96,
+      "trace_id": "smoke-1106-211826-8176",
+      "partition": 0,
+      "offset": 55512
+    }
+  },
+  "aborted": null,
+  "baseline": {
+    "docs": 5001,
+    "kafka_end": 5001
+  },
+  "samples": 74,
+  "trace_index": "created",
+  "prometheus": {
+    "before": {
+      "end_to_end_p95_s": 0.92
+    },
+    "after": {
+      "end_to_end_p95_s": 46.34
+    }
+  },
+  "hpa": {
+    "min": 1,
+    "max": 5,
+    "cpu_target": 50,
+    "processor_min": 1,
+    "processor_max": 3,
+    "processor_target": 70
+  },
+  "reached_max_after": 40.9,
+  "load_pods_per_node": {
+    "ca3-agent-2": 2,
+    "ca3-server": 2,
+    "ca3-agent-1": 1
+  },
+  "producers_back_after": 36.5,
+  "backlog_gone_after": 54.5,
+  "processors_back_after": 174.9
+}
