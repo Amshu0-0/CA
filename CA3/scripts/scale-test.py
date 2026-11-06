@@ -650,7 +650,7 @@ def preflight():
     status, body = lib.rest_get(host, port, "/stats")
 
     if status != 200:
-        raise lib.Fail("the REST API does not answer from this computer (" + str(status) + " " + body.strip()[:100] + "). If your internet address changed (new Wi-Fi, a hotspot, a VPN), run block 3B of the walk-through again (it updates the firewall)")
+        raise lib.Fail("the REST API does not answer from this computer (" + str(status) + " " + body.strip()[:100] + "). If your internet address changed (new Wi-Fi, a hotspot, a VPN), run  make cluster-up  (it updates the firewall)")
 
     baseline["docs"] = int(json.loads(body)["documents"])
 

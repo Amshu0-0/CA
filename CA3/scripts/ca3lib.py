@@ -162,12 +162,23 @@ def node_port():
     return int(found.group(1)) if found else 30080
 
 
+# The firewall of the cluster lets in one internet address: the one that was current at the last  make cluster-up . After a new Wi-Fi, a phone hotspot or
+# a VPN this computer is outside, and kubectl (like the REST API) just times out. That looks like a stack that is down, but it is not.
+ADDRESS_HINT = "If your internet address changed (new Wi-Fi, a phone hotspot, a VPN), run  make cluster-up  to update the firewall, then try again."
+
+
+# True when the text of a kubectl error says that the cluster could not be reached at all (as opposed to: reached, but it has no such object).
+def cannot_connect(err):
+    return any(w in err for w in ("i/o timeout", "Unable to connect to the server", "connection refused", "no route to host", "TLS handshake timeout", "context deadline exceeded"))
+
+
 # One value of a Secret, read with kubectl (the administrator may; nobody else in the cluster can). Returned as bytes.
 def secret_value(secret, key):
     code, out, err = kubectl("-n", NS, "get", "secret", secret, "-o", "jsonpath={.data." + key.replace(".", "\\.") + "}")
 
     if code != 0 or not out.strip():
-        raise Fail("could not read " + key + " from the Secret " + secret + ": " + (err.strip() or "empty") + ". Is the stack up? Run:  make up")
+        hint = (ADDRESS_HINT + " If it did not change, is the cluster running? Run:  make cluster-status") if cannot_connect(err) else "Is the stack up? Run:  make up"
+        raise Fail("could not read " + key + " from the Secret " + secret + ": " + (err.strip() or "empty") + ". " + hint)
 
     return base64.b64decode(out.strip())
 

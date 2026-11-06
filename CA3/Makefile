@@ -19,7 +19,11 @@
 #   make prometheus    open Prometheus at http://localhost:9090
 #   make scale-test    switch the producer load on, let the autoscalers work, switch it off again, and measure all of it (about 12 minutes)
 #   make scale-report  draw the table, the goals and the chart of the last scale-test again (needs no cluster)
-#   make goals         list the goals in slo.json; change one with  make goals GOAL_ARGS="scale-up 120"
+#   make goals         list the goals in slo.json; change one with  make goals GOAL_ARGS="scale-up 120 --why 'one sentence'"
+#   make drill         delete one pod in each tier (Kafka, processor, MongoDB, REST API, producer) and measure how the platform recovers (about 25 minutes)
+#   make drill-report  draw the table, the goals and the chart of the last drill again (needs no cluster)
+#   make rest-evidence call every REST endpoint and save request, response, logs and metrics as evidence
+#   make operator-steps  do the manual steps of runbook.md once: read the logs, scale the REST API up and back, read the certificate dates
 #
 # Needs: terraform, ansible, kubectl, bash and ssh-keygen, plus AWS credentials, for the cluster targets;
 # kubeconform for "make validate"; python3 with PyYAML for "make verify".
@@ -41,6 +45,8 @@ REST_ARGS  ?=
 METRICS_ARGS ?=
 SCALE_ARGS ?=
 GOAL_ARGS ?=
+DRILL_ARGS ?=
+OPERATOR_ARGS ?=
 TRACE      ?=
 SCAN_ARGS  ?=
 FILES      ?=
@@ -55,7 +61,7 @@ export KUBECONFIG
 .PHONY: help validate verify cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context up status get-all logs diagnose rbac-check rest-check exposure-check scale-up scale-down images-info down \
     smoke netpol-check netpol-control heal-check scan scrub teardown dry-run \
-    metrics-check logs-trace grafana grafana-login prometheus scale-test scale-report goals
+    metrics-check logs-trace grafana grafana-login prometheus scale-test scale-report goals drill drill-report rest-evidence operator-steps
 
 help: ; @printf '%s\n' \
     "  Cluster (AWS)" \
@@ -78,7 +84,7 @@ help: ; @printf '%s\n' \
     "  make exposure-check  show which ports of the nodes answer from this computer" \
     "  make rbac-check      prove the access rules with kubectl auth can-i" \
     "  make smoke           send one tagged event through producer, Kafka, processor, MongoDB and REST API" \
-    "  make netpol-check    test what each kind of pod can reach (42 connections, compared with the policies)" \
+    "  make netpol-check    test what each kind of pod can reach (169 connections, compared with the policies)" \
     "  make netpol-control  the same test, then again with the policies deleted: proves the policies do the blocking" \
     "  make heal-check      delete pods on purpose and check that they come back with their data" \
     "  make metrics-check   ask Prometheus, Loki and Grafana if the numbers and logs arrive and the dashboard is loaded" \
@@ -88,7 +94,11 @@ help: ; @printf '%s\n' \
     "  make prometheus      open Prometheus at http://localhost:9090 (leave the window open)" \
     "  make scale-test      the scaling test: load on with one producer pod, then the autoscaler, then the load off; measures all of it (about 12 minutes)" \
     "  make scale-report    draw the table, the goals and the chart of the last scale-test again (needs no cluster)" \
-    "  make goals           list the goals in slo.json (change one:  make goals GOAL_ARGS=\"scale-up 120\")" \
+    "  make goals           list the goals in slo.json (change one:  make goals GOAL_ARGS=\"scale-up 120 --why 'one sentence'\")" \
+    "  make drill           the resilience drill: delete one pod in each tier and measure how the platform recovers (about 25 minutes; one tier:  make drill DRILL_ARGS=\"--only restapi\")" \
+    "  make drill-report    draw the table, the goals and the chart of the last drill again (needs no cluster)" \
+    "  make rest-evidence   call every REST endpoint and save request, response, logs and metrics as evidence (evidence/step7-rest-evidence.txt)" \
+    "  make operator-steps  the manual steps of runbook.md, done once: read the logs, scale the REST API up and back, read the certificate dates (about 2 minutes)" \
     "  make scale-up        switch the producer load on by hand (the autoscaler adds producer pods while the CPU is busy)" \
     "  make scale-down      switch the producer load off by hand (the autoscaler shrinks the producers back to one pod)" \
     "  make down            delete everything: workloads, disks, Secrets, namespace" \
@@ -239,8 +249,22 @@ scale-test: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts
 # Draws the table, the goals (slo.json) and the chart of the last scale-test again from the saved files. Needs no cluster.
 scale-report: ; python3 scripts/scalereport.py $(SCALE_ARGS)
 
-# Lists the goals in slo.json, or changes the number (or the reason) of one:  make goals GOAL_ARGS="scale-up 120"
+# Lists the goals in slo.json, or changes the number (with its reason) or only the reason of one:  make goals GOAL_ARGS="scale-up 120 --why 'one sentence'"
 goals: ; python3 scripts/set-goal.py $(GOAL_ARGS)
+
+# The resilience drill deletes ONE pod in each tier, one tier after the other, and watches the platform bring it back (Step 7).
+# Options, for example:  make drill DRILL_ARGS="--only restapi"   (the whole list:  python3 scripts/drill.py --help)
+drill: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/drill.py $(DRILL_ARGS)
+
+# Draws the table, the goals (slo.json) and the chart of the last drill again from the saved files. Needs no cluster.
+drill-report: ; python3 scripts/drillreport.py $(DRILL_ARGS)
+
+# Calls every endpoint of the REST API and saves the requests, the answers, the log lines and the numbers that belong to them.
+rest-evidence: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/rest-evidence.py $(REST_ARGS)
+
+# The manual steps of runbook.md, done once (logs, scale the REST API from 2 pods to 3 and back, certificate end dates). Nothing is deleted.
+# If it stops in the middle, the REST API is put back to 2 pods first.
+operator-steps: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/operator-steps.py $(OPERATOR_ARGS)
 
 # The load generator and its autoscaler are part of the stack. They only send while the load is switched on.
 scale-up: ; $(KUBECTL) apply -k producer/loadtest

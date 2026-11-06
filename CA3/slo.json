@@ -1,5 +1,5 @@
 {
-  "about": "The goals of the pipeline, as numbers (SLO = service level objective: a goal for the service that a test can measure). make scale-test (Step 6) measures them and says met or not met. Change a number here and run make scale-report: the saved test is judged again, the measurements stay the same. Each goal says which test measures it (the field test): make scale-test (Step 6) measures the ones marked scale-test.",
+  "about": "The goals of the pipeline, as numbers (SLO = service level objective: a goal for the service that a test can measure). make scale-test (Step 6) and make drill (Step 7) measure them and say met or not met. Change a number here (make goals) and run make scale-report or make drill-report: the saved test is judged again, the measurements stay the same. Each goal says which test measures it (the field test): make scale-test measures the ones marked scale-test, make drill the ones marked drill.",
   "objectives": [
     {
       "id": "rest-available",
@@ -63,6 +63,51 @@
       "goal": 600,
       "unit": "seconds after the load was switched off",
       "why": "The processors shrink only after the backlog is gone (while they work, their CPU is high); then their autoscaler waits 60 seconds and removes one pod every 30 seconds."
+    },
+    {
+      "id": "pod-back",
+      "test": "drill",
+      "text": "A pod that is deleted is replaced by a new pod that is ready, in every tier",
+      "direction": "at most",
+      "goal": 150,
+      "unit": "seconds after the delete, for the slowest of the five tiers",
+      "why": "Kubernetes starts a replacement at once, but a pod needs time to start: Kafka and MongoDB need the longest. Two and a half minutes is a first guess for the slowest tier; the first real drill shows the real numbers, and this goal is then set from them."
+    },
+    {
+      "id": "whole-again",
+      "test": "drill",
+      "text": "After the delete, every part of the stack has its pods ready again (not only the replaced pod)",
+      "direction": "at most",
+      "goal": 300,
+      "unit": "seconds after the delete, for the slowest of the five tiers",
+      "why": "The parts wait for each other: the REST API pods wait for MongoDB and the processor waits for MongoDB and Kafka. Five minutes is a first guess for the slowest tier; set it from the first real drill."
+    },
+    {
+      "id": "event-flows",
+      "test": "drill",
+      "text": "An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards",
+      "direction": "at most",
+      "goal": 300,
+      "unit": "seconds after the delete, for the slowest of the five tiers",
+      "why": "The event waits in Kafka (or, while Kafka is gone, in the Job that sends it) and arrives after the recovery. Five minutes is a first guess for the slowest tier (Kafka: the producer has to wait for the broker); set it from the first real drill."
+    },
+    {
+      "id": "data-kept",
+      "test": "drill",
+      "text": "Deleting a pod deletes no data: every tier still has all the records and messages it had",
+      "direction": "at least",
+      "goal": 100,
+      "unit": "percent of the tiers",
+      "why": "The disks of Kafka and MongoDB belong to the StatefulSets, not to the pods, so a new pod gets the same disk. A pipeline that loses data when a pod dies is not a pipeline; 100 percent is the only acceptable number."
+    },
+    {
+      "id": "api-gap",
+      "test": "drill",
+      "text": "While one of the two REST API pods is replaced, the REST API keeps answering the calls for /stats",
+      "direction": "at most",
+      "goal": 5,
+      "unit": "seconds in a row without a good answer",
+      "why": "The REST API runs as two pods so that one can be replaced while the other answers. Up to 5 seconds allows for the moment in which a call is still sent to the pod that is going away; a longer gap would mean that the second pod did not carry the load."
     }
   ]
 }

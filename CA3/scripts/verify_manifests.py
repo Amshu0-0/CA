@@ -1042,6 +1042,277 @@ if not (ROOT / "scripts" / "set-goal.py").is_file() or not re.search(r"^goals:.*
     fails.append("make goals (scripts/set-goal.py) is missing: it is how a number in slo.json is changed without editing the file by hand")
 judge(G, "scripts/scale-test.py: three folders for the load, limits on messages and minutes, Ctrl-C handled, and the clean-up that always runs saves the autoscaler's account, switches the load off and checks it; make goals changes a goal", fails)
 
+# ------------------------------------------------------------ 6d. the resilience drill: the goals, the scripts and the runbook
+# make drill (Step 7) deletes one pod in every tier and judges the platform against the numbers in slo.json. These checks read that file, run the judging
+# code of drillreport.py on made-up measurements (no cluster needed), read drill.py and operator-steps.py for the safety rules, and compare runbook.md with the files.
+G = "6d. The resilience drill: the goals, the scripts and the runbook"
+DRILL_IDS_ = ("pod-back", "whole-again", "event-flows", "data-kept", "api-gap")
+by_id_ = {o_.get("id"): o_ for o_ in objectives_}
+fails = []
+for id_ in DRILL_IDS_:
+    if id_ not in by_id_:
+        fails.append("slo.json has no goal " + id_ + " (make drill measures it)")
+    elif by_id_[id_].get("test") != "drill":
+        fails.append("goal " + id_ + ": the field test must say drill")
+judge(G, "slo.json holds the five goals that make drill measures (" + ", ".join(DRILL_IDS_) + "), each marked test: drill", fails)
+
+# The judging code, run on made-up measurements: a goal is met exactly when the number reaches it in the direction that slo.json says;
+# a run of fewer than five tiers can say "NOT met" but never "met"; nothing measured says "not measured".
+fails = []
+try:
+    spec_ = importlib.util.spec_from_file_location("drillreport", ROOT / "scripts" / "drillreport.py")
+    dr_ = importlib.util.module_from_spec(spec_)
+    spec_.loader.exec_module(dr_)
+
+    def drill_summary_(count=5, base=1.0):
+        return {"tiers": [{"tier": t_, "deleted": True, "pod_back_s": base, "whole_s": base, "event": {"readable_s": base}, "data": {"kept": True},
+                           "rest": {"calls": 10, "stats_failed": 0, "stats_gap_s": 0.0}} for t_ in list(dr_.ORDER)[:count]]}
+
+    def drill_verdicts_(s_):
+        return {v["id"]: v["verdict"] for v in dr_.judge(s_)}
+
+    def drill_should_(o, value):
+        return "met" if (value >= o["goal"] if o["direction"] == "at least" else value <= o["goal"]) else "NOT met"
+
+    def number_goal_(id_):
+        o_ = by_id_.get(id_)
+        return o_ if o_ and "direction" in o_ and isinstance(o_.get("goal"), (int, float)) and not isinstance(o_.get("goal"), bool) else None
+
+    setters_ = {"pod-back": lambda t_, v_: t_.__setitem__("pod_back_s", v_), "whole-again": lambda t_, v_: t_.__setitem__("whole_s", v_),
+                "event-flows": lambda t_, v_: t_["event"].__setitem__("readable_s", v_)}
+
+    for id_, set_ in setters_.items():
+        o_ = number_goal_(id_)
+        if o_ is None:
+            continue
+        base_ = o_["goal"] / 2.0
+        for value_ in sorted({max(o_["goal"] - 1, 0), o_["goal"], o_["goal"] + 1}):
+            s_ = drill_summary_(5, base_)
+            set_(s_["tiers"][2], value_)                       # the slowest tier is the third one
+            got_, want_ = drill_verdicts_(s_).get(id_), drill_should_(o_, value_)
+            if got_ != want_:
+                fails.append("goal " + id_ + ": a slowest tier of " + str(value_) + " gets '" + str(got_) + "' but the goal (" + o_["direction"] + " " + str(o_["goal"]) + ") says '" + want_ + "'")
+        s_ = drill_summary_(5, base_)
+        set_(s_["tiers"][1], None)                             # a tier that never got there
+        if drill_verdicts_(s_).get(id_) != "NOT met":
+            fails.append("goal " + id_ + ": a tier that never got there must give 'NOT met' (got '" + str(drill_verdicts_(s_).get(id_)) + "')")
+        if drill_verdicts_(drill_summary_(3, base_)).get(id_) != "not measured":
+            fails.append("goal " + id_ + ": a good result in 3 of the 5 tiers must give 'not measured' (got '" + str(drill_verdicts_(drill_summary_(3, base_)).get(id_)) + "')")
+        if drill_verdicts_({"tiers": []}).get(id_) != "not measured":
+            fails.append("goal " + id_ + ": a drill with no tier must give 'not measured'")
+
+    o_ = number_goal_("data-kept")
+    if o_ is not None:
+        for kept_ in range(0, 6):
+            s_ = drill_summary_(5)
+            for t_ in s_["tiers"][kept_:]:
+                t_["data"]["kept"] = False
+            got_, want_ = drill_verdicts_(s_).get("data-kept"), drill_should_(o_, 100.0 * kept_ / 5)
+            if got_ != want_:
+                fails.append("goal data-kept: " + str(kept_) + " of 5 tiers kept their data (" + format(100.0 * kept_ / 5, ".0f") + " percent) and the goal (" + o_["direction"] + " " + str(o_["goal"]) + ") says '" + want_ + "', not '" + str(got_) + "'")
+        s_ = drill_summary_(5)
+        s_["tiers"][0]["data"]["kept"] = None
+        if drill_verdicts_(s_).get("data-kept") != "not measured":
+            fails.append("goal data-kept: a tier whose data was not checked must give 'not measured'")
+
+    o_ = number_goal_("api-gap")
+    if o_ is not None:
+        for value_ in sorted({max(o_["goal"] - 1, 0), o_["goal"], o_["goal"] + 1}):
+            s_ = drill_summary_(5)
+            s_["tiers"][3]["rest"] = {"calls": 10, "stats_failed": 1, "stats_gap_s": float(value_)}
+            got_, want_ = drill_verdicts_(s_).get("api-gap"), drill_should_(o_, value_)
+            if got_ != want_:
+                fails.append("goal api-gap: a gap of " + str(value_) + " s gets '" + str(got_) + "' but the goal (" + o_["direction"] + " " + str(o_["goal"]) + ") says '" + want_ + "'")
+        if drill_verdicts_(drill_summary_(3)).get("api-gap") != "not measured":
+            fails.append("goal api-gap: a drill without the REST API tier must give 'not measured'")
+except Exception as e_:
+    fails.append("drillreport.py could not be run on made-up measurements: " + type(e_).__name__ + ": " + str(e_))
+judge(G, "drillreport.py judges the five drill goals the way slo.json says (tested on made-up measurements: on the goal, just under, just over, a tier that never got there, fewer than five tiers, none)", fails)
+
+# The safety rules of the two programs that change the cluster.
+fails = []
+drill_text_ = (ROOT / "scripts" / "drill.py").read_text() if (ROOT / "scripts" / "drill.py").is_file() else ""
+if not drill_text_:
+    fails.append("scripts/drill.py is missing")
+for needle_, why_ in (('"--only"', "choose the tiers"), ('"--dry-run"', "look without deleting"), ('"--max-minutes"', "the limit on the running time"), ("except KeyboardInterrupt", "the reaction to Ctrl-C"),
+                      ('"one": "producer/loadtest-one"', "the folder that switches the load on with one pod"), ('"off": "producer/load"', "the folder that switches the load off"),
+                      ('"SIGHUP"', "a closed window must clean up like Ctrl-C")):
+    if drill_text_ and needle_ not in drill_text_:
+        fails.append("scripts/drill.py has no " + needle_ + " (" + why_ + ")")
+deletes_ = set(re.findall(r'"delete",\s*"([^"]+)"', drill_text_))
+if deletes_ != {"pod"}:
+    fails.append("scripts/drill.py may delete only pods (kubectl delete pod <name>); it deletes: " + (", ".join(sorted(deletes_)) or "nothing"))
+if re.search(r'"--all"|--force|--grace-period|"-k"[^\n]*delete|delete[^\n]*"-k"', drill_text_):
+    fails.append("scripts/drill.py: --all, --force, --grace-period and delete -k are not allowed: the drill deletes ONE pod and lets Kubernetes do the rest")
+after_finally_ = drill_text_.split("\nfinally:\n", 1)[1].split("# ------", 1)[0] if "\nfinally:\n" in drill_text_ else ""
+for call_ in ("switch_off()", "check_load_off()"):
+    if call_ not in after_finally_:
+        fails.append("scripts/drill.py: the clean-up that always runs (finally) does not call " + call_)
+ops_text_ = (ROOT / "scripts" / "operator-steps.py").read_text() if (ROOT / "scripts" / "operator-steps.py").is_file() else ""
+if not ops_text_:
+    fails.append("scripts/operator-steps.py is missing")
+else:
+    for needle_, why_ in (("except KeyboardInterrupt", "the reaction to Ctrl-C"), ("SIGHUP", "a closed window must clean up like Ctrl-C"), ('"scale", "deployment/restapi"', "the REST API is put back to its number")):
+        if needle_ not in ops_text_:
+            fails.append("scripts/operator-steps.py has no " + needle_ + " (" + why_ + ")")
+    after_ops_ = ops_text_.split("\nfinally:\n", 1)[1].split("sys.stdout = ", 1)[0] if "\nfinally:\n" in ops_text_ else ""
+    if '"scale", "deployment/restapi"' not in after_ops_:
+        fails.append("scripts/operator-steps.py: the clean-up that always runs (finally) does not scale the REST API back")
+    kubectl_verbs_ = {"get", "logs", "scale", "delete", "patch", "apply", "edit", "replace", "rollout", "create", "exec", "cp", "annotate", "label", "set", "drain", "cordon", "taint", "run", "expose", "autoscale", "wait"}
+    used_verbs_ = set()
+    for call_args_ in re.findall(r"lib\.(?:kubectl|kube_json)\(([^)]*)\)", ops_text_):
+        used_verbs_ |= {w_ for w_ in re.findall(r'"([a-z]+)"', call_args_) if w_ in kubectl_verbs_}
+    if not used_verbs_ <= {"get", "logs", "scale"}:
+        fails.append("scripts/operator-steps.py may only read (get, logs) and scale the REST API; it also uses: " + ", ".join(sorted(used_verbs_ - {"get", "logs", "scale"})))
+    scaled_ = set(re.findall(r'"scale",\s*"([^"]+)"', ops_text_))
+    if scaled_ != {"deployment/restapi"}:
+        fails.append("scripts/operator-steps.py may scale only deployment/restapi; it scales: " + (", ".join(sorted(scaled_)) or "nothing"))
+mk_6d_ = (ROOT / "Makefile").read_text() if (ROOT / "Makefile").is_file() else ""
+for t_, script_ in (("drill", "drill.py"), ("drill-report", "drillreport.py"), ("rest-evidence", "rest-evidence.py"), ("operator-steps", "operator-steps.py")):
+    if not re.search(r"^" + t_ + r":.*scripts/" + re.escape(script_), mk_6d_, flags=re.M):
+        fails.append("Makefile: the target " + t_ + " must run scripts/" + script_)
+    if not (ROOT / "scripts" / script_).is_file():
+        fails.append("scripts/" + script_ + " is missing")
+judge(G, "scripts/drill.py deletes only pods (one per tier, no --all, --force or grace-period) and always switches the load off and checks it; scripts/operator-steps.py only reads and scales the REST API, and always puts it back; the four make targets exist", fails)
+
+# runbook.md: it exists, it has the parts the assignment names, every command and file in it exists, and the numbers it states are the numbers of the files.
+fails = []
+RUNBOOK_ = ROOT / "runbook.md"
+rb_ = RUNBOOK_.read_text(encoding="utf-8", errors="replace") if RUNBOOK_.is_file() else ""
+
+
+def rb_prose_(t_): return re.sub(r"```.*?```", "", t_, flags=re.S)
+
+
+if not rb_:
+    fails.append("runbook.md is missing (the assignment asks for the manual steps to be documented: check logs, scale replicas, rotate a certificate)")
+else:
+    heads_ = [h_.lower() for h_ in re.findall(r"^#{1,6}[ ]+(.+?)[ #]*$", rb_prose_(rb_), flags=re.M)]
+    for word_ in ("look first", "check the logs", "scale replicas", "certificates", "tier by tier", "healthy", "not tested"):
+        if not any(word_ in h_ for h_ in heads_):
+            fails.append("runbook.md: no heading with '" + word_ + "'")
+    for word_ in ("kafka", "processor", "mongo", "rest api", "producer"):
+        if not any(word_ in h_ for h_ in heads_):
+            fails.append("runbook.md: no heading for the tier " + word_)
+    if "\t" in rb_:
+        fails.append("runbook.md: contains a TAB character")
+    fails += ["runbook.md: unfinished text " + m_ for m_ in sorted(set(re.findall(r"\{\{[^}]*\}\}|\bTODO\b|\bTBD\b|\bFIXME\b", rb_)))]
+    if "rotat" in rb_.lower() and not re.search(r"rotating a certificate:\s*\*{0,2}\s*not run|not run", rb_.lower()):
+        fails.append("runbook.md talks about rotating a certificate but does not say that it was not run")
+    mk_targets_6d_ = set(re.findall(r"^([a-z][a-z0-9-]*):", mk_6d_, flags=re.M))
+    spans_ = re.findall(r"`([^`\n]+)`", rb_prose_(rb_))
+    for span_ in spans_:
+        for m_ in re.finditer(r"\bmake\s+([a-z][a-z0-9-]*)", span_):
+            if m_.group(1) not in mk_targets_6d_:
+                fails.append("runbook.md: 'make " + m_.group(1) + "' is not a target of the Makefile")
+    # file names in backticks: they exist, or they are files that a script writes
+    outputs_ = {"evidence/step7-rest-evidence.txt", "evidence/step7-operator-steps.txt"}
+    files_line_ = re.search(r'print\("Files in "[^\n]*', drill_text_)
+    outputs_ |= {"evidence/step7-drill" + s_ for s_ in re.findall(r'"(-[a-z-]+\.(?:txt|json|csv|md|svg))"', files_line_.group(0) if files_line_ else "")}
+    known_ = set()
+    for dirpath_, dirnames_, filenames_ in os.walk(str(ROOT)):
+        dirnames_[:] = [d_ for d_ in dirnames_ if d_ not in (".git", ".terraform", ".secrets", "__pycache__")]
+        known_ |= {f_ for f_ in filenames_}
+    top_6d_ = {p_.name for p_ in ROOT.iterdir()}
+    for span_ in sorted(set(spans_)):
+        span_ = span_.rstrip(".,:;")
+        if not re.fullmatch(r"[\w.*/-]+", span_):
+            continue
+        if "/" in span_ and span_.split("/")[0] in top_6d_:
+            if span_ in outputs_ or span_.rstrip("/") and (ROOT / span_.rstrip("/")).exists() or ("*" in span_ and list(ROOT.glob(span_))):
+                continue
+            fails.append("runbook.md: `" + span_ + "` does not exist and no script writes it")
+        elif "/" not in span_ and re.fullmatch(r"[\w.-]+\.(md|yaml|yml|py|sh|tf|json|svg|png|txt|csv)|Makefile|Dockerfile", span_):
+            if span_ not in known_:
+                fails.append("runbook.md: `" + span_ + "` is not a file of this repository")
+    # numbers that the text states, compared with the files
+    def state_(pattern_):
+        return [int(x_) for x_ in re.findall(pattern_, rb_, flags=re.I)]
+    hpa_ = {n_: (by.get(("HorizontalPodAutoscaler", n_)) or {}).get("spec", {}) for n_ in ("processor", "producer-load")}
+    facts_ = [
+        ("the number of Secrets that the setup Job makes", state_(r"\b(\d+) Secrets"), len(SECRETS)),
+        ("the validity of the certificates in days", state_(r"valid for (\d+) days"), int((re.search(r"^VALID_DAYS\s*=\s*(\d+)", BOOTSTRAP_TEXT, flags=re.M) or [0, -1])[1])),
+        ("the replicas of the REST API", state_(r"REST API[^.\n]*?\b(\d+) pods in `restapi/restapi.yaml`"), (by.get(("Deployment", "restapi")) or {}).get("spec", {}).get("replicas")),
+        ("the largest number of processor pods", state_(r"processor\*{0,2} \(1 to (\d+) pods\)"), hpa_["processor"].get("maxReplicas")),
+        ("the largest number of load-generator pods", state_(r"load generator\*{0,2} \(1 to (\d+) pods\)"), hpa_["producer-load"].get("maxReplicas")),
+        ("the grace period of Kafka in seconds", state_(r"Kafka may take up to (\d+) seconds"), ((by.get(("StatefulSet", "kafka")) or {}).get("spec", {}).get("template", {}).get("spec", {}) or {}).get("terminationGracePeriodSeconds")),
+        ("the grace period of MongoDB in seconds", state_(r"MongoDB (\d+)\)"), ((by.get(("StatefulSet", "mongo")) or {}).get("spec", {}).get("template", {}).get("spec", {}) or {}).get("terminationGracePeriodSeconds")),
+    ]
+    for what_, found_, truth_ in facts_:
+        if not found_:
+            fails.append("runbook.md: no sentence states " + what_ + ", so it cannot be compared")
+        elif any(x_ != truth_ for x_ in found_):
+            fails.append("runbook.md states " + what_ + " as " + "/".join(str(x_) for x_ in found_) + ", the files say " + str(truth_))
+    loki_text_ = (ROOT / "observability" / "loki.yaml").read_text() if (ROOT / "observability" / "loki.yaml").is_file() else ""
+    prom_text_ = (ROOT / "observability" / "prometheus.yaml").read_text() if (ROOT / "observability" / "prometheus.yaml").is_file() else ""
+    if "retention_period: 24h" not in loki_text_ or "--storage.tsdb.retention.time=24h" not in prom_text_:
+        fails.append("runbook.md says that Loki and Prometheus keep their data for 24 hours, but observability/loki.yaml or prometheus.yaml says another time")
+    if "24 hours" not in rb_:
+        fails.append("runbook.md does not say that Loki and Prometheus keep their data for 24 hours")
+    topic_partitions_ = [int(x_) for x_ in re.findall(r'KAFKA_NUM_PARTITIONS\s*\n\s*value:\s*"?(\d+)', (ROOT / "kafka" / "kafka.yaml").read_text())] if (ROOT / "kafka" / "kafka.yaml").is_file() else []
+    if topic_partitions_ and "the topic has " + str(topic_partitions_[0]) + " partitions" not in rb_:
+        fails.append("runbook.md must say that the topic has " + str(topic_partitions_[0]) + " partitions (kafka/kafka.yaml)")
+judge(G, "runbook.md: the parts the assignment names (logs, scaling, certificates, every tier, what was not tested), every make command and file name in it exists, and the numbers it states (Secrets, days, pods, grace periods, retention, partitions) are the numbers of the files", fails)
+
+# The network test (netpol-check.py, Step 7 version): a test pod for every program, test pods that are never ready (no Service may send a call to
+# them), and a table of expected answers that is exactly what the policy files allow. The same table is worked out here from the files, with the
+# rules of group 6: a connection needs an egress rule at the sender and an ingress rule at the receiver; everything else is denied.
+G = "6d. The resilience drill: the goals, the scripts and the runbook"
+np_text_ = (ROOT / "scripts" / "netpol-check.py").read_text() if (ROOT / "scripts" / "netpol-check.py").is_file() else ""
+fails = []
+np_env_ = {"lib": type("lib", (), {"NS": "ca3"})}
+np_wanted_ = {"INTRUDER_NS", "NAME", "COMPONENT", "PROBES", "PIPELINE", "MONITORING", "TARGETS", "OPEN", "EXPECT"}
+try:
+    for node_ in ast.parse(np_text_).body:
+        if isinstance(node_, ast.Assign) and len(node_.targets) == 1:
+            target_ = node_.targets[0]
+            names_ = [target_.id] if isinstance(target_, ast.Name) else [e_.id for e_ in getattr(target_, "elts", []) if isinstance(e_, ast.Name)]
+            if names_ and set(names_) <= np_wanted_:
+                value_ = eval(compile(ast.Expression(node_.value), "netpol-check.py", "eval"), np_env_)
+                if isinstance(target_, ast.Name):
+                    np_env_[target_.id] = value_
+                else:
+                    np_env_.update(dict(zip(names_, value_)))
+    probes_ = {p_[0]: (p_[1], p_[2]) for p_ in np_env_["PROBES"]}
+    expect_ = np_env_["EXPECT"]
+    fails += ["netpol-check.py has no test pod for " + n_ for n_ in ("producer", "processor", "restapi", "bootstrap", "prometheus", "grafana", "loki", "alloy", "kafka-exporter", "mongodb-exporter") if n_ not in probes_]
+    if '"readinessProbe": {"exec": {"command": ["false"]}' not in np_text_:
+        fails.append("the test pods of netpol-check.py must never be ready (a readinessProbe that always fails): the Services choose pods by the label app.kubernetes.io/name, and a ready test pod would get calls that are meant for a real pod")
+
+    def np_selects_(labels_, direction_):
+        return [p_ for p_ in policies if direction_.capitalize() in p_["spec"].get("policyTypes", []) and label_match(p_["spec"].get("podSelector"), labels_)]
+
+    def np_can_(src_, elsewhere_, svc_, port_):
+        if svc_ is None:         # the DNS server: the one thing every pod of ca3 may call (allow-dns-egress); no rule governs the receiver
+            return elsewhere_ or any(r_.get("ports") and any(x_.get("port") == 53 for x_ in r_["ports"]) and any("namespaceSelector" in t_ for t_ in r_.get("to", []))
+                                     for p_ in np_selects_(src_, "egress") for r_ in p_["spec"].get("egress", []))
+        if svc_.startswith("kubernetes."):   # the API server: a rule with an address block (ipBlock) on 6443 or 443
+            return elsewhere_ or any(any("ipBlock" in t_ for t_ in r_.get("to", [])) and any(x_.get("port") in (6443, 443) for x_ in r_.get("ports", []))
+                                     for p_ in np_selects_(src_, "egress") for r_ in p_["spec"].get("egress", []))
+        selector_ = (services.get(svc_) or {}).get("spec", {}).get("selector") or {}
+        dst_ = comp_labels.get(selector_.get("app.kubernetes.io/name"))
+        if dst_ is None or port_ not in svc_ports(svc_):
+            if not any(svc_ + ":" + str(port_) in f_ for f_ in fails):
+                fails.append("netpol-check.py tries " + svc_ + ":" + str(port_) + ", which is not a Service and port of the stack")
+            return None
+        if elsewhere_:           # a pod of another namespace matches only a rule that names no sender at all
+            return any(r_.get("from") is None and (not r_.get("ports") or any(x_.get("port") == port_ for x_ in r_["ports"]))
+                       for p_ in np_selects_(dst_, "ingress") for r_ in p_["spec"].get("ingress", []))
+        return side_allows(src_, dst_, "egress", port_) and side_allows(dst_, src_, "ingress", port_)
+
+    open_count_ = 0
+    for probe_, (ns_, labels_) in probes_.items():
+        for title_, svc_, port_ in np_env_["TARGETS"]:
+            truth_ = np_can_(labels_, ns_ != "ca3", svc_, port_)
+            open_count_ += 1 if truth_ else 0
+            if truth_ is not None and expect_.get(probe_, {}).get(title_) != truth_:
+                fails.append("netpol-check.py expects " + probe_ + " -> " + title_ + " to be " + ("open" if expect_.get(probe_, {}).get(title_) else "blocked") + ", but the policy files make it " + ("open" if truth_ else "blocked"))
+    np_total_ = len(probes_) * len(np_env_["TARGETS"])
+except Exception as e_:
+    np_total_, open_count_ = 0, 0
+    fails.append("netpol-check.py: could not read the tables PROBES, TARGETS and EXPECT (" + type(e_).__name__ + ": " + str(e_)[:120] + ")")
+judge(G, "the network test (netpol-check.py): a test pod for every program, never ready, and its table of " + str(np_total_) + " connections (" + str(open_count_) + " open, " + str(np_total_ - open_count_) + " blocked) is exactly what the policy files allow", fails)
+
 # ------------------------------------------------------------ 7. the cluster is built by code
 G = "7. Cluster as code (Terraform and Ansible)"
 INFRA = ROOT / "infra"
@@ -1109,7 +1380,7 @@ checks = [
     ("A bare kubectl apply -k . is enough: no script has to make anything first, and the Makefile does not call one",
      has("Job", "bootstrap") and not (ROOT / "scripts" / "create-secrets.sh").exists() and "create-secrets" not in makefile, False),
     ("Hardening: TLS on Kafka (client certificates), MongoDB and the REST API; a login on the REST API; one MongoDB account per program; each Secret only where it is needed; Pod Security restricted enforced",
-     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[1].startswith(("6b", "6c")) and not r_[2].startswith(("HPA ", "the scaling test")))
+     all(r_[0] != "FAIL" for r_ in rows if r_[1][0] in "136" and not r_[1].startswith(("6b", "6c", "6d")) and not r_[2].startswith(("HPA ", "the scaling test")))
      and by.get(("Namespace", "ca3"), {"metadata": {"labels": {}}})["metadata"].get("labels", {}).get("pod-security.kubernetes.io/enforce") == "restricted", False),
     ("A REST endpoint declared and exposed", services.get("restapi", {}).get("spec", {}).get("type") in ("NodePort", "LoadBalancer"), False),
     ("Secrets mounted, not embedded in manifests", all(not (re.search(r"PASSWORD|SECRET|TOKEN", e["name"]) and "value" in e and not e["name"].endswith("_FILE")) for w in workloads for c in containers(w) for e in c.get("env", [])), False),
@@ -1153,8 +1424,9 @@ checks = [
      has("DaemonSet", "alloy") and has("Deployment", "loki") and "loki" in datasources_ and any(p_["type"] == "logs" for p_ in dashboard.get("panels", [])), False),
     ("Monitoring tests: make metrics-check asks Prometheus, Loki and Grafana, and make logs-trace follows one event id through the logs",
      all(re.search(r"^" + t + r":", makefile, flags=re.M) for t in ("metrics-check", "logs-trace")) and (ROOT / "scripts" / "metrics-check.py").is_file(), False),
-    ("Resilience drill: a script deletes a pod in every tier (make drill) and the operator steps are written down",
-     (ROOT / "scripts" / "drill.py").is_file() and bool(re.search(r"^drill:", makefile, flags=re.M)), True),
+    ("Resilience drill: a script deletes a pod in every tier (make drill, make drill-report), the operator steps are written down (runbook.md) and can be run once (make operator-steps), and REST evidence can be collected (make rest-evidence)",
+     all((ROOT / "scripts" / f_).is_file() for f_ in ("drill.py", "drillreport.py", "operator-steps.py", "rest-evidence.py")) and (ROOT / "runbook.md").is_file()
+     and all(re.search(r"^" + t_ + r":", makefile, flags=re.M) for t_ in ("drill", "drill-report", "operator-steps", "rest-evidence")), False),
     ("A 3-node Kubernetes cluster is built by code (Terraform and Ansible)", infra_ok, not INFRA.is_dir()),
     ("NetworkPolicy restricting traffic between services", bool(policies), True),
     ("RBAC: a Role and a RoleBinding", bool(roles) and bool(of("RoleBinding")), True),
@@ -1359,6 +1631,7 @@ for d in docs:
 want = "(" + str(len(docs)) + " objects: namespace, " + str(kinds_n.get("NetworkPolicy", 0)) + " NetworkPolicies, " + str(kinds_n.get("ServiceAccount", 0)) + " service accounts, " + \
     str(kinds_n.get("Role", 0)) + " roles and " + str(kinds_n.get("RoleBinding", 0)) + " role bindings, " + str(kinds_n.get("ConfigMap", 0)) + " ConfigMaps, " + \
     str(kinds_n.get("Service", 0)) + " Services, " + str(kinds_n.get("StatefulSet", 0)) + " StatefulSets, " + str(kinds_n.get("Deployment", 0)) + " Deployments, " + \
+    str(kinds_n.get("DaemonSet", 0)) + (" DaemonSet, " if kinds_n.get("DaemonSet", 0) == 1 else " DaemonSets, ") + \
     str(kinds_n.get("HorizontalPodAutoscaler", 0)) + " autoscalers and " + str(kinds_n.get("Job", 0)) + " Jobs: the setup Job and the replay Job)"
 if want not in readme:
     fails.append("README.md has no sentence that lists the objects like this: " + want)
