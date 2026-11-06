@@ -420,7 +420,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Pods running: what the autoscalers did",
-      "description": "Producer pods (the horizontal autoscaler of the producers adds and removes them), pods that are sending, and processor pods (the processor autoscaler). A line that rises is a scale-up, a line that falls is a scale-down.",
+      "description": "Producer pods (the horizontal autoscaler of the producers adds and removes them), pods that are sending, and processor pods (the processor autoscaler). A line that rises is a scale-up, a line that falls is a scale-down. The processor line is dashed, so that it stays visible where it lies on top of the producer line.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -452,7 +452,26 @@
           },
           "min": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "processor pods running"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -1087,7 +1106,7 @@
       "id": 19,
       "type": "timeseries",
       "title": "REST API: requests per second",
-      "description": "Requests answered per second, split by the HTTP status (200 = ok, 401 = no or wrong login, 404 = not found).",
+      "description": "Requests answered per second (an average over the last 2 minutes), one line for each HTTP status that was answered recently: 200 = ok, 401 = no or wrong login, 404 = not found, 503 = the database did not answer. A status that nobody got has no line. At rest there is one line, 200, at about 0.3 requests per second: those are the health checks of Kubernetes itself.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1110,7 +1129,7 @@
             "lineInterpolation": "linear",
             "axisPlacement": "auto",
             "stacking": {
-              "mode": "normal",
+              "mode": "none",
               "group": "A"
             }
           },
@@ -1140,7 +1159,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (status) (rate(restapi_requests_total[$__rate_interval]))",
+          "expr": "sum by (status) (rate(restapi_requests_total[2m])) > 0",
           "legendFormat": "{{status}}",
           "editorMode": "code",
           "range": true,
@@ -1152,7 +1171,7 @@
       "id": 20,
       "type": "timeseries",
       "title": "REST API: errors per second",
-      "description": "Server errors (5xx: the API or the database failed) and client errors (4xx: wrong login, bad request).",
+      "description": "Server errors (red, 5xx: the API or the database failed) and client errors (orange, 4xx: wrong login, bad request). The red line is drawn on top, so a red line lying at 0 means that the server did not fail.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1236,8 +1255,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(rate(restapi_requests_total{status=~\"5..\"}[$__rate_interval])) or vector(0)",
-          "legendFormat": "server errors (5xx)",
+          "expr": "sum(rate(restapi_requests_total{status=~\"4..\"}[$__rate_interval])) or vector(0)",
+          "legendFormat": "client errors (4xx)",
           "editorMode": "code",
           "range": true,
           "instant": false
@@ -1248,8 +1267,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(rate(restapi_requests_total{status=~\"4..\"}[$__rate_interval])) or vector(0)",
-          "legendFormat": "client errors (4xx)",
+          "expr": "sum(rate(restapi_requests_total{status=~\"5..\"}[$__rate_interval])) or vector(0)",
+          "legendFormat": "server errors (5xx)",
           "editorMode": "code",
           "range": true,
           "instant": false
@@ -1682,7 +1701,7 @@
       "id": 28,
       "type": "timeseries",
       "title": "Log lines per second, by program",
-      "description": "How many log lines Loki receives per second from each program. If a program is missing here, its logs are not being collected.",
+      "description": "How many log lines Loki receives per second from each program, one line each (they are not stacked, so a line shows its own program only). If a program is missing here, its logs are not being collected.",
       "datasource": {
         "type": "loki",
         "uid": "loki"
@@ -1707,7 +1726,7 @@
             "showPoints": "never",
             "spanNulls": false,
             "stacking": {
-              "mode": "normal",
+              "mode": "none",
               "group": "A"
             }
           }
