@@ -1,0 +1,27 @@
+The newest log line of each program of the pipeline, as Loki keeps it (namespace ca3, last hour)
+
+producer
+  labels: app=producer container=producer detected_level=info instance=ca3/producer-smoke-sf9j5:producer job=loki.source.kubernetes.pods level=info namespace=ca3 node=ca3-server pod=producer-smoke-sf9j5 service=producer service_name=producer
+  line:   {"ts":"2026-11-06T19:02:32.851+00:00","level":"info","service":"producer","msg":"sent","trace_id":"smoke-1106-190230-548c","topic":"network-flows","partition":1,"offset":1667}
+
+
+processor
+  labels: app=processor container=processor detected_level=info instance=ca3/processor-6d4869f56b-8qsrh:processor job=loki.source.kubernetes.pods level=info namespace=ca3 node=ca3-agent-1 pod=processor-6d4869f56b-8qsrh service=processor service_name=processor
+  line:   {"ts":"2026-11-06T19:02:32.854+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1106-190230-548c","topic":"network-flows","partition":1,"offset":1667}
+
+
+restapi
+  labels: app=restapi container=restapi detected_level=info instance=ca3/restapi-5f54fc9f7b-87bbr:restapi job=loki.source.kubernetes.pods level=info namespace=ca3 node=ca3-agent-1 pod=restapi-5f54fc9f7b-87bbr service=restapi service_name=restapi
+  line:   {"ts":"2026-11-06T19:02:52.597+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.3}
+
+
+kafka
+  labels: app=kafka container=kafka detected_level=info instance=ca3/kafka-0:kafka job=loki.source.kubernetes.pods namespace=ca3 node=ca3-agent-1 pod=kafka-0 service_name=kafka
+  line:   [2026-11-06 18:29:25,072] INFO [SnapshotEmitter id=1] Successfully wrote snapshot 00000000000000007265-0000000001 (org.apache.kafka.image.publisher.SnapshotEmitter)
+
+
+mongo
+  labels: app=mongo container=mongo detected_level=unknown instance=ca3/mongo-0:mongo job=loki.source.kubernetes.pods namespace=ca3 node=ca3-agent-2 pod=mongo-0 service_name=mongo
+  line:   {"t":{"$date":"2026-11-06T19:07:33.226+00:00"},"s":"I",  "c":"NETWORK",  "id":22944,   "ctx":"conn4444","msg":"Connection ended","attr":{"remote":"10.42.1.6:52032","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"2146b852-7ac0-4022
+
+RESULT: PASS - Loki holds log lines with pod labels from all 5 programs; the 3 that write JSON also have the labels level and service

@@ -1,0 +1,11 @@
+NS=ca3 KUBECTL=kubectl python3 scripts/metrics-check.py --trace "smoke-1106-190230-548c" 
+Following the event smoke-1106-190230-548c through the logs in Loki (namespace ca3)
+
+  19:02:32.851  producer   info    {"ts":"2026-11-06T19:02:32.851+00:00","level":"info","service":"producer","msg":"sent","trace_id":"smoke-1106-190230-548c","topic":"network-flows","partition":1,"offset":1667}
+
+  19:02:32.855  processor  info    {"ts":"2026-11-06T19:02:32.854+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1106-190230-548c","topic":"network-flows","partition":1,"offset":1667}
+
+  19:02:52.474  restapi    info    {"ts":"2026-11-06T19:02:52.474+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/events/smoke-1106-190230-548c","status":200,"duration_ms":9.3,"trace_id":"smoke-1106-190230-548c"}
+
+
+RESULT: PASS - 3 log lines with this event id, from processor, producer, restapi: one id, one story across programs
