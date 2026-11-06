@@ -1,0 +1,22 @@
+NS=ca3 KUBECTL=kubectl python3 scripts/netpol-check.py
+NetworkPolicy test: 25 policies in namespace ca3
+
+Starting 13 probe pods (busybox; one of them in the namespace ca3-intruder)...
+
+Clean-up: no probe pod and no namespace ca3-intruder left
+
+RESULT: FAIL
+  - the probe pods did not start within 180 s (an image that cannot be downloaded is the usual reason):
+  probe-intruder: Running
+  probe-bootstrap: Running
+  probe-grafana: Running
+  probe-kafka-exporter: Running
+  probe-loki: Running
+  probe-mongodb-exporter: Running
+  probe-observer: Running
+  probe-processor: Running
+  probe-producer: Running
+  probe-prometheus: Running
+  probe-restapi: Running
+  probe-stranger: Running
+make: *** [netpol-check] Error 1

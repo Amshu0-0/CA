@@ -1,0 +1,64 @@
+NS=ca3 KUBECTL=kubectl python3 scripts/netpol-check.py
+NetworkPolicy test: 25 policies in namespace ca3
+
+Starting 13 probe pods (busybox; one of them in the namespace ca3-intruder)...
+Trying 169 connections (a blocked one can take up to 3 seconds to give up)...
+
+The pipeline (78 connections):
+  from              kafka:9092  mongo:27017  processor:8000  restapi:8443  DNS:53      k8s-api:443  
+  stranger          blocked     blocked      blocked         blocked       open        blocked      
+  intruder          blocked     blocked      blocked         open          open        open         
+  producer          open        blocked      blocked         blocked       open        blocked      
+  processor         open        open         blocked         blocked       open        blocked      
+  restapi           blocked     open         blocked         blocked       open        blocked      
+  observer          blocked     blocked      open            open          open        blocked      
+  bootstrap         blocked     blocked      blocked         blocked       open        open         
+  prometheus        blocked     blocked      open            open          open        blocked      
+  grafana           blocked     blocked      blocked         blocked       open        blocked      
+  loki              blocked     blocked      blocked         blocked       open        blocked      
+  alloy             blocked     blocked      blocked         blocked       open        open         
+  kafka-exporter    open        blocked      blocked         blocked       open        blocked      
+  mongodb-exporter  blocked     open         blocked         blocked       open        blocked      
+
+The monitoring (91 connections):
+  from              prometheus:9090  grafana:3000  loki:3100   kafka-exporter:9308  mongodb-exporter:9216  prod-metrics:8001  rest-metrics:9102  
+  stranger          blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  intruder          blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  producer          blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  processor         blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  restapi           blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  observer          blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  bootstrap         blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  prometheus        blocked          blocked       blocked     open                 open                   open               open               
+  grafana           open             blocked       open        blocked              blocked                blocked            blocked            
+  loki              blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  alloy             blocked          blocked       open        blocked              blocked                blocked            blocked            
+  kafka-exporter    blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+  mongodb-exporter  blocked          blocked       blocked     blocked              blocked                blocked            blocked            
+
+  open = the connection was accepted; blocked = it did not get through; ! = not what the policies say
+
+What that shows:
+  stranger          (no role, in ca3) reaches nothing but DNS: default-deny-all blocks the rest, and allow-dns-egress opens only the DNS server
+  intruder          (another namespace) reaches only the REST API of the pipeline: restapi-ingress is the one policy that accepts any sender (the policies of ca3 do not govern the other namespace, so it also reaches the Kubernetes API, as any pod there would)
+  producer          reaches only Kafka: producer-egress lets it out, kafka-ingress lets it in
+  processor         reaches Kafka and MongoDB: processor-egress, kafka-ingress and mongo-ingress
+  restapi           reaches only MongoDB: restapi-egress and mongo-ingress
+  observer          (the monitoring role) reaches the processor's metrics port and the REST API: observer-egress, processor-ingress and restapi-ingress
+  bootstrap         reaches only the Kubernetes API server (and DNS): bootstrap-egress is the one rule that lets a pod out to it
+  prometheus        reads the numbers: the processor's port and the REST API's port 8443 (observer-egress, which Prometheus also wears), and what prometheus-egress names (the producers' port, the REST API's metrics port, the two exporters); never Kafka, MongoDB, Loki or Grafana
+  grafana           reaches only Prometheus and Loki: grafana-egress, prometheus-ingress and loki-ingress
+  loki              reaches nothing but DNS: it has no egress rule of its own (it takes logs in and answers searches, it never calls out)
+  alloy             reaches Loki (to send the logs) and the Kubernetes API server (to find the pods and read their logs): alloy-egress, loki-ingress
+  kafka-exporter    reaches only Kafka: kafka-exporter-egress and kafka-exporter-to-kafka (the first exception to 'only the producers and the processor talk to Kafka')
+  mongodb-exporter  reaches only MongoDB: mongodb-exporter-egress and mongodb-exporter-to-mongo (the second exception)
+  The column grafana:3000 is blocked for every pod: no rule lets any pod call Grafana. You reach it from your computer with kubectl port-forward, which is not a pod-to-pod connection.
+  In the second table every open cell is a sender that a policy names: Grafana reads Prometheus and Loki, Alloy sends the logs to Loki, Prometheus reads the exporters and the metrics ports.
+
+The observer pod reads the processor's metrics port: processor_messages_total 131362.0; processor_alerts_total 51784.0; processor_ready 1.0
+The grafana pod asks Prometheus (/-/ready): Prometheus Server is Ready.
+The grafana pod asks Loki (/ready): ready
+
+Clean-up: no probe pod and no namespace ca3-intruder left
+
+RESULT: PASS - all 169 connections behave as the policies say (34 allowed, 135 blocked)

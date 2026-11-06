@@ -14,6 +14,11 @@
 # The probe pods are never "ready" on purpose. The Services of the stack choose their pods by the label app.kubernetes.io/name, and a probe
 # wears such a label; a pod that is not ready gets no traffic from a Service, so a probe never takes a call that is meant for a real pod.
 #
+# One probe needs more: the Alloy probe. Alloy runs as a DaemonSet, and a DaemonSet takes (adopts) every pod without an owner whose labels
+# match its selector, then deletes the extra one (every machine already has its Alloy pod). The Alloy probe wears exactly that label, so it
+# is created with an owner, its own namespace (the way the kubelet's mirror pods belong to their node): a controller leaves a pod alone that
+# already belongs to something else. Found on the first real run, where 12 of the 13 probes started and this one was gone after a second.
+#
 # The rules reach a new pod a few seconds after it starts, so an answer that is not the expected one is tried again for up
 # to --patience seconds before it counts, and the report says when that was needed.
 # The probe pods and the namespace ca3-intruder are removed at the end, also when the test fails.
@@ -47,6 +52,9 @@ PROBES = [
     ("kafka-exporter", lib.NS, {NAME: "kafka-exporter"}, "wears the Kafka exporter's label"),
     ("mongodb-exporter", lib.NS, {NAME: "mongodb-exporter"}, "wears the MongoDB exporter's label"),
 ]
+
+# The probes whose label is the selector of a controller that adopts pods without an owner (the DaemonSet alloy). They are created with an owner.
+OWNED = ("alloy",)
 
 # What each probe tries to reach: (column title, Service name, port). A name without a dot is a Service of the namespace ca3; a name with dots
 # is used as it is. The DNS server is found by its address. "k8s-api" is the Service of the Kubernetes API server (the setup Job's one connection).
@@ -116,6 +124,13 @@ def pod_manifest(short, namespace, labels):
     }
 
 
+# The owner of a probe that a controller would adopt: its own namespace (an object that exists as long as the probe does).
+def owner_of(namespace):
+    uid = lib.kube_json("get", "namespace", namespace)["metadata"]["uid"]
+
+    return {"apiVersion": "v1", "kind": "Namespace", "name": namespace, "uid": uid, "controller": True}
+
+
 # Remove every probe pod and the other namespace. Safe to call when nothing is there.
 def cleanup():
     lib.kubectl("-n", lib.NS, "delete", "pods", "-l", TEST, "--now", "--wait=true", "--timeout=60s", timeout=90)
@@ -165,7 +180,17 @@ def start_probes(wanted, wait=180):
         if not lib.wait_for(lambda: lib.kubectl("-n", INTRUDER_NS, "get", "serviceaccount", "default", "-o", "name")[0] == 0, 30, interval=1)[0]:
             raise lib.Fail("the namespace " + INTRUDER_NS + " did not get its default ServiceAccount within 30 s")
 
-    items = [pod_manifest(*p[:3]) for p in PROBES if p[0] in wanted]
+    items = []
+
+    for p in PROBES:
+        if p[0] in wanted:
+            manifest = pod_manifest(*p[:3])
+
+            if p[0] in OWNED:
+                manifest["metadata"]["ownerReferences"] = [owner_of(p[1])]
+
+            items.append(manifest)
+
     code, out, err = lib.kubectl("create", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": items}))
 
     if code != 0:
@@ -176,8 +201,12 @@ def start_probes(wanted, wait=180):
         return pods if len(pods) == len(wanted) and all(is_running(p) for p in pods) else None
 
     if not lib.wait_for(all_running, wait, interval=3)[0]:
-        states = [why_not_ready(p) for p in lib.kube_json("get", "pods", "-A", "-l", TEST)["items"]]
-        raise lib.Fail("the probe pods did not start within " + str(wait) + " s (an image that cannot be downloaded is the usual reason):\n  " + "\n  ".join(states))
+        pods = lib.kube_json("get", "pods", "-A", "-l", TEST)["items"]
+        there = {p["metadata"]["name"] for p in pods}
+        states = [why_not_ready(p) for p in pods]
+        states += ["probe-" + short + ": not there any more (something deleted it after it was created)" for short in wanted if "probe-" + short not in there]
+        raise lib.Fail("the probe pods did not all start within " + str(wait) + " s (an image that cannot be downloaded is the usual reason; a probe that is "
+                       "'not there any more' was deleted by something else):\n  " + "\n  ".join(states))
 
 
 # Try to open one TCP connection from a probe pod. Returns (it worked, the last line of what nc said).

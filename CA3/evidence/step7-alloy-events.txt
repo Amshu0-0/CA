@@ -1,0 +1,13 @@
+23m         Normal    Scheduled          pod/probe-alloy              Successfully assigned ca3/probe-alloy to ca3-server
+13m         Normal    Scheduled          pod/probe-alloy              Successfully assigned ca3/probe-alloy to ca3-server
+23m         Normal    Created            pod/probe-alloy              Container created
+23m         Normal    Pulled             pod/probe-alloy              Container image "busybox:1.36" already present on machine and can be accessed by the pod
+23m         Normal    Started            pod/probe-alloy              Container started
+23m         Warning   Unhealthy          pod/probe-alloy              Readiness probe failed:
+23m         Normal    Killing            pod/probe-alloy              Stopping container probe
+13m         Normal    SuccessfulDelete   daemonset/alloy              Deleted pod: probe-alloy
+13m         Normal    Pulled             pod/probe-alloy              Container image "busybox:1.36" already present on machine and can be accessed by the pod
+13m         Normal    Created            pod/probe-alloy              Container created
+13m         Normal    Started            pod/probe-alloy              Container started
+13m         Normal    Killing            pod/probe-alloy              Stopping container probe
+13m         Warning   Unhealthy          pod/probe-alloy              Readiness probe failed:
