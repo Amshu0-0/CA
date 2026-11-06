@@ -1,0 +1,118 @@
+kubectl context: ca3-k3s   (kubeconfig: /Users/<user>/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
+( kubectl apply -k . || { echo "kubectl reported an error. If it says that the Job bootstrap cannot be changed, the finished Job is replaced and the stack applied again:" ; \
+      kubectl -n ca3 delete job bootstrap --ignore-not-found && kubectl apply -k . ; } ) && \
+    ( kubectl -n ca3 wait --for=condition=complete job/bootstrap --timeout=300s && \
+      kubectl -n ca3 rollout status statefulset/mongo --timeout=420s && \
+      kubectl -n ca3 rollout status statefulset/kafka --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/processor --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/restapi --timeout=300s && \
+      kubectl -n ca3 wait --for=condition=complete job/producer-replay --timeout=600s && \
+      kubectl -n ca3 rollout status deployment/kafka-exporter --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/mongodb-exporter --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/prometheus --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/loki --timeout=300s && \
+      kubectl -n ca3 rollout status daemonset/alloy --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/grafana --timeout=300s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check   and check the monitoring with:  make metrics-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
+namespace/ca3 unchanged
+serviceaccount/alloy created
+serviceaccount/bootstrap unchanged
+serviceaccount/grafana created
+serviceaccount/kafka unchanged
+serviceaccount/kafka-exporter created
+serviceaccount/loki created
+serviceaccount/mongo unchanged
+serviceaccount/mongodb-exporter created
+serviceaccount/pipeline-operator unchanged
+serviceaccount/pipeline-viewer unchanged
+serviceaccount/processor unchanged
+serviceaccount/producer unchanged
+serviceaccount/prometheus created
+serviceaccount/restapi unchanged
+role.rbac.authorization.k8s.io/alloy created
+role.rbac.authorization.k8s.io/bootstrap unchanged
+role.rbac.authorization.k8s.io/pipeline-operator unchanged
+role.rbac.authorization.k8s.io/pipeline-viewer unchanged
+rolebinding.rbac.authorization.k8s.io/alloy created
+rolebinding.rbac.authorization.k8s.io/bootstrap unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-operator unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer unchanged
+configmap/alloy-config created
+configmap/grafana-dashboards created
+configmap/grafana-provisioning created
+configmap/loki-config created
+configmap/mongo-init unchanged
+configmap/pipeline-config unchanged
+configmap/processor-config unchanged
+configmap/prometheus-config created
+service/grafana created
+service/kafka unchanged
+service/kafka-exporter created
+service/kafka-headless unchanged
+service/loki created
+service/mongo unchanged
+service/mongo-headless unchanged
+service/mongodb-exporter created
+service/processor unchanged
+service/processor-metrics created
+service/producer-metrics created
+service/prometheus created
+service/restapi unchanged
+service/restapi-metrics created
+deployment.apps/grafana created
+deployment.apps/kafka-exporter created
+deployment.apps/loki created
+deployment.apps/mongodb-exporter created
+deployment.apps/processor unchanged
+deployment.apps/producer-load unchanged
+deployment.apps/prometheus created
+deployment.apps/restapi unchanged
+statefulset.apps/kafka unchanged
+statefulset.apps/mongo unchanged
+daemonset.apps/alloy created
+horizontalpodautoscaler.autoscaling/processor unchanged
+horizontalpodautoscaler.autoscaling/producer-load unchanged
+job.batch/bootstrap unchanged
+job.batch/producer-replay unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/alloy-egress created
+networkpolicy.networking.k8s.io/bootstrap-egress unchanged
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/grafana-egress created
+networkpolicy.networking.k8s.io/kafka-exporter-egress created
+networkpolicy.networking.k8s.io/kafka-exporter-ingress created
+networkpolicy.networking.k8s.io/kafka-exporter-to-kafka created
+networkpolicy.networking.k8s.io/kafka-ingress unchanged
+networkpolicy.networking.k8s.io/kafka-self unchanged
+networkpolicy.networking.k8s.io/loki-ingress created
+networkpolicy.networking.k8s.io/mongo-ingress unchanged
+networkpolicy.networking.k8s.io/mongodb-exporter-egress created
+networkpolicy.networking.k8s.io/mongodb-exporter-ingress created
+networkpolicy.networking.k8s.io/mongodb-exporter-to-mongo created
+networkpolicy.networking.k8s.io/observer-egress unchanged
+networkpolicy.networking.k8s.io/processor-egress unchanged
+networkpolicy.networking.k8s.io/processor-ingress unchanged
+networkpolicy.networking.k8s.io/producer-egress unchanged
+networkpolicy.networking.k8s.io/producer-metrics-ingress created
+networkpolicy.networking.k8s.io/prometheus-egress created
+networkpolicy.networking.k8s.io/prometheus-ingress created
+networkpolicy.networking.k8s.io/restapi-egress unchanged
+networkpolicy.networking.k8s.io/restapi-ingress unchanged
+networkpolicy.networking.k8s.io/restapi-metrics-ingress created
+job.batch/bootstrap condition met
+partitioned roll out complete: 1 new pods have been updated...
+partitioned roll out complete: 1 new pods have been updated...
+deployment "processor" successfully rolled out
+deployment "restapi" successfully rolled out
+job.batch/producer-replay condition met
+Waiting for deployment "kafka-exporter" rollout to finish: 0 of 1 updated replicas are available...
+deployment "kafka-exporter" successfully rolled out
+deployment "mongodb-exporter" successfully rolled out
+deployment "prometheus" successfully rolled out
+Waiting for deployment "loki" rollout to finish: 0 of 1 updated replicas are available...
+deployment "loki" successfully rolled out
+daemon set "alloy" successfully rolled out
+deployment "grafana" successfully rolled out
+Stack is up. Call the REST API from this computer with:  make rest-check   and check the monitoring with:  make metrics-check
+make up took 0 min 42 s

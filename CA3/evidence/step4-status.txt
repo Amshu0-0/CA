@@ -1,0 +1,155 @@
+kubectl -n ca3 get all,pvc,configmap,secret,hpa,networkpolicy,serviceaccount,role,rolebinding -o wide
+NAME                                    READY   STATUS      RESTARTS   AGE    IP           NODE          NOMINATED NODE   READINESS GATES
+pod/alloy-8bcnx                         1/1     Running     0          2m     10.42.2.11   ca3-agent-1   <none>           <none>
+pod/alloy-d4nql                         1/1     Running     0          2m     10.42.0.20   ca3-server    <none>           <none>
+pod/alloy-hv5lw                         1/1     Running     0          2m     10.42.1.10   ca3-agent-2   <none>           <none>
+pod/bootstrap-qmvbh                     0/1     Completed   0          71m    10.42.2.2    ca3-agent-1   <none>           <none>
+pod/grafana-7f87954cc5-64785            1/1     Running     0          2m1s   10.42.1.9    ca3-agent-2   <none>           <none>
+pod/kafka-0                             1/1     Running     0          39m    10.42.2.7    ca3-agent-1   <none>           <none>
+pod/kafka-exporter-5dbbf4d5f9-88mkr     1/1     Running     0          2m1s   10.42.2.8    ca3-agent-1   <none>           <none>
+pod/loki-6bfdf55564-x9jsh               1/1     Running     0          2m1s   10.42.0.19   ca3-server    <none>           <none>
+pod/mongo-0                             1/1     Running     0          40m    10.42.1.7    ca3-agent-2   <none>           <none>
+pod/mongodb-exporter-746d4897c4-kvsb8   1/1     Running     0          2m1s   10.42.2.9    ca3-agent-1   <none>           <none>
+pod/processor-6d4869f56b-cc4g5          1/1     Running     0          40m    10.42.0.18   ca3-server    <none>           <none>
+pod/producer-load-66dcbb6f55-hm9hg      1/1     Running     0          71m    10.42.2.4    ca3-agent-1   <none>           <none>
+pod/producer-replay-5mmxx               0/1     Completed   0          71m    10.42.1.6    ca3-agent-2   <none>           <none>
+pod/prometheus-84888865f5-ngg5d         1/1     Running     0          2m1s   10.42.2.10   ca3-agent-1   <none>           <none>
+pod/restapi-5f54fc9f7b-h5llz            1/1     Running     0          40m    10.42.0.16   ca3-server    <none>           <none>
+pod/restapi-5f54fc9f7b-r4n8v            1/1     Running     0          71m    10.42.1.4    ca3-agent-2   <none>           <none>
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE    SELECTOR
+service/grafana             ClusterIP   10.43.190.18    <none>        3000/TCP         2m3s   app.kubernetes.io/name=grafana
+service/kafka               ClusterIP   10.43.42.80     <none>        9092/TCP         71m    app.kubernetes.io/name=kafka
+service/kafka-exporter      ClusterIP   10.43.36.5      <none>        9308/TCP         2m2s   app.kubernetes.io/name=kafka-exporter
+service/kafka-headless      ClusterIP   None            <none>        9092/TCP         71m    app.kubernetes.io/name=kafka
+service/loki                ClusterIP   10.43.190.59    <none>        3100/TCP         2m2s   app.kubernetes.io/name=loki
+service/mongo               ClusterIP   10.43.235.21    <none>        27017/TCP        71m    app.kubernetes.io/name=mongo
+service/mongo-headless      ClusterIP   None            <none>        27017/TCP        71m    app.kubernetes.io/name=mongo
+service/mongodb-exporter    ClusterIP   10.43.221.26    <none>        9216/TCP         2m2s   app.kubernetes.io/name=mongodb-exporter
+service/processor           ClusterIP   10.43.99.15     <none>        8000/TCP         71m    app.kubernetes.io/name=processor
+service/processor-metrics   ClusterIP   None            <none>        8000/TCP         2m2s   app.kubernetes.io/name=processor
+service/producer-metrics    ClusterIP   None            <none>        8001/TCP         2m2s   app.kubernetes.io/name=producer
+service/prometheus          ClusterIP   10.43.143.199   <none>        9090/TCP         2m2s   app.kubernetes.io/name=prometheus
+service/restapi             NodePort    10.43.111.140   <none>        8443:30080/TCP   71m    app.kubernetes.io/name=restapi
+service/restapi-metrics     ClusterIP   None            <none>        9102/TCP         2m1s   app.kubernetes.io/name=restapi
+
+NAME                   DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE   CONTAINERS   IMAGES                 SELECTOR
+daemonset.apps/alloy   3         3         3       3            3           <none>          2m    alloy        grafana/alloy:v1.5.0   app.kubernetes.io/name=alloy
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS         IMAGES                                 SELECTOR
+deployment.apps/grafana            1/1     1            1           2m1s   grafana            grafana/grafana:11.3.0                 app.kubernetes.io/name=grafana
+deployment.apps/kafka-exporter     1/1     1            1           2m1s   kafka-exporter     danielqsj/kafka-exporter:v1.9.0        app.kubernetes.io/name=kafka-exporter
+deployment.apps/loki               1/1     1            1           2m1s   loki               grafana/loki:3.3.0                     app.kubernetes.io/name=loki
+deployment.apps/mongodb-exporter   1/1     1            1           2m1s   mongodb-exporter   percona/mongodb_exporter:0.40.0        app.kubernetes.io/name=mongodb-exporter
+deployment.apps/processor          1/1     1            1           71m    processor          ghcr.io/amshu0-0/ca3-processor:1.0.0   app.kubernetes.io/name=processor
+deployment.apps/producer-load      1/1     1            1           71m    producer           ghcr.io/amshu0-0/ca3-producer:1.0.0    app.kubernetes.io/component=load-generator,app.kubernetes.io/name=producer
+deployment.apps/prometheus         1/1     1            1           2m1s   prometheus         prom/prometheus:v2.55.1                app.kubernetes.io/name=prometheus
+deployment.apps/restapi            2/2     2            2           71m    restapi            ghcr.io/amshu0-0/ca3-restapi:1.0.0     app.kubernetes.io/name=restapi
+
+NAME                                          DESIRED   CURRENT   READY   AGE    CONTAINERS         IMAGES                                 SELECTOR
+replicaset.apps/grafana-7f87954cc5            1         1         1       2m1s   grafana            grafana/grafana:11.3.0                 app.kubernetes.io/name=grafana,pod-template-hash=7f87954cc5
+replicaset.apps/kafka-exporter-5dbbf4d5f9     1         1         1       2m1s   kafka-exporter     danielqsj/kafka-exporter:v1.9.0        app.kubernetes.io/name=kafka-exporter,pod-template-hash=5dbbf4d5f9
+replicaset.apps/loki-6bfdf55564               1         1         1       2m1s   loki               grafana/loki:3.3.0                     app.kubernetes.io/name=loki,pod-template-hash=6bfdf55564
+replicaset.apps/mongodb-exporter-746d4897c4   1         1         1       2m1s   mongodb-exporter   percona/mongodb_exporter:0.40.0        app.kubernetes.io/name=mongodb-exporter,pod-template-hash=746d4897c4
+replicaset.apps/processor-6d4869f56b          1         1         1       71m    processor          ghcr.io/amshu0-0/ca3-processor:1.0.0   app.kubernetes.io/name=processor,pod-template-hash=6d4869f56b
+replicaset.apps/producer-load-66dcbb6f55      1         1         1       71m    producer           ghcr.io/amshu0-0/ca3-producer:1.0.0    app.kubernetes.io/component=load-generator,app.kubernetes.io/name=producer,pod-template-hash=66dcbb6f55
+replicaset.apps/prometheus-84888865f5         1         1         1       2m1s   prometheus         prom/prometheus:v2.55.1                app.kubernetes.io/name=prometheus,pod-template-hash=84888865f5
+replicaset.apps/restapi-5f54fc9f7b            2         2         2       71m    restapi            ghcr.io/amshu0-0/ca3-restapi:1.0.0     app.kubernetes.io/name=restapi,pod-template-hash=5f54fc9f7b
+
+NAME                     READY   AGE   CONTAINERS   IMAGES
+statefulset.apps/kafka   1/1     71m   kafka        confluentinc/cp-kafka:7.7.1
+statefulset.apps/mongo   1/1     71m   mongo        mongo:7.0
+
+NAME                                                REFERENCE                  TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/processor       Deployment/processor       cpu: 7%/70%   1         3         1          71m
+horizontalpodautoscaler.autoscaling/producer-load   Deployment/producer-load   cpu: 1%/50%   1         5         1          71m
+
+NAME                        STATUS     COMPLETIONS   DURATION   AGE   CONTAINERS   IMAGES                                 SELECTOR
+job.batch/bootstrap         Complete   1/1           10s        71m   bootstrap    ghcr.io/amshu0-0/ca3-processor:1.0.0   batch.kubernetes.io/controller-uid=35a8cb89-a479-42d9-a099-34a40c966816
+job.batch/producer-replay   Complete   1/1           56s        71m   producer     ghcr.io/amshu0-0/ca3-producer:1.0.0    batch.kubernetes.io/controller-uid=4efead23-33d5-41fc-baf8-7d763a3c795c
+
+NAME                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
+persistentvolumeclaim/data-kafka-0   Bound    pvc-648e666a-38c8-4189-93b7-1198a40f1eed   5Gi        RWO            local-path     <unset>                 71m   Filesystem
+persistentvolumeclaim/data-mongo-0   Bound    pvc-93628baa-6d67-40b1-a183-7668a53789e8   5Gi        RWO            local-path     <unset>                 71m   Filesystem
+
+NAME                             DATA   AGE
+configmap/alloy-config           1      2m3s
+configmap/grafana-dashboards     1      2m3s
+configmap/grafana-provisioning   2      2m3s
+configmap/kube-root-ca.crt       1      71m
+configmap/loki-config            1      2m3s
+configmap/mongo-init             1      71m
+configmap/pipeline-config        14     71m
+configmap/processor-config       2      71m
+configmap/prometheus-config      1      2m3s
+
+NAME                            TYPE     DATA   AGE
+secret/grafana-admin            Opaque   2      71m
+secret/kafka-client-exporter    Opaque   3      71m
+secret/kafka-client-processor   Opaque   3      71m
+secret/kafka-client-producer    Opaque   3      71m
+secret/kafka-tls                Opaque   2      71m
+secret/mongo-exporter           Opaque   2      71m
+secret/mongo-processor          Opaque   2      71m
+secret/mongo-restapi            Opaque   2      71m
+secret/mongo-root               Opaque   2      71m
+secret/mongo-tls                Opaque   2      71m
+secret/pki-ca                   Opaque   1      71m
+secret/restapi-login            Opaque   2      71m
+secret/restapi-tls              Opaque   2      71m
+
+NAME                                                        POD-SELECTOR                              AGE
+networkpolicy.networking.k8s.io/allow-dns-egress            <none>                                    45m
+networkpolicy.networking.k8s.io/alloy-egress                app.kubernetes.io/name=alloy              2m
+networkpolicy.networking.k8s.io/bootstrap-egress            app.kubernetes.io/name=bootstrap          45m
+networkpolicy.networking.k8s.io/default-deny-all            <none>                                    45m
+networkpolicy.networking.k8s.io/grafana-egress              app.kubernetes.io/name=grafana            2m
+networkpolicy.networking.k8s.io/kafka-exporter-egress       app.kubernetes.io/name=kafka-exporter     2m
+networkpolicy.networking.k8s.io/kafka-exporter-ingress      app.kubernetes.io/name=kafka-exporter     119s
+networkpolicy.networking.k8s.io/kafka-exporter-to-kafka     app.kubernetes.io/name=kafka              119s
+networkpolicy.networking.k8s.io/kafka-ingress               app.kubernetes.io/name=kafka              45m
+networkpolicy.networking.k8s.io/kafka-self                  app.kubernetes.io/name=kafka              45m
+networkpolicy.networking.k8s.io/loki-ingress                app.kubernetes.io/name=loki               119s
+networkpolicy.networking.k8s.io/mongo-ingress               app.kubernetes.io/name=mongo              45m
+networkpolicy.networking.k8s.io/mongodb-exporter-egress     app.kubernetes.io/name=mongodb-exporter   119s
+networkpolicy.networking.k8s.io/mongodb-exporter-ingress    app.kubernetes.io/name=mongodb-exporter   119s
+networkpolicy.networking.k8s.io/mongodb-exporter-to-mongo   app.kubernetes.io/name=mongo              119s
+networkpolicy.networking.k8s.io/observer-egress             app.kubernetes.io/component=observer      45m
+networkpolicy.networking.k8s.io/processor-egress            app.kubernetes.io/name=processor          45m
+networkpolicy.networking.k8s.io/processor-ingress           app.kubernetes.io/name=processor          45m
+networkpolicy.networking.k8s.io/producer-egress             app.kubernetes.io/name=producer           45m
+networkpolicy.networking.k8s.io/producer-metrics-ingress    app.kubernetes.io/name=producer           118s
+networkpolicy.networking.k8s.io/prometheus-egress           app.kubernetes.io/name=prometheus         118s
+networkpolicy.networking.k8s.io/prometheus-ingress          app.kubernetes.io/name=prometheus         118s
+networkpolicy.networking.k8s.io/restapi-egress              app.kubernetes.io/name=restapi            45m
+networkpolicy.networking.k8s.io/restapi-ingress             app.kubernetes.io/name=restapi            45m
+networkpolicy.networking.k8s.io/restapi-metrics-ingress     app.kubernetes.io/name=restapi            118s
+
+NAME                               AGE
+serviceaccount/alloy               2m6s
+serviceaccount/bootstrap           71m
+serviceaccount/default             71m
+serviceaccount/grafana             2m6s
+serviceaccount/kafka               71m
+serviceaccount/kafka-exporter      2m6s
+serviceaccount/loki                2m6s
+serviceaccount/mongo               71m
+serviceaccount/mongodb-exporter    2m6s
+serviceaccount/pipeline-operator   71m
+serviceaccount/pipeline-viewer     71m
+serviceaccount/processor           71m
+serviceaccount/producer            71m
+serviceaccount/prometheus          2m5s
+serviceaccount/restapi             71m
+
+NAME                                               CREATED AT
+role.rbac.authorization.k8s.io/alloy               2026-11-04T18:22:49Z
+role.rbac.authorization.k8s.io/bootstrap           2026-11-04T17:13:09Z
+role.rbac.authorization.k8s.io/pipeline-operator   2026-11-04T17:13:09Z
+role.rbac.authorization.k8s.io/pipeline-viewer     2026-11-04T17:13:09Z
+
+NAME                                                      ROLE                     AGE    USERS   GROUPS   SERVICEACCOUNTS
+rolebinding.rbac.authorization.k8s.io/alloy               Role/alloy               2m5s                    ca3/alloy
+rolebinding.rbac.authorization.k8s.io/bootstrap           Role/bootstrap           71m                     ca3/bootstrap
+rolebinding.rbac.authorization.k8s.io/pipeline-operator   Role/pipeline-operator   71m                     ca3/pipeline-operator
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer     Role/pipeline-viewer     71m                     ca3/pipeline-viewer

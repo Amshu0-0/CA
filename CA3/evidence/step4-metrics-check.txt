@@ -1,0 +1,39 @@
+NS=ca3 KUBECTL=kubectl python3 scripts/metrics-check.py 
+Monitoring check (namespace ca3): asks Prometheus, Loki and Grafana from inside their pods
+
+[1/4] Prometheus reads every program
+      Prometheus says: Prometheus Server is Ready.
+      producer          1 of 1 targets up
+      processor         1 of 1 targets up
+      restapi           2 of 2 targets up
+      kafka-exporter    1 of 1 targets up
+      mongodb-exporter  1 of 1 targets up
+      prometheus        1 of 1 targets up
+
+[2/4] The numbers the assignment names exist
+      producer rate, events per second (all producers)        0
+      consumer lag of the group processor, messages           0
+      database inserts per second (MongoDB's own count)       0
+      events stored by the processor since it started         5000
+      REST requests per second                                0.2545
+      REST server errors per second (status 5xx)              0
+      REST latency, 95% of the answers faster than (seconds)  0.0048
+
+[3/4] Loki holds the logs of every program
+      Loki says: ready
+      programs with logs in Loki: alloy, bootstrap, grafana, kafka, kafka-exporter, loki, mongo, mongodb-exporter, processor, producer, prometheus, restapi
+      levels seen in the logs:    info, warning
+
+[4/4] Grafana has the dashboard and both data sources
+      health: database ok, version 11.3.0
+      dashboards found: CA3, CA3 pipeline
+      data source prometheus OK: Successfully queried the Prometheus API.
+      data source loki       OK: Data source successfully connected.
+
+Summary
+  PASS  prometheus every one of the 7 targets is up
+  PASS  numbers    all 7 numbers exist
+  PASS  loki       logs of 7 programs are in Loki, with level labels
+  PASS  grafana    the dashboard is loaded and both data sources answer
+
+RESULT: PASS - 4 of 4 monitoring checks passed
