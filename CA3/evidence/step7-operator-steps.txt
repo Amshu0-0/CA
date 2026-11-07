@@ -1,0 +1,119 @@
+Operator steps, 2026-11-07 02:20 UTC   (namespace ca3)
+These are the manual steps of runbook.md, done once on the running stack. Nothing here deletes data.
+
+====================================================================================================
+1. Check the logs
+====================================================================================================
+
+First question when something is wrong: what did the program say? The producer, the processor and the REST API write one JSON line per event (Kafka and MongoDB write their own format), so the last lines tell what the program did last.
+
+   $ kubectl -n ca3 logs kafka-0 -c kafka --tail=3
+       [2026-11-07 01:06:28,479] INFO [SnapshotEmitter id=1] Successfully wrote snapshot 00000000000000054986-0000000002 (org.apache.kafka.image.publisher.SnapshotEmitter)
+       [2026-11-07 02:06:28,733] INFO [SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000000062185-0000000002 because we have waited at least 60 minute(s). (org.apache.kafka.image.publisher.SnapshotGenerator)
+       [2026-11-07 02:06:28,742] INFO [SnapshotEmitter id=1] Successfully wrote snapshot 00000000000000062185-0000000002 (org.apache.kafka.image.publisher.SnapshotEmitter)
+   ok:       Kafka: the log of kafka-0 can be read
+
+   $ kubectl -n ca3 logs processor-6d4869f56b-rjxqg -c processor --tail=3
+       {"ts":"2026-11-07T00:11:19.372+00:00","level":"info","service":"processor","msg":"progress","rows":10036,"alerts":3952,"topic":"network-flows"}
+       {"ts":"2026-11-07T00:11:27.824+00:00","level":"info","service":"processor","msg":"progress","rows":15044,"alerts":5920,"topic":"network-flows"}
+       {"ts":"2026-11-07T00:11:52.071+00:00","level":"info","service":"processor","msg":"progress","rows":20045,"alerts":7906,"topic":"network-flows"}
+   ok:       Processor: the log of processor-6d4869f56b-rjxqg can be read
+
+   $ kubectl -n ca3 logs mongo-0 -c mongo --tail=3
+       {"t":{"$date":"2026-11-07T02:20:48.228+00:00"},"s":"I", "c":"NETWORK", "id":22944, "ctx":"conn5985","msg":"Connection ended","attr":{"remote":"10.42.1.6:35446","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"d00709ac-ea67-492c-...
+       {"t":{"$date":"2026-11-07T02:20:48.402+00:00"},"s":"I", "c":"NETWORK", "id":22943, "ctx":"listener","msg":"Connection accepted","attr":{"remote":"10.42.3.1:54128","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"f2742e39-0135-46...
+       {"t":{"$date":"2026-11-07T02:20:48.402+00:00"},"s":"I", "c":"NETWORK", "id":22944, "ctx":"conn5989","msg":"Connection ended","attr":{"remote":"10.42.3.1:54128","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"f2742e39-0135-469f-...
+   ok:       MongoDB: the log of mongo-0 can be read
+
+   $ kubectl -n ca3 logs restapi-5f54fc9f7b-87bbr -c restapi --tail=3
+       {"ts":"2026-11-07T00:12:05.214+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.8}
+       {"ts":"2026-11-07T00:12:06.229+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.0}
+       {"ts":"2026-11-07T00:12:07.280+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.1}
+   ok:       REST API: the log of restapi-5f54fc9f7b-87bbr can be read
+
+   $ kubectl -n ca3 logs producer-load-66dcbb6f55-xrpg5 -c producer --tail=3
+       {"ts":"2026-11-07T00:12:12.555+00:00","level":"info","service":"producer","msg":"idle: connected to Kafka over TLS, sending nothing. The scaling test switches the load on (producer/loadtest).","topic":"network-flows"}
+   ok:       Producer (load generator): the log of producer-load-66dcbb6f55-xrpg5 can be read
+
+A pod that crashed and was restarted keeps the log of its last run:  kubectl -n ca3 logs <pod> --previous
+A pod that was deleted takes its log with it, but Loki has kept the lines for 24 hours (Grafana > Explore > Loki, or the search below).
+
+   $ Loki:  {namespace="ca3"} |~ "(?i)(error|exception|traceback|refused|timed out)" != "Checking authorization failed"      (the last 15 minutes)
+       0 lines in 0 pods.
+       (The search leaves out the lines of mongo-0 that say 'Checking authorization failed': the small account of the metrics reader is refused all the time, and in
+       those lines the word error is only the name of a field. After a drill there are lines on purpose: the pods that lost MongoDB or Kafka said so.)
+   ok:       Loki answers the error search
+
+====================================================================================================
+2. Scale replicas
+====================================================================================================
+
+A replica is a means, not a goal. The REST API has 2 pods so that it keeps answering while one of them is replaced (the goal 'api-gap' in slo.json).
+To see the manual step, the REST API goes to 3 pods and then back. This is the only Deployment without an autoscaler.
+
+   $ kubectl -n ca3 get deployment restapi
+       now: 2 wanted, 2 ready (2 pods)
+   ok:       the REST API starts with all its pods ready (2 of 2)
+   $ kubectl -n ca3 scale deployment/restapi --replicas=3
+       deployment.apps/restapi scaled
+   ok:       kubectl scale to 3 was accepted
+       after 8 s: 3 wanted, 3 ready (3 pods)
+   ok:       the extra pod became ready within 240 s (3 of 3 ready)
+
+   $ curl https://<node-address>:30080/stats      (with the login of the Secret restapi-login)
+       HTTP 200   {"collection":"flows","database":"ca3","documents":370358}
+   ok:       the REST API answers /stats with 3 pods
+
+Back to the normal number. The file restapi/restapi.yaml says 2. A change made with  kubectl scale  is not in the file, and  kubectl apply -k .  does not undo it
+(apply only sends what changed in the file), so it is undone by hand here. To keep a different number, change  replicas:  in the file.
+   $ kubectl -n ca3 scale deployment/restapi --replicas=2
+       deployment.apps/restapi scaled
+       after 4 s: 2 wanted, 2 ready (2 pods listed)
+   ok:       the REST API is back to 2 pods, all ready
+
+The other two parts that have more than one pod are not scaled by hand: the processor (1 to 3 pods, processor/hpa.yaml) and the load generator (1 to 5, producer/load/hpa.yaml)
+belong to their autoscalers. A  kubectl scale  on them is undone within about 15 seconds. To change how many they may have, change minReplicas / maxReplicas in the file
+and run  kubectl apply -k .  The processor cannot use more than 3 pods: the Kafka topic has 3 partitions, and one partition is read by one processor at a time.
+
+====================================================================================================
+3. Check the certificates
+====================================================================================================
+
+A certificate is valid until a fixed date. The bootstrap Job makes them valid for 365 days (VALID_DAYS in processor/bootstrap.py).
+The end dates are read from the Secrets; only the certificate part is looked at, no key is printed or saved.
+
+   $ kubectl -n ca3 get secret <name> -o jsonpath='{.data.<key>}' | base64 --decode | openssl x509 -noout -subject -enddate
+
+   Secret                    name in the certificate   valid until   days left   used by
+   pki-ca                    ca3 pipeline CA           2027-11-06          364   the private certificate authority (CA)
+   ok:       pki-ca: more than 30 days left
+   kafka-tls                 kafka                     2027-11-06          364   Kafka broker (server)
+   ok:       kafka-tls: more than 30 days left
+   mongo-tls                 mongo                     2027-11-06          364   MongoDB (server)
+   ok:       mongo-tls: more than 30 days left
+   restapi-tls               restapi                   2027-11-06          364   REST API (server)
+   ok:       restapi-tls: more than 30 days left
+   kafka-client-producer     producer                  2027-11-06          364   producer (client of Kafka)
+   ok:       kafka-client-producer: more than 30 days left
+   kafka-client-processor    processor                 2027-11-06          364   processor (client of Kafka)
+   ok:       kafka-client-processor: more than 30 days left
+   kafka-client-exporter     exporter                  2027-11-06          364   Kafka metrics reader (client of Kafka)
+   ok:       kafka-client-exporter: more than 30 days left
+
+When a date comes close, the certificates have to be replaced before it passes: a program with an expired certificate is refused by the others, and the pipeline stops.
+
+====================================================================================================
+4. Rotate a certificate: NOT DONE here, on purpose
+====================================================================================================
+
+With the design of this stack a certificate cannot be replaced while the data stays. Three reasons, all in processor/bootstrap.py:
+  - The private key of the CA was never stored, so nobody can sign a new certificate that the old CA vouches for.
+  - The Job bootstrap makes all 13 Secrets or none. When only some exist it stops with an error, because new certificates would not match the old ones.
+  - The passwords are in the same 13 Secrets, and MongoDB created its users only once, when its disk was still empty (the official image runs its set-up
+    scripts only for an empty data directory). A new password would not match the old disk.
+
+So today the only way to new certificates is   make down   (deletes everything, also the disks) and   make up   (the Job makes everything new, the replay Job loads the sample flows again).
+That is fine for a course project and wrong for a production system. runbook.md says what a production system does (cert-manager renews certificates before they end and the
+programs reload them) and what would have to change in this stack: keep the CA key somewhere safe and separate (a tool such as cert-manager, or a Secret that only a renewal Job may read), and make the passwords separate from the certificates.
+This step was not run, so nothing here claims that it works.
+

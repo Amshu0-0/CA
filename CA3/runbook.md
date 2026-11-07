@@ -32,10 +32,12 @@ The producer, the processor and the REST API write one JSON line per event, with
 | the end of the processor log | `make logs` |
 | the end of the log of any pod | `kubectl -n ca3 logs <pod> -c <container> --tail=50` (the container is called like the program: `kafka`, `mongo`, `processor`, `restapi`, `producer`) |
 | the log of the run before a restart | `kubectl -n ca3 logs <pod> --previous` |
-| all the error lines of the last minutes, from every pod, also from pods that are gone | Grafana, panel "Errors and warnings (all programs)"; or Explore with the data source Loki and the search `{namespace="ca3"} \|~ "(?i)(error\|exception\|traceback\|refused\|timed out)"` |
+| all the error lines of the last minutes, from every pod, also from pods that are gone | Grafana, panel "Errors and warnings (all programs)"; or Explore with the data source Loki and the search `{namespace="ca3"} \|~ "(?i)(error\|exception\|traceback\|refused\|timed out)" != "Checking authorization failed"` |
 | one event through every program | `make smoke` sends a tagged event and prints its id; then `make logs-trace TRACE=<id>`; in Grafana type the id in the box "Follow one event" |
 
 A pod that was deleted takes its own log with it. Loki keeps the lines for 24 hours, so the log of a pod that is gone can still be read, but only for a day (the same is true for the numbers in Prometheus). Take the screenshots of Grafana in that time.
+
+The end of that search, `!= "Checking authorization failed"`, leaves out the lines that `mongo-0` writes all the time: the small account of the metrics reader is refused (code 13, `Unauthorized`), and in those lines the word *error* is only the name of a field. Without that end, nearly every line the search finds is one of them.
 
 `make operator-steps` runs the log commands once (and the two sections below) and saves the output in `evidence/step7-operator-steps.txt`.
 

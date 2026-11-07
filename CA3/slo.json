@@ -69,27 +69,27 @@
       "test": "drill",
       "text": "A pod that is deleted is replaced by a new pod that is ready, in every tier",
       "direction": "at most",
-      "goal": 150,
+      "goal": 60,
       "unit": "seconds after the delete, for the slowest of the five tiers",
-      "why": "Kubernetes starts a replacement at once, but a pod needs time to start: Kafka and MongoDB need the longest. Two and a half minutes is a first guess for the slowest tier; the first real drill shows the real numbers, and this goal is then set from them."
+      "why": "The slowest new pod was ready after 23 seconds in the first drill, so 60 seconds leaves room for a slower start"
     },
     {
       "id": "whole-again",
       "test": "drill",
       "text": "After the delete, every part of the stack has its pods ready again (not only the replaced pod)",
       "direction": "at most",
-      "goal": 300,
+      "goal": 90,
       "unit": "seconds after the delete, for the slowest of the five tiers",
-      "why": "The parts wait for each other: the REST API pods wait for MongoDB and the processor waits for MongoDB and Kafka. Five minutes is a first guess for the slowest tier; set it from the first real drill."
+      "why": "The slowest whole stack was whole again after 25 seconds in the first drill, so 90 seconds leaves room for a slower day"
     },
     {
       "id": "event-flows",
       "test": "drill",
       "text": "An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards",
       "direction": "at most",
-      "goal": 300,
+      "goal": 90,
       "unit": "seconds after the delete, for the slowest of the five tiers",
-      "why": "The event waits in Kafka (or, while Kafka is gone, in the Job that sends it) and arrives after the recovery. Five minutes is a first guess for the slowest tier (Kafka: the producer has to wait for the broker); set it from the first real drill."
+      "why": "The slowest test event could be read after 29 seconds in the first drill, so 90 seconds leaves room for a slower day"
     },
     {
       "id": "data-kept",

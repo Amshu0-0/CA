@@ -74,9 +74,9 @@ The goals are the numbers in `slo.json` whose field `test` says `drill`. Each li
 
 | Goal | Asked | This run | |
 |---|---|---|---|
-| A pod that is deleted is replaced by a new pod that is ready, in every tier | at most 150 seconds after the delete, for the slowest of the five tiers | kafka 23 s, processor 14 s, mongo 13 s, restapi 7 s, producer 6 s | **met** |
-| After the delete, every part of the stack has its pods ready again (not only the replaced pod) | at most 300 seconds after the delete, for the slowest of the five tiers | kafka 25 s, processor 14 s, mongo 14 s, restapi 8 s, producer 16 s | **met** |
-| An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards | at most 300 seconds after the delete, for the slowest of the five tiers | kafka 29 s, processor 14 s, mongo 13 s, restapi 13 s, producer 12 s | **met** |
+| A pod that is deleted is replaced by a new pod that is ready, in every tier | at most 60 seconds after the delete, for the slowest of the five tiers | kafka 23 s, processor 14 s, mongo 13 s, restapi 7 s, producer 6 s | **met** |
+| After the delete, every part of the stack has its pods ready again (not only the replaced pod) | at most 90 seconds after the delete, for the slowest of the five tiers | kafka 25 s, processor 14 s, mongo 14 s, restapi 8 s, producer 16 s | **met** |
+| An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards | at most 90 seconds after the delete, for the slowest of the five tiers | kafka 29 s, processor 14 s, mongo 13 s, restapi 13 s, producer 12 s | **met** |
 | Deleting a pod deletes no data: every tier still has all the records and messages it had | at least 100 percent of the tiers | 100 percent (5 of 5 tiers kept all their data) | **met** |
 | While one of the two REST API pods is replaced, the REST API keeps answering the calls for /stats | at most 5 seconds in a row without a good answer | longest stretch of failed /stats calls: 0.0 s (0 of 13 calls failed) | **met** |
 

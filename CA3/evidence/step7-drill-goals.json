@@ -2,21 +2,21 @@
   {
     "id": "pod-back",
     "text": "A pod that is deleted is replaced by a new pod that is ready, in every tier",
-    "goal": "at most 150 seconds after the delete, for the slowest of the five tiers",
+    "goal": "at most 60 seconds after the delete, for the slowest of the five tiers",
     "measured": "kafka 23 s, processor 14 s, mongo 13 s, restapi 7 s, producer 6 s",
     "verdict": "met"
   },
   {
     "id": "whole-again",
     "text": "After the delete, every part of the stack has its pods ready again (not only the replaced pod)",
-    "goal": "at most 300 seconds after the delete, for the slowest of the five tiers",
+    "goal": "at most 90 seconds after the delete, for the slowest of the five tiers",
     "measured": "kafka 25 s, processor 14 s, mongo 14 s, restapi 8 s, producer 16 s",
     "verdict": "met"
   },
   {
     "id": "event-flows",
     "text": "An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards",
-    "goal": "at most 300 seconds after the delete, for the slowest of the five tiers",
+    "goal": "at most 90 seconds after the delete, for the slowest of the five tiers",
     "measured": "kafka 29 s, processor 14 s, mongo 13 s, restapi 13 s, producer 12 s",
     "verdict": "met"
   },

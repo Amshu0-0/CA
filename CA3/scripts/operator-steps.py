@@ -38,7 +38,7 @@ args = parser.parse_args()
 out_dir = Path(args.out) if Path(args.out).is_absolute() else lib.ROOT / args.out
 lines = []
 checks = []       # (what, ok)
-LOKI_ERRORS = '{namespace="' + lib.NS + '"} |~ "(?i)(error|exception|traceback|refused|timed out)"'
+LOKI_ERRORS = '{namespace="' + lib.NS + '"} |~ "(?i)(error|exception|traceback|refused|timed out)" != "Checking authorization failed"'
 
 # The programs: what to call them, the label app.kubernetes.io/name, the container whose log is read, and a second label (for the load generator).
 PROGRAMS = (("Kafka", "kafka", "kafka", None), ("Processor", "processor", "processor", None), ("MongoDB", "mongo", "mongo", None),
@@ -164,7 +164,8 @@ def step_logs():
         for _, labels, line in found[-3:]:
             print("       " + labels.get("pod", "?") + ": " + shorten(line, 200))
 
-        print("       (After a drill there are error lines on purpose: the pods that lost MongoDB or Kafka said so. A quiet stack has none.)")
+        print("       (The search leaves out the lines of mongo-0 that say 'Checking authorization failed': the small account of the metrics reader is refused all the time, and in")
+        print("       those lines the word error is only the name of a field. After a drill there are lines on purpose: the pods that lost MongoDB or Kafka said so.)")
         judge("Loki answers the error search", True)
     except (lib.Fail, ValueError, KeyError) as problem:
         print("       Loki did not answer: " + shorten(problem, 300))

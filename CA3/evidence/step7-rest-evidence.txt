@@ -1,0 +1,117 @@
+REST evidence, 2026-11-07 02:22 UTC   (namespace ca3)
+Every call below was made from this computer over HTTPS, through a node port of the cluster. The node address is shown as <node-address>.
+
+Sending one tagged event through the pipeline (producer, Kafka, processor, MongoDB): smoke-1107-022238-2b99
+Kafka stored it at partition 1, offset 123913. Waiting for it to reach MongoDB ...
+It is in MongoDB and readable from the REST API 1 s after the producer finished.
+
+====================================================================================================
+1. Requests and answers
+====================================================================================================
+
+### GET /health  (is the program alive; the liveness probe of Kubernetes; needs no login)
+request:   GET https://<node-address>:30080/health
+           (no Authorization header: no login sent)
+answer:    HTTP 200   (83 ms)   expected: 200
+           {"status":"ok"}
+
+### GET /ready  (does MongoDB answer; the readiness probe; needs no login)
+request:   GET https://<node-address>:30080/ready
+           (no Authorization header: no login sent)
+answer:    HTTP 200   (194 ms)   expected: 200
+           {"status":"ready"}
+
+### GET /stats  (how many flows are stored; login needed)
+request:   GET https://<node-address>:30080/stats
+           Authorization: Basic <user and password from the Secret restapi-login>
+answer:    HTTP 200   (112 ms)   expected: 200
+           {"collection":"flows","database":"ca3","documents":370359}
+
+### GET /alerts  (up to 50 flows that are not BENIGN; login needed)
+request:   GET https://<node-address>:30080/alerts
+           Authorization: Basic <user and password from the Secret restapi-login>
+answer:    HTTP 200   (159 ms)   expected: 200
+           50 alerts (flows whose Label is not BENIGN) in the answer; the first one, shortened:
+           {"Label": "Bot", "Source IP": "205.174.165.73", "Destination IP": "192.168.10.9", "Destination Port": "4182", "Protocol": "6", "Timestamp": "7/7/2017 10:45", "...": "79 more fields"}
+
+### GET /events/<trace id>  (the tagged event that was just sent; login needed)
+request:   GET https://<node-address>:30080/events/smoke-1107-022238-2b99
+           Authorization: Basic <user and password from the Secret restapi-login>
+answer:    HTTP 200   (109 ms)   expected: 200
+           {"event":{"ACK Flag Count":"1","Active Max":"0.0","Active Mean":"0.0","Active Min":"0.0","Active Std":"0.0","Average Packet Size":"21.33333333","Avg Bwd Segment Size":"0.0","Avg Fwd Segment Size":"19.33333333","Bwd Avg Bulk Rate":"0","Bwd Avg Bytes/Bulk":"0","Bwd Avg Packets/Bulk":"0","Bwd Header Length":"0","Bwd IAT Max":"0.0","Bwd IAT Mean":"0.0","Bwd IAT Min":"0.0","Bwd IAT Std":"0.0","Bwd IAT Total":"0.0","Bwd PSH Flags":"0","Bwd Packet Length Max":"0","Bwd Packet Length Mean":"0.0","Bwd Packet Length Min":"0","Bwd Packet Length Std":"0.0","Bwd Packets/s":"0.0","Bwd URG Flags":"0","CWE Flag Count":"0","Destination IP":"34.199.20.76","Destination Port":"443","Down/Up Ratio":"0","ECE Fl...
+
+### GET /events/<an id that does not exist>  (the answer is JSON, so a caller can tell 'not here' from 'no such address')
+request:   GET https://<node-address>:30080/events/smoke-does-not-exist
+           Authorization: Basic <user and password from the Secret restapi-login>
+answer:    HTTP 404   (166 ms)   expected: 404
+           {"found":false,"trace_id":"smoke-does-not-exist"}
+
+### GET /stats without a login
+request:   GET https://<node-address>:30080/stats
+           (no Authorization header: no login sent)
+answer:    HTTP 401   (119 ms)   expected: 401
+           {"error":"login required"}
+
+### GET /stats with a wrong password
+request:   GET https://<node-address>:30080/stats
+           Authorization: Basic <a user and a WRONG password>
+answer:    HTTP 401   (121 ms)   expected: 401
+           {"error":"login required"}
+
+### GET /no-such-address  (an address that does not exist; with the login)
+request:   GET https://<node-address>:30080/no-such-address
+           Authorization: Basic <user and password from the Secret restapi-login>
+answer:    HTTP 404   (86 ms)   expected: 404
+           <!doctype html> <html lang=en> <title>404 Not Found</title> <h1>Not Found</h1> <p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+
+### GET /stats when the client does not trust the certificate authority of the stack
+answer:    no answer   expected: no answer (the TLS handshake must fail)
+           SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1028)
+
+====================================================================================================
+2. Logs of the REST API pods for these calls
+====================================================================================================
+
+$ kubectl -n ca3 logs -l app.kubernetes.io/name=restapi -c restapi --since=10m --prefix      (the lines about the calls above; /health and /ready are logged only when they fail)
+
+  [pod/restapi-5f54fc9f7b-87bbr/restapi] {"ts":"2026-11-07T02:22:49.449+00:00","level":"warning","service":"restapi","msg":"request","method":"GET","path":"/events/smoke-does-not-exist","status":404,"duration_ms":1.5,"trace_id":"smoke-does-not-exist"}
+  [pod/restapi-5f54fc9f7b-87bbr/restapi] {"ts":"2026-11-07T02:22:49.688+00:00","level":"warning","service":"restapi","msg":"request","method":"GET","path":"/stats","status":401,"duration_ms":0.1}
+  [pod/restapi-5f54fc9f7b-87bbr/restapi] {"ts":"2026-11-07T02:22:49.775+00:00","level":"warning","service":"restapi","msg":"request","method":"GET","path":"/no-such-address","status":404,"duration_ms":0.3}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:21:03.096+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.4}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:22:48.622+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/events/smoke-1107-022238-2b99","status":200,"duration_ms":1.8,"trace_id":"smoke-1107-022238-2b99"}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:22:49.012+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.1}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:22:49.100+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/alerts","status":200,"duration_ms":6.5}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:22:49.282+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/events/smoke-1107-022238-2b99","status":200,"duration_ms":1.6,"trace_id":"smoke-1107-022238-2b99"}
+  [pod/restapi-5f54fc9f7b-gc7qb/restapi] {"ts":"2026-11-07T02:22:49.567+00:00","level":"warning","service":"restapi","msg":"request","method":"GET","path":"/stats","status":401,"duration_ms":0.1}
+
+The event id can be followed through the logs of every program with:  make logs-trace TRACE=smoke-1107-022238-2b99
+
+====================================================================================================
+3. Metrics: what Prometheus counted
+====================================================================================================
+
+restapi_requests_total, summed over the REST API pods, by endpoint and status (counted since the pods started):
+    /alerts                 200   2
+    /events/<trace_id>      200   6
+    /events/<trace_id>      404   9
+    /health                 200   2,250
+    /ready                  200   3,999
+    /ready                  503   1
+    /stats                  200   284
+    /stats                  401   5
+    /stats                  503   1
+
+over the last 5 minutes:  requests per second 0.335;  server errors (5xx) per second 0.000;  95th percentile of the time to answer 5 ms
+
+====================================================================================================
+4. Failure and recovery: what the resilience drill saw
+====================================================================================================
+
+From step7-drill-summary.json (the full table is in step7-drill-results.md, the second-by-second account in step7-drill-timeline.txt):
+
+One of the two REST API pods was deleted (kubectl delete pod). The other pod kept answering:
+    13 calls to /stats from this computer during the replacement, 0 failed (longest stretch 0.0 s); the new pod was ready 7 s after the delete.
+MongoDB was deleted. The design says that the REST API pods report 'not ready' while MongoDB is away (the readiness probe asks /ready), so that Kubernetes takes them out of the Service. What the drill saw:
+    6 calls from this computer during that tier: /stats failed 3 times (longest stretch 7.5 s), /health failed 0 times (longest stretch 0.0 s); MongoDB was ready again 13 s after the delete, the whole stack 14 s.
+    While MongoDB is gone the API cannot return data, whichever way it is built.
+
