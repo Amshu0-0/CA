@@ -1,0 +1,110 @@
+Evidence from Loki (logs) and Prometheus (numbers) for each tier.
+
+=== Kafka: logs from Loki and numbers from Prometheus (window: 5 minutes back from 00:07:01 UTC)
+
+Loki: the pod that was deleted (kafka-0) has 500 log lines in the window, the first and the last two:
+    00:06:13 [2026-11-07 00:06:13,990] INFO Terminating process due to signal SIGTERM (org.apache.kafka.common.utils.LoggingSignalHandler)
+    00:06:27 [2026-11-07 00:06:27,868] WARN [QuorumController id=1] Performing controller activation. Loaded ZK migration state of NONE. (org.apache.kafka.controller.QuorumController)
+    00:06:27 [2026-11-07 00:06:27,940] INFO [MetadataLoader id=1] maybePublishMetadata(LOG_DELTA): The loader finished catching up to the current high water mark of 47730 (org.apache.kafka.image.loader.MetadataLoader)
+
+Loki: the search for  error  across all pods in the window found 135 lines in 4 pods (this is the search for the screenshot of Step 5):
+    grafana-7f87954cc5-b7t9w: 4 lines; for example: logger=tsdb.loki endpoint=CheckHealth endpoint=queryData pluginId=loki dsName=Loki dsUID=loki uname=admin fromAlert=false t=2026-11-07T00:05:12.095136101Z le...
+    kafka-0: 2 lines; for example: [2026-11-07 00:06:14,764] INFO [QuorumController id=1] maybeBalancePartitionLeaders: event unable to start processing because of RejectedExecutionException (...
+    kafka-exporter-5dbbf4d5f9-7ts5l: 9 lines; for example: E1107 00:06:31.951653 1 kafka_exporter.go:452] Cannot get current offset of topic __consumer_offsets partition 1: kafka: client has run out of available brok...
+    mongo-0: 120 lines; for example: {"t":{"$date":"2026-11-07T00:06:57.734+00:00"},"s":"I", "c":"ACCESS", "id":20436, "ctx":"conn17947","msg":"Checking authorization failed","attr":{"error":{"c...
+
+Prometheus: the most messages waiting for the processor (kafka_consumergroup_lag): 1
+Prometheus: the fewest scrape targets that answered for the processor (up): 1
+Prometheus: the fewest scrape targets that answered for the REST API (up): 2
+Prometheus: the fewest Kafka brokers the exporter saw (kafka_brokers): 1
+These numbers are for orientation in Grafana, not a verdict: a series that is missing while a pod is away is shown as n/a.
+
+=== Processor: logs from Loki and numbers from Prometheus (window: 5 minutes back from 00:08:10 UTC)
+
+Loki: the pod that was deleted (processor-6d4869f56b-8qsrh) has 2 log lines in the window, the first and the last two:
+    00:06:43 {"ts":"2026-11-07T00:06:43.066+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1107-000613-884f","topic":"network-flows","partition":2,"offset":110063}
+    00:07:38 {"ts":"2026-11-07T00:07:38.166+00:00","level":"info","service":"processor","msg":"processor stopped","rows":131363}
+Loki: the new pod (processor-6d4869f56b-rjxqg) has 5 log lines in the window, the first and the last two:
+    00:07:40 /app/processor.py:212: DeprecationWarning: value_deserializer does not implement kafka.serializer.Deserializer
+    00:07:46 {"ts":"2026-11-07T00:07:46.070+00:00","level":"warning","service":"processor","msg":"alert flow stored","topic":"network-flows","label":"SMOKE-TEST","alerts_so_far":1}
+    00:07:46 {"ts":"2026-11-07T00:07:46.070+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1107-000737-fa07","topic":"network-flows","partition":0,"offset":109927}
+
+Loki: the search for  error  across all pods in the window found 133 lines in 4 pods (this is the search for the screenshot of Step 5):
+    grafana-7f87954cc5-b7t9w: 2 lines; for example: logger=tsdb.loki endpoint=CheckHealth endpoint=queryData pluginId=loki dsName=Loki dsUID=loki uname=admin fromAlert=false t=2026-11-07T00:05:12.095136101Z le...
+    kafka-0: 2 lines; for example: [2026-11-07 00:06:14,764] INFO [QuorumController id=1] maybeBalancePartitionLeaders: event unable to start processing because of RejectedExecutionException (...
+    kafka-exporter-5dbbf4d5f9-7ts5l: 9 lines; for example: E1107 00:06:31.951653 1 kafka_exporter.go:452] Cannot get current offset of topic __consumer_offsets partition 1: kafka: client has run out of available brok...
+    mongo-0: 120 lines; for example: {"t":{"$date":"2026-11-07T00:08:07.735+00:00"},"s":"I", "c":"ACCESS", "id":20436, "ctx":"conn18015","msg":"Checking authorization failed","attr":{"error":{"c...
+
+Prometheus: the most messages waiting for the processor (kafka_consumergroup_lag): 1
+Prometheus: the fewest scrape targets that answered for the processor (up): 0
+Prometheus: the fewest scrape targets that answered for the REST API (up): 2
+These numbers are for orientation in Grafana, not a verdict: a series that is missing while a pod is away is shown as n/a.
+
+=== MongoDB: logs from Loki and numbers from Prometheus (window: 5 minutes back from 00:09:16 UTC)
+
+Loki: the pod that was deleted (mongo-0) has 500 log lines in the window, the first and the last two:
+    00:04:17 {"t":{"$date":"2026-11-07T00:04:17.705+00:00"},"s":"I", "c":"NETWORK", "id":22943, "ctx":"listener","msg":"Connection accepted","attr":{"remote":"10.42.1.6:38000","isLoadBalanced":false,"uuid":{"uuid":{"$uuid":"ac8821...
+    00:05:57 {"t":{"$date":"2026-11-07T00:05:57.712+00:00"},"s":"W", "c":"NETWORK", "id":23234, "ctx":"conn17888","msg":"No SSL certificate provided by peer"}
+    00:05:57 {"t":{"$date":"2026-11-07T00:05:57.712+00:00"},"s":"I", "c":"NETWORK", "id":51800, "ctx":"conn17888","msg":"client metadata","attr":{"remote":"10.42.1.6:51992","client":"conn17888","negotiatedCompressors":[],"doc":{"a...
+
+Loki: the search for  error  across all pods in the window found 140 lines in 7 pods (this is the search for the screenshot of Step 5):
+    grafana-7f87954cc5-b7t9w: 1 lines; for example: logger=tsdb.loki endpoint=CheckHealth endpoint=queryData pluginId=loki dsName=Loki dsUID=loki uname=admin fromAlert=false t=2026-11-07T00:05:12.095136101Z le...
+    kafka-0: 2 lines; for example: [2026-11-07 00:06:14,764] INFO [QuorumController id=1] maybeBalancePartitionLeaders: event unable to start processing because of RejectedExecutionException (...
+    kafka-exporter-5dbbf4d5f9-7ts5l: 9 lines; for example: E1107 00:06:31.951653 1 kafka_exporter.go:452] Cannot get current offset of topic __consumer_offsets partition 1: kafka: client has run out of available brok...
+    mongo-0: 118 lines; for example: {"t":{"$date":"2026-11-07T00:09:12.732+00:00"},"s":"I", "c":"ACCESS", "id":20436, "ctx":"conn32","msg":"Checking authorization failed","attr":{"error":{"code...
+    mongodb-exporter-746d4897c4-dhzr7: 2 lines; for example: time="2026-11-07T00:08:55Z" level=error msg="Cannot connect to MongoDB: cannot connect to MongoDB: server selection error: context deadline exceeded, current...
+    restapi-5f54fc9f7b-5gz55: 5 lines; for example: {"ts":"2026-11-07T00:08:56.823+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/stats","status":503,"duration_ms":3270.3}
+    restapi-5f54fc9f7b-87bbr: 3 lines; for example: {"ts":"2026-11-07T00:08:51.749+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/ready","status":503,"duration_ms":3208.5}
+
+Prometheus: the most messages waiting for the processor (kafka_consumergroup_lag): 1
+Prometheus: the fewest scrape targets that answered for the processor (up): 0
+Prometheus: the fewest scrape targets that answered for the REST API (up): 2
+Prometheus: the lowest value of mongodb_up (1 = the exporter reaches MongoDB, 0 = it does not): 0
+These numbers are for orientation in Grafana, not a verdict: a series that is missing while a pod is away is shown as n/a.
+
+=== REST API: logs from Loki and numbers from Prometheus (window: 5 minutes back from 00:10:21 UTC)
+
+Loki: the pod that was deleted (restapi-5f54fc9f7b-5gz55) has 116 log lines in the window, the first and the last two:
+    00:06:07 {"ts":"2026-11-07T00:06:07.349+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.3}
+    00:09:52 [2026-11-07 00:09:52 +0000] [7] [INFO] Worker exiting (pid: 7)
+    00:09:53 [2026-11-07 00:09:53 +0000] [1] [INFO] Shutting down: Master
+Loki: the new pod (restapi-5f54fc9f7b-gc7qb) has 14 log lines in the window, the first and the last two:
+    00:09:53 waiting for mongo
+    00:10:18 {"ts":"2026-11-07T00:10:18.812+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.4}
+    00:10:19 {"ts":"2026-11-07T00:10:19.862+00:00","level":"info","service":"restapi","msg":"request","method":"GET","path":"/stats","status":200,"duration_ms":1.4}
+
+Loki: the search for  error  across all pods in the window found 139 lines in 6 pods (this is the search for the screenshot of Step 5):
+    kafka-0: 2 lines; for example: [2026-11-07 00:06:14,764] INFO [QuorumController id=1] maybeBalancePartitionLeaders: event unable to start processing because of RejectedExecutionException (...
+    kafka-exporter-5dbbf4d5f9-7ts5l: 9 lines; for example: E1107 00:06:31.951653 1 kafka_exporter.go:452] Cannot get current offset of topic __consumer_offsets partition 1: kafka: client has run out of available brok...
+    mongo-0: 118 lines; for example: {"t":{"$date":"2026-11-07T00:10:17.735+00:00"},"s":"I", "c":"ACCESS", "id":20436, "ctx":"conn95","msg":"Checking authorization failed","attr":{"error":{"code...
+    mongodb-exporter-746d4897c4-dhzr7: 2 lines; for example: time="2026-11-07T00:08:55Z" level=error msg="Cannot connect to MongoDB: cannot connect to MongoDB: server selection error: context deadline exceeded, current...
+    restapi-5f54fc9f7b-5gz55: 5 lines; for example: {"ts":"2026-11-07T00:08:56.823+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/stats","status":503,"duration_ms":3270.3}
+    restapi-5f54fc9f7b-87bbr: 3 lines; for example: {"ts":"2026-11-07T00:08:51.749+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/ready","status":503,"duration_ms":3208.5}
+
+Prometheus: the most messages waiting for the processor (kafka_consumergroup_lag): 1
+Prometheus: the fewest scrape targets that answered for the processor (up): 1
+Prometheus: the fewest scrape targets that answered for the REST API (up): 1
+These numbers are for orientation in Grafana, not a verdict: a series that is missing while a pod is away is shown as n/a.
+
+=== Producer: logs from Loki and numbers from Prometheus (window: 5 minutes back from 00:12:07 UTC)
+
+Loki: the pod that was deleted (producer-load-f877bb9f4-w2rlt) has 10 log lines in the window, the first and the last two:
+    00:10:56 waiting for kafka
+    00:11:36 {"ts":"2026-11-07T00:11:36.445+00:00","level":"info","service":"producer","msg":"rate","rows_total":20000,"rate_msg_s":566,"topic":"network-flows"}
+    00:11:36 {"ts":"2026-11-07T00:11:36.447+00:00","level":"info","service":"producer","msg":"producer done","rows_sent":20000,"topic":"network-flows"}
+Loki: the new pod (producer-load-f877bb9f4-vscbn) has 6 log lines in the window, the first and the last two:
+    00:11:36 waiting for kafka
+    00:11:57 {"ts":"2026-11-07T00:11:57.068+00:00","level":"info","service":"producer","msg":"rate","rows_total":9000,"rate_msg_s":575,"topic":"network-flows"}
+    00:12:02 {"ts":"2026-11-07T00:12:02.076+00:00","level":"info","service":"producer","msg":"rate","rows_total":11864,"rate_msg_s":572,"topic":"network-flows"}
+
+Loki: the search for  error  across all pods in the window found 126 lines in 4 pods (this is the search for the screenshot of Step 5):
+    mongo-0: 116 lines; for example: {"t":{"$date":"2026-11-07T00:12:02.832+00:00"},"s":"I", "c":"ACCESS", "id":20436, "ctx":"conn194","msg":"Checking authorization failed","attr":{"error":{"cod...
+    mongodb-exporter-746d4897c4-dhzr7: 2 lines; for example: time="2026-11-07T00:08:55Z" level=error msg="Cannot connect to MongoDB: cannot connect to MongoDB: server selection error: context deadline exceeded, current...
+    restapi-5f54fc9f7b-5gz55: 5 lines; for example: {"ts":"2026-11-07T00:08:56.823+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/stats","status":503,"duration_ms":3270.3}
+    restapi-5f54fc9f7b-87bbr: 3 lines; for example: {"ts":"2026-11-07T00:08:51.749+00:00","level":"error","service":"restapi","msg":"request","method":"GET","path":"/ready","status":503,"duration_ms":3208.5}
+
+Prometheus: the most messages waiting for the processor (kafka_consumergroup_lag): 2,727
+Prometheus: the fewest scrape targets that answered for the processor (up): 1
+Prometheus: the fewest scrape targets that answered for the REST API (up): 2
+Prometheus: the highest sending rate of the producers (messages per second): 600
+These numbers are for orientation in Grafana, not a verdict: a series that is missing while a pod is away is shown as n/a.

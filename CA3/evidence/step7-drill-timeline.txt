@@ -1,0 +1,54 @@
+What every pod of the stack did, tier by tier. '+N s' counts from the moment of the delete (kubectl delete pod). Times are UTC.
+The pods were looked at every 1.5 seconds, so a time is exact to about 2 seconds. A pod 'gone' is one that was not in the list any more.
+
+=== Kafka: kafka-0 deleted at 00:06:13 UTC
+    +1 s  00:06:14  kafka-0                                  Terminating
+    +2 s  00:06:16  kafka-0                                  ContainerCreating
+    +4 s  00:06:17  kafka-0                                  Running, not ready
+   +11 s  00:06:25  producer-smoke-ggszj                     Init:0/1   (new pod)
+   +23 s  00:06:37  kafka-0                                  Running, ready
+   +25 s  00:06:38  producer-smoke-ggszj                     Running, ready
+   +27 s  00:06:40  producer-smoke-ggszj                     Completed
+
+=== Processor: processor-6d4869f56b-8qsrh deleted at 00:07:37 UTC
+    +2 s  00:07:39  processor-6d4869f56b-8qsrh               Terminating
+    +2 s  00:07:39  processor-6d4869f56b-rjxqg               Init:0/1   (new pod)
+    +3 s  00:07:40  processor-6d4869f56b-rjxqg               Running, not ready
+    +3 s  00:07:40  producer-smoke-hb5bt                     Init:0/1   (new pod)
+    +3 s  00:07:40  processor-6d4869f56b-8qsrh               gone
+    +3 s  00:07:40  producer-smoke-ggszj                     gone
+    +9 s  00:07:46  producer-smoke-hb5bt                     Running, ready
+   +11 s  00:07:48  producer-smoke-hb5bt                     Completed
+   +14 s  00:07:51  processor-6d4869f56b-rjxqg               Running, ready
+
+=== MongoDB: mongo-0 deleted at 00:08:45 UTC
+    +1 s  00:08:46  mongo-0                                  Terminating
+    +3 s  00:08:48  mongo-0                                  Running, not ready
+    +4 s  00:08:49  producer-smoke-m9j54                     Init:0/1   (new pod)
+    +4 s  00:08:49  producer-smoke-hb5bt                     gone
+    +5 s  00:08:51  producer-smoke-m9j54                     Running, ready
+    +7 s  00:08:52  producer-smoke-m9j54                     Completed
+   +13 s  00:08:58  mongo-0                                  Running, ready
+
+=== REST API: restapi-5f54fc9f7b-5gz55 deleted at 00:09:52 UTC
+    +1 s  00:09:53  restapi-5f54fc9f7b-5gz55                 Terminating
+    +1 s  00:09:53  restapi-5f54fc9f7b-gc7qb                 Init:0/1   (new pod)
+    +3 s  00:09:54  restapi-5f54fc9f7b-5gz55                 gone
+    +4 s  00:09:56  producer-smoke-ljj8w                     Init:0/1   (new pod)
+    +4 s  00:09:56  producer-smoke-m9j54                     gone
+    +6 s  00:09:57  restapi-5f54fc9f7b-gc7qb                 Running, not ready
+    +7 s  00:09:59  restapi-5f54fc9f7b-gc7qb                 Running, ready
+    +9 s  00:10:00  producer-smoke-ljj8w                     Running, ready
+   +10 s  00:10:02  producer-smoke-ljj8w                     Completed
+
+=== Producer: producer-load-f877bb9f4-w2rlt deleted at 00:11:35 UTC
+    +2 s  00:11:37  producer-load-f877bb9f4-vscbn            Init:0/1   (new pod)
+    +2 s  00:11:37  producer-load-f877bb9f4-w2rlt            Terminating
+    +3 s  00:11:38  producer-smoke-jpr9v                     Init:0/1   (new pod)
+    +3 s  00:11:38  producer-load-f877bb9f4-w2rlt            gone
+    +3 s  00:11:38  producer-smoke-ljj8w                     gone
+    +6 s  00:11:41  producer-load-f877bb9f4-vscbn            Running, ready
+    +6 s  00:11:41  producer-smoke-jpr9v                     Running, ready
+    +8 s  00:11:43  producer-smoke-jpr9v                     Completed
+   +18 s  00:11:53  processor-6d4869f56b-qtwnr               Init:0/1   (new pod)
+

@@ -1,0 +1,336 @@
+{
+  "started": "2026-11-07 00:06 UTC",
+  "args": {
+    "only": null,
+    "dry_run": false,
+    "pause": 30,
+    "settle": 12,
+    "producer_seconds": 25,
+    "max_minutes": 60,
+    "no_evidence": false,
+    "out": "evidence",
+    "prefix": null,
+    "host": null,
+    "port": null
+  },
+  "planned": [
+    "kafka",
+    "processor",
+    "mongo",
+    "restapi",
+    "producer"
+  ],
+  "aborted": null,
+  "load_left": false,
+  "monitoring": {
+    "prometheus": true,
+    "loki": true
+  },
+  "windows": [
+    {
+      "tier": "kafka",
+      "from_local": "18:03",
+      "to_local": "18:09"
+    },
+    {
+      "tier": "processor",
+      "from_local": "18:04",
+      "to_local": "18:10"
+    },
+    {
+      "tier": "mongo",
+      "from_local": "18:05",
+      "to_local": "18:11"
+    },
+    {
+      "tier": "restapi",
+      "from_local": "18:06",
+      "to_local": "18:12"
+    },
+    {
+      "tier": "producer",
+      "from_local": "18:08",
+      "to_local": "18:14"
+    }
+  ],
+  "tiers": [
+    {
+      "tier": "kafka",
+      "title": "Kafka (the broker)",
+      "deleted": true,
+      "victim": "kafka-0",
+      "kind": "StatefulSet",
+      "replacement": "kafka-0",
+      "delete_wall": "2026-11-07T00:06:13Z",
+      "old_gone_s": 2.4776800829858985,
+      "pod_back_s": 23.457513915986056,
+      "whole_s": 24.586665582988644,
+      "sending_again_s": null,
+      "event": {
+        "trace": "smoke-1107-000613-884f",
+        "sent_s": 28.626845791004598,
+        "readable_s": 29.249771957984194,
+        "copies": 1,
+        "error": null
+      },
+      "rest": {
+        "calls": 29,
+        "health_failed": 0,
+        "health_gap_s": 0.0,
+        "stats_failed": 0,
+        "stats_gap_s": 0.0,
+        "stats_gap_start_s": null
+      },
+      "data": {
+        "checks": [
+          {
+            "what": "records in MongoDB",
+            "before": "330,353",
+            "after": "330,354",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the test event is stored in MongoDB",
+            "before": "sent",
+            "after": "1 time",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "messages in Kafka",
+            "before": "330,353",
+            "after": "330,354",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the disk of kafka-0",
+            "before": "pvc-a183437c-3daa-486b-99b8-ba0951139f8f",
+            "after": "pvc-a183437c-3daa-486b-99b8-ba0951139f8f",
+            "ok": true,
+            "note": ""
+          }
+        ],
+        "kept": true
+      },
+      "restarts": {},
+      "problem": null,
+      "passed": true
+    },
+    {
+      "tier": "processor",
+      "title": "The processor",
+      "deleted": true,
+      "victim": "processor-6d4869f56b-8qsrh",
+      "kind": "Deployment",
+      "replacement": "processor-6d4869f56b-rjxqg",
+      "delete_wall": "2026-11-07T00:07:37Z",
+      "old_gone_s": 2.991298500011908,
+      "pod_back_s": 13.531370250013424,
+      "whole_s": 14.474705958011327,
+      "sending_again_s": null,
+      "event": {
+        "trace": "smoke-1107-000737-fa07",
+        "sent_s": 13.699380917008966,
+        "readable_s": 13.825748750008643,
+        "copies": 1,
+        "error": null
+      },
+      "rest": {
+        "calls": 14,
+        "health_failed": 0,
+        "health_gap_s": 0.0,
+        "stats_failed": 0,
+        "stats_gap_s": 0.0,
+        "stats_gap_start_s": null
+      },
+      "data": {
+        "checks": [
+          {
+            "what": "records in MongoDB",
+            "before": "330,354",
+            "after": "330,355",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the test event is stored in MongoDB",
+            "before": "sent",
+            "after": "1 time",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "messages waiting in Kafka for the processor",
+            "before": "-",
+            "after": "0",
+            "ok": true,
+            "note": ""
+          }
+        ],
+        "kept": true
+      },
+      "restarts": {},
+      "problem": null,
+      "passed": true
+    },
+    {
+      "tier": "mongo",
+      "title": "MongoDB (the database)",
+      "deleted": true,
+      "victim": "mongo-0",
+      "kind": "StatefulSet",
+      "replacement": "mongo-0",
+      "delete_wall": "2026-11-07T00:08:45Z",
+      "old_gone_s": 2.533687666989863,
+      "pod_back_s": 12.945929417008301,
+      "whole_s": 14.272759082989069,
+      "sending_again_s": null,
+      "event": {
+        "trace": "smoke-1107-000845-ed8e",
+        "sent_s": 9.677202166989446,
+        "readable_s": 12.90155650000088,
+        "copies": 1,
+        "error": null
+      },
+      "rest": {
+        "calls": 6,
+        "health_failed": 0,
+        "health_gap_s": 0.0,
+        "stats_failed": 3,
+        "stats_gap_s": 7.5,
+        "stats_gap_start_s": 0.8
+      },
+      "data": {
+        "checks": [
+          {
+            "what": "records in MongoDB",
+            "before": "330,355",
+            "after": "330,356",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the test event is stored in MongoDB",
+            "before": "sent",
+            "after": "1 time",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the disk of mongo-0",
+            "before": "pvc-70d04a35-7345-44a5-922f-a8160f9d1e97",
+            "after": "pvc-70d04a35-7345-44a5-922f-a8160f9d1e97",
+            "ok": true,
+            "note": ""
+          }
+        ],
+        "kept": true
+      },
+      "restarts": {},
+      "problem": null,
+      "passed": true
+    },
+    {
+      "tier": "restapi",
+      "title": "The REST API",
+      "deleted": true,
+      "victim": "restapi-5f54fc9f7b-5gz55",
+      "kind": "Deployment",
+      "replacement": "restapi-5f54fc9f7b-gc7qb",
+      "delete_wall": "2026-11-07T00:09:52Z",
+      "old_gone_s": 2.9043501669948455,
+      "pod_back_s": 7.272026417020243,
+      "whole_s": 8.411075000010896,
+      "sending_again_s": null,
+      "event": {
+        "trace": "smoke-1107-000952-4acc",
+        "sent_s": 12.494480292021763,
+        "readable_s": 13.065272834006464,
+        "copies": 1,
+        "error": null
+      },
+      "rest": {
+        "calls": 13,
+        "health_failed": 0,
+        "health_gap_s": 0.0,
+        "stats_failed": 0,
+        "stats_gap_s": 0.0,
+        "stats_gap_start_s": null
+      },
+      "data": {
+        "checks": [
+          {
+            "what": "records in MongoDB",
+            "before": "330,356",
+            "after": "330,357",
+            "ok": true,
+            "note": ""
+          },
+          {
+            "what": "the test event is stored in MongoDB",
+            "before": "sent",
+            "after": "1 time",
+            "ok": true,
+            "note": ""
+          }
+        ],
+        "kept": true
+      },
+      "restarts": {},
+      "problem": null,
+      "passed": true
+    },
+    {
+      "tier": "producer",
+      "title": "The producer",
+      "deleted": true,
+      "victim": "producer-load-f877bb9f4-w2rlt",
+      "kind": "Deployment",
+      "replacement": "producer-load-f877bb9f4-vscbn",
+      "delete_wall": "2026-11-07T00:11:35Z",
+      "old_gone_s": 3.1429301669995766,
+      "pod_back_s": 6.130007750005461,
+      "whole_s": 16.025729999993928,
+      "sending_again_s": 15.286235082981875,
+      "event": {
+        "trace": "smoke-1107-001135-69fd",
+        "sent_s": 11.642592666990822,
+        "readable_s": 12.022654041997157,
+        "copies": 1,
+        "error": null
+      },
+      "rest": {
+        "calls": 16,
+        "health_failed": 0,
+        "health_gap_s": 0.0,
+        "stats_failed": 0,
+        "stats_gap_s": 0.0,
+        "stats_gap_start_s": null
+      },
+      "data": {
+        "checks": [
+          {
+            "what": "records in MongoDB",
+            "before": "349,801",
+            "after": "357,007",
+            "ok": true,
+            "note": "the load adds records all the time, so only 'not fewer than before' is checked"
+          },
+          {
+            "what": "the test event is stored in MongoDB",
+            "before": "sent",
+            "after": "1 time",
+            "ok": true,
+            "note": ""
+          }
+        ],
+        "kept": true
+      },
+      "restarts": {},
+      "problem": null,
+      "passed": true
+    }
+  ]
+}

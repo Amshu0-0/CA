@@ -1,0 +1,286 @@
+Resilience drill: a pod is deleted in each of 5 tiers (kafka, processor, mongo, restapi, producer) (namespace ca3)
+Only  kubectl delete pod  is used to break things, and the load generator is switched on and off for the producer tier. Ctrl-C stops the drill and cleans up.
+
+[0] Checks before anything is deleted
+    the stack is whole; 14 pods; the REST API answers; Prometheus answers; Loki answers
+
+[1/5] Kafka (the broker): delete the pod kafka-0. The messages are on a disk that stays, so they must all still be there.
+      checking that the whole stack is whole before the delete ...
+      before: 330,353 records in MongoDB, 330,353 messages in Kafka, the disk of kafka-0 is pvc-a183437c-3daa-486b-99b8-ba0951139f8f
+      deleting kafka-0 now. From here on, only the platform acts: this program just watches.
+
+      +0 s   kubectl delete pod kafka-0   ->   pod "kafka-0" deleted from ca3 namespace
+      +1 s   kafka-0: Terminating
+      +2 s   kafka-0: ContainerCreating
+      +4 s   kafka-0: Running, not ready
+     +11 s   producer-smoke-ggszj: Init:0/1   (new pod)
+     +23 s   kafka-0: Running, ready
+     +23 s   the new pod kafka-0 is ready   <-- the platform replaced the pod
+     +25 s   the whole stack is whole again (every part has its pods ready)
+     +25 s   producer-smoke-ggszj: Running, ready
+     +27 s   producer-smoke-ggszj: Completed
+     +29 s   the producer Job for the test event smoke-1107-000613-884f has finished: Kafka stored it (partition 2, offset 110063)
+     +29 s   the REST API returns the test event (HTTP 200)
+     +36 s   REST API asked 29 times from this computer: /health failed 0, /stats failed 0
+     +36 s   ok:       records in MongoDB: 330,353 -> 330,354
+     +36 s   ok:       the test event is stored in MongoDB: sent -> 1 time
+     +36 s   ok:       messages in Kafka: 330,353 -> 330,354
+     +36 s   ok:       the disk of kafka-0: pvc-a183437c-3daa-486b-99b8-ba0951139f8f -> pvc-a183437c-3daa-486b-99b8-ba0951139f8f
+      collecting the evidence of this tier (Kubernetes events, Loki, Prometheus) ...
+      Kubernetes wrote 16 events in this time (all in step7-drill-events.txt); the ones that matter most:
+           -1 s  Killing           Pod/kafka-0                    Stopping container kafka
+           +2 s  SuccessfulCreate  StatefulSet/kafka              Create Pod kafka-0 in StatefulSet kafka successful
+           +2 s  Scheduled         Pod/kafka-0                    Successfully assigned ca3/kafka-0 to ca3-agent-1
+          +10 s  SuccessfulCreate  Job/producer-smoke             Created pod: producer-smoke-ggszj
+          +11 s  Scheduled         Pod/producer-smoke-ggszj       Successfully assigned ca3/producer-smoke-ggszj to ca3-server
+          +12 s  Unhealthy         Pod/kafka-0                    Startup probe failed: dial tcp 10.42.1.14:9092: connect: connection re
+      Loki: the pod that was deleted (kafka-0): 500 log lines; last: [2026-11-07 00:06:27,940] INFO [MetadataLoader id=1] maybePublishMetadata(LOG_DELTA): The loader ...
+      Loki: the search for 'error' across all pods found 135 lines in 4 pods: grafana-7f87954cc5-b7t9w, kafka-0, kafka-exporter-5dbbf4d5f9-7ts5l, mongo-0
+      resting 30 seconds before the next tier, so the graphs show the recovery ...
+
+[2/5] The processor: delete the processor pod. Kafka keeps the events until a new processor reads them.
+      checking that the whole stack is whole before the delete ...
+      before: 330,354 records in MongoDB
+      deleting processor-6d4869f56b-8qsrh now. From here on, only the platform acts: this program just watches.
+
+      +0 s   kubectl delete pod processor-6d4869f56b-8qsrh   ->   pod "processor-6d4869f56b-8qsrh" deleted from ca3 namespace
+      +2 s   processor-6d4869f56b-8qsrh: Terminating
+      +2 s   processor-6d4869f56b-rjxqg: Init:0/1   (new pod)
+      +3 s   processor-6d4869f56b-rjxqg: Running, not ready
+      +3 s   producer-smoke-hb5bt: Init:0/1   (new pod)
+      +3 s   processor-6d4869f56b-8qsrh: gone
+      +3 s   producer-smoke-ggszj: gone
+      +9 s   producer-smoke-hb5bt: Running, ready
+     +11 s   producer-smoke-hb5bt: Completed
+     +14 s   processor-6d4869f56b-rjxqg: Running, ready
+     +14 s   the new pod processor-6d4869f56b-rjxqg is ready   <-- the platform replaced the pod
+     +14 s   the producer Job for the test event smoke-1107-000737-fa07 has finished: Kafka stored it (partition 0, offset 109927)
+     +14 s   the REST API returns the test event (HTTP 200)
+     +14 s   the whole stack is whole again (every part has its pods ready)
+     +21 s   REST API asked 14 times from this computer: /health failed 0, /stats failed 0
+     +21 s   ok:       records in MongoDB: 330,354 -> 330,355
+     +21 s   ok:       the test event is stored in MongoDB: sent -> 1 time
+     +21 s   ok:       messages waiting in Kafka for the processor: - -> 0
+      collecting the evidence of this tier (Kubernetes events, Loki, Prometheus) ...
+      Kubernetes wrote 22 events in this time (all in step7-drill-events.txt); the ones that matter most:
+           +0 s  Killing           Pod/processor-6d4869f56b-8qsrh Stopping container processor
+           +0 s  SuccessfulCreate  ReplicaSet/processor-6d4869f56b Created pod: processor-6d4869f56b-rjxqg
+           +0 s  Scheduled         Pod/processor-6d4869f56b-rjxqg Successfully assigned ca3/processor-6d4869f56b-rjxqg to ca3-server
+           +2 s  Unhealthy         Pod/processor-6d4869f56b-rjxqg Readiness probe failed: Get "http://10.42.0.61:8000/readyz": dial tcp 
+           +3 s  SuccessfulCreate  Job/producer-smoke             Created pod: producer-smoke-hb5bt
+           +3 s  Unhealthy         Pod/processor-6d4869f56b-rjxqg Readiness probe failed: HTTP probe failed with statuscode: 503
+           +3 s  Scheduled         Pod/producer-smoke-hb5bt       Successfully assigned ca3/producer-smoke-hb5bt to ca3-server
+      Loki: the pod that was deleted (processor-6d4869f56b-8qsrh): 2 log lines; last: {"ts":"2026-11-07T00:07:38.166+00:00","level":"info","service":"processor","msg":"processor stopp...
+      Loki: the new pod (processor-6d4869f56b-rjxqg): 5 log lines; last: {"ts":"2026-11-07T00:07:46.070+00:00","level":"info","service":"processor","msg":"stored","trace_...
+      Loki: the search for 'error' across all pods found 133 lines in 4 pods: grafana-7f87954cc5-b7t9w, kafka-0, kafka-exporter-5dbbf4d5f9-7ts5l, mongo-0
+      resting 30 seconds before the next tier, so the graphs show the recovery ...
+
+[3/5] MongoDB (the database): delete the pod mongo-0. The data is on a disk that stays, so every record must still be there.
+      checking that the whole stack is whole before the delete ...
+      before: 330,355 records in MongoDB, the disk of mongo-0 is pvc-70d04a35-7345-44a5-922f-a8160f9d1e97
+      deleting mongo-0 now. From here on, only the platform acts: this program just watches.
+
+      +0 s   kubectl delete pod mongo-0   ->   pod "mongo-0" deleted from ca3 namespace
+      +1 s   mongo-0: Terminating
+      +3 s   mongo-0: Running, not ready
+      +4 s   producer-smoke-m9j54: Init:0/1   (new pod)
+      +4 s   producer-smoke-hb5bt: gone
+      +5 s   producer-smoke-m9j54: Running, ready
+      +7 s   producer-smoke-m9j54: Completed
+     +10 s   the producer Job for the test event smoke-1107-000845-ed8e has finished: Kafka stored it (partition 1, offset 110363)
+     +13 s   the REST API returns the test event (HTTP 200)
+     +13 s   mongo-0: Running, ready
+     +13 s   the new pod mongo-0 is ready   <-- the platform replaced the pod
+     +14 s   the whole stack is whole again (every part has its pods ready)
+     +19 s   REST API asked 6 times from this computer: /health failed 0, /stats failed 3 (longest stretch 8 s)
+     +19 s   ok:       records in MongoDB: 330,355 -> 330,356
+     +19 s   ok:       the test event is stored in MongoDB: sent -> 1 time
+     +19 s   ok:       the disk of mongo-0: pvc-70d04a35-7345-44a5-922f-a8160f9d1e97 -> pvc-70d04a35-7345-44a5-922f-a8160f9d1e97
+      collecting the evidence of this tier (Kubernetes events, Loki, Prometheus) ...
+      Kubernetes wrote 17 events in this time (all in step7-drill-events.txt); the ones that matter most:
+           +0 s  Killing           Pod/mongo-0                    Stopping container mongo
+           +1 s  SuccessfulCreate  StatefulSet/mongo              Create Pod mongo-0 in StatefulSet mongo successful
+           +2 s  Scheduled         Pod/mongo-0                    Successfully assigned ca3/mongo-0 to ca3-agent-2
+           +2 s  SuccessfulCreate  Job/producer-smoke             Created pod: producer-smoke-m9j54
+           +3 s  Scheduled         Pod/producer-smoke-m9j54       Successfully assigned ca3/producer-smoke-m9j54 to ca3-server
+           +3 s  Unhealthy         Pod/restapi-5f54fc9f7b-5gz55   Readiness probe failed: Get "https://10.42.0.7:8443/ready": context de
+           +3 s  Unhealthy         Pod/restapi-5f54fc9f7b-87bbr   Readiness probe failed: Get "https://10.42.1.9:8443/ready": net/http: 
+      Loki: the pod that was deleted (mongo-0): 500 log lines; last: {"t":{"$date":"2026-11-07T00:05:57.712+00:00"},"s":"I", "c":"NETWORK", "id":51800, "ctx":"conn178...
+      Loki: the search for 'error' across all pods found 140 lines in 7 pods: grafana-7f87954cc5-b7t9w, kafka-0, kafka-exporter-5dbbf4d5f9-7ts5l, mongo-0
+      resting 30 seconds before the next tier, so the graphs show the recovery ...
+
+[4/5] The REST API: delete one of the two REST API pods. The other one must keep answering.
+      checking that the whole stack is whole before the delete ...
+      before: 330,356 records in MongoDB
+      deleting restapi-5f54fc9f7b-5gz55 now. From here on, only the platform acts: this program just watches.
+
+      +0 s   kubectl delete pod restapi-5f54fc9f7b-5gz55   ->   pod "restapi-5f54fc9f7b-5gz55" deleted from ca3 namespace
+      +1 s   restapi-5f54fc9f7b-5gz55: Terminating
+      +1 s   restapi-5f54fc9f7b-gc7qb: Init:0/1   (new pod)
+      +3 s   restapi-5f54fc9f7b-5gz55: gone
+      +4 s   producer-smoke-ljj8w: Init:0/1   (new pod)
+      +4 s   producer-smoke-m9j54: gone
+      +6 s   restapi-5f54fc9f7b-gc7qb: Running, not ready
+      +7 s   restapi-5f54fc9f7b-gc7qb: Running, ready
+      +7 s   the new pod restapi-5f54fc9f7b-gc7qb is ready   <-- the platform replaced the pod
+      +8 s   the whole stack is whole again (every part has its pods ready)
+      +9 s   producer-smoke-ljj8w: Running, ready
+     +10 s   producer-smoke-ljj8w: Completed
+     +12 s   the producer Job for the test event smoke-1107-000952-4acc has finished: Kafka stored it (partition 0, offset 109928)
+     +13 s   the REST API returns the test event (HTTP 200)
+     +17 s   REST API asked 13 times from this computer: /health failed 0, /stats failed 0
+     +17 s   ok:       records in MongoDB: 330,356 -> 330,357
+     +17 s   ok:       the test event is stored in MongoDB: sent -> 1 time
+      collecting the evidence of this tier (Kubernetes events, Loki, Prometheus) ...
+      Kubernetes wrote 19 events in this time (all in step7-drill-events.txt); the ones that matter most:
+           +0 s  Killing           Pod/restapi-5f54fc9f7b-5gz55   Stopping container restapi
+           +0 s  SuccessfulCreate  ReplicaSet/restapi-5f54fc9f7b  Created pod: restapi-5f54fc9f7b-gc7qb
+           +1 s  Scheduled         Pod/restapi-5f54fc9f7b-gc7qb   Successfully assigned ca3/restapi-5f54fc9f7b-gc7qb to ca3-server
+           +3 s  SuccessfulCreate  Job/producer-smoke             Created pod: producer-smoke-ljj8w
+           +3 s  Scheduled         Pod/producer-smoke-ljj8w       Successfully assigned ca3/producer-smoke-ljj8w to ca3-server
+           +5 s  Unhealthy         Pod/restapi-5f54fc9f7b-gc7qb   Readiness probe failed: Get "https://10.42.0.64:8443/ready": dial tcp 
+      Loki: the pod that was deleted (restapi-5f54fc9f7b-5gz55): 116 log lines; last: [2026-11-07 00:09:53 +0000] [1] [INFO] Shutting down: Master
+      Loki: the new pod (restapi-5f54fc9f7b-gc7qb): 14 log lines; last: {"ts":"2026-11-07T00:10:19.862+00:00","level":"info","service":"restapi","msg":"request","method"...
+      Loki: the search for 'error' across all pods found 139 lines in 6 pods: kafka-0, kafka-exporter-5dbbf4d5f9-7ts5l, mongo-0, mongodb-exporter-746d4897c4-dhzr7
+      resting 30 seconds before the next tier, so the graphs show the recovery ...
+
+[5/5] The producer: switch the load on with one producer pod, then delete that pod. The Deployment must start a new one that sends again.
+      checking that the whole stack is whole before the delete ...
+      switching the load on with ONE producer pod (kubectl apply -k producer/loadtest-one) ...
+      the producer is sending (470 messages per second); letting it run for 25 seconds first
+      before: 349,801 records in MongoDB
+      deleting producer-load-f877bb9f4-w2rlt now. From here on, only the platform acts: this program just watches.
+
+      +0 s   kubectl delete pod producer-load-f877bb9f4-w2rlt   ->   pod "producer-load-f877bb9f4-w2rlt" deleted from ca3 namespace
+      +2 s   producer-load-f877bb9f4-vscbn: Init:0/1   (new pod)
+      +2 s   producer-load-f877bb9f4-w2rlt: Terminating
+      +3 s   producer-smoke-jpr9v: Init:0/1   (new pod)
+      +3 s   producer-load-f877bb9f4-w2rlt: gone
+      +3 s   producer-smoke-ljj8w: gone
+      +6 s   producer-load-f877bb9f4-vscbn: Running, ready
+      +6 s   producer-smoke-jpr9v: Running, ready
+      +6 s   the new pod producer-load-f877bb9f4-vscbn is ready   <-- the platform replaced the pod
+      +8 s   producer-smoke-jpr9v: Completed
+     +12 s   the producer Job for the test event smoke-1107-001135-69fd has finished: Kafka stored it (partition 0, offset 116493)
+     +12 s   the REST API returns the test event (HTTP 200)
+     +15 s   the new producer pod sends again (594 messages per second)
+     +16 s   the whole stack is whole again (every part has its pods ready)
+     +18 s   processor-6d4869f56b-qtwnr: Init:0/1   (new pod)
+     +20 s   REST API asked 16 times from this computer: /health failed 0, /stats failed 0
+     +20 s   ok:       records in MongoDB: 349,801 -> 357,007 (the load adds records all the time, so only 'not fewer than before' is checked)
+     +20 s   ok:       the test event is stored in MongoDB: sent -> 1 time
+      collecting the evidence of this tier (Kubernetes events, Loki, Prometheus) ...
+      Kubernetes wrote 38 events in this time (all in step7-drill-events.txt); the ones that matter most:
+           -8 s  Unhealthy         Pod/processor-6d4869f56b-nfcr5 Readiness probe failed: Get "http://10.42.3.18:8000/readyz": dial tcp 
+           +0 s  Killing           Pod/producer-load-f877bb9f4-w2rlt Stopping container producer
+           +0 s  SuccessfulCreate  ReplicaSet/producer-load-f877bb9f4 Created pod: producer-load-f877bb9f4-vscbn
+           +0 s  Scheduled         Pod/producer-load-f877bb9f4-vscbn Successfully assigned ca3/producer-load-f877bb9f4-vscbn to ca3-server
+           +3 s  SuccessfulCreate  Job/producer-smoke             Created pod: producer-smoke-jpr9v
+           +3 s  Scheduled         Pod/producer-smoke-jpr9v       Successfully assigned ca3/producer-smoke-jpr9v to ca3-agent-1
+          +18 s  SuccessfulCreate  ReplicaSet/processor-6d4869f56b Created pod: processor-6d4869f56b-qtwnr
+          +18 s  Scheduled         Pod/processor-6d4869f56b-qtwnr Successfully assigned ca3/processor-6d4869f56b-qtwnr to ca3-agent-1
+          +20 s  Unhealthy         Pod/processor-6d4869f56b-qtwnr Readiness probe failed: Get "http://10.42.1.16:8000/readyz": dial tcp 
+          +21 s  Unhealthy         Pod/processor-6d4869f56b-qtwnr Readiness probe failed: HTTP probe failed with statuscode: 503
+      Loki: the pod that was deleted (producer-load-f877bb9f4-w2rlt): 10 log lines; last: {"ts":"2026-11-07T00:11:36.447+00:00","level":"info","service":"producer","msg":"producer done","...
+      Loki: the new pod (producer-load-f877bb9f4-vscbn): 6 log lines; last: {"ts":"2026-11-07T00:12:02.076+00:00","level":"info","service":"producer","msg":"rate","rows_tota...
+      Loki: the search for 'error' across all pods found 126 lines in 4 pods: mongo-0, mongodb-exporter-746d4897c4-dhzr7, restapi-5f54fc9f7b-5gz55, restapi-5f54fc9f7b-87bbr
+      switching the load off again (kubectl apply -k producer/load) ...
+
+  Checked with the cluster: the load is off (the producer pods of the load generator are idle).
+
+# Resilience drill: one pod deleted in every tier
+
+Run at 2026-11-07 00:06 UTC, 5 of 5 tiers drilled. Every number is in seconds after the pod was deleted (`kubectl delete pod`).
+
+## What happened, tier by tier
+
+| Tier | Pod deleted | New pod ready | Whole stack | Event readable | REST `/stats` calls failed | Data | Result |
+|---|---|---|---|---|---|---|---|
+| Kafka | `kafka-0` | 23 s | 25 s | 29 s | 0 of 29 | kept | **PASS** |
+| Processor | `processor-6d4869f56b-8qsrh` | 14 s | 14 s | 14 s | 0 of 14 | kept | **PASS** |
+| MongoDB | `mongo-0` | 13 s | 14 s | 13 s | 3 of 6 (8 s) | kept | **PASS** |
+| REST API | `restapi-5f54fc9f7b-5gz55` | 7 s | 8 s | 13 s | 0 of 13 | kept | **PASS** |
+| Producer | `producer-load-f877bb9f4-w2rlt` | 6 s | 16 s | 12 s | 0 of 16 | kept | **PASS** |
+
+*New pod ready*: the replacement pod reports Ready. *Whole stack*: every part (including Prometheus, Grafana, Loki and the exporters) has its pods ready again. *Event readable*: a tagged event sent right after the delete can be read from the REST API. *REST `/stats` calls failed*: the drill asked the REST API for `/stats` about once a second from the computer that ran it; in brackets the longest stretch of failures.
+
+### Kafka
+
+- Pod deleted: `kafka-0` (StatefulSet) at 00:06:13 UTC (18:06:13 on the computer that ran it)
+- Replacement: `kafka-0`; the old pod was gone after 2 s
+- New pod ready after 23 s, whole stack after 25 s
+- Test event `smoke-1107-000613-884f`: Kafka stored it 29 s after the delete; readable from the REST API after 29 s; stored 1 time
+- OK: records in MongoDB: 330,353 -> 330,354
+- OK: the test event is stored in MongoDB: sent -> 1 time
+- OK: messages in Kafka: 330,353 -> 330,354
+- OK: the disk of kafka-0: pvc-a183437c-3daa-486b-99b8-ba0951139f8f -> pvc-a183437c-3daa-486b-99b8-ba0951139f8f
+- REST API, asked from outside every second: `/health` failed 0 of 29 times (longest stretch 0.0 s), `/stats` failed 0 of 29 times (longest stretch 0.0 s)
+
+### Processor
+
+- Pod deleted: `processor-6d4869f56b-8qsrh` (Deployment) at 00:07:37 UTC (18:07:37 on the computer that ran it)
+- Replacement: `processor-6d4869f56b-rjxqg`; the old pod was gone after 3 s
+- New pod ready after 14 s, whole stack after 14 s
+- Test event `smoke-1107-000737-fa07`: Kafka stored it 14 s after the delete; readable from the REST API after 14 s; stored 1 time
+- OK: records in MongoDB: 330,354 -> 330,355
+- OK: the test event is stored in MongoDB: sent -> 1 time
+- OK: messages waiting in Kafka for the processor: - -> 0
+- REST API, asked from outside every second: `/health` failed 0 of 14 times (longest stretch 0.0 s), `/stats` failed 0 of 14 times (longest stretch 0.0 s)
+
+### MongoDB
+
+- Pod deleted: `mongo-0` (StatefulSet) at 00:08:45 UTC (18:08:45 on the computer that ran it)
+- Replacement: `mongo-0`; the old pod was gone after 3 s
+- New pod ready after 13 s, whole stack after 14 s
+- Test event `smoke-1107-000845-ed8e`: Kafka stored it 10 s after the delete; readable from the REST API after 13 s; stored 1 time
+- OK: records in MongoDB: 330,355 -> 330,356
+- OK: the test event is stored in MongoDB: sent -> 1 time
+- OK: the disk of mongo-0: pvc-70d04a35-7345-44a5-922f-a8160f9d1e97 -> pvc-70d04a35-7345-44a5-922f-a8160f9d1e97
+- REST API, asked from outside every second: `/health` failed 0 of 6 times (longest stretch 0.0 s), `/stats` failed 3 of 6 times (longest stretch 7.5 s)
+
+### REST API
+
+- Pod deleted: `restapi-5f54fc9f7b-5gz55` (Deployment) at 00:09:52 UTC (18:09:52 on the computer that ran it)
+- Replacement: `restapi-5f54fc9f7b-gc7qb`; the old pod was gone after 3 s
+- New pod ready after 7 s, whole stack after 8 s
+- Test event `smoke-1107-000952-4acc`: Kafka stored it 12 s after the delete; readable from the REST API after 13 s; stored 1 time
+- OK: records in MongoDB: 330,356 -> 330,357
+- OK: the test event is stored in MongoDB: sent -> 1 time
+- REST API, asked from outside every second: `/health` failed 0 of 13 times (longest stretch 0.0 s), `/stats` failed 0 of 13 times (longest stretch 0.0 s)
+
+### Producer
+
+- Pod deleted: `producer-load-f877bb9f4-w2rlt` (Deployment) at 00:11:35 UTC (18:11:35 on the computer that ran it)
+- Replacement: `producer-load-f877bb9f4-vscbn`; the old pod was gone after 3 s
+- New pod ready after 6 s, whole stack after 16 s; the producer was sending again after 15 s
+- Test event `smoke-1107-001135-69fd`: Kafka stored it 12 s after the delete; readable from the REST API after 12 s; stored 1 time
+- OK: records in MongoDB: 349,801 -> 357,007 (the load adds records all the time, so only 'not fewer than before' is checked)
+- OK: the test event is stored in MongoDB: sent -> 1 time
+- REST API, asked from outside every second: `/health` failed 0 of 16 times (longest stretch 0.0 s), `/stats` failed 0 of 16 times (longest stretch 0.0 s)
+
+## The goals (service level objectives)
+
+The goals are the numbers in `slo.json` whose field `test` says `drill`. Each line says what was asked, what this run measured, and whether the goal was met. Change a goal with `make goals` and run `make drill-report`: the verdicts change, the measurements do not.
+
+| Goal | Asked | This run | |
+|---|---|---|---|
+| A pod that is deleted is replaced by a new pod that is ready, in every tier | at most 150 seconds after the delete, for the slowest of the five tiers | kafka 23 s, processor 14 s, mongo 13 s, restapi 7 s, producer 6 s | **met** |
+| After the delete, every part of the stack has its pods ready again (not only the replaced pod) | at most 300 seconds after the delete, for the slowest of the five tiers | kafka 25 s, processor 14 s, mongo 14 s, restapi 8 s, producer 16 s | **met** |
+| An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards | at most 300 seconds after the delete, for the slowest of the five tiers | kafka 29 s, processor 14 s, mongo 13 s, restapi 13 s, producer 12 s | **met** |
+| Deleting a pod deletes no data: every tier still has all the records and messages it had | at least 100 percent of the tiers | 100 percent (5 of 5 tiers kept all their data) | **met** |
+| While one of the two REST API pods is replaced, the REST API keeps answering the calls for /stats | at most 5 seconds in a row without a good answer | longest stretch of failed /stats calls: 0.0 s (0 of 13 calls failed) | **met** |
+
+## Where to look in Grafana and Loki
+
+Open the dashboard CA3 pipeline and set the time range to the minutes below (the clock of the computer that ran the drill):
+
+- Kafka: from 18:03 to 18:09
+- Processor: from 18:04 to 18:10
+- MongoDB: from 18:05 to 18:11
+- REST API: from 18:06 to 18:12
+- Producer: from 18:08 to 18:14
+
+Files in evidence/:  step7-drill-run.txt, step7-drill-summary.json, step7-drill-timeline.txt, step7-drill-events.txt, step7-drill-rest-calls.csv, step7-drill-observability.txt, step7-drill-results.md, step7-drill-goals.json, step7-drill-chart.svg
+Goals in slo.json: 5 met, 0 NOT met, 0 not measured (5 goals).
+
+RESULT: PASS - a pod was deleted in 5 of 5 tiers; each one was replaced, the stack was whole again and no data was lost

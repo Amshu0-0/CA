@@ -1,0 +1,128 @@
+Events that Kubernetes wrote during each tier (kubectl get events). '+N s' counts from the delete. Times are UTC.
+
+=== Kafka: events of Kubernetes from 00:06:03 UTC (+ N s is counted from the delete at 00:06:13 UTC)
+
+    -1 s  Normal   Killing              Pod/kafka-0                        Stopping container kafka
+    +2 s  Normal   Created              Pod/kafka-0                        Container created
+    +2 s  Normal   Pulled               Pod/kafka-0                        Container image "confluentinc/cp-kafka:7.7.1" already present on machine and can be accessed by the pod
+    +2 s  Normal   Started              Pod/kafka-0                        Container started
+    +2 s  Normal   SuccessfulCreate     StatefulSet/kafka                  Create Pod kafka-0 in StatefulSet kafka successful (x2)
+    +2 s  Normal   Scheduled            Pod/kafka-0                        Successfully assigned ca3/kafka-0 to ca3-agent-1
+   +10 s  Normal   Created              Pod/producer-smoke-ggszj           Container created
+   +10 s  Normal   Pulled               Pod/producer-smoke-ggszj           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+   +10 s  Normal   SuccessfulCreate     Job/producer-smoke                 Created pod: producer-smoke-ggszj
+   +11 s  Normal   Scheduled            Pod/producer-smoke-ggszj           Successfully assigned ca3/producer-smoke-ggszj to ca3-server
+   +11 s  Normal   Started              Pod/producer-smoke-ggszj           Container started
+   +12 s  Warning  Unhealthy            Pod/kafka-0                        Startup probe failed: dial tcp 10.42.1.14:9092: connect: connection refused
+   +23 s  Normal   Created              Pod/producer-smoke-ggszj           Container created
+   +23 s  Normal   Pulled               Pod/producer-smoke-ggszj           Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+   +24 s  Normal   Started              Pod/producer-smoke-ggszj           Container started
+   +28 s  Normal   Completed            Job/producer-smoke                 Job completed
+
+=== Processor: events of Kubernetes from 00:07:27 UTC (+ N s is counted from the delete at 00:07:37 UTC)
+
+    +0 s  Normal   Killing              Pod/processor-6d4869f56b-8qsrh     Stopping container processor
+    +0 s  Normal   SuccessfulCreate     ReplicaSet/processor-6d4869f56b    Created pod: processor-6d4869f56b-rjxqg
+    +0 s  Normal   Scheduled            Pod/processor-6d4869f56b-rjxqg     Successfully assigned ca3/processor-6d4869f56b-rjxqg to ca3-server
+    +1 s  Normal   Created              Pod/processor-6d4869f56b-rjxqg     Container created
+    +1 s  Normal   Pulled               Pod/processor-6d4869f56b-rjxqg     Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +1 s  Normal   Started              Pod/processor-6d4869f56b-rjxqg     Container started
+    +2 s  Normal   Created              Pod/processor-6d4869f56b-rjxqg     Container created
+    +2 s  Normal   Pulled               Pod/processor-6d4869f56b-rjxqg     Container image "ghcr.io/amshu0-0/ca3-processor:1.0.0" already present on machine and can be accessed by the pod
+    +2 s  Normal   Started              Pod/processor-6d4869f56b-rjxqg     Container started
+    +2 s  Warning  Unhealthy            Pod/processor-6d4869f56b-rjxqg     Readiness probe failed: Get "http://10.42.0.61:8000/readyz": dial tcp 10.42.0.61:8000: connect: connection refused
+    +3 s  Normal   Created              Pod/producer-smoke-hb5bt           Container created
+    +3 s  Normal   Pulled               Pod/producer-smoke-hb5bt           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +3 s  Normal   Started              Pod/producer-smoke-hb5bt           Container started
+    +3 s  Normal   SuccessfulCreate     Job/producer-smoke                 Created pod: producer-smoke-hb5bt
+    +3 s  Warning  Unhealthy            Pod/processor-6d4869f56b-rjxqg     Readiness probe failed: HTTP probe failed with statuscode: 503
+    +3 s  Normal   Scheduled            Pod/producer-smoke-hb5bt           Successfully assigned ca3/producer-smoke-hb5bt to ca3-server
+    +8 s  Normal   Created              Pod/producer-smoke-hb5bt           Container created
+    +8 s  Normal   Pulled               Pod/producer-smoke-hb5bt           Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+    +8 s  Normal   Started              Pod/producer-smoke-hb5bt           Container started
+   +12 s  Normal   Completed            Job/producer-smoke                 Job completed
+   +30 s  Warning  FailedComputeMetricsReplicas HorizontalPodAutoscaler/processor  invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready) (x5)
+   +30 s  Warning  FailedGetResourceMetric HorizontalPodAutoscaler/processor  failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready) (x5)
+
+=== MongoDB: events of Kubernetes from 00:08:35 UTC (+ N s is counted from the delete at 00:08:45 UTC)
+
+    +0 s  Normal   Killing              Pod/mongo-0                        Stopping container mongo
+    +1 s  Normal   SuccessfulCreate     StatefulSet/mongo                  Create Pod mongo-0 in StatefulSet mongo successful (x2)
+    +2 s  Normal   Scheduled            Pod/mongo-0                        Successfully assigned ca3/mongo-0 to ca3-agent-2
+    +2 s  Normal   Created              Pod/mongo-0                        Container created
+    +2 s  Normal   Pulled               Pod/mongo-0                        Container image "mongo:7.0" already present on machine and can be accessed by the pod
+    +2 s  Normal   Started              Pod/mongo-0                        Container started
+    +2 s  Normal   SuccessfulCreate     Job/producer-smoke                 Created pod: producer-smoke-m9j54
+    +3 s  Normal   Scheduled            Pod/producer-smoke-m9j54           Successfully assigned ca3/producer-smoke-m9j54 to ca3-server
+    +3 s  Normal   Created              Pod/producer-smoke-m9j54           Container created
+    +3 s  Normal   Pulled               Pod/producer-smoke-m9j54           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +3 s  Normal   Started              Pod/producer-smoke-m9j54           Container started
+    +3 s  Warning  Unhealthy            Pod/restapi-5f54fc9f7b-5gz55       Readiness probe failed: Get "https://10.42.0.7:8443/ready": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+    +3 s  Warning  Unhealthy            Pod/restapi-5f54fc9f7b-87bbr       Readiness probe failed: Get "https://10.42.1.9:8443/ready": net/http: request canceled (Client.Timeout exceeded while awaiting headers)
+    +4 s  Normal   Created              Pod/producer-smoke-m9j54           Container created
+    +4 s  Normal   Pulled               Pod/producer-smoke-m9j54           Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+    +4 s  Normal   Started              Pod/producer-smoke-m9j54           Container started
+    +8 s  Normal   Completed            Job/producer-smoke                 Job completed
+
+=== REST API: events of Kubernetes from 00:09:42 UTC (+ N s is counted from the delete at 00:09:52 UTC)
+
+    +0 s  Normal   Killing              Pod/restapi-5f54fc9f7b-5gz55       Stopping container restapi
+    +0 s  Normal   SuccessfulCreate     ReplicaSet/restapi-5f54fc9f7b      Created pod: restapi-5f54fc9f7b-gc7qb
+    +1 s  Normal   Scheduled            Pod/restapi-5f54fc9f7b-gc7qb       Successfully assigned ca3/restapi-5f54fc9f7b-gc7qb to ca3-server
+    +1 s  Normal   Created              Pod/restapi-5f54fc9f7b-gc7qb       Container created
+    +1 s  Normal   Pulled               Pod/restapi-5f54fc9f7b-gc7qb       Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +1 s  Normal   Started              Pod/restapi-5f54fc9f7b-gc7qb       Container started
+    +3 s  Normal   Created              Pod/producer-smoke-ljj8w           Container created
+    +3 s  Normal   Pulled               Pod/producer-smoke-ljj8w           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +3 s  Normal   SuccessfulCreate     Job/producer-smoke                 Created pod: producer-smoke-ljj8w
+    +3 s  Normal   Scheduled            Pod/producer-smoke-ljj8w           Successfully assigned ca3/producer-smoke-ljj8w to ca3-server
+    +4 s  Normal   Started              Pod/producer-smoke-ljj8w           Container started
+    +5 s  Normal   Created              Pod/restapi-5f54fc9f7b-gc7qb       Container created
+    +5 s  Normal   Pulled               Pod/restapi-5f54fc9f7b-gc7qb       Container image "ghcr.io/amshu0-0/ca3-restapi:1.0.0" already present on machine and can be accessed by the pod
+    +5 s  Normal   Started              Pod/restapi-5f54fc9f7b-gc7qb       Container started
+    +5 s  Warning  Unhealthy            Pod/restapi-5f54fc9f7b-gc7qb       Readiness probe failed: Get "https://10.42.0.64:8443/ready": dial tcp 10.42.0.64:8443: connect: connection refused
+    +7 s  Normal   Created              Pod/producer-smoke-ljj8w           Container created
+    +7 s  Normal   Pulled               Pod/producer-smoke-ljj8w           Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+    +7 s  Normal   Started              Pod/producer-smoke-ljj8w           Container started
+   +11 s  Normal   Completed            Job/producer-smoke                 Job completed
+
+=== Producer: events of Kubernetes from 00:11:25 UTC (+ N s is counted from the delete at 00:11:35 UTC)
+
+    -8 s  Normal   Created              Pod/processor-6d4869f56b-nfcr5     Container created
+    -8 s  Normal   Pulled               Pod/processor-6d4869f56b-nfcr5     Container image "ghcr.io/amshu0-0/ca3-processor:1.0.0" already present on machine and can be accessed by the pod
+    -8 s  Normal   Started              Pod/processor-6d4869f56b-nfcr5     Container started
+    -8 s  Warning  Unhealthy            Pod/processor-6d4869f56b-nfcr5     Readiness probe failed: Get "http://10.42.3.18:8000/readyz": dial tcp 10.42.3.18:8000: connect: connection refused
+    +0 s  Normal   Killing              Pod/producer-load-f877bb9f4-w2rlt  Stopping container producer
+    +0 s  Normal   SuccessfulCreate     ReplicaSet/producer-load-f877bb9f4 Created pod: producer-load-f877bb9f4-vscbn
+    +0 s  Normal   Scheduled            Pod/producer-load-f877bb9f4-vscbn  Successfully assigned ca3/producer-load-f877bb9f4-vscbn to ca3-server
+    +1 s  Normal   Created              Pod/producer-load-f877bb9f4-vscbn  Container created
+    +1 s  Normal   Pulled               Pod/producer-load-f877bb9f4-vscbn  Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +1 s  Normal   Started              Pod/producer-load-f877bb9f4-vscbn  Container started
+    +3 s  Normal   Created              Pod/producer-smoke-jpr9v           Container created
+    +3 s  Normal   Pulled               Pod/producer-smoke-jpr9v           Container image "busybox:1.36" already present on machine and can be accessed by the pod
+    +3 s  Normal   Started              Pod/producer-smoke-jpr9v           Container started
+    +3 s  Normal   SuccessfulCreate     Job/producer-smoke                 Created pod: producer-smoke-jpr9v
+    +3 s  Warning  FailedComputeMetricsReplicas HorizontalPodAutoscaler/producer-load invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource  (x10)
+    +3 s  Warning  FailedGetResourceMetric HorizontalPodAutoscaler/producer-load failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API (x10)
+    +3 s  Normal   Scheduled            Pod/producer-smoke-jpr9v           Successfully assigned ca3/producer-smoke-jpr9v to ca3-agent-1
+    +5 s  Normal   Created              Pod/producer-load-f877bb9f4-vscbn  Container created
+    +5 s  Normal   Created              Pod/producer-smoke-jpr9v           Container created
+    +5 s  Normal   Pulled               Pod/producer-load-f877bb9f4-vscbn  Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+    +5 s  Normal   Pulled               Pod/producer-smoke-jpr9v           Container image "ghcr.io/amshu0-0/ca3-producer:1.0.0" already present on machine and can be accessed by the pod
+    +5 s  Normal   Started              Pod/producer-load-f877bb9f4-vscbn  Container started
+    +5 s  Normal   Started              Pod/producer-smoke-jpr9v           Container started
+    +9 s  Normal   Completed            Job/producer-smoke                 Job completed
+   +18 s  Normal   Created              Pod/processor-6d4869f56b-qtwnr     Container created
+   +18 s  Normal   Pulled               Pod/processor-6d4869f56b-qtwnr     Container image "busybox:1.36" already present on machine and can be accessed by the pod
+   +18 s  Normal   ScalingReplicaSet    Deployment/processor               Scaled up replica set processor-6d4869f56b from 2 to 3 (x2)
+   +18 s  Normal   SuccessfulCreate     ReplicaSet/processor-6d4869f56b    Created pod: processor-6d4869f56b-qtwnr
+   +18 s  Normal   SuccessfulRescale    HorizontalPodAutoscaler/processor  New size: 3; reason: cpu resource utilization (percentage of request) above target (x2)
+   +18 s  Warning  FailedComputeMetricsReplicas HorizontalPodAutoscaler/producer-load invalid metrics (1 invalid out of 1), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready) (x3)
+   +18 s  Warning  FailedGetResourceMetric HorizontalPodAutoscaler/producer-load failed to get cpu utilization: did not receive metrics for targeted pods (pods might be unready) (x3)
+   +18 s  Normal   Scheduled            Pod/processor-6d4869f56b-qtwnr     Successfully assigned ca3/processor-6d4869f56b-qtwnr to ca3-agent-1
+   +19 s  Normal   Started              Pod/processor-6d4869f56b-qtwnr     Container started
+   +20 s  Normal   Created              Pod/processor-6d4869f56b-qtwnr     Container created
+   +20 s  Normal   Pulled               Pod/processor-6d4869f56b-qtwnr     Container image "ghcr.io/amshu0-0/ca3-processor:1.0.0" already present on machine and can be accessed by the pod
+   +20 s  Normal   Started              Pod/processor-6d4869f56b-qtwnr     Container started
+   +20 s  Warning  Unhealthy            Pod/processor-6d4869f56b-qtwnr     Readiness probe failed: Get "http://10.42.1.16:8000/readyz": dial tcp 10.42.1.16:8000: connect: connection refused
+   +21 s  Warning  Unhealthy            Pod/processor-6d4869f56b-qtwnr     Readiness probe failed: HTTP probe failed with statuscode: 503

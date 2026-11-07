@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 356" font-family="Helvetica, Arial, sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="120" y="22" font-size="15" font-weight="bold" fill="#222">Resilience drill: seconds after the pod was deleted</text>
+<line x1="120.0" y1="46" x2="120.0" y2="284" stroke="#ddd"/>
+<text x="120.0" y="40" text-anchor="middle" fill="#555">0 s</text>
+<line x1="363.3" y1="46" x2="363.3" y2="284" stroke="#ddd"/>
+<text x="363.3" y="40" text-anchor="middle" fill="#555">10 s</text>
+<line x1="606.7" y1="46" x2="606.7" y2="284" stroke="#ddd"/>
+<text x="606.7" y="40" text-anchor="middle" fill="#555">20 s</text>
+<line x1="850.0" y1="46" x2="850.0" y2="284" stroke="#ddd"/>
+<text x="850.0" y="40" text-anchor="middle" fill="#555">30 s</text>
+<text x="110" y="81.0" text-anchor="end" fill="#222" font-weight="bold">Kafka</text>
+<rect x="120.0" y="68.0" width="598.3" height="18" rx="3" fill="#2ca02c" opacity="0.35"/>
+<rect x="120.0" y="68.0" width="570.8" height="18" rx="3" fill="#1f77b4" opacity="0.8"/>
+<circle cx="831.7" cy="77.0" r="6" fill="#7b3294" stroke="#fff" stroke-width="1.5"/>
+<text x="694.8" y="65.0" fill="#145a8d" font-size="11">23 s</text>
+<text x="110" y="127.0" text-anchor="end" fill="#222" font-weight="bold">Processor</text>
+<rect x="120.0" y="114.0" width="352.2" height="18" rx="3" fill="#2ca02c" opacity="0.35"/>
+<rect x="120.0" y="114.0" width="329.3" height="18" rx="3" fill="#1f77b4" opacity="0.8"/>
+<circle cx="456.4" cy="123.0" r="6" fill="#7b3294" stroke="#fff" stroke-width="1.5"/>
+<text x="453.3" y="111.0" fill="#145a8d" font-size="11">14 s</text>
+<text x="110" y="173.0" text-anchor="end" fill="#222" font-weight="bold">MongoDB</text>
+<rect x="120.0" y="160.0" width="347.3" height="18" rx="3" fill="#2ca02c" opacity="0.35"/>
+<rect x="120.0" y="160.0" width="315.0" height="18" rx="3" fill="#1f77b4" opacity="0.8"/>
+<rect x="139.5" y="180.0" width="182.5" height="5" fill="#d95f02"/>
+<circle cx="433.9" cy="169.0" r="6" fill="#7b3294" stroke="#fff" stroke-width="1.5"/>
+<text x="439.0" y="157.0" fill="#145a8d" font-size="11">13 s</text>
+<text x="110" y="219.0" text-anchor="end" fill="#222" font-weight="bold">REST API</text>
+<rect x="120.0" y="206.0" width="204.7" height="18" rx="3" fill="#2ca02c" opacity="0.35"/>
+<rect x="120.0" y="206.0" width="177.0" height="18" rx="3" fill="#1f77b4" opacity="0.8"/>
+<circle cx="437.9" cy="215.0" r="6" fill="#7b3294" stroke="#fff" stroke-width="1.5"/>
+<text x="301.0" y="203.0" fill="#145a8d" font-size="11">7 s</text>
+<text x="110" y="265.0" text-anchor="end" fill="#222" font-weight="bold">Producer</text>
+<rect x="120.0" y="252.0" width="390.0" height="18" rx="3" fill="#2ca02c" opacity="0.35"/>
+<rect x="120.0" y="252.0" width="149.2" height="18" rx="3" fill="#1f77b4" opacity="0.8"/>
+<circle cx="412.6" cy="261.0" r="6" fill="#7b3294" stroke="#fff" stroke-width="1.5"/>
+<text x="273.2" y="249.0" fill="#145a8d" font-size="11">6 s</text>
+<rect x="120" y="310" width="14" height="10" fill="#1f77b4"/>
+<text x="139" y="320" fill="#333" font-size="11">new pod ready</text>
+<rect x="241" y="310" width="14" height="10" fill="#2ca02c"/>
+<text x="260" y="320" fill="#333" font-size="11">whole stack again (green, lighter)</text>
+<rect x="496" y="310" width="14" height="10" fill="#7b3294"/>
+<text x="515" y="320" fill="#333" font-size="11">test event readable from the REST API</text>
+<rect x="120" y="328" width="14" height="10" fill="#d95f02"/>
+<text x="139" y="338" fill="#333" font-size="11">REST API did not answer /stats</text>
+</svg>

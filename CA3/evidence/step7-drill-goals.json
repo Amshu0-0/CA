@@ -1,0 +1,37 @@
+[
+  {
+    "id": "pod-back",
+    "text": "A pod that is deleted is replaced by a new pod that is ready, in every tier",
+    "goal": "at most 150 seconds after the delete, for the slowest of the five tiers",
+    "measured": "kafka 23 s, processor 14 s, mongo 13 s, restapi 7 s, producer 6 s",
+    "verdict": "met"
+  },
+  {
+    "id": "whole-again",
+    "text": "After the delete, every part of the stack has its pods ready again (not only the replaced pod)",
+    "goal": "at most 300 seconds after the delete, for the slowest of the five tiers",
+    "measured": "kafka 25 s, processor 14 s, mongo 14 s, restapi 8 s, producer 16 s",
+    "verdict": "met"
+  },
+  {
+    "id": "event-flows",
+    "text": "An event that is sent while a pod is being replaced is not lost: it can be read from the REST API afterwards",
+    "goal": "at most 300 seconds after the delete, for the slowest of the five tiers",
+    "measured": "kafka 29 s, processor 14 s, mongo 13 s, restapi 13 s, producer 12 s",
+    "verdict": "met"
+  },
+  {
+    "id": "data-kept",
+    "text": "Deleting a pod deletes no data: every tier still has all the records and messages it had",
+    "goal": "at least 100 percent of the tiers",
+    "measured": "100 percent (5 of 5 tiers kept all their data)",
+    "verdict": "met"
+  },
+  {
+    "id": "api-gap",
+    "text": "While one of the two REST API pods is replaced, the REST API keeps answering the calls for /stats",
+    "goal": "at most 5 seconds in a row without a good answer",
+    "measured": "longest stretch of failed /stats calls: 0.0 s (0 of 13 calls failed)",
+    "verdict": "met"
+  }
+]
