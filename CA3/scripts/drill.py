@@ -1,6 +1,6 @@
 # Resilience drill: deletes one pod in every tier of the pipeline, one tier after the other, and records how the platform brings it back.
 #
-#   make drill                                   all five tiers, about 25 minutes
+#   make drill                                   all five tiers, about 6 minutes
 #   make drill DRILL_ARGS="--only restapi"       one or more tiers (kafka, processor, mongo, restapi, producer), for example for the video
 #   make drill DRILL_ARGS="--dry-run"            look and say what would be deleted; delete nothing
 #   make drill-report                            draw the table, the goals and the chart again from the saved files (needs no cluster)

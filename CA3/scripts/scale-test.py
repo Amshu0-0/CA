@@ -1,6 +1,6 @@
 # Scaling test: what happens when the load goes up and the autoscalers react, and when the load stops again.
 #
-#   make scale-test                                          the whole test, about 12 minutes
+#   make scale-test                                          the whole test, about 7 minutes
 #   make scale-test SCALE_ARGS="--before 30 --after 30"      shorter measuring windows
 #   make scale-report                                        draw the table and the chart again from the saved files (needs no cluster)
 #   make scale-down                                          switch the load off by hand (the test does it by itself, also when it stops early)

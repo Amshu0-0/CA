@@ -1,6 +1,6 @@
 # Kills parts of the running stack on purpose and checks that Kubernetes brings them back and that no data is lost.
 #
-#   make heal-check                              all four tests, about 5 minutes
+#   make heal-check                              all four tests, about 2 minutes
 #   make heal-check HEAL_ARGS="--only mongo"     one test (rest, processor, mongo or kafka)
 #
 #   rest       delete one of the two REST API pods while this computer keeps calling the API

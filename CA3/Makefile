@@ -17,10 +17,10 @@
 #   make logs-trace    follow one event id through the logs of every program (TRACE=<id>, the smoke test prints one)
 #   make grafana       open the dashboard at http://localhost:3000 (log in with: make grafana-login)
 #   make prometheus    open Prometheus at http://localhost:9090
-#   make scale-test    switch the producer load on, let the autoscalers work, switch it off again, and measure all of it (about 12 minutes)
+#   make scale-test    switch the producer load on, let the autoscalers work, switch it off again, and measure all of it (about 7 minutes)
 #   make scale-report  draw the table, the goals and the chart of the last scale-test again (needs no cluster)
 #   make goals         list the goals in slo.json; change one with  make goals GOAL_ARGS="scale-up 120 --why 'one sentence'"
-#   make drill         delete one pod in each tier (Kafka, processor, MongoDB, REST API, producer) and measure how the platform recovers (about 25 minutes)
+#   make drill         delete one pod in each tier (Kafka, processor, MongoDB, REST API, producer) and measure how the platform recovers (about 6 minutes)
 #   make drill-report  draw the table, the goals and the chart of the last drill again (needs no cluster)
 #   make rest-evidence call every REST endpoint and save request, response, logs and metrics as evidence
 #   make operator-steps  do the manual steps of runbook.md once: read the logs, scale the REST API up and back, read the certificate dates
@@ -92,10 +92,10 @@ help: ; @printf '%s\n' \
     "  make grafana         open the dashboard at http://localhost:3000 (leave the window open; log in with: make grafana-login)" \
     "  make grafana-login   print the Grafana user name and password (they live in the Secret grafana-admin)" \
     "  make prometheus      open Prometheus at http://localhost:9090 (leave the window open)" \
-    "  make scale-test      the scaling test: load on with one producer pod, then the autoscaler, then the load off; measures all of it (about 12 minutes)" \
+    "  make scale-test      the scaling test: load on with one producer pod, then the autoscaler, then the load off; measures all of it (about 7 minutes)" \
     "  make scale-report    draw the table, the goals and the chart of the last scale-test again (needs no cluster)" \
     "  make goals           list the goals in slo.json (change one:  make goals GOAL_ARGS=\"scale-up 120 --why 'one sentence'\")" \
-    "  make drill           the resilience drill: delete one pod in each tier and measure how the platform recovers (about 25 minutes; one tier:  make drill DRILL_ARGS=\"--only restapi\")" \
+    "  make drill           the resilience drill: delete one pod in each tier and measure how the platform recovers (about 6 minutes; one tier:  make drill DRILL_ARGS=\"--only restapi\")" \
     "  make drill-report    draw the table, the goals and the chart of the last drill again (needs no cluster)" \
     "  make rest-evidence   call every REST endpoint and save request, response, logs and metrics as evidence (evidence/step7-rest-evidence.txt)" \
     "  make operator-steps  the manual steps of runbook.md, done once: read the logs, scale the REST API up and back, read the certificate dates (about 2 minutes)" \
