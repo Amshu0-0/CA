@@ -1,0 +1,94 @@
+python3 scripts/cleanup-scan.py 
+CA3 cleanup scan
+  time    : 2026-11-08 16:00 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-CA3
+
+Created by this project (tagged Project=CS5287-CA3)
+  [FOUND] EC2 instances (3)
+            ca3-agent-2  i-0682a92b3f5f1a7f0  (running)
+            ca3-agent-1  i-077175bd3887a3487  (running)
+            ca3-server  i-0e4199d88d38691da  (running)
+  [FOUND] EBS volumes (3)
+            ca3-server-root  vol-016169b894dadd6eb  (in-use, 30 GiB)
+            ca3-agent-1-root  vol-066dbbb3ac4c3c208  (in-use, 30 GiB)
+            ca3-agent-2-root  vol-020f04d0e08d01e5d  (in-use, 30 GiB)
+  [FOUND] VPCs (1)
+            vpc-0307b9d4d103e69a6  (10.20.0.0/16)
+  [FOUND] Subnets (1)
+            subnet-0bbb930e2895efdd6  (10.20.1.0/24)
+  [FOUND] Security groups (2)
+            sg-06919991502027d56  (ca3-cluster)
+            sg-0b4c1e55592b527b7  (default)
+  [FOUND] Internet gateways (1)
+            igw-00490caf637027ad3
+  [FOUND] Route tables (1)
+            rtb-0df12a55375fb8eb1
+  [FOUND] Key pairs (1)
+            ca3-key
+
+Anything else with that tag, in any AWS service
+  [FOUND] Tagged resources (21)
+            ec2  instance/i-077175bd3887a3487
+            ec2  security-group-rule/sgr-033f9192bb5875e22
+            ec2  security-group/sg-0b4c1e55592b527b7
+            ec2  vpc/vpc-0307b9d4d103e69a6
+            ec2  key-pair/key-0a4d7e5c1d3b46250
+            ec2  security-group-rule/sgr-08f994ced405744c2
+            ec2  volume/vol-020f04d0e08d01e5d
+            ec2  route-table/rtb-0df12a55375fb8eb1
+            ec2  security-group-rule/sgr-06ce8cfa50bc5102d
+            ec2  subnet/subnet-0bbb930e2895efdd6
+            ec2  internet-gateway/igw-00490caf637027ad3
+            ec2  security-group-rule/sgr-0b0bd0b4e2cba9424
+            ec2  volume/vol-016169b894dadd6eb
+            ec2  instance/i-0682a92b3f5f1a7f0
+            ec2  security-group-rule/sgr-031daab597057bcbd
+            ec2  security-group-rule/sgr-0dfc20dc84c53b10f
+            ec2  security-group-rule/sgr-0b87624d8f93e755e
+            ec2  instance/i-0e4199d88d38691da
+            ec2  security-group/sg-06919991502027d56
+            ec2  volume/vol-066dbbb3ac4c3c208
+            ec2  security-group-rule/sgr-0b85b480f6fd8aaad
+
+Every kind of EC2 resource with that tag (asked of EC2, which needs no extra permission)
+  [FOUND] Tagged EC2 resources (21)
+            vpc  vpc-0307b9d4d103e69a6
+            instance  i-0682a92b3f5f1a7f0
+            instance  i-077175bd3887a3487
+            instance  i-0e4199d88d38691da
+            key-pair  key-0a4d7e5c1d3b46250
+            route-table  rtb-0df12a55375fb8eb1
+            internet-gateway  igw-00490caf637027ad3
+            volume  vol-016169b894dadd6eb
+            volume  vol-020f04d0e08d01e5d
+            volume  vol-066dbbb3ac4c3c208
+            subnet  subnet-0bbb930e2895efdd6
+            security-group-rule  sgr-031daab597057bcbd
+            security-group-rule  sgr-033f9192bb5875e22
+            security-group-rule  sgr-06ce8cfa50bc5102d
+            security-group-rule  sgr-08f994ced405744c2
+            security-group-rule  sgr-0b0bd0b4e2cba9424
+            security-group-rule  sgr-0b85b480f6fd8aaad
+            security-group-rule  sgr-0b87624d8f93e755e
+            security-group-rule  sgr-0dfc20dc84c53b10f
+            security-group  sg-06919991502027d56
+            security-group  sg-0b4c1e55592b527b7
+
+Resources that cost money, tagged or not, in us-east-2
+  [FOUND] EC2 instances (3)
+            ca3-agent-2  i-0682a92b3f5f1a7f0  (running)
+            ca3-agent-1  i-077175bd3887a3487  (running)
+            ca3-server  i-0e4199d88d38691da  (running)
+  [FOUND] EBS volumes (3)
+            ca3-server-root  vol-016169b894dadd6eb  (in-use, 30 GiB)
+            ca3-agent-1-root  vol-066dbbb3ac4c3c208  (in-use, 30 GiB)
+            ca3-agent-2-root  vol-020f04d0e08d01e5d  (in-use, 30 GiB)
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+RESULT: LEFTOVERS FOUND - the resources listed above are still in AWS.
+        While the cluster exists, that is expected. After "make cluster-down" it is not: run it again, then scan again.
+make: *** [scan] Error 1

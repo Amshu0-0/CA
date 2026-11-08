@@ -1,0 +1,34 @@
+TLS checks, run inside the processor pod with the processor's own settings. Only names and results are printed, never a file's content.
+Kafka: kafka:9092    MongoDB: mongo:27017
+
+[1/6] Kafka, plain connection without TLS
+      required: refused
+      observed: bytes came back that are not a Kafka answer
+      OK
+
+[2/6] Kafka, TLS but no client certificate
+      required: refused
+      observed: TLS refused (SSLV3_ALERT_BAD_CERTIFICATE)
+      OK
+
+[3/6] Kafka, TLS with the processor's own certificate
+      required: answered
+      observed: the broker answered the Kafka question (error code 0)
+      OK
+
+[4/6] MongoDB, plain connection without TLS
+      required: refused
+      observed: no connection (ServerSelectionTimeoutError)
+      OK
+
+[5/6] MongoDB, TLS, ping without a login
+      required: answered
+      observed: MongoDB answered the ping
+      OK
+
+[6/6] MongoDB, TLS, list the databases without a login
+      required: refused
+      observed: MongoDB refused: Unauthorized (code 13)
+      OK
+
+RESULT: PASS - 6 of 6 connections behaved as required: nothing without TLS, no Kafka client without a certificate, no MongoDB data without a login; the right ones were answered

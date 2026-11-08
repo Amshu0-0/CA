@@ -8,3 +8,11 @@ infra/terraform/crash.log
 infra/ansible/inventory.ini
 infra/ansible/known_hosts
 infra/ansible/*.retry
+
+# The demo video is hosted outside Git (the assignment says: do not commit video files). These lines keep a video from being added by accident.
+*.mp4
+*.mov
+*.m4v
+*.webm
+*.mkv
+*.avi

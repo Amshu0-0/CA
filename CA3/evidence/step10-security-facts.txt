@@ -1,0 +1,110 @@
+Security facts of the running cluster. Only names, modes and counts were read: no Secret value was printed or saved.
+
+=== 1. The Secrets of the stack: name, type, number of keys
+$ kubectl -n ca3 get secrets
+NAME                     TYPE     DATA   AGE
+grafana-admin            Opaque   2      158m
+kafka-client-exporter    Opaque   3      158m
+kafka-client-processor   Opaque   3      158m
+kafka-client-producer    Opaque   3      158m
+kafka-tls                Opaque   2      158m
+mongo-exporter           Opaque   2      158m
+mongo-processor          Opaque   2      158m
+mongo-restapi            Opaque   2      158m
+mongo-root               Opaque   2      158m
+mongo-tls                Opaque   2      158m
+pki-ca                   Opaque   1      158m
+restapi-login            Opaque   2      158m
+restapi-tls              Opaque   2      158m
+
+=== 2. The key names inside each Secret (names only)
+$ kubectl -n ca3 get secrets -o go-template=<every Secret name, then its key names>
+grafana-admin: password username
+kafka-client-exporter: ca.crt tls.crt tls.key
+kafka-client-processor: ca.crt tls.crt tls.key
+kafka-client-producer: ca.crt tls.crt tls.key
+kafka-tls: ca.pem keystore.pem
+mongo-exporter: password username
+mongo-processor: password username
+mongo-restapi: password username
+mongo-root: password username
+mongo-tls: ca.pem mongo.pem
+pki-ca: ca.crt
+restapi-login: password username
+restapi-tls: tls.crt tls.key
+
+=== 3. The namespace and its Pod Security labels
+$ kubectl get namespace ca3 --show-labels
+NAME   STATUS   AGE    LABELS
+ca3    Active   158m   app.kubernetes.io/part-of=ca3-pipeline,kubernetes.io/metadata.name=ca3,pod-security.kubernetes.io/audit=restricted,pod-security.kubernetes.io/enforce=restricted,pod-security.kubernetes.io/warn=restricted
+
+=== 4. A privileged pod is asked for, as a dry run on the server (nothing is created)
+$ kubectl -n ca3 run privileged-test --image=busybox:1.36 --privileged --restart=Never --dry-run=server -o name -- sleep 1
+Error from server (Forbidden): pods "privileged-test" is forbidden: violates PodSecurity "restricted:latest": privileged (container "privileged-test" must not set securityContext.privileged=true), allowPrivilegeEscalation != false (container "privileged-test" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "privileged-test" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "privileged-test" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "privileged-test" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+
+=== 5. What the processor pod sees
+$ kubectl -n ca3 exec deploy/processor -c processor -- sh -c '<ls of the mounted folders, the names of the environment variables, ls of the token folder>'
+-- files that the Secrets put into the pod (owner and group are numbers)
+/etc/pki/ca:
+total 4
+-r--r----- 1 0 1000 1172 Nov  8 15:01 ca.crt
+
+/etc/pki/kafka-client:
+total 12
+-r--r----- 1 0 1000 1172 Nov  8 15:01 ca.crt
+-r--r----- 1 0 1000 1229 Nov  8 15:01 tls.crt
+-r--r----- 1 0 1000 1704 Nov  8 15:01 tls.key
+
+/etc/secrets/mongo:
+total 8
+-r--r----- 1 0 1000 32 Nov  8 15:01 password
+-r--r----- 1 0 1000  9 Nov  8 15:01 username
+
+-- names of the environment variables (the values are not printed)
+CONSUMER_GROUP
+DATASET_FILE
+GPG_KEY
+HOME
+HOSTNAME
+KAFKA_BROKER
+KAFKA_SSL_CA_FILE
+KAFKA_SSL_CERT_FILE
+KAFKA_SSL_KEY_FILE
+KAFKA_TOPIC
+KUBERNETES_PORT
+KUBERNETES_PORT_443_TCP
+KUBERNETES_PORT_443_TCP_ADDR
+KUBERNETES_PORT_443_TCP_PORT
+KUBERNETES_PORT_443_TCP_PROTO
+KUBERNETES_SERVICE_HOST
+KUBERNETES_SERVICE_PORT
+KUBERNETES_SERVICE_PORT_HTTPS
+LANG
+METRICS_PORT
+MONGO_COLLECTION
+MONGO_DB
+MONGO_HOST
+MONGO_PASSWORD_FILE
+MONGO_PORT
+MONGO_TLS_CA_FILE
+MONGO_USER_FILE
+PATH
+PRODUCER_METRICS_PORT
+PWD
+PYTHON_SHA256
+PYTHON_VERSION
+REST_METRICS_PORT
+REST_PORT
+
+-- the folder where Kubernetes would put an API token
+ls: cannot access '/var/run/secrets/kubernetes.io/serviceaccount': No such file or directory
+
+=== Summary
+OK: 13 Secrets exist
+OK: the namespace ca3 enforces the Pod Security profile restricted
+OK: a privileged pod is refused by the API server (dry run, nothing was created)
+OK: the processor sees 6 Secret files, all read-only for owner and group (-r--r-----)
+OK: the processor's environment holds the path of the password file (MONGO_PASSWORD_FILE), and no variable named like a password, key or token (GPG_KEY is set by the Python base image: it is the ID of a public key)
+OK: the processor pod has no Kubernetes API token
+
+RESULT: PASS - 6 of 6 checks passed
