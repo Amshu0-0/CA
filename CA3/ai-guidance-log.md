@@ -6,7 +6,7 @@ I used Claude (Anthropic) to design and write the manifests, the programs, the T
 
 **How to read the last column.** It uses three kinds of statement, each in bold:
 
-- **Verified by Amshu:** I ran the command on my own cluster or my own AWS account and saved the output in the file named. It does not claim that I read every line of the text around it.
+- **Verified by Amshu:** I ran the command on my own cluster or my own AWS account and saved the output in the file named.
 - **By Claude, in a copy (not on the cluster):** Claude ran it in a copy of the repository: with a Kubernetes API server that has no machines, with pretend clusters and stand-in programs, and with the checks of `make verify`. That shows that the files agree with each other and that a script's logic works. It does not show that a real program starts or behaves.
 - **Not tested:** nobody tested it.
 
