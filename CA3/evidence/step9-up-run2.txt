@@ -1,0 +1,116 @@
+kubectl context: ca3-k3s   (kubeconfig: /Users/<user>/Desktop/CA/CA3/.secrets/kubeconfig.yaml)
+( kubectl apply -k . || { echo "kubectl reported an error. If it says that the Job bootstrap cannot be changed, the finished Job is replaced and the stack applied again:" ; \
+      kubectl -n ca3 delete job bootstrap --ignore-not-found && kubectl apply -k . ; } ) && \
+    ( kubectl -n ca3 wait --for=condition=complete job/bootstrap --timeout=300s && \
+      kubectl -n ca3 rollout status statefulset/mongo --timeout=420s && \
+      kubectl -n ca3 rollout status statefulset/kafka --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/processor --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/restapi --timeout=300s && \
+      kubectl -n ca3 wait --for=condition=complete job/producer-replay --timeout=600s && \
+      kubectl -n ca3 rollout status deployment/kafka-exporter --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/mongodb-exporter --timeout=420s && \
+      kubectl -n ca3 rollout status deployment/prometheus --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/loki --timeout=300s && \
+      kubectl -n ca3 rollout status daemonset/alloy --timeout=300s && \
+      kubectl -n ca3 rollout status deployment/grafana --timeout=300s && \
+      echo "Stack is up. Call the REST API from this computer with:  make rest-check   and check the monitoring with:  make metrics-check" ) || \
+    { echo "The stack is not up yet. Read the first error above, then run:  make diagnose   (it is safe to run make up again)"; exit 1; }
+namespace/ca3 unchanged
+serviceaccount/alloy unchanged
+serviceaccount/bootstrap unchanged
+serviceaccount/grafana unchanged
+serviceaccount/kafka unchanged
+serviceaccount/kafka-exporter unchanged
+serviceaccount/loki unchanged
+serviceaccount/mongo unchanged
+serviceaccount/mongodb-exporter unchanged
+serviceaccount/pipeline-operator unchanged
+serviceaccount/pipeline-viewer unchanged
+serviceaccount/processor unchanged
+serviceaccount/producer unchanged
+serviceaccount/prometheus unchanged
+serviceaccount/restapi unchanged
+role.rbac.authorization.k8s.io/alloy unchanged
+role.rbac.authorization.k8s.io/bootstrap unchanged
+role.rbac.authorization.k8s.io/pipeline-operator unchanged
+role.rbac.authorization.k8s.io/pipeline-viewer unchanged
+rolebinding.rbac.authorization.k8s.io/alloy unchanged
+rolebinding.rbac.authorization.k8s.io/bootstrap unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-operator unchanged
+rolebinding.rbac.authorization.k8s.io/pipeline-viewer unchanged
+configmap/alloy-config unchanged
+configmap/grafana-dashboards unchanged
+configmap/grafana-provisioning unchanged
+configmap/loki-config unchanged
+configmap/mongo-init unchanged
+configmap/pipeline-config unchanged
+configmap/processor-config unchanged
+configmap/prometheus-config unchanged
+service/grafana unchanged
+service/kafka unchanged
+service/kafka-exporter unchanged
+service/kafka-headless unchanged
+service/loki unchanged
+service/mongo unchanged
+service/mongo-headless unchanged
+service/mongodb-exporter unchanged
+service/processor unchanged
+service/processor-metrics unchanged
+service/producer-metrics unchanged
+service/prometheus unchanged
+service/restapi unchanged
+service/restapi-metrics unchanged
+deployment.apps/grafana unchanged
+deployment.apps/kafka-exporter unchanged
+deployment.apps/loki unchanged
+deployment.apps/mongodb-exporter unchanged
+deployment.apps/processor unchanged
+deployment.apps/producer-load unchanged
+deployment.apps/prometheus unchanged
+deployment.apps/restapi unchanged
+statefulset.apps/kafka unchanged
+statefulset.apps/mongo unchanged
+daemonset.apps/alloy unchanged
+horizontalpodautoscaler.autoscaling/processor unchanged
+horizontalpodautoscaler.autoscaling/producer-load unchanged
+job.batch/bootstrap unchanged
+job.batch/producer-replay unchanged
+networkpolicy.networking.k8s.io/allow-dns-egress unchanged
+networkpolicy.networking.k8s.io/alloy-egress unchanged
+networkpolicy.networking.k8s.io/bootstrap-egress unchanged
+networkpolicy.networking.k8s.io/default-deny-all unchanged
+networkpolicy.networking.k8s.io/grafana-egress unchanged
+networkpolicy.networking.k8s.io/kafka-exporter-egress unchanged
+networkpolicy.networking.k8s.io/kafka-exporter-ingress unchanged
+networkpolicy.networking.k8s.io/kafka-exporter-to-kafka unchanged
+networkpolicy.networking.k8s.io/kafka-ingress unchanged
+networkpolicy.networking.k8s.io/kafka-self unchanged
+networkpolicy.networking.k8s.io/loki-ingress unchanged
+networkpolicy.networking.k8s.io/mongo-ingress unchanged
+networkpolicy.networking.k8s.io/mongodb-exporter-egress unchanged
+networkpolicy.networking.k8s.io/mongodb-exporter-ingress unchanged
+networkpolicy.networking.k8s.io/mongodb-exporter-to-mongo unchanged
+networkpolicy.networking.k8s.io/observer-egress unchanged
+networkpolicy.networking.k8s.io/processor-egress unchanged
+networkpolicy.networking.k8s.io/processor-ingress unchanged
+networkpolicy.networking.k8s.io/producer-egress unchanged
+networkpolicy.networking.k8s.io/producer-metrics-ingress unchanged
+networkpolicy.networking.k8s.io/prometheus-egress unchanged
+networkpolicy.networking.k8s.io/prometheus-ingress unchanged
+networkpolicy.networking.k8s.io/restapi-egress unchanged
+networkpolicy.networking.k8s.io/restapi-ingress unchanged
+networkpolicy.networking.k8s.io/restapi-metrics-ingress unchanged
+job.batch/bootstrap condition met
+partitioned roll out complete: 1 new pods have been updated...
+partitioned roll out complete: 1 new pods have been updated...
+deployment "processor" successfully rolled out
+deployment "restapi" successfully rolled out
+job.batch/producer-replay condition met
+deployment "kafka-exporter" successfully rolled out
+deployment "mongodb-exporter" successfully rolled out
+deployment "prometheus" successfully rolled out
+deployment "loki" successfully rolled out
+daemon set "alloy" successfully rolled out
+deployment "grafana" successfully rolled out
+Stack is up. Call the REST API from this computer with:  make rest-check   and check the monitoring with:  make metrics-check
+make up took 0 min 9 s

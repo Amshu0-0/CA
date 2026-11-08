@@ -1,0 +1,12 @@
+macOS: 26.5
+make: GNU Make 3.81
+terraform: Terraform v1.16.3
+ansible: ansible [core 2.21.4]
+kubectl: Client Version: v1.37.1
+kubeconform: v0.8.0
+aws: aws-cli/2.36.49 Python/3.14.7 Darwin/25.5.0 source/arm64
+python3: Python 3.13.2
+openssl: OpenSSL 3.0.16 11 Feb 2025 (Library: OpenSSL 3.0.16 11 Feb 2025)
+ssh: OpenSSH_10.2p1, LibreSSL 3.3.6
+git: git version 2.50.1 (Apple Git-155)
+PyYAML: 6.0.2

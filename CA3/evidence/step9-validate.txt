@@ -1,0 +1,9 @@
+kubectl kustomize . | kubeconform -strict -summary - && \
+    for d in producer/load producer/loadtest producer/loadtest-one; do kubectl kustomize $d | kubeconform -strict -summary - || exit 1; done && \
+    kubeconform -strict -summary producer/smoke
+Summary: 85 resources found parsing stdin - Valid: 85, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 2 resources found parsing stdin - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 2 resources found parsing stdin - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 2 resources found parsing stdin - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+Summary: 1 resource found in 1 file - Valid: 1, Invalid: 0, Errors: 0, Skipped: 0
+make validate took 0 min 2 s
