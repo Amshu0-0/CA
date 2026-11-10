@@ -22,3 +22,17 @@ parsing:
     - '(0x)[0-9a-fA-F]+'              # hexadecimal numbers
     - '\d+\.\d+\.\d+\.\d+'            # IPv4 addresses
     - '\d+'                           # any other integer
+
+# Chronological split: earliest 60% of the timeline for training, next 20%
+# for validation (tuning), last 20% for testing. Never random (Le & Zhang 2022).
+split:
+  by: time                            # "time" (timeline) or "messages" (count)
+  train: 0.6
+  val: 0.2
+  test: 0.2
+
+# Shared evaluation unit: 5-minute windows sliding by 1 minute (LogBERT BGL).
+# A window is anomalous if it contains at least one alert message.
+windows:
+  size_seconds: 300
+  step_seconds: 60

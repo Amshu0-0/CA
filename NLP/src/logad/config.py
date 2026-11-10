@@ -60,6 +60,24 @@ class ParsingConfig:
     )
 
 
+# Chronological train / validation / test split (Le & Zhang, ICSE 2022).
+@dataclass
+class SplitConfig:
+    # "time" cuts the timeline into fractions; "messages" cuts the message count.
+    by: str = "time"
+    train: float = 0.6
+    val: float = 0.2
+    test: float = 0.2
+
+
+# Sliding windows: the shared evaluation unit of both approaches
+# (LogBERT's BGL setting: 5-minute windows moved forward by 1 minute).
+@dataclass
+class WindowConfig:
+    size_seconds: int = 300
+    step_seconds: int = 60
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -69,6 +87,8 @@ class ExperimentConfig:
     seed: int = 42
     paths: PathsConfig = field(default_factory=PathsConfig)
     parsing: ParsingConfig = field(default_factory=ParsingConfig)
+    split: SplitConfig = field(default_factory=SplitConfig)
+    windows: WindowConfig = field(default_factory=WindowConfig)
 
 
 # ---------------------------------------------------------------------------
