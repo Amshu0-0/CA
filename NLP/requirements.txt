@@ -1,0 +1,7 @@
+# Installs this repository as an editable package together with every
+# optional dependency group. All version pins live in pyproject.toml so they
+# are declared in exactly one place.
+#
+#   pip install -r requirements.txt
+#
+-e .[dev]
