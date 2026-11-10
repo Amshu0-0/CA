@@ -43,6 +43,23 @@ class PathsConfig:
     output_dir: str = "outputs/bgl"
 
 
+# Drain log-parser settings (He et al., 2017). The defaults reproduce the
+# LogBERT repository's preprocessing of BGL.
+@dataclass
+class ParsingConfig:
+    # Depth of Drain's parse tree; 3 groups messages by token count only.
+    depth: int = 3
+    # Minimum fraction of matching tokens for a message to join a template.
+    similarity_threshold: float = 0.3
+    # Maximum number of children of an internal tree node.
+    max_children: int = 100
+    # Regexes replaced by <*> before parsing: hex numbers, IPv4 addresses,
+    # integers (same list as logad.data.drain.DEFAULT_MASKING).
+    masking: list[str] = field(
+        default_factory=lambda: [r"(0x)[0-9a-fA-F]+", r"\d+\.\d+\.\d+\.\d+", r"\d+"]
+    )
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -51,6 +68,7 @@ class ExperimentConfig:
     # Global random seed (Python, NumPy and PyTorch are all seeded from it).
     seed: int = 42
     paths: PathsConfig = field(default_factory=PathsConfig)
+    parsing: ParsingConfig = field(default_factory=ParsingConfig)
 
 
 # ---------------------------------------------------------------------------

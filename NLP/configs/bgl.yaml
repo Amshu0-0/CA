@@ -12,3 +12,13 @@ paths:
   raw_log: data/raw/BGL.log           # downloaded by scripts/download_data.py
   processed_dir: data/processed/bgl   # written by scripts/preprocess.py
   output_dir: outputs/bgl             # checkpoints, predictions, metrics
+
+# Drain template extraction - same settings as the LogBERT repo for BGL.
+parsing:
+  depth: 3
+  similarity_threshold: 0.3
+  max_children: 100
+  masking:                            # replaced by <*> before parsing
+    - '(0x)[0-9a-fA-F]+'              # hexadecimal numbers
+    - '\d+\.\d+\.\d+\.\d+'            # IPv4 addresses
+    - '\d+'                           # any other integer
