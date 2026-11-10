@@ -1,0 +1,18 @@
+# =============================================================================
+# Smoke-test configuration on Loghub's 2,000-line BGL sample.
+#
+# The sample is spread thinly over seven months, so most windows hold only a
+# handful of messages and the numbers it produces are NOT meaningful results.
+# Use it to check that every stage of the pipeline runs end to end:
+#
+#   python scripts/download_data.py --dataset bgl_2k
+#   python scripts/preprocess.py --config configs/bgl_2k.yaml
+# =============================================================================
+
+extends: bgl.yaml
+name: bgl_2k
+
+paths:
+  raw_log: data/raw/BGL_2k.log
+  processed_dir: data/processed/bgl_2k
+  output_dir: outputs/bgl_2k

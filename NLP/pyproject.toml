@@ -12,6 +12,7 @@ dependencies = [
     "drain3>=0.9.11",
     "numpy>=1.24",
     "pandas>=2.0",
+    "pyarrow>=14.0",
     "pyyaml>=6.0",
     "tqdm>=4.66",
 ]
@@ -26,7 +27,6 @@ dev = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "-q"
 
