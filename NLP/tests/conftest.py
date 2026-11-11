@@ -57,3 +57,32 @@ def synthetic_bgl_file(tmp_path: Path) -> Path:
     path = tmp_path / "BGL_synthetic.log"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
+
+
+# The synthetic log, preprocessed into tmp_path, with a tiny LogBERT config
+# that trains in about a second. Returns (config, processed logs).
+@pytest.fixture
+def processed_synthetic(synthetic_bgl_file: Path, tmp_path: Path):
+    from logad.config import load_config
+    from logad.data.preprocess import preprocess
+
+    config = load_config(
+        "configs/bgl.yaml",
+        overrides=[
+            f"paths.raw_log={synthetic_bgl_file}",
+            f"paths.processed_dir={tmp_path / 'processed'}",
+            f"paths.output_dir={tmp_path / 'outputs'}",
+            "logbert.hidden=32",
+            "logbert.ff_dim=64",
+            "logbert.max_len=16",
+            "logbert.min_len=1",
+            "logbert.batch_size=16",
+            "logbert.learning_rate=0.005",
+            "logbert.warmup_steps=1",
+            "logbert.epochs=4",
+            "logbert.device=cpu",
+            "logbert.detection.g_values=[1, 2, 3]",
+            "logbert.detection.r_max=3",
+        ],
+    )
+    return config, preprocess(config)
