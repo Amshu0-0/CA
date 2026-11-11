@@ -16,3 +16,15 @@ paths:
   raw_log: data/raw/BGL_2k.log
   processed_dir: data/processed/bgl_2k
   output_dir: outputs/bgl_2k
+
+# A tiny LogBERT that trains in seconds on a CPU.
+logbert:
+  hidden: 64
+  ff_dim: 128
+  max_len: 64
+  min_len: 1                          # the sample's windows hold only a few messages
+  center_samples: 2000
+  batch_size: 32
+  warmup_steps: 10
+  epochs: 10
+  patience: 3

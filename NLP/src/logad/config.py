@@ -78,6 +78,63 @@ class WindowConfig:
     step_seconds: int = 60
 
 
+# How LogBERT turns masked-key predictions into window labels, and the grid
+# searched on the validation period to pick the two detection settings.
+@dataclass
+class LogBERTDetectionConfig:
+    # Fraction of keys masked in each test sequence.
+    mask_ratio: float = 0.5
+    # Candidate set sizes g: a key is "normal" if it is in the top-g predictions.
+    g_values: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20])
+    # Anomalous-key counts r tried: 0, 1, ..., r_max. A sequence is anomalous
+    # if more than r of its masked keys fall outside the top-g candidates.
+    r_max: int = 20
+    # Batch size for scoring (no gradients, so it can be larger than training).
+    batch_size: int = 128
+    # Seed for choosing which keys to mask, so scores are reproducible.
+    seed: int = 1234
+
+
+# Approach A: LogBERT architecture, training and detection settings.
+@dataclass
+class LogBERTConfig:
+    # --- architecture (two-layer encoder as described in the LogBERT paper) ---
+    hidden: int = 256
+    layers: int = 2
+    heads: int = 4
+    ff_dim: int = 1024
+    dropout: float = 0.1
+    # Longest sequence incl. the <dist> token; longer windows are chunked.
+    max_len: int = 512
+    # --- training data ---
+    # Skip training windows with fewer keys than this (LogBERT's min_len).
+    min_len: int = 10
+    # Chronologically last fraction of normal training windows held out for
+    # early stopping (the labeled validation period is used for g / r only).
+    dev_fraction: float = 0.1
+    # Randomly subsample training sequences (e.g. for quick CPU runs); null = all.
+    max_train_sequences: int | None = None
+    # --- objective ---
+    # Fraction of keys masked for masked log-key prediction (MLKP).
+    mask_ratio: float = 0.5
+    # Weight alpha of the hypersphere (VHM) loss: loss = MLKP + alpha * VHM.
+    vhm_weight: float = 0.1
+    # Number of training sequences used to estimate the hypersphere centre.
+    center_samples: int = 20000
+    # --- optimisation ---
+    batch_size: int = 64
+    learning_rate: float = 1.0e-3
+    weight_decay: float = 0.0
+    warmup_steps: int = 500
+    grad_clip: float = 1.0
+    epochs: int = 50
+    # Stop after this many epochs without dev-loss improvement.
+    patience: int = 5
+    # "auto" picks CUDA, then Apple MPS, then CPU.
+    device: str = "auto"
+    detection: LogBERTDetectionConfig = field(default_factory=LogBERTDetectionConfig)
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -89,6 +146,7 @@ class ExperimentConfig:
     parsing: ParsingConfig = field(default_factory=ParsingConfig)
     split: SplitConfig = field(default_factory=SplitConfig)
     windows: WindowConfig = field(default_factory=WindowConfig)
+    logbert: LogBERTConfig = field(default_factory=LogBERTConfig)
 
 
 # ---------------------------------------------------------------------------
