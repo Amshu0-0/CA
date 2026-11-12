@@ -19,6 +19,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Approach B: OpenAI-compatible API client (OpenAI, Ollama, vLLM) and local
+# Hugging Face models. For 4-bit loading on a GPU also install bitsandbytes.
+llm = [
+    "openai>=1.40",
+    "transformers>=4.45",
+    "accelerate>=0.34",
+]
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",

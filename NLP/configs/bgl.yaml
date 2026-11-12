@@ -67,3 +67,30 @@ logbert:
     r_max: 20
     batch_size: 128
     seed: 1234
+
+# Approach B: the two LLMs. Both use the OpenAI-compatible chat API, which
+# covers the OpenAI API as well as local servers such as Ollama and vLLM.
+llm:
+  cache_dir: outputs/llm_cache        # every prompt + response is logged here
+  generator:                          # rule induction (LogRules used GPT-4o-mini)
+    backend: openai
+    model: gpt-4o-mini
+    base_url: null                    # official OpenAI API
+    api_key_env: OPENAI_API_KEY
+    temperature: 0.0
+    max_tokens: 1024
+    timeout_seconds: 120
+    json_mode: true
+    load_in_4bit: false
+    seed: 0
+  classifier:                         # deduction (LogRules also used Qwen2.5-7B-Instruct)
+    backend: openai                   # served locally, e.g. `ollama pull qwen2.5:7b-instruct`
+    model: qwen2.5:7b-instruct        # HF id for backend=transformers: Qwen/Qwen2.5-7B-Instruct
+    base_url: http://localhost:11434/v1
+    api_key_env: OLLAMA_API_KEY       # not needed by Ollama; any value works
+    temperature: 0.0
+    max_tokens: 256
+    timeout_seconds: 120
+    json_mode: false
+    load_in_4bit: false               # true for a 16 GB Colab GPU with backend=transformers
+    seed: 0

@@ -138,6 +138,40 @@ class LogBERTConfig:
     detection: LogBERTDetectionConfig = field(default_factory=LogBERTDetectionConfig)
 
 
+# Connection settings for one LLM. Two are configured: the rule *generator*
+# (GPT-4o-mini in LogRules) and the *classifier* (Qwen2.5-7B-Instruct).
+@dataclass
+class LLMBackendConfig:
+    # "openai": the OpenAI API or any OpenAI-compatible server (Ollama, vLLM,
+    # LM Studio, ...); "transformers": a Hugging Face model loaded locally.
+    backend: str = "openai"
+    model: str = "gpt-4o-mini"
+    # Server URL for OpenAI-compatible backends, e.g. http://localhost:11434/v1
+    # for Ollama; null means the official OpenAI API.
+    base_url: str | None = None
+    # Environment variable that holds the API key (local servers need none).
+    api_key_env: str = "OPENAI_API_KEY"
+    # 0 = greedy decoding, so results are as reproducible as the backend allows.
+    temperature: float = 0.0
+    max_tokens: int = 512
+    timeout_seconds: float = 120.0
+    # Ask the server for JSON output (response_format=json_object) if supported.
+    json_mode: bool = False
+    # transformers backend only: load weights in 4 bit to fit a 16 GB GPU.
+    load_in_4bit: bool = False
+    seed: int = 0
+
+
+# Settings shared by everything that calls an LLM.
+@dataclass
+class LLMConfig:
+    # Every prompt and raw response is cached here (JSONL), which makes reruns
+    # free and keeps a complete, auditable record of all LLM calls.
+    cache_dir: str = "outputs/llm_cache"
+    generator: LLMBackendConfig = field(default_factory=LLMBackendConfig)
+    classifier: LLMBackendConfig = field(default_factory=LLMBackendConfig)
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -150,6 +184,7 @@ class ExperimentConfig:
     split: SplitConfig = field(default_factory=SplitConfig)
     windows: WindowConfig = field(default_factory=WindowConfig)
     logbert: LogBERTConfig = field(default_factory=LogBERTConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)
 
 
 # ---------------------------------------------------------------------------
