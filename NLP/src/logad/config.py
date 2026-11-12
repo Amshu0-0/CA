@@ -84,6 +84,9 @@ class WindowConfig:
 class LogBERTDetectionConfig:
     # Fraction of keys masked in each test sequence.
     mask_ratio: float = 0.5
+    # Extension: mask every key exactly once (in ceil(1/mask_ratio) passes)
+    # instead of LogBERT's single random mask. Saved as method "logbert_full".
+    full_coverage: bool = False
     # Candidate set sizes g: a key is "normal" if it is in the top-g predictions.
     g_values: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20])
     # Anomalous-key counts r tried: 0, 1, ..., r_max. A sequence is anomalous
