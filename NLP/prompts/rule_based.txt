@@ -1,0 +1,16 @@
+### SYSTEM
+You are an expert in operating large-scale supercomputers and in analysing their system logs.
+### USER
+Classify a log message template from the BlueGene/L supercomputer as "abnormal" (it should raise an alert) or "normal". Variable parts of the message (numbers, addresses, file names) have been replaced by <*>.
+
+Use the rules below. They were learned from labeled training logs and are listed in order of importance. Each rule names the keyword phrases that trigger it.
+
+Rules:
+$rules
+
+Log: $log
+
+Find the first rule that applies to this log and use its label. If no rule applies, use your own judgement and answer with rule 0.
+
+Answer with a single JSON object and nothing else, in this format:
+{"label": "abnormal" or "normal", "rule": <number of the rule you applied, or 0>, "reason": "<one short sentence>"}
