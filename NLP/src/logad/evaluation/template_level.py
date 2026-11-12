@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 
 from logad.data.processed import ProcessedLogs
+from logad.data.windows import count_in_windows
 from logad.evaluation.metrics import binary_metrics, windows_from_message_flags
 
 
@@ -59,13 +60,15 @@ def message_flags(logs: ProcessedLogs, template_labels: dict[int, int]) -> np.nd
 
 
 # Window- and message-level metrics of template predictions on one split.
-# Returns a dict with "window" and "message" metric dicts and the window
-# predictions (aligned with logs.windows_in(split)).
+# Returns a dict with "window" and "message" metric dicts, the window
+# predictions and the number of flagged messages per window (both aligned
+# with logs.windows_in(split)).
 def evaluate_template_labels(
     logs: ProcessedLogs, template_labels: dict[int, int], split: str
 ) -> dict[str, Any]:
     flags = message_flags(logs, template_labels)
     windows = logs.windows_in(split)
+    flagged_counts = count_in_windows(flags, windows[["start_idx", "end_idx"]].to_numpy())
     window_preds = windows_from_message_flags(flags, windows)
 
     in_split = (logs.messages["split"].astype(str) == split).to_numpy()
@@ -73,4 +76,5 @@ def evaluate_template_labels(
         "window": binary_metrics(windows["label"].to_numpy(), window_preds).as_dict(),
         "message": binary_metrics(logs.message_labels[in_split], flags[in_split]).as_dict(),
         "window_preds": window_preds,
+        "window_flagged_counts": flagged_counts,
     }

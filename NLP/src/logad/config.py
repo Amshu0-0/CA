@@ -192,6 +192,19 @@ class RulesConfig:
     top_k: int = 30
 
 
+# Approach B's deduction stage: which conditions to run and on which splits.
+@dataclass
+class DeductionConfig:
+    # Any of: zero_shot, few_shot, rule_based (LLM) and keyword (no LLM).
+    conditions: list[str] = field(
+        default_factory=lambda: ["zero_shot", "few_shot", "rule_based", "keyword"]
+    )
+    # Labeled training templates in the few-shot prompt (half abnormal).
+    few_shot_examples: int = 8
+    # Splits whose templates are classified; "test" is the reported result.
+    splits: list[str] = field(default_factory=lambda: ["val", "test"])
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -206,6 +219,7 @@ class ExperimentConfig:
     logbert: LogBERTConfig = field(default_factory=LogBERTConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     rules: RulesConfig = field(default_factory=RulesConfig)
+    deduction: DeductionConfig = field(default_factory=DeductionConfig)
 
 
 # ---------------------------------------------------------------------------

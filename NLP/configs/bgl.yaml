@@ -104,3 +104,10 @@ rules:
   min_precision: 1.0                  # must classify every matched training template correctly
   min_support: 1
   top_k: 30                           # rules used by the rule-based prompt and keyword baseline
+
+# Approach B's four conditions. Each unique template is classified once and
+# its label is copied to every message with that template.
+deduction:
+  conditions: [zero_shot, few_shot, rule_based, keyword]
+  few_shot_examples: 8                # labeled training templates in the few-shot prompt
+  splits: [val, test]                 # test = reported result
