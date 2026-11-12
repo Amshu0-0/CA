@@ -172,6 +172,26 @@ class LLMConfig:
     classifier: LLMBackendConfig = field(default_factory=LLMBackendConfig)
 
 
+# LogRules-style rule induction (Approach B).
+@dataclass
+class RulesConfig:
+    # Labeled training templates shown per induction prompt (half abnormal,
+    # half normal when possible).
+    batch_size: int = 20
+    # Passes over the training templates, each with a different shuffle.
+    rounds: int = 3
+    # Maximum number of rules the generator may propose per prompt.
+    max_rules_per_batch: int = 8
+    # Keep a rule only if it labels at least this share of the training
+    # templates it matches correctly (1.0 = never wrong on training data)...
+    min_precision: float = 1.0
+    # ...and matches at least this many training templates.
+    min_support: int = 1
+    # Number of top-ranked rules used by the rule-based prompt and the
+    # keyword baseline (both use the same rules, for a fair comparison).
+    top_k: int = 30
+
+
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -185,6 +205,7 @@ class ExperimentConfig:
     windows: WindowConfig = field(default_factory=WindowConfig)
     logbert: LogBERTConfig = field(default_factory=LogBERTConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
+    rules: RulesConfig = field(default_factory=RulesConfig)
 
 
 # ---------------------------------------------------------------------------

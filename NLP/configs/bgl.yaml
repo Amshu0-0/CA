@@ -94,3 +94,13 @@ llm:
     json_mode: false
     load_in_4bit: false               # true for a 16 GB Colab GPU with backend=transformers
     seed: 0
+
+# LogRules-style induction: propose rules from labeled training templates,
+# keep only the ones that are never wrong on the training set, rank by usage.
+rules:
+  batch_size: 20                      # templates per induction prompt (balanced labels)
+  rounds: 3                           # passes over the training templates
+  max_rules_per_batch: 8
+  min_precision: 1.0                  # must classify every matched training template correctly
+  min_support: 1
+  top_k: 30                           # rules used by the rule-based prompt and keyword baseline

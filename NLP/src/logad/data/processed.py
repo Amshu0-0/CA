@@ -80,6 +80,15 @@ def save_processed(logs: ProcessedLogs, directory: str | Path) -> Path:
     return directory
 
 
+# Load only the template table (rule induction needs nothing else).
+def load_templates(directory: str | Path) -> pd.DataFrame:
+    path = Path(directory) / TEMPLATES_FILE
+    if not path.exists():
+        raise FileNotFoundError(f"{path} not found. Run `python scripts/preprocess.py` first.")
+    # keep_default_na=False: a template is free text and must never become NaN.
+    return pd.read_csv(path, keep_default_na=False)
+
+
 # Load a dataset written by `save_processed`.
 #
 # `message_columns` restricts which message columns are read; LogBERT, for

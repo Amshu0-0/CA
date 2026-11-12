@@ -1,0 +1,17 @@
+### SYSTEM
+You are an expert in operating large-scale supercomputers and in analysing their system logs.
+### USER
+Below are log message templates from the BlueGene/L supercomputer. Each one is labeled "normal" or "abnormal" (abnormal messages were flagged as alerts by the system administrators). Variable parts of the messages (numbers, addresses, file names) have been replaced by <*>.
+
+$examples
+
+Write general rules that explain these labels, so that someone could label NEW log messages using only your rules.
+
+Requirements:
+- Every rule must list one or more short keyword phrases, copied exactly from the logs above, whose presence triggers the rule.
+- A keyword phrase must not appear in any log of the opposite label above.
+- Prefer phrases that are general enough to also match unseen logs of the same kind (for example "error interrupt" rather than a whole message).
+- Write at most $max_rules rules, covering both labels.
+
+Answer with a single JSON object and nothing else, in this format:
+{"rules": [{"rule": "<one sentence>", "keywords": ["<phrase>", "..."], "label": "abnormal" or "normal"}]}
