@@ -1,0 +1,11 @@
+template_id,template,missed_windows
+206,<*> <*> <*> socket closed,18
+573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",16
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",7
+320,Lustre mount FAILED : bglio<*> : block_id : location,2
+65,ciod: LOGIN <*> failed: <*> <*>,2
+631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,2
+281,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,1
+716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,1
+258,<*> exited abnormally due to signal: Aborted,1
+480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1

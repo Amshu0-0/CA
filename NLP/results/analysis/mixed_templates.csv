@@ -1,0 +1,4 @@
+template_id,template,n_test,n_test_anomalous,alert_tags
+20,machine <*> <*>,127,4,KERNMC
+34,data <*> <*>,79,1,KERNSTOR
+86,DDR <*> <*> register: <*> <*>,52,26,KERNMC

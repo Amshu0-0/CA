@@ -1,0 +1,34 @@
+{
+  "method": "logbert",
+  "approach": "A",
+  "settings": {
+    "g": 12,
+    "r": 3,
+    "mask_ratio": 0.5,
+    "full_coverage": false
+  },
+  "validation": {
+    "tp": 367,
+    "fp": 413,
+    "tn": 9619,
+    "fn": 79,
+    "precision": 0.4705128205128205,
+    "recall": 0.8228699551569507,
+    "f1": 0.5986949429037519,
+    "false_positive_rate": 0.0411682615629984,
+    "support": 10478
+  },
+  "test": {
+    "tp": 456,
+    "fp": 2159,
+    "tn": 3088,
+    "fn": 39,
+    "precision": 0.17437858508604206,
+    "recall": 0.9212121212121213,
+    "f1": 0.29324758842443727,
+    "false_positive_rate": 0.4114732227939775,
+    "support": 5742
+  },
+  "inference_seconds": 78.04346265899949,
+  "n_test_windows": 5742
+}

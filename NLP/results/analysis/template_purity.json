@@ -1,0 +1,31 @@
+{
+  "split": "test",
+  "n_templates": 472,
+  "n_mixed_templates": 3,
+  "n_messages": 482331,
+  "messages_in_mixed_templates": 258,
+  "anomalous_messages": 28915,
+  "anomalous_messages_in_mixed_templates": 31,
+  "oracle_message_level": {
+    "tp": 28884,
+    "fp": 0,
+    "tn": 453416,
+    "fn": 31,
+    "precision": 1.0,
+    "recall": 0.9989278920975272,
+    "f1": 0.9994636585408052,
+    "false_positive_rate": 0.0,
+    "support": 482331
+  },
+  "oracle_window_level": {
+    "tp": 491,
+    "fp": 0,
+    "tn": 5247,
+    "fn": 4,
+    "precision": 1.0,
+    "recall": 0.9919191919191919,
+    "f1": 0.9959432048681541,
+    "false_positive_rate": 0.0,
+    "support": 5742
+  }
+}
