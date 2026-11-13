@@ -19,25 +19,38 @@ anomalous system events?
 Both approaches are evaluated on **the same 5-minute test windows** of BGL, after a **chronological
 60/20/20 split**, by **the same evaluation code**.
 
+- Results, trained model, rules and LLM answers: [`results/`](results/README.md)
 - Full GPU run on Colab: [`notebooks/colab_full_run.ipynb`](notebooks/colab_full_run.ipynb)
 
 ## Results
 
-Run the full pipeline (below, or the Colab notebook), then `make results` to copy the tables here.
-`results/comparison.md` will hold the main table: precision, recall, F1, false positives,
-message-level F1 and inference time for each method on the shared test windows.
+Full BGL (4,747,963 messages), test period: 5,742 windows, of which 495 are anomalous. Run on a 4-core
+CPU with `configs/bgl_cpu.yaml`; Approach B used Qwen2.5-7B-Instruct (4-bit) for both rule induction
+and classification.
 
-| Code | Method |
-|---|---|
-| A | LogBERT, original random masking |
-| A+ | LogBERT with full-coverage masking (our extension: every key is checked once) |
-| B1 / B2 / B3 | LLM zero-shot / few-shot (case-based) / rule-based |
-| B4 | the same induced rules as plain keyword matching (no LLM) |
+| Code | Method | Precision | Recall | F1 | False positives | Inference |
+|---|---|---:|---:|---:|---:|---:|
+| A | LogBERT, original random masking | 0.174 | 0.921 | 0.293 | 2,159 | 78 s |
+| A+ | LogBERT with full-coverage masking (our extension: every key is checked once) | 0.184 | 0.897 | 0.305 | 1,975 | 156 s |
+| B1 | LLM zero-shot | 0.108 | 1.000 | 0.194 | 4,103 | 47 min |
+| B2 | LLM few-shot (case-based) | 0.323 | 0.941 | 0.481 | 976 | 53 min |
+| B3 | LLM rule-based | 0.489 | 0.943 | 0.644 | 488 | 57 min |
+| B4 | the same induced rules as plain keyword matching (no LLM) | 1.000 | 0.915 | **0.956** | 0 | 8 ms |
+
+In short, the rule-guided approach wins clearly, and its rules win without the LLM:
+
+- **LogBERT is hurt by new templates.** 361 of the 472 test templates never occur in training, and
+  99.8% of LogBERT's false-positive windows contain one.
+- **The LLM applies the rules loosely.** It follows the rules' sentences rather than their verified
+  keywords: the cited rule's keyword occurs in the template in only 20 of 420 citations.
+
+[`results/`](results/README.md) has every table, the trained model, the rules and all LLM answers.
 
 ## Repository layout
 
 ```
-configs/            experiment settings (bgl.yaml = full BGL, bgl_2k.yaml = smoke test)
+configs/            experiment settings (bgl.yaml = full BGL, bgl_cpu.yaml = the reported CPU run,
+                    bgl_2k.yaml = smoke test)
 prompts/            every LLM prompt, as plain text (induction + 3 classification conditions)
 src/logad/
   config.py         typed YAML config with `extends:` and --set overrides
@@ -50,7 +63,8 @@ src/logad/
 scripts/            one command-line entry point per pipeline stage
 app/demo.py         Gradio demo
 notebooks/          Colab notebook for the full GPU run
-tests/              141 unit and integration tests (offline; stub LLMs only)
+tests/              148 unit and integration tests (offline; stub LLMs only)
+results/            the reported run: metrics, LogBERT checkpoint, rules, decisions, analysis, LLM cache
 ```
 
 ## Setup
@@ -128,6 +142,18 @@ either model. Three ways to run them:
    python scripts/induce_rules.py --set llm.generator.model=gpt-4o-mini \
        --set llm.generator.base_url=null --set llm.generator.api_key_env=OPENAI_API_KEY
    ```
+4. **CPU only (the reported run).** Download the two `qwen2.5-7b-instruct-q4_k_m-*.gguf` files from
+   the Hugging Face repository `Qwen/Qwen2.5-7B-Instruct-GGUF`, then serve them with llama.cpp's
+   OpenAI-compatible server:
+   ```bash
+   pip install "llama-cpp-python[server]"
+   ```
+   ```bash
+   python -m llama_cpp.server --model qwen2.5-7b-instruct-q4_k_m-00001-of-00002.gguf --model_alias qwen2.5:7b-instruct --n_ctx 8192 --n_threads 4 --port 8000
+   ```
+   Then pass `--config configs/bgl_cpu.yaml` to every script. It points both roles at that server and
+   trims the run to fit a CPU: on 4 cores, LogBERT trains in about an hour, and each
+   LLM condition takes about an hour.
 
 ```bash
 python scripts/induce_rules.py       # -> outputs/bgl/rules/rules.{json,md}
@@ -143,13 +169,29 @@ make results                         # copy the deliverables into results/ for g
 ```
 
 Every LLM prompt and response is cached in `outputs/llm_cache/*.jsonl`. Re-running costs nothing, and
-the cache is a complete record of all LLM calls.
+the cache is a complete record of all LLM calls. The reported run's cache is committed in
+`results/llm_cache/`, so its Approach B results replay without a model (`results/README.md`).
 
 ## Live demo
 
 ```bash
 python app/demo.py            # http://127.0.0.1:7860
 python app/demo.py --share    # temporary public link for the class
+```
+
+To demo the reported run without retraining anything, preprocess the data, then put the committed
+model, rules and decisions back in place and point the demo at that run:
+
+```bash
+make data preprocess
+```
+
+```bash
+make restore OUT=outputs/bgl_cpu
+```
+
+```bash
+python app/demo.py --config configs/bgl_cpu.yaml --share
 ```
 
 - **Paste a log line.** A full BGL line has its alert tag removed (shown as ground truth). The line is
@@ -192,9 +234,10 @@ GitHub Actions runs lint and tests on Python 3.10 and 3.12 for every push.
 | Course requirement | Where |
 |---|---|
 | Documented, reproducible code | `src/logad/`, `scripts/`, `configs/`, `Makefile`, tests and CI |
-| Trained models | `results/logbert/model.pt` after `make results` |
-| Induced rules and all prompts | `results/rules/rules.md`, `prompts/` |
-| Run instructions | this README, `notebooks/colab_full_run.ipynb` |
+| Trained models | `results/logbert/model.pt` |
+| Induced rules, all prompts and every LLM answer | `results/rules/rules.md`, `prompts/`, `results/llm_cache/` |
+| Results and error analysis | `results/comparison.md`, `results/analysis/analysis.md` |
+| Run instructions | this README, `results/README.md`, `notebooks/colab_full_run.ipynb` |
 | Interactive demo | `app/demo.py` |
 
 ## References
