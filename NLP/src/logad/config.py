@@ -140,6 +140,8 @@ class LogBERTConfig:
 
 # Connection settings for one LLM. Two are configured: the rule *generator*
 # (GPT-4o-mini in LogRules) and the *classifier* (Qwen2.5-7B-Instruct).
+# configs/bgl.yaml points both at a local Qwen2.5-7B-Instruct server, so no
+# API key is needed; the generic defaults below describe the OpenAI API.
 @dataclass
 class LLMBackendConfig:
     # "openai": the OpenAI API or any OpenAI-compatible server (Ollama, vLLM,

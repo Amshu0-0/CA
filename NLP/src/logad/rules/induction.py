@@ -4,7 +4,8 @@
    the majority label of its training messages. Only template text is used -
    alert tags were removed during preprocessing.
 2. **Induction.** The pool is shown to the generator LLM (GPT-4o-mini in
-   LogRules) in small batches that mix normal and abnormal examples. For each
+   LogRules; the open Qwen2.5-7B-Instruct by default here, so no API key is
+   needed) in small batches that mix normal and abnormal examples. For each
    batch the LLM proposes rules with keyword phrases. Several rounds with
    different shuffles give a diverse set of candidates.
 3. **Verification.** Every candidate is applied to the *whole* training pool

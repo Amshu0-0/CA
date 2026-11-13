@@ -8,9 +8,12 @@ where ``messages`` is a chat transcript (``[{"role": "system" | "user", "content
 
 Backends
 --------
-``OpenAICompatibleClient``  the OpenAI API (GPT-4o-mini for rule induction), or
-                            any server that speaks the same protocol: Ollama,
-                            vLLM, LM Studio... (Qwen2.5-7B-Instruct for deduction)
+``OpenAICompatibleClient``  any server that speaks the OpenAI chat protocol:
+                            Ollama, vLLM, LM Studio... serving the open
+                            Qwen2.5-7B-Instruct (the default for both rule
+                            induction and deduction, no API key needed), or
+                            the OpenAI API itself (e.g. GPT-4o-mini, LogRules'
+                            original rule generator)
 ``TransformersClient``      a Hugging Face model loaded in-process, e.g. on a
                             Colab GPU
 

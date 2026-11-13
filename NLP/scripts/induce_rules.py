@@ -1,8 +1,11 @@
 """Induce anomaly-detection rules from labeled training templates (Approach B, step 1).
 
 Usage:
-    export OPENAI_API_KEY=...        # the generator defaults to gpt-4o-mini
+    ollama pull qwen2.5:7b-instruct  # the generator defaults to this local open model (no API key)
     python scripts/induce_rules.py
+    python scripts/induce_rules.py --set llm.generator.model=gpt-4o-mini \
+        --set llm.generator.base_url=null --set llm.generator.api_key_env=OPENAI_API_KEY
+                                     # optional: GPT-4o-mini as in LogRules (needs OPENAI_API_KEY)
 
 Writes to <output_dir>/rules/:
     rules.json        kept rules in rank order, with their training statistics

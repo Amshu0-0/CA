@@ -70,17 +70,20 @@ logbert:
 
 # Approach B: the two LLMs. Both use the OpenAI-compatible chat API, which
 # covers the OpenAI API as well as local servers such as Ollama and vLLM.
+# No API key is needed by default: both roles use the open Qwen2.5-7B-Instruct,
+# served locally (e.g. `ollama pull qwen2.5:7b-instruct`) or, on a GPU, loaded
+# in-process with backend: transformers (see notebooks/colab_full_run.ipynb).
 llm:
   cache_dir: outputs/llm_cache        # every prompt + response is logged here
-  generator:                          # rule induction (LogRules used GPT-4o-mini)
-    backend: openai
-    model: gpt-4o-mini
-    base_url: null                    # official OpenAI API
-    api_key_env: OPENAI_API_KEY
+  generator:                          # rule induction. LogRules used GPT-4o-mini; the
+    backend: openai                   # proposal allows "a comparable model" when it is
+    model: qwen2.5:7b-instruct        # unavailable. With an OpenAI key, set model:
+    base_url: http://localhost:11434/v1   # gpt-4o-mini, base_url: null and
+    api_key_env: OLLAMA_API_KEY       # api_key_env: OPENAI_API_KEY instead.
     temperature: 0.0
     max_tokens: 1024
-    timeout_seconds: 120
-    json_mode: true
+    timeout_seconds: 600              # generous: a 7B model on a CPU is slow
+    json_mode: false
     load_in_4bit: false
     seed: 0
   classifier:                         # deduction (LogRules also used Qwen2.5-7B-Instruct)
@@ -90,7 +93,7 @@ llm:
     api_key_env: OLLAMA_API_KEY       # not needed by Ollama; any value works
     temperature: 0.0
     max_tokens: 256
-    timeout_seconds: 120
+    timeout_seconds: 600
     json_mode: false
     load_in_4bit: false               # true for a 16 GB Colab GPU with backend=transformers
     seed: 0

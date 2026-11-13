@@ -102,24 +102,32 @@ python scripts/evaluate_logbert.py --set logbert.detection.full_coverage=true # 
 ```
 
 **Approach B - rule-guided LLM.** Two models are configured in `configs/bgl.yaml`: the **generator**
-(rule induction, GPT-4o-mini as in LogRules) and the **classifier** (Qwen2.5-7B-Instruct). Any
-OpenAI-compatible server works for either model. Three ways to run them:
+(rule induction) and the **classifier**. **No API key is needed.** Both default to the open
+Qwen2.5-7B-Instruct, which LogRules also used. LogRules induced its rules with GPT-4o-mini, and the
+proposal allows a comparable model when that is unavailable. Any OpenAI-compatible server works for
+either model. Three ways to run them:
 
-1. **OpenAI + Ollama (default config).** Generator via the OpenAI API, classifier served locally:
+1. **Locally with Ollama (default config).** Serve Qwen once; both roles use it:
    ```bash
-   export OPENAI_API_KEY=...
    ollama pull qwen2.5:7b-instruct
    ```
-   Then keep `ollama serve` running in another terminal.
-2. **Colab GPU.** Run Qwen in-process with `transformers` (see the notebook):
+   Then keep `ollama serve` running in another terminal. A GPU makes this much faster.
+2. **Colab GPU.** Run Qwen in-process with `transformers`; the notebook does this for both roles.
+   For example, for the classifier:
    ```bash
    python scripts/run_rule_guided.py \
        --set llm.classifier.backend=transformers \
        --set llm.classifier.model=Qwen/Qwen2.5-7B-Instruct \
        --set llm.classifier.load_in_4bit=true
    ```
-   This needs `pip install bitsandbytes`.
-3. **No OpenAI key.** Use the same `--set` overrides on `llm.generator` so Qwen also induces the rules.
+   This needs `pip install bitsandbytes`. Use the same overrides on `llm.generator` for
+   `induce_rules.py`.
+3. **Optional: GPT-4o-mini for induction, as in LogRules.** With an OpenAI key:
+   ```bash
+   export OPENAI_API_KEY=...
+   python scripts/induce_rules.py --set llm.generator.model=gpt-4o-mini \
+       --set llm.generator.base_url=null --set llm.generator.api_key_env=OPENAI_API_KEY
+   ```
 
 ```bash
 python scripts/induce_rules.py       # -> outputs/bgl/rules/rules.{json,md}
