@@ -150,7 +150,12 @@ class DemoEngine:
 
         self.live_llm: LLMTemplateClassifier | None = None
         backend = self.config.llm.classifier
-        if enable_live_llm and self.rules and server_reachable(backend.base_url):
+        # Only an OpenAI-compatible backend talks to a server that may be down;
+        # a transformers backend loads the model in this process instead.
+        reachable = backend.backend != "openai" or server_reachable(backend.base_url)
+        if enable_live_llm and self.rules and not reachable:
+            logger.warning("LLM server %s is not reachable; live LLM disabled", backend.base_url)
+        if enable_live_llm and self.rules and reachable:
             try:
                 client = create_client(backend, self.config.llm.cache_dir)
                 self.live_llm = LLMTemplateClassifier(client, "rule_based", rules=self.rules)
