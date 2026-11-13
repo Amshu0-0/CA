@@ -4,4 +4,4 @@
 #
 #   pip install -r requirements.txt
 #
--e .[llm,dev]
+-e .[llm,demo,dev]

@@ -26,6 +26,10 @@ llm = [
     "transformers>=4.45",
     "accelerate>=0.34",
 ]
+# Interactive demo (app/demo.py).
+demo = [
+    "gradio>=4.40",
+]
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",
