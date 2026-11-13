@@ -13,7 +13,7 @@ OUT    ?= outputs/bgl
 CACHE  ?= outputs/llm_cache
 
 .PHONY: help install data data-2k preprocess logbert logbert-train logbert-eval \
-        rules rule-guided keyword compare analyze results restore demo test lint format smoke all
+        rules rule-guided keyword compare analyze results restore figures demo test lint format smoke all
 
 help:            ## List the available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -54,9 +54,11 @@ compare:         ## Comparison table of every evaluated method
 analyze:         ## Error analysis tables for the report
 	$(PY) scripts/analyze.py --config $(CONFIG)
 
-results:         ## Copy the deliverables (metrics, rules, decisions, analysis, checkpoint, LLM cache) into results/
-	mkdir -p results/rules results/rule_guided results/analysis results/logbert results/llm_cache
+results:         ## Copy the deliverables (metrics, predictions, rules, decisions, analysis, checkpoint, LLM cache) into results/
+	mkdir -p results/rules results/rule_guided results/analysis results/logbert results/llm_cache \
+	    results/predictions
 	cp $(OUT)/results/* results/
+	-cp $(OUT)/predictions/*.parquet results/predictions/
 	-cp $(OUT)/rules/rules.md $(OUT)/rules/rules.json $(OUT)/rules/candidates.json \
 	    $(OUT)/rules/induction_summary.json results/rules/
 	-cp $(OUT)/rule_guided/*_decisions.csv results/rule_guided/
@@ -66,8 +68,11 @@ results:         ## Copy the deliverables (metrics, rules, decisions, analysis, 
 
 restore:         ## Copy the committed results/ back into $(OUT), e.g. to run the demo without retraining
 	@test ! -e $(OUT)/logbert/model.pt || { echo "$(OUT) already holds a run; pick another OUT=..."; exit 1; }
-	mkdir -p $(OUT)/results $(OUT)/rules $(OUT)/rule_guided $(OUT)/logbert $(CACHE)
-	cp results/*.json $(OUT)/results/
+	mkdir -p $(OUT)/results $(OUT)/predictions $(OUT)/rules $(OUT)/rule_guided $(OUT)/analysis \
+	    $(OUT)/logbert $(CACHE)
+	cp results/*.json results/comparison.csv $(OUT)/results/
+	cp results/predictions/* $(OUT)/predictions/
+	cp results/analysis/* $(OUT)/analysis/
 	cp results/rules/* $(OUT)/rules/
 	cp results/rule_guided/* $(OUT)/rule_guided/
 	cp results/logbert/* $(OUT)/logbert/
@@ -76,6 +81,9 @@ restore:         ## Copy the committed results/ back into $(OUT), e.g. to run th
 	  if [ -e "$(CACHE)/$$(basename $$f)" ]; then echo "kept existing $(CACHE)/$$(basename $$f)"; \
 	  else cp "$$f" $(CACHE)/ && echo "copied $$f"; fi; \
 	done
+
+figures:         ## Draw the guide's figures from a run into docs/figures/ (needs the docs extra)
+	$(PY) scripts/make_figures.py --config $(CONFIG)
 
 demo:            ## Launch the Gradio demo
 	$(PY) app/demo.py --config $(CONFIG)

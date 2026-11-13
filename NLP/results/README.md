@@ -28,6 +28,7 @@ One-off costs: LogBERT training took 60 minutes; rule induction took 50 minutes 
 | `comparison.md`, `comparison.csv` | the table above, recomputed from the saved predictions by `scripts/compare.py` |
 | `logbert.json`, `logbert_full.json` | Approach A metrics and the (g, r) chosen on the validation period |
 | `llm_zero_shot.json`, `llm_few_shot.json`, `llm_rule_based.json`, `keyword_rules.json` | Approach B metrics (window and message level), unparsed answers and timing per condition |
+| `predictions/<method>.parquet` | each method's verdict on every test window (`pred`), plus LogBERT's window score (`score`: the most missed keys in any chunk) |
 | `logbert/model.pt` | the trained LogBERT checkpoint (weights, vocabulary, hypersphere centre); load with `logad.logbert.trainer.load_checkpoint` |
 | `logbert/history.json` | per-epoch training and dev losses |
 | `logbert/*_tuning_grid.csv` | validation F1 for every (g, r) pair |

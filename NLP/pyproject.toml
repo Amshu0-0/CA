@@ -30,6 +30,10 @@ llm = [
 demo = [
     "gradio>=4.40",
 ]
+# Figures for the guide and the slides (scripts/make_figures.py).
+docs = [
+    "matplotlib>=3.8",
+]
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",
