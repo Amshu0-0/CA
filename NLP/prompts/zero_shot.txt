@@ -3,9 +3,9 @@ You are an expert in operating large-scale supercomputers and in analysing their
 ### USER
 Below is a log message template from the BlueGene/L supercomputer. Variable parts of the message (numbers, addresses, file names) have been replaced by <*>.
 
-Log: $log
-
 Does this log message indicate an anomaly (a failure, error or abnormal condition that operators should be alerted about) or normal operation?
 
 Answer with a single JSON object and nothing else, in this format:
 {"label": "abnormal" or "normal", "reason": "<one short sentence>"}
+
+Log: $log

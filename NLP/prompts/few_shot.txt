@@ -3,14 +3,14 @@ You are an expert in operating large-scale supercomputers and in analysing their
 ### USER
 Below are labeled examples of log message templates from the BlueGene/L supercomputer, followed by a new log message to classify. Variable parts of the messages (numbers, addresses, file names) have been replaced by <*>. Abnormal messages were flagged as alerts by the system administrators.
 
+Based on the examples, decide whether the new log message indicates an anomaly or normal operation.
+
+Answer with a single JSON object and nothing else, in this format:
+{"label": "abnormal" or "normal", "reason": "<one short sentence>"}
+
 Examples:
 
 $examples
 
 New log message:
 Log: $log
-
-Based on the examples, does this log message indicate an anomaly or normal operation?
-
-Answer with a single JSON object and nothing else, in this format:
-{"label": "abnormal" or "normal", "reason": "<one short sentence>"}

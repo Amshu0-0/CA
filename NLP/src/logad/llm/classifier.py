@@ -10,7 +10,9 @@ Three prompting conditions isolate what each kind of guidance contributes:
 
 Every condition sees exactly the same template text (Drain template of the
 message content; alert tags were removed in preprocessing). The prompts live
-in ``prompts/<condition>.txt``.
+in ``prompts/<condition>.txt``. Each prompt ends with the log line, so all
+text before it is identical across templates; a model server that caches
+prompt prefixes (llama.cpp, vLLM) then only reads the new log each call.
 """
 
 from __future__ import annotations
