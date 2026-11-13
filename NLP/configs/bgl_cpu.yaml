@@ -1,0 +1,27 @@
+# =============================================================================
+# Full BGL on a CPU-only machine (4 cores, no GPU).
+#
+# Same data, split, windows and LogBERT architecture as configs/bgl.yaml. Only
+# the amount of LogBERT training is reduced so that it finishes in about an
+# hour: a random subsample of the normal training sequences and fewer epochs.
+# Results from this config are reported as a reduced-training run; on a GPU,
+# use configs/bgl.yaml instead.
+#
+#   python scripts/train_logbert.py --config configs/bgl_cpu.yaml
+#   python scripts/evaluate_logbert.py --config configs/bgl_cpu.yaml
+# =============================================================================
+
+extends: bgl.yaml
+name: bgl_cpu
+
+paths:
+  # Same preprocessed data as the full run; separate outputs so a later GPU
+  # run with configs/bgl.yaml never mixes with these results.
+  output_dir: outputs/bgl_cpu
+
+logbert:
+  max_train_sequences: 30000          # random subsample of normal training sequences
+  epochs: 8
+  patience: 3
+  warmup_steps: 200
+  device: cpu
