@@ -32,3 +32,23 @@ logbert:
   patience: 3
   warmup_steps: 200
   device: cpu
+
+# Approach B on the same CPU. Qwen2.5-7B-Instruct comes from Qwen's official
+# Q4_K_M GGUF build, served by llama-cpp-python's OpenAI-compatible server
+# (Ollama's installer could not be downloaded here):
+#   python -m llama_cpp.server --model <q4_k_m-00001-of-00002.gguf> \
+#       --model_alias qwen2.5:7b-instruct --n_ctx 8192 --n_threads 4 --port 8000
+llm:
+  generator:
+    base_url: http://localhost:8000/v1
+  classifier:
+    base_url: http://localhost:8000/v1
+
+# A 7B model on 4 cores answers in seconds, not milliseconds, so the LLM work
+# is cut to what the reported result needs: one induction round over all 442
+# training templates, and only the 472 templates of the test period.
+rules:
+  rounds: 1
+
+deduction:
+  splits: [test]
