@@ -1,0 +1,16 @@
+caught_by,group_windows,template_id,template,windows
+only LogBERT,18,206,<*> <*> <*> socket closed,9
+only LogBERT,18,716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,3
+only LogBERT,18,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",3
+only LogBERT,18,86,DDR <*> <*> register: <*> <*>,2
+only LogBERT,18,475,L<*> major internal error,1
+only keyword_rules,15,573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",8
+only keyword_rules,15,631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,3
+only keyword_rules,15,281,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,1
+only keyword_rules,15,258,<*> exited abnormally due to signal: Aborted,1
+only keyword_rules,15,320,Lustre mount FAILED : bglio<*> : block_id : location,1
+neither,24,206,<*> <*> <*> socket closed,14
+neither,24,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",6
+neither,24,65,ciod: LOGIN <*> failed: <*> <*>,2
+neither,24,34,data <*> <*>,1
+neither,24,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1

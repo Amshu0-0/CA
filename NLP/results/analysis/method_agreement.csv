@@ -1,2 +1,16 @@
 method_a,method_b,both_caught,only_a,only_b,neither,shared_false_positives
 logbert,logbert_full,442,14,2,37,1925
+logbert,llm_zero_shot,456,0,39,0,1792
+logbert,llm_few_shot,448,8,18,21,312
+logbert,llm_rule_based,446,10,21,18,208
+logbert,keyword_rules,438,18,15,24,0
+logbert_full,llm_zero_shot,444,0,51,0,1671
+logbert_full,llm_few_shot,440,4,26,25,284
+logbert_full,llm_rule_based,436,8,31,20,193
+logbert_full,keyword_rules,430,14,23,28,0
+llm_zero_shot,llm_few_shot,466,29,0,0,819
+llm_zero_shot,llm_rule_based,467,28,0,0,488
+llm_zero_shot,keyword_rules,453,42,0,0,0
+llm_few_shot,llm_rule_based,457,9,10,19,488
+llm_few_shot,keyword_rules,453,13,0,29,0
+llm_rule_based,keyword_rules,453,14,0,28,0

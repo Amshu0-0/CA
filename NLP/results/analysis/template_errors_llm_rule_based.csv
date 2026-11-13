@@ -1,0 +1,30 @@
+error,template_id,template,n_test,n_test_anomalous,rule,reason
+false positive,569,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",27510,0,8.0,contains 'terminated'
+false positive,341,"ciod: Error loading <*> invalid or missing program image, Permission denied",13952,0,4.0,contains 'Error loading' and permission denied
+false positive,59,ciod: pollControlDescriptors: Detected the debugger died.,5603,0,11.0,Signals system or hardware issues that require attention.
+false positive,10,"ciod: Error loading <*> invalid or missing program image, No such file or directory",4752,0,4.0,Error loading program image indicates a failure
+false positive,16,ciod: LOGIN <*> failed: No such file or directory,3623,0,4.0,indicates a system error or failure
+false positive,806,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,1024,0,25.0,mentions 'mount failed'
+false negative,65,ciod: LOGIN <*> failed: <*> <*>,816,816,,No specific keyword phrases trigger an abnormal condition.
+false positive,187,"ciod: Error loading <*> program image too big, <*> > <*>",208,0,4.0,program image too big
+false positive,77,capture first <*> <*> error address..<*>,156,0,4.0,contains 'terminated for reason'
+false negative,20,machine <*> <*>,127,4,30.0,Describes a state or condition without indicating an error.
+false positive,80,<*> error detected in EDRAM bank <*>,104,0,4.0,contains 'error detected' which is indicative of a system failure
+false negative,34,data <*> <*>,79,1,1.0,Describes normal system operations or status updates.
+false positive,81,parity error in <*> <*>,78,0,24.0,mentions 'parity error' which is indicative of a hardware issue
+false positive,538,Machine Check Status Register: <*>,53,0,3.0,contains 'machine check interrupt'
+false positive,27,imprecise machine check...........<*>,53,0,4.0,contains 'machine check interrupt'
+false positive,24,tlb error.........................<*>,53,0,24.0,contains 'tlb error interrupt'
+false negative,86,DDR <*> <*> register: <*> <*>,52,26,1.0,Describes normal system operations or status updates.
+false negative,206,<*> <*> <*> socket closed,37,37,,No specific keyword phrases match the log message.
+false positive,104,DDR failing data registers: <*> <*>,26,0,4.0,contains 'terminated for reason'
+false positive,93,memory manager / command manager address parity..<*>,26,0,16.0,contains 'parityAlignment'
+false positive,100,uncorrectable error...<*>,26,0,4.0,uncorrectable error
+false positive,717,ciod: Error creating node map from file my_map.txt: No such file or directory,24,0,4.0,Error creating node map from file
+false positive,55,rts internal error,12,0,7.0,indicates a critical system failure
+false positive,179,ciod: Unexpected eof at line <*> of node map file <*>,8,0,14.0,indicates abnormal termination
+false positive,218,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,8,0,11.0,Signals system or hardware issues that require attention.
+false positive,259,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",8,0,4.0,contains 'Error loading' and invalid image
+false positive,115,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,1,0,9.0,contains 'terminated'
+false negative,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1,1,,No specific keyword phrases trigger an abnormal rule.
+false positive,795,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,1,0,4.0,contains 'terminated for reason'

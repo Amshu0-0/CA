@@ -1,0 +1,5 @@
+template_id,template,missed_windows
+206,<*> <*> <*> socket closed,21
+480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",4
+65,ciod: LOGIN <*> failed: <*> <*>,2
+34,data <*> <*>,1

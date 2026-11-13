@@ -1,0 +1,11 @@
+template_id,template,missed_windows
+206,<*> <*> <*> socket closed,23
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",7
+480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",4
+716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,3
+86,DDR <*> <*> register: <*> <*>,2
+65,ciod: LOGIN <*> failed: <*> <*>,2
+34,data <*> <*>,1
+475,L<*> major internal error,1
+571,Power Good signal deactivated: <*> A service action may be required.,1
+20,machine <*> <*>,1

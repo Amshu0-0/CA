@@ -1,0 +1,39 @@
+{
+  "method": "llm_zero_shot",
+  "approach": "B",
+  "condition": "zero_shot",
+  "classifier": "openai:qwen2.5:7b-instruct",
+  "settings": {
+    "n_rules": null,
+    "few_shot_examples": null
+  },
+  "n_templates_classified": 472,
+  "n_unparsed_answers": 0,
+  "n_cached_answers": 175,
+  "test": {
+    "tp": 495,
+    "fp": 4103,
+    "tn": 1144,
+    "fn": 0,
+    "precision": 0.1076555023923445,
+    "recall": 1.0,
+    "f1": 0.1943844492440605,
+    "false_positive_rate": 0.7819706498951782,
+    "support": 5742
+  },
+  "test_message_level": {
+    "tp": 28884,
+    "fp": 262570,
+    "tn": 190846,
+    "fn": 31,
+    "precision": 0.09910311747308323,
+    "recall": 0.9989278920975272,
+    "f1": 0.1803170718764924,
+    "false_positive_rate": 0.5790929301127441,
+    "support": 482331
+  },
+  "inference_seconds": 2812.968357495012,
+  "inference_seconds_by_split": {
+    "test": 2812.968357495012
+  }
+}

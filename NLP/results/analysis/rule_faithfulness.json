@@ -1,0 +1,12 @@
+{
+  "templates": 472,
+  "answers_citing_a_rule": 420,
+  "cited_rule_occurs_in_template": 20,
+  "cited_rule_label_agrees": 418,
+  "cited_rule_is_keyword_rule": 12,
+  "abnormal_answers": 37,
+  "abnormal_answers_backed_by_an_occurring_rule": 7,
+  "abnormal_where_keywords_say_normal": 28,
+  "abnormal_where_keywords_say_normal_with_alerts": 5,
+  "normal_where_keywords_say_abnormal": 0
+}

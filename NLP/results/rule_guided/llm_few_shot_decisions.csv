@@ -1,0 +1,473 @@
+template_id,label,rule,reason,parsed,latency_seconds,cached,template,n_val,n_val_anomalous,n_test,n_test_anomalous
+1,0,,"The message indicates a correction of an error, which is typically handled by the system without being flagged as abnormal.",True,21.27463444499972,False,instruction cache parity error corrected,5206,0,33547,0
+6,0,,The format matches typical log entries without indicating an error.,True,6.24292216799995,False,"CE sym <*>, at <*>, mask <*>",67817,0,19837,0
+10,1,,Error loading invalid or missing program image,True,5.571374201000253,False,"ciod: Error loading <*> invalid or missing program image, No such file or directory",12944,0,4752,0
+13,0,,The log message indicates the normal start of a service with specified parameters.,True,6.9324518909998005,False,idoproxydb has been started: $Name: <*> $ Input parameters: -enableflush -loguserinfo db.properties BlueGene<*>,32,0,26,0
+14,0,,Restart of a service is not inherently abnormal.,True,5.010100617999797,False,ciodb has been restarted.,31,0,44,0
+16,1,,"The log indicates a failure to find a file, which is an error condition.",True,7.482589025999914,False,ciod: LOGIN <*> failed: No such file or directory,2376,0,3623,0
+18,1,,TLB error is typically indicative of a hardware or software issue.,True,5.920686131999901,False,<*> TLB error interrupt,0,0,12,12
+19,0,,The log message is about instruction execution which seems normal.,True,5.080414881000252,False,instruction <*> <*>,180,0,166,0
+20,0,,The log message is a standard system report.,True,5.171930381000038,False,machine <*> <*>,105,37,127,4
+23,1,,"The message contains 'data' followed by an error indicator, suggesting a problem.",True,7.338042119999955,False,data <*> plb <*>,126,0,106,0
+24,1,,TLB errors are typically indicative of hardware or software issues that need attention.,True,7.277745460999995,False,tlb error.........................<*>,63,0,53,0
+25,1,,Unusual log message indicating a parity error.,True,5.620022669999798,False,<*> parity <*>,68,0,79,0
+26,1,,d-cache parity error indicates a hardware issue,True,5.301815214999806,False,d-cache <*> parity <*>,126,0,106,0
+27,1,,Machine check errors are typically indicative of hardware issues.,True,6.3095411009999225,False,imprecise machine check...........<*>,62,0,53,0
+29,0,,The log message does not indicate an error or abnormal condition.,True,5.8200411960001475,False,<*> state <*>,128,0,132,0
+30,0,,The message indicates a routine operation.,True,5.054241101999651,False,<*> input interrupt enable...<*>,128,0,132,0
+31,0,,The message is related to a common operation.,True,5.266094331999739,False,floating point <*> <*>,63,1,66,0
+32,0,,"The message indicates a change in floating point exception handling mode, which is a normal operational event.",True,7.713300238000102,False,floating pt ex mode <*> enable......<*>,112,0,132,0
+33,0,,The log message is a generic debug statement.,True,5.103430560000106,False,debug <*> <*>,116,0,132,0
+34,1,,"The template matches the 'data <*> <*>' pattern, which was flagged as abnormal in the examples.",True,7.987368832999891,False,data <*> <*>,56,2,79,1
+36,0,,The log message does not indicate an error or abnormal condition.,True,5.537236993000079,False,disable <*> <*>,101,0,158,0
+37,0,,The message is a routine operation log.,True,5.30341689099987,False,disable apu instruction broadcast........<*>,49,0,66,0
+38,0,,The log message describes a normal operation of the system.,True,5.845409973000187,False,guaranteed <*> cache block <*>,92,0,132,0
+39,0,,The log message indicates a routine operation.,True,5.475641522999922,False,force load/store alignment...............<*>,46,0,66,0
+40,0,,The log message is related to a common operation.,True,5.765030645000024,False,icache prefetch <*>,91,0,132,0
+48,1,,Panic messages indicate severe issues.,True,6.548976289000166,False,rts panic! - stopping execution,60,60,68,68
+55,1,,rts internal errors are typically indicative of problems.,True,7.110805849000371,False,rts internal error,4,0,12,0
+59,1,,Mentioned debugger died,True,5.0176799070000015,False,ciod: pollControlDescriptors: Detected the debugger died.,298,0,5603,0
+60,0,,The log message format does not indicate an error.,True,5.621548228999927,False,"ciod: for node <*>, <*> <*> <*> <*> <*> <*> <*>",0,0,38,0
+65,0,,"The log message indicates a login attempt failure, which is a normal operational event.",True,7.093686918000003,False,ciod: LOGIN <*> failed: <*> <*>,0,0,816,816
+66,1,,"Contains a machine check interrupt, which is typically indicative of hardware issues.",True,7.159416520999912,False,machine check interrupt (bit=<*>): <*> <*> <*> <*>,7,7,7,7
+67,0,,The log message format does not indicate an error.,True,5.724637706000067,False,L<*> <*> <*> register: <*>,15,0,78,0
+68,0,,The log message indicates a normal start operation.,True,5.24375707299987,False,start <*>,20,0,104,0
+69,0,,The message is a routine instruction and does not indicate an error.,True,6.690199711999867,False,close EDRAM pages as soon as possible....<*>,5,0,26,0
+70,0,,"The log message indicates a normal operation, reporting the size of something in megabytes.",True,8.112442624999858,False,size of <*> <*> <*> <*> (<*>M),10,0,52,0
+71,0,,The message describes a routine administrative action.,True,6.027120532000026,False,disable all access to cache directory....<*>,5,0,26,0
+72,0,,The message is about a configuration setting and does not indicate an error.,True,7.346588498000074,False,write buffer commit threshold............<*>,5,0,26,0
+73,0,,The log message does not indicate an error or abnormal condition.,True,6.575684802000069,False,prefetch depth for <*> <*>,15,0,78,0
+74,0,,The message is informational about prefetches and does not indicate an error.,True,7.116172602000006,False,max number of outstanding prefetches.....<*>,5,0,26,0
+75,0,,The message does not indicate an error or abnormal termination.,True,6.3383601580003415,False,turn on hidden refreshes.................<*>,5,0,26,0
+76,0,,The log message does not indicate an error or abnormal condition.,True,6.44900530599989,False,disable write lines <*>:<*>..................<*>,5,0,26,0
+77,1,,"Contains error and address information, suggesting a problem.",True,8.011710556999788,False,capture first <*> <*> error address..<*>,30,0,156,0
+78,0,,The log message is a note about disabling a flagging mechanism and does not indicate an error or anomaly.,True,11.28297004199976,False,disable flagging of DDR UE's as major internal error.<*>,5,0,26,0
+79,1,,Error detected usually indicates a problem.,True,5.755021782999847,False,<*> error detected in <*> <*>,25,0,130,0
+80,1,,EDRAM errors are typically indicative of hardware issues.,True,6.254666466999879,False,<*> error detected in EDRAM bank <*>,20,0,104,0
+81,1,,Parity errors typically indicate hardware issues.,True,6.144061135999891,False,parity error in <*> <*>,15,0,78,0
+82,1,,parity errors indicate hardware issues,True,4.857371764999698,False,parity error in read queue <*>,15,0,78,0
+83,0,,The message describes a normal operational check.,True,5.990007235999656,False,number of correctable errors detected in L<*> <*>,10,0,52,0
+84,0,,The message is about interrupt threshold which seems routine.,True,6.165979436999805,False,interrupt threshold...<*>,10,0,52,0
+85,0,,The message describes a normal operation related to error handling.,True,7.055757976000223,False,number of lines with parity errors written to L<*> EDRAMs...<*>,5,0,26,0
+86,0,,The log message describes a normal operation related to DDR registers.,True,6.701321818999986,False,DDR <*> <*> register: <*> <*>,10,5,52,26
+87,0,,The log message is a standard summary and does not indicate an error.,True,8.607066358999873,False,memory and bus summary...........................<*>,5,0,26,0
+88,0,,The log message is a standard summary from the command manager unit.,True,8.45608251900012,False,command manager unit summary.....................<*>,5,0,26,0
+89,0,,The log message format matches the normal example provided.,True,5.994868046999727,False,memory manager <*> <*>,20,0,104,0
+90,0,,The log message format matches the normal example provided.,True,7.122037149999869,False,memory manager <*> <*> <*>,20,0,104,0
+91,0,,The template matches a normal operation example.,True,6.394598238000071,False,memory manager <*>,10,0,52,0
+92,0,,The log message is a generic state machine update without any error or abnormal indication.,True,7.990449559999888,False,state machine....................................<*>,5,0,26,0
+93,1,,"The log indicates an issue with address parity, which is unusual.",True,7.571218239000245,False,memory manager / command manager address parity..<*>,5,0,26,0
+94,0,,The log message indicates a routine operation.,True,6.05404401900023,False,regctl scancom interface.........................<*>,5,0,26,0
+96,0,,The message indicates a routine operation.,True,5.672730767000303,False,capture valid.........<*>,5,0,26,0
+97,0,,The log message does not indicate an error or abnormal termination.,True,6.396034079999936,False,symbol................<*>,5,0,26,0
+98,0,,The log message does not indicate an error or abnormal condition.,True,6.427913126000021,False,mask..................<*>,5,0,26,0
+99,1,,New log messages indicating miscompare are typically errors.,True,6.4312420680003015,False,miscompare............<*>,5,0,26,0
+100,1,,Contains uncorrectable error,True,5.030706369999734,False,uncorrectable error...<*>,5,0,26,0
+101,0,,"The message indicates a correctable error, which is typically not flagged as an anomaly.",True,8.186197844000162,False,correctable error.....<*>,5,0,26,0
+102,1,,Unrecognized command or error message.,True,7.086226542999611,False,qw trapped............<*>,5,0,26,0
+103,0,,The log message is a standard memory access message.,True,7.269953032000103,False,chip select...........<*>,5,0,26,0
+104,1,,DDR failing data registers suggests a hardware issue.,True,5.862797390999731,False,DDR failing data registers: <*> <*>,5,0,26,0
+105,0,,Short and generic log message,True,4.570994845999849,False,<*> <*>,15,0,78,0
+110,0,,The log message describes a normal operation.,True,5.672839114999988,False,EndServiceAction <*> performed upon <*> by <*>,23,0,40,0
+111,1,,The message indicates a hardware issue.,True,5.71637247200033,False,Node card is not fully functional,732,0,585,0
+112,1,,"The message indicates a failure to get assembly information, which is unusual.",True,7.665079785000216,False,Can not get assembly information for node card,732,0,585,0
+113,1,,MPGOOD ERROR LATCH IS ACTIVE,True,10.050783472999683,False,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,731,0,583,0
+114,1,,VPD check failure indicates a mismatch that needs attention.,True,7.5799066290001065,False,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,764,0,658,0
+115,1,,Error sending message indicates a problem,True,6.2608582200000455,False,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,0,0,1,0
+138,0,,"The message indicates the start of a service, which is typical for system operation.",True,7.313550022000072,False,Starting SystemController,10,0,16,0
+140,0,,The message indicates a routine operation.,True,5.282074294999802,False,Running as background command,10,0,16,0
+142,1,,Program interrupts are typically errors.,True,6.582612545999837,False,program interrupt: <*> <*>,30,0,24,0
+143,0,,The log message is a standard floating point operation notification.,True,7.5518608960001075,False,floating point operation....................<*>,5,0,4,0
+144,0,,The log message describes a normal store operation.,True,7.376343585000086,False,store operation.............................<*>,5,0,4,0
+145,1,,"The message indicates an interrupt in the data store, which is unusual.",True,7.575947125999846,False,data store interrupt caused by <*>,10,0,8,0
+146,0,,The log message is a standard status update.,True,5.795363908000127,False,auxiliary processor.........................<*>,5,0,4,0
+147,1,,Byte ordering exception is an error condition.,True,5.844836176999706,False,byte ordering exception.....................<*>,5,0,4,0
+148,0,,The message describes a common program interrupt related to floating point operations.,True,7.498876169999676,False,program interrupt: fp cr update.............<*>,5,0,4,0
+149,1,,"Program interrupts, especially those involving floating point issues, are typically indicative of an abnormal condition.",True,8.52430388699986,False,program interrupt: fp cr field .............<*>,5,0,4,0
+155,0,,The log message describes a standard external input interrupt event.,True,7.080848514000081,False,external input interrupt (unit=<*> bit=<*>): <*> <*> <*> <*> <*> <*> <*>,12,0,2,0
+160,0,,The log message describes a status change which is typical for monitoring hardware health.,True,8.380886672999623,False,Ido chip status changed: <*> ip=<*> v=<*> t=<*> status=M <*> <*> <*> <*>:<*>:<*> <*> <*>,161,0,443,0
+179,1,,Unexpected EOF suggests a file read error.,True,6.249840175999907,False,ciod: Unexpected eof at line <*> of node map file <*>,32,0,8,0
+187,1,,Error messages indicate a problem.,True,5.311878685000011,False,"ciod: Error loading <*> program image too big, <*> > <*>",1272,0,208,0
+189,0,,"The message indicates a timeout and resource management, which is typical operation.",True,6.856994205000319,False,job <*> timed out. Block freed.,84,0,36,0
+193,0,,The log message describes normal operation details.,True,6.051787513000363,False,ciod: <*> <*> <*> <*> <*> <*> <*> at line <*> of node map file <*>,32,0,24,0
+206,0,,The message indicates a normal socket operation.,True,6.076412432000325,False,<*> <*> <*> socket closed,55,55,37,37
+209,1,,PGOOD and MPGOOD error latches are active.,True,11.126813214000322,False,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,1,0,2,0
+218,1,,It contains an error message.,True,5.679996779999783,False,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,8,0,8,0
+219,0,,The log message indicates a normal shutdown.,True,5.6600708800001485,False,shutdown complete,51,0,3,0
+220,0,,The log message describes a routine operation.,True,6.4284881210001,False,"PrepareForService is being done on this Midplane (mLctn(R<*>-M<*>), <*> <*> by <*>",32,0,46,0
+221,0,,The message describes a routine operation.,True,5.309397072000138,False,PrepareForService is being done on this rack (R<*>) by <*>,0,0,2,0
+226,0,,The message describes a normal packet handling process.,True,6.623727296999732,False,ciod: In packet from node <*>.<*> <*> message code <*> is not <*> or <*> <*> <*> <*> <*>),11,0,9,0
+258,1,,Exits due to signal indicate an abnormal condition.,True,6.927234679999856,False,<*> exited abnormally due to signal: Aborted,0,0,19,19
+259,1,,Error messages typically indicate issues.,True,5.743988355000056,False,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",1032,0,8,0
+280,1,,Packet timeout suggests a network issue.,True,5.456775311000001,False,Ido packet timeout,2,0,92,0
+281,1,,"The log indicates a timeout and connection loss, which is typically an anomaly.",True,8.312441571000363,False,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,2,2,2,2
+282,1,,Error reading message prefix indicates a problem.,True,6.645112206000249,False,ciod: Error reading message prefix after <*> on CioStream socket to <*>:<*>: <*> <*> <*> <*>,3110,3110,336,336
+305,0,,The message describes a routine check and does not indicate an error.,True,7.079315889999634,False,"Node card VPD check: missing U<*> node, VPD ecid <*> in processor card slot J<*>",0,0,2,0
+309,0,,The log message describes a routine operation.,True,5.565139970000018,False,Controlling BG/L rows [ <*> <*> <*> <*> <*> <*> <*> <*> ],10,0,16,0
+320,1,,The log indicates a failure in mounting the filesystem.,True,6.832355228999859,False,Lustre mount FAILED : bglio<*> : block_id : location,1769,1769,2210,2210
+328,0,,The log message describes a specific failure but does not indicate an abnormal termination or critical error.,True,9.326642720999644,False,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",0,0,8,8
+337,1,,The log indicates an issue with rank steering that may require hardware replacement.,True,10.622458990999803,False,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",141,0,3,0
+341,1,,Error loading with permission denied suggests a failure.,True,6.253995153999767,False,"ciod: Error loading <*> invalid or missing program image, Permission denied",17280,0,13952,0
+342,1,,Log mentions generation of core files which usually indicates a crash or error.,True,6.996291672000098,False,ciod: generated <*> core files for program <*>,20646,0,6062,0
+348,0,,The log message describes the normal start of a server with specified parameters.,True,9.01956110600031,False,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties <*> --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*>,30,0,9,0
+449,1,,Parity errors typically indicate hardware issues.,True,5.7398046869998325,False,data cache <*> parity error detected. attempting to correct,13951,0,55,0
+475,1,,"The log indicates a major internal error, which is unusual.",True,6.681216505000066,False,L<*> major internal error,1,1,2,2
+480,1,,Error message indicates a problem with packet reception on the network.,True,10.080365744000119,False,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",6144,6144,1,1
+481,0,,The log message describes a routine operation.,True,5.755693281999811,False,ddr: activating redundant bit steering for next allocation: rank=<*> symbol=<*>,267,0,225,0
+528,0,,The log message describes the normal startup of BGLMaster with specified parameters.,True,9.27603625499978,False,BGLMaster has been started: ./BGLMaster --consoleip <*> --consoleport <*> --configfile bglmaster.init --autorestart y --db<*>profile /u/bgdb<*>cli/sqllib/db<*>profile --dbproperties db.properties,7,0,24,0
+529,0,,"The message describes a warning and suppression of interrupts, which is a routine operational message.",True,8.216561449999972,False,"critical input interrupt (unit=<*> bit=<*>): warning for <*> <*> wire, suppressing further interrupts of same type",258,0,3288,0
+530,0,,The message describes a state event and does not indicate an error.,True,7.509599413999695,False,<*> tree receiver <*> in re-synch state event(s) (dcr <*>) detected over <*> seconds,145,0,3003,0
+531,0,,"The message describes a correction of errors, which is typically part of normal operation.",True,7.874690343000111,False,<*> torus receiver <*> input pipe error(s) (dcr <*>) detected and corrected over <*> seconds,870,0,2642,0
+532,0,,"The message describes a correction of errors, which is expected behavior.",True,8.486452812999687,False,"<*> ddr error(s) detected and corrected on rank <*>, symbol <*> over <*> seconds",456,0,9980,0
+533,0,,The message indicates routine error correction by the memory system.,True,7.795539503999862,False,total of <*> ddr error(s) detected and corrected over <*> seconds,456,0,9959,0
+534,0,,"The message indicates errors were detected and corrected, which is a normal operational event.",True,7.859780401999615,False,<*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,103,0,1412,0
+538,1,,MCS register errors are typically indicative of hardware issues.,True,8.166917349999949,False,Machine Check Status Register: <*>,3,0,53,0
+539,0,,The log message is about the Machine State Register which does not indicate an error.,True,8.640798470999925,False,Machine State Register: <*>,3,0,66,0
+540,0,,The log message is about core configuration which does not indicate an error.,True,6.99704394399987,False,Core Configuration Register <*>: <*>,3,0,66,0
+541,0,,The message is informational about DDR status.,True,5.399301350000314,False,DDR failing info register: DDR Fail Info Register: <*>,3,0,26,0
+542,0,,The log message does not indicate an error or abnormal condition.,True,6.151075710999976,False,<*> <*> Registers:,9,0,196,0
+543,0,,The format matches typical log entries.,True,6.153337827000087,False,r<*>=<*> r<*>=<*> r<*>=<*> r<*>=<*>,24,0,523,0
+544,0,,The log message does not indicate an error or abnormal termination.,True,6.7603667960001985,False,lr=<*> cr=<*> xer=<*> ctr=<*>,3,0,65,0
+545,0,,"The log message appears to be reporting register values, which is typical system information.",True,7.8184189279995735,False,msr=<*> dear=<*> esr=<*> fpscr=<*>,3,0,65,0
+546,0,,The log message format matches typical operation logs.,True,6.427904925999883,False,dbcr<*>=<*> dbsr=<*> ccr<*>=<*>,3,0,65,0
+547,0,,The log message is related to a standard system status update.,True,8.443858884999827,False,Floating Point Status and Control Register: <*>,3,0,65,0
+548,1,,New log messages about exceptions are often indicative of problems.,True,8.117604173000018,False,exception summary........................<*>,3,0,65,0
+549,0,,The message is about enabling a feature and does not indicate an error.,True,6.799869312000283,False,enabled exception summary................<*>,3,0,65,0
+550,1,,Invalid operation exception suggests a problem.,True,5.502533738000238,False,invalid operation exception <*>,9,0,195,0
+551,1,,Overflow exceptions are typically errors.,True,5.560813729000074,False,overflow exception.......................<*>,3,0,65,0
+552,1,,Contains an exception which is typically indicative of a problem.,True,6.625943508000091,False,underflow exception......................<*>,3,0,65,0
+553,1,,Divide-by-zero exceptions are typically errors.,True,6.236950315000286,False,divide-by-zero exception.................<*>,3,0,65,0
+554,1,,Contains an exception which is typically indicative of a problem.,True,8.007539552999788,False,inexact exception........................<*>,3,0,65,0
+555,1,,Unrecognized or invalid parameters are typically errors.,True,7.149956053000096,False,invalid <*>,18,0,390,0
+556,0,,The log message does not indicate an error or abnormal condition.,True,6.194063307000306,False,fraction <*>,6,0,130,0
+557,0,,The log message does not indicate an error or abnormal termination.,True,6.485508008000124,False,quiet NaN................................<*>,3,0,65,0
+558,1,,The log message does not follow any of the normal patterns and includes 'minus' which is unusual.,True,8.609221229000013,False,minus <*>,6,0,130,0
+559,0,,The log message does not indicate an error or abnormal condition.,True,6.0557410860001255,False,minus <*> <*>,6,0,130,0
+560,0,,The log message does not indicate an error or abnormal condition.,True,6.3138990039997225,False,plus <*>,6,0,130,0
+561,0,,The log message does not indicate an error or abnormal condition.,True,6.3176594749998,False,plus <*> <*>,6,0,130,0
+562,0,,The log message is a placeholder or informational message.,True,5.955397433000144,False,reserved.................................<*>,3,0,65,0
+563,1,,"Contains an invalid operation exception, which is unusual.",True,6.88649718600027,False,invalid operation exception (int cnvt)...<*>,3,0,65,0
+564,1,,The log message mentions 'enable invalid operation exceptions' which is unusual and likely indicates an error.,True,8.577586952000274,False,enable invalid operation exceptions......<*>,3,0,65,0
+565,0,,The log message does not indicate an error or abnormal condition.,True,6.480964876000144,False,enable <*> <*>,15,0,325,0
+566,0,,The log message appears to be a standard operation description.,True,6.208462649000012,False,round nearest............................<*>,3,0,65,0
+567,0,,The log message does not indicate an error or abnormal condition.,True,6.5645743210002365,False,round toward <*>,9,0,195,0
+568,1,,The log message contains an error or unexpected state indicated by 'fpr' and 'fffffff'.,True,9.046420880000369,False,fpr<*>=<*> ffffffff <*> <*>,96,0,1329,0
+569,1,,Signal reception often indicates an issue.,True,6.077445377000004,False,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",11947,0,27510,0
+570,0,,The log message format does not indicate an error or abnormal condition.,True,7.035785221999959,False,<*> <*> <*> <*> <*> <*> <*> <*> <*> as part of Service Action <*>,34,0,732,0
+571,0,,The message indicates a status change rather than an error.,True,6.247797593999621,False,Power Good signal deactivated: <*> A service action may be required.,79,79,15,15
+572,0,,"The message indicates errors were detected and corrected, which is a normal operational event.",True,7.398740314999941,False,<*> torus <*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,770,0,279,0
+573,1,,Error reading message prefix suggests a problem.,True,6.179991794000216,False,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",3477,3477,25325,25325
+610,1,,Unusual log entry related to Exception Syndrome Register.,True,5.86246770400021,False,Exception Syndrome Register: <*>,0,0,4,0
+611,0,,The log message format does not indicate an error.,True,5.8251315699999395,False,fpr<*>=<*> <*> <*> <*>,0,0,111,0
+612,0,,The format matches typical log entries without indicating an error.,True,5.581465742000091,False,fpr<*>=<*> <*> <*> <*>fdc<*>,0,0,2,0
+613,0,,The log message format matches typical operation logs.,True,5.755585506999978,False,fpr<*>=<*> <*> f<*>dd<*>f c<*>ba<*>,0,0,1,0
+614,0,,The format matches the normal example provided.,True,5.200336552999943,False,fpr<*>=<*> <*> <*> c<*>,0,0,2,0
+615,0,,The format matches typical log entries.,True,5.241980839000007,False,fpr<*>=<*> c<*>d<*> <*> <*>,0,0,4,0
+616,0,,The log message format matches typical operation logs.,True,5.855101190000369,False,fpr<*>=<*> c<*>f<*>ed<*> b<*>f<*>a<*> <*>cbea,0,0,1,0
+617,0,,The format matches the normal template provided in the examples.,True,5.743512394999925,False,fpr<*>=<*> <*> <*> c<*>f<*>,0,0,7,0
+618,0,,The format matches typical log entries without indicating an error.,True,5.919059287999971,False,fpr<*>=<*> <*> <*>b<*> <*>,0,0,7,0
+619,0,,The log message format matches typical operation logs.,True,5.9191147430001365,False,fpr<*>=<*> <*>f<*>b<*> <*>b<*>fd c<*>fac,0,0,1,0
+620,0,,The format matches the normal example provided.,True,5.384982967999804,False,fpr<*>=<*> <*>c<*> <*> <*>,0,0,14,0
+621,0,,The format matches typical log entries.,True,5.702489016999607,False,fpr<*>=<*> <*> fe<*>a<*> c<*>b<*>ec,0,0,1,0
+622,0,,The format matches typical log entries.,True,6.434994050000114,False,fpr<*>=<*> <*> <*> c<*>a<*>,0,0,3,0
+623,0,,The log message format matches typical operation logs.,True,7.9061140019998675,False,fpr<*>=<*> <*>e<*>be <*>f<*>d <*>d<*>f,0,0,1,0
+624,0,,The format matches typical log entries.,True,5.44673155800001,False,fpr<*>=<*> c<*>a<*> <*> <*>,0,0,3,0
+625,0,,The format matches the normal pattern provided in the examples.,True,6.6434465100001034,False,fpr<*>=<*> c<*>dd<*> <*>c<*>f<*> bff<*>ea,0,0,1,0
+626,1,,Contains unexpected error codes and does not match normal operation patterns.,True,7.360806092000075,False,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,0,0,1,0
+627,0,,The format matches typical log entries without indicating an error.,True,6.085203323999849,False,fpr<*>=<*> <*>d<*>a <*> <*>,0,0,2,0
+628,0,,The format matches the provided normal log message template.,True,6.080998419000025,False,fpr<*>=<*> c<*>ec <*> <*>,0,0,1,0
+629,0,,The log message describes the normal start of a server with specified parameters.,True,8.851559326999904,False,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties db.properties --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*> --shutdown-timeout <*>,0,0,18,0
+630,0,,The log message describes normal communication between nodes.,True,6.577056008,False,ciod: In packet from node <*>.<*> <*> message still ready for node <*> <*> <*> <*> <*>),0,0,2,0
+631,1,,Contains a machine check interrupt indicating hardware failure.,True,6.475620003000131,False,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,0,0,23,23
+632,0,,The format matches typical log entries without indicating an error.,True,6.416054646999783,False,fpr<*>=<*> c<*>f<*> <*> <*>,0,0,2,0
+633,0,,The log message format matches typical operation logs.,True,5.994797218999793,False,fpr<*>=<*> <*> <*>de<*>d<*> <*>,0,0,1,0
+634,0,,The format matches typical log entries without indicating an error.,True,6.264072375000069,False,fpr<*>=<*> <*> cb<*>ef<*> <*>cf<*>c,0,0,1,0
+635,1,,The log message contains unexpected patterns and error indicators.,True,6.282006425999953,False,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,0,0,2,0
+636,0,,The format matches typical log entries without indicating an error.,True,6.095430415999999,False,fpr<*>=<*> <*> <*> <*>fd<*>,0,0,6,0
+637,0,,The log message format does not indicate an error or abnormal condition.,True,6.471991287000037,False,fpr<*>=<*> <*> <*>f<*> <*>,0,0,4,0
+638,0,,The format matches typical log entries.,True,5.560073981999722,False,fpr<*>=<*> <*> <*> c<*>b<*>,0,0,2,0
+639,0,,The format matches typical log entries.,True,5.6315119330001835,False,fpr<*>=<*> bf<*>c<*> e<*>e <*>fc<*>d<*>,0,0,1,0
+640,0,,The format matches the normal template provided.,True,5.707935044999886,False,fpr<*>=<*> <*> <*> c<*>c<*>,0,0,8,0
+641,0,,The format matches the normal example provided.,True,4.95932760200003,False,fpr<*>=<*> <*> <*> <*>c<*>,0,0,16,0
+642,0,,The format matches typical log entries without indicating an error.,True,5.9323687169999175,False,fpr<*>=<*> <*> b<*>b<*> <*>,0,0,2,0
+643,0,,The log message format does not indicate an error.,True,7.17858275899971,False,fpr<*>=<*> <*>f<*> <*> <*>,0,0,10,0
+644,0,,The format matches typical log entries without indicating an error.,True,7.496116306999738,False,fpr<*>=<*> <*> <*> <*>f<*>,0,0,9,0
+645,0,,The format matches the normal example provided.,True,5.550257767999938,False,fpr<*>=<*> <*> <*> c<*>d<*>,0,0,2,0
+646,0,,The log message does not indicate an error or abnormal termination.,True,6.617187908000233,False,fpr<*>=<*> <*>eddf<*> ae<*>ee<*>be bfaf<*>cf,0,0,1,0
+647,0,,The log message format does not indicate an error.,True,6.2853482699997585,False,fpr<*>=<*> bfe<*>ae<*> d<*>bce c<*>b,0,0,1,0
+648,0,,The format matches typical log entries without indicating an error.,True,5.874011577999681,False,fpr<*>=<*> c<*>fbc<*>d <*> <*>fd<*>f<*>,0,0,1,0
+649,0,,The format matches the normal example provided.,True,5.448579654999776,False,fpr<*>=<*> <*> c<*>d<*>cf<*> <*>dfb<*>a,0,0,2,0
+650,0,,The format matches typical log entries without indicating an error.,True,5.742621718999999,False,fpr<*>=<*> <*> <*>e<*> <*>,0,0,9,0
+651,1,,"The log message contains an error related to a bad message header, which is similar to the abnormal examples provided.",True,8.371684386999732,False,fpr<*>=<*> <*> <*> <*>ffe<*>,0,0,2,0
+652,0,,The format matches the normal example provided.,True,6.130457890999878,False,fpr<*>=<*> <*> <*>c<*>a bb<*>a<*>,0,0,1,0
+653,0,,The format matches typical log entries without indicating an error.,True,6.120249360999878,False,fpr<*>=<*> <*> <*> <*>b<*>d,0,0,2,0
+654,0,,The format matches typical log entries without indicating an error.,True,6.292792959000053,False,fpr<*>=<*> <*> <*>dcda<*> bb<*>f<*>,0,0,1,0
+655,0,,The format matches typical log entries.,True,5.812762119000126,False,fpr<*>=<*> c<*>a<*>b <*>c<*>d<*>fd <*>b<*>d<*>,0,0,1,0
+656,0,,The format matches typical log entries without indicating an error.,True,5.971589805000349,False,fpr<*>=<*> <*>ec<*>d<*> <*> <*>cb<*>e<*>,0,0,1,0
+657,1,,The log message contains unexpected segments and 'Error' indicative of a problem.,True,7.476072720000047,False,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,0,0,1,0
+658,0,,The format matches typical log entries without indicating an error.,True,5.847236950000024,False,fpr<*>=<*> <*> <*>aa<*>a <*>f<*>a,0,0,1,0
+659,0,,The log message format matches typical operation logs.,True,5.3558877909999865,False,fpr<*>=<*> <*> <*>b<*>e<*>c<*> bfd<*>fac<*>,0,0,2,0
+660,0,,The log message format matches typical operation logs.,True,6.431962620000377,False,fpr<*>=<*> <*>e<*>ca<*> d<*>a<*>c<*> bfb<*>f<*>e,0,0,1,0
+661,0,,The format matches typical log entries without indicating an error.,True,6.596618444999876,False,fpr<*>=<*> bffe<*>d<*> d<*>a<*>c<*>c <*>fbd<*>d<*>,0,0,1,0
+662,0,,The log message format matches typical operation logs.,True,5.666640615000233,False,fpr<*>=<*> <*> df<*>abd<*> <*>fc<*>b<*>,0,0,1,0
+663,0,,The format matches typical log entries without indicating an error.,True,6.004823368999951,False,fpr<*>=<*> <*> <*> <*>cb<*>,0,0,3,0
+664,0,,The log message format matches typical operation logs.,True,5.247617120999621,False,fpr<*>=<*> <*> d<*>f<*>d<*>b <*>,0,0,1,0
+665,0,,The log message format does not indicate an error or abnormal condition.,True,6.036859652000203,False,fpr<*>=<*> <*> <*>f<*>c c<*>c<*>cf,0,0,1,0
+666,0,,The log message format matches typical operation logs.,True,6.005172896999738,False,fpr<*>=<*> <*> cd<*>d<*>b<*> <*>d<*>b<*>,0,0,1,0
+667,0,,The format matches the normal example provided.,True,5.432184707000033,False,fpr<*>=<*> <*> <*>c<*>ed bfd<*>fba<*>,0,0,2,0
+668,0,,The format matches typical log entries without indicating an error.,True,6.715354760000082,False,fpr<*>=<*> c<*>fba <*>a<*>b<*> bfb<*>ba,0,0,1,0
+669,1,,"The log message contains unexpected and fragmented text, which is unusual for normal operation.",True,7.794045094000012,False,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,0,0,1,0
+670,0,,The log message format does not indicate an error.,True,5.535153342000285,False,fpr<*>=<*> <*> <*>be<*>a <*>edf<*>,0,0,1,0
+671,1,,The log message contains unexpected elements that do not match the normal patterns.,True,6.964749014000063,False,fpr<*>=<*> <*> a<*>b<*> c<*>eb,0,0,1,0
+672,0,,The format matches typical log entries without indicating an error.,True,5.980515622999974,False,fpr<*>=<*> <*> <*>b<*>d<*> <*>db<*>d,0,0,1,0
+673,1,,The log message contains unexpected and error-like patterns.,True,6.453356700000313,False,fpr<*>=<*> <*> b<*>eae bfdc<*>,0,0,2,0
+674,0,,The log message format matches typical operation logs.,True,6.032026797000071,False,fpr<*>=<*> c<*>e<*> <*>ad<*>c<*> bfc<*>e<*>fa,0,0,1,0
+675,1,,The log message contains an error indicator 'ebe' which suggests a problem.,True,7.361524401999759,False,fpr<*>=<*> <*> <*>e<*>b<*> <*>,0,0,2,0
+676,0,,The format matches the normal pattern provided in the examples.,True,6.642037858000094,False,fpr<*>=<*> <*>fb<*>c<*>c <*>a<*>e<*>c <*>fb<*>b<*>,0,0,1,0
+677,1,,Contains unexpected error codes and terminated messages,True,5.542678754999997,False,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,0,0,1,0
+678,0,,The format matches typical log entries without indicating an error.,True,5.949219395,False,fpr<*>=<*> <*> a<*>c<*>cf <*>dc<*>,0,0,1,0
+679,0,,The format matches typical log entries without indicating an error.,True,6.328479619000063,False,fpr<*>=<*> <*> <*>fcd c<*>a<*>a,0,0,1,0
+680,0,,The log message format matches typical operation logs.,True,5.52634778599986,False,fpr<*>=<*> <*> f<*>c<*>bd <*>ba,0,0,1,0
+681,0,,The log message format does not indicate an error or abnormal condition.,True,6.409057096000197,False,fpr<*>=<*> <*> <*>cd<*>b<*>c bfb<*>b<*>,0,0,2,0
+682,1,,"The log message contains unexpected and fragmented text, suggesting an error.",True,6.947055362000356,False,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,0,0,1,0
+683,0,,The log message format matches typical operation logs.,True,6.255805672999941,False,fpr<*>=<*> <*>f<*>ea<*>c <*>cc<*>a<*>c c<*>e<*>,0,0,1,0
+684,1,,The log message contains unexpected characters and does not match the format of normal operation logs.,True,8.11343469600024,False,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,0,0,1,0
+685,0,,The format matches typical log entries.,True,4.981053814000006,False,fpr<*>=<*> <*> <*> <*>fa<*>c<*>,0,0,2,0
+686,0,,The log message format matches typical operation logs.,True,6.13588211699971,False,fpr<*>=<*> <*> f<*>b<*>c<*>fd bf<*>c<*>b<*>,0,0,1,0
+687,0,,The format matches typical log entries without indicating an error.,True,6.068510594000145,False,fpr<*>=<*> <*> <*> <*>b<*>,0,0,2,0
+688,0,,The format matches typical log entries.,True,5.155873916000019,False,fpr<*>=<*> <*> <*>a<*>c<*> <*>,0,0,2,0
+689,0,,The format matches typical log entries without indicating an error.,True,5.9615601619998415,False,fpr<*>=<*> <*> <*> <*>ff<*>,0,0,16,0
+690,1,,The log message contains unexpected characters and does not match the normal pattern.,True,9.23970401700035,False,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,0,0,2,0
+691,0,,The format matches typical log entries.,True,6.915584378999938,False,fpr<*>=<*> c<*>c<*>f<*>c <*>c<*>e<*>ce bf<*>a<*>,0,0,1,0
+692,0,,The format matches typical log entries without indicating an error.,True,6.1703204710001955,False,fpr<*>=<*> <*> <*>a<*> <*>,0,0,3,0
+693,0,,The format matches typical log entries without indicating an error.,True,6.206152557000223,False,fpr<*>=<*> <*> <*>d<*>ac<*>c bf<*>e<*>,0,0,1,0
+694,1,,"The log message contains unexpected and truncated characters, which is unusual.",True,7.14848702900008,False,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,0,0,1,0
+695,0,,The log message format matches typical operation logs.,True,6.13451078900016,False,fpr<*>=<*> <*> b<*>a<*>a<*>c <*>ee<*>f<*>,0,0,1,0
+696,0,,The log message format matches typical operation logs.,True,6.3662318209999285,False,fpr<*>=<*> <*> f<*>f<*>a<*>a <*>d<*>f<*>b,0,0,1,0
+697,0,,The format matches the normal example provided.,True,5.811831164000068,False,fpr<*>=<*> <*> c<*>d<*>c<*>c <*>f<*>cf<*>,0,0,2,0
+698,0,,The log message format does not indicate an error or abnormal condition.,True,6.791982712999925,False,fpr<*>=<*> <*> <*> <*>f<*>d<*>,0,0,2,0
+699,0,,The format matches the normal pattern provided in the examples.,True,7.076001572999758,False,fpr<*>=<*> c<*>c<*>ec <*>f<*>a bf<*>c<*>,0,0,1,0
+700,0,,The format matches typical log entries without indicating an error.,True,6.88349118799988,False,fpr<*>=<*> <*> ea<*>dfa<*>e bf<*>ec<*>,0,0,1,0
+701,1,,The log message contains unexpected hexadecimal values.,True,6.141723635999824,False,fpr<*>=<*> <*> <*> <*>ffff<*>,0,0,46,0
+702,0,,The format matches typical log entries without indicating an error.,True,5.954431636999743,False,fpr<*>=<*> <*> <*> <*>d,0,0,4,0
+703,1,,The log message contains an error related to file system operations.,True,6.782931112999904,False,fpr<*>=<*> <*> <*> <*>e<*>,0,0,12,0
+704,0,,The log message format does not indicate an error.,True,5.778076384999622,False,fpr<*>=<*> <*>d <*> <*>,0,0,2,0
+705,0,,The log message format matches typical operation logs.,True,5.894194746999801,False,fpr<*>=<*> <*> <*> <*>ffff<*>c<*>,0,0,10,0
+706,0,,The format matches typical log entries without indicating an error.,True,6.235263833999852,False,fpr<*>=<*> <*>cfaf<*> <*> <*>,0,0,10,0
+707,1,,The log message contains unexpected elements like 'ffff' which is not typical.,True,7.33189670999991,False,fpr<*>=<*> <*> <*>ffff<*> <*>,0,0,10,0
+708,0,,The log message format does not indicate an error.,True,6.084913716999836,False,fpr<*>=<*> <*>ffff<*> <*> <*>,0,0,23,0
+709,0,,The format matches typical log entries without indicating an error.,True,6.400926398000593,False,fpr<*>=<*> <*> <*> <*>f<*>af,0,0,1,0
+710,1,,The log message contains unexpected elements that do not match the normal patterns.,True,7.008831082999677,False,fpr<*>=<*> <*> <*> <*>a<*>aa,0,0,1,0
+711,0,,The format matches typical log entries without indicating an error.,True,6.479421936999643,False,fpr<*>=<*> <*>e <*> <*>,0,0,7,0
+712,0,,The format matches typical log entries without indicating an error.,True,6.461011435000728,False,fpr<*>=<*> <*> <*> <*>a<*>a,0,0,3,0
+713,0,,The format matches typical log entries without indicating an error.,True,6.3164919620003275,False,fpr<*>=<*> <*> <*> <*>b<*>b,0,0,1,0
+714,0,,The format matches the normal example provided.,True,7.074421108999559,False,fpr<*>=<*> <*> <*> <*>c<*>c,0,0,1,0
+715,0,,The log message format does not indicate an error.,True,7.426564055000199,False,fpr<*>=<*> <*>f <*> <*>,0,0,4,0
+716,0,,The log message describes a specific failure but does not indicate an abnormal termination or critical error.,True,9.24528464300056,False,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,0,0,2,2
+717,1,,The file does not exist.,True,5.970152390999829,False,ciod: Error creating node map from file my_map.txt: No such file or directory,0,0,24,0
+718,0,,The format matches typical log entries without indicating an error.,True,6.0659832839992305,False,fpr<*>=<*> <*> <*>d<*> <*>,0,0,4,0
+719,0,,The format matches typical log entries without indicating an error.,True,5.915813161000187,False,fpr<*>=<*> <*> <*> <*>a<*>,0,0,2,0
+720,0,,The log message format matches typical operation logs.,True,6.232617472999664,False,fpr<*>=<*> <*>cd<*>f<*> <*>ff<*>a<*> <*>ffff<*>f<*>,0,0,1,0
+721,0,,The log message format does not indicate an error or abnormal condition.,True,8.890872076999585,False,fpr<*>=<*> <*>ffff<*>d<*> <*>ff<*>f<*> <*>ffff<*>b<*>,0,0,1,0
+722,1,,The log message contains an error code 'fffffff' which is unusual.,True,8.779090933000589,False,fpr<*>=<*> <*> <*> <*>fffffff,0,0,7,0
+723,1,,The log message contains unexpected patterns and appears to be an error.,True,7.438970401999541,False,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,0,0,1,0
+724,0,,The format matches the normal pattern provided in the examples.,True,7.125138912000693,False,fpr<*>=<*> c<*>b <*>ec<*>c<*> bff<*>ed<*>,0,0,1,0
+725,0,,The log message format does not indicate an error or abnormal condition.,True,7.383821962000184,False,fpr<*>=<*> bfed<*>fde <*>d<*>bbc<*> <*>fe<*>f,0,0,1,0
+726,0,,The format matches typical log entries.,True,7.031419452000591,False,fpr<*>=<*> <*>fdc<*> <*>c<*>ab bfec<*>f,0,0,1,0
+727,0,,The format matches the normal pattern provided in the examples.,True,8.21411801100021,False,fpr<*>=<*> <*>ff<*>cd<*> c<*>b<*>d c<*>e<*>d,0,0,1,0
+728,0,,The format matches typical log entries without indicating an error.,True,6.875721397999769,False,fpr<*>=<*> c<*>cb<*>d <*>a<*>d<*>dd<*> c<*>aec,0,0,1,0
+729,1,,The log message contains unexpected characters and does not match the format of normal operation logs.,True,8.055199092000294,False,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,0,0,1,0
+730,1,,The log message contains unexpected characters and does not match the normal patterns.,True,7.49190236800041,False,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,0,0,1,0
+731,1,,"The log message contains unexpected and fragmented text, suggesting an error.",True,7.687165006999749,False,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,0,0,1,0
+732,1,,The log message contains an error code 'fffffffa' which is unusual.,True,7.514854015999845,False,fpr<*>=<*> <*> <*> fffffffa,0,0,1,0
+733,0,,The format matches typical log entries without indicating an error.,True,7.895241920000444,False,fpr<*>=<*> <*>aaba <*>dc<*>a<*> <*>afc,0,0,1,0
+734,0,,The format matches the normal pattern provided in the examples.,True,8.258111490000374,False,fpr<*>=<*> bff<*>ab <*>c<*>bc<*>e c<*>d<*>b,0,0,1,0
+735,0,,The format matches the normal example pattern.,True,6.899670946999322,False,fpr<*>=<*> <*> <*> c<*>e,0,0,2,0
+736,0,,The format matches the normal example provided.,True,5.332352523000736,False,fpr<*>=<*> <*> <*>c<*> <*>,0,0,4,0
+737,0,,The format matches typical log entries without indicating an error.,True,6.189676506000069,False,fpr<*>=<*> bff<*> <*> <*>,0,0,3,0
+738,1,,The log message contains unexpected characters and does not match the normal patterns.,True,8.369614234999972,False,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,0,0,1,0
+739,0,,The format matches the normal example provided.,True,5.3950286440003765,False,fpr<*>=<*> <*>c<*>d<*> <*> <*>,0,0,2,0
+740,0,,The log message format does not indicate an error or abnormal condition.,True,7.350388938000833,False,fpr<*>=<*> bfea<*>f <*>fdbbf<*> bffcbf<*>a,0,0,1,0
+741,1,,The log message contains unexpected characters and seems to indicate a failure.,True,7.7793372590003855,False,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,0,0,1,0
+742,0,,The log message format matches typical memory or file system operations.,True,7.154957190000459,False,fpr<*>=<*> bff<*>dec<*> <*>e<*>b<*>df<*> c<*>b<*>b,0,0,1,0
+743,0,,The format matches typical log entries without indicating an error.,True,6.650649852000242,False,fpr<*>=<*> <*>ff<*> <*> <*>,0,0,6,0
+744,0,,The log message format does not indicate an error or abnormal condition.,True,7.750308780000523,False,fpr<*>=<*> <*>ff<*>a<*> <*>da<*>ea<*> <*>b<*>c<*>,0,0,1,0
+745,0,,The format matches typical log entries.,True,6.047744436000357,False,fpr<*>=<*> c<*> f<*>ccd<*> c<*>dfcf,0,0,1,0
+746,0,,The log message format matches typical operation logs.,True,6.195507408000594,False,fpr<*>=<*> <*>be<*> <*>ac<*>b<*> <*>d<*>,0,0,1,0
+747,0,,The format matches the normal example provided.,True,7.602893795999989,False,fpr<*>=<*> bfff<*> <*>b<*>f c<*>a,0,0,1,0
+748,0,,The log message format matches typical operation logs.,True,7.729130816999714,False,fpr<*>=<*> <*>e<*>f <*> <*>,0,0,1,0
+749,0,,The log message describes normal performance metrics.,True,7.143970951000483,False,<*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,135092,0
+750,0,,The log message describes normal system metrics.,True,6.0912227499993605,False,"<*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,135092,0
+751,0,,The log message describes normal operation of the memory and error handling system.,True,9.17905692399927,False,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,4,0
+752,0,,The log message describes normal operational metrics.,True,7.382288982999853,False,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,4,0
+753,0,,The log message format does not indicate an error.,True,6.436897537999357,False,fpr<*>=<*> <*>aa<*> <*> <*>,0,0,2,0
+754,0,,The format matches typical log entries without indicating an error.,True,6.653326523999567,False,fpr<*>=<*> <*> <*> <*>fe<*>,0,0,10,0
+755,0,,The format matches typical log entries.,True,7.109110266999778,False,fpr<*>=<*> <*> <*>e<*>a<*> c<*>d<*>cb,0,0,4,0
+756,0,,The format matches typical log entries without indicating an error.,True,7.841223179999361,False,fpr<*>=<*> <*>d<*> <*> <*>,0,0,2,0
+757,0,,The log message format does not indicate an error.,True,6.034807888999239,False,fpr<*>=<*> <*>fffff <*> <*>,0,0,2,0
+758,0,,The message describes a system response to an error condition and does not indicate a failure or abnormal termination.,True,9.519243857999754,False,"external input interrupt (unit=<*> bit=<*>): number of corrected SRAM errors has exceeded threshold, suppressing further interrupts of same type",0,0,57,0
+759,0,,The message indicates a suppression action rather than an error.,True,6.565263198000139,False,ddr: Suppressing further CE interrupts,0,0,302,0
+760,0,,The message describes a common kernel detection and does not indicate an error.,True,10.959457167999972,False,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,22175,0
+761,0,,The format matches typical log entries without indicating an error.,True,7.21636461900016,False,fpr<*>=<*> bfb<*>a<*> a<*>aa<*>ac bfc<*>f<*>,0,0,1,0
+762,0,,The log message format does not indicate an error or abnormal condition.,True,7.825075050999658,False,fpr<*>=<*> bfbaf<*>fe b<*>cf<*> bfc<*>d<*>c,0,0,1,0
+763,0,,The log message format does not indicate an error or abnormal condition.,True,7.853193519999877,False,fpr<*>=<*> bfcb<*>d e<*>cdf<*> <*>fcab<*>f<*>,0,0,1,0
+764,0,,The log message format matches the normal pattern.,True,8.286485958999947,False,fpr<*>=<*> bfa<*>c<*>c <*>a<*>e<*> <*>fc<*>e,0,0,1,0
+765,0,,The format matches typical log entries without indicating an error.,True,9.099204040000586,False,fpr<*>=<*> <*>fe<*>b<*> <*>c<*>f<*>c<*> <*>fbcbeb<*>,0,0,1,0
+766,0,,The format matches typical log entries without indicating an error.,True,6.28592998699969,False,fpr<*>=<*> <*> <*>b <*>,0,0,2,0
+767,0,,The log message format does not indicate an error or abnormal condition.,True,7.316317869000159,False,fpr<*>=<*> <*> <*>afb<*> <*>a,0,0,1,0
+768,0,,The format matches typical log entries.,True,6.671793742000773,False,fpr<*>=<*> c<*>cdf<*> <*>c<*>a<*> bfcefc<*>,0,0,1,0
+769,0,,The format matches typical log entries.,True,5.6773293739997825,False,fpr<*>=<*> c<*>cf<*>e <*> c<*>cd<*>,0,0,1,0
+770,0,,The format matches typical log entries without indicating an error.,True,6.64699278199987,False,fpr<*>=<*> <*>b<*> <*> <*>,0,0,3,0
+771,1,,The log message contains unexpected patterns and does not match any normal operation template.,True,8.641169849000107,False,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,0,0,1,0
+772,1,,"The log message contains unexpected and fragmented text, suggesting an error.",True,7.768314687000384,False,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,0,0,1,0
+773,0,,The format matches the normal pattern provided in the examples.,True,7.083937526999762,False,fpr<*>=<*> c<*>d <*>aef<*>ff c<*>ac<*>,0,0,1,0
+774,0,,The log message format matches the normal pattern.,True,6.608871139999792,False,fpr<*>=<*> c<*>bc<*> ee<*>caaa <*>ff<*>af<*>,0,0,1,0
+775,0,,The format matches typical log entries without indicating an error.,True,6.765547211000012,False,fpr<*>=<*> <*>a<*> <*> <*>,0,0,6,0
+776,0,,The log message format does not indicate an error or abnormal condition.,True,7.222348672999942,False,fpr<*>=<*> <*> a<*>b<*>ace <*>e,0,0,1,0
+777,0,,The log message format does not indicate an error or abnormal condition.,True,7.691696580000098,False,fpr<*>=<*> bfc<*>b<*>d <*>cbfb<*> c<*>a<*>bc,0,0,1,0
+778,0,,The log message format matches typical operation logs.,True,6.352889846000835,False,fpr<*>=<*> <*> <*>f<*>e<*> <*>,0,0,2,0
+779,1,,The log message contains unexpected and fragmented components that do not match the normal patterns.,True,8.193444848000581,False,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,0,0,1,0
+780,0,,The log message format matches the normal pattern.,True,7.414351002999865,False,fpr<*>=<*> c<*>c e<*>ca<*>f<*> c<*>f<*>a<*>,0,0,1,0
+781,0,,The log message format does not indicate an error or abnormal condition.,True,8.182853376999446,False,fpr<*>=<*> <*>fd<*>fef<*> <*>e<*>c<*>de bfeb<*>ad<*>,0,0,1,0
+782,0,,The format matches typical log entries.,True,6.451214980999794,False,fpr<*>=<*> <*>ff<*>fbd<*> <*>c<*>decd bfeb<*>b<*>e,0,0,1,0
+783,0,,The format matches typical log entries without indicating an error.,True,7.90058256499924,False,fpr<*>=<*> bfe<*>cfc<*> <*>b<*>fa<*>d<*> bfe<*>cf<*>,0,0,1,0
+784,0,,The format matches typical log entries.,True,6.730906898000285,False,fpr<*>=<*> <*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*>,0,0,1,0
+785,0,,The format matches typical log entries without indicating an error.,True,6.735287293999136,False,fpr<*>=<*> <*> <*> bff<*>d<*>,0,0,2,0
+786,0,,The format matches typical log entries without indicating an error.,True,7.312705487999665,False,fpr<*>=<*> bdd<*>fe c<*>b<*>fb <*>df<*>dd<*>,0,0,1,0
+787,0,,The log message format does not indicate an error or abnormal condition.,True,7.352776800000356,False,fpr<*>=<*> <*>df<*>ed <*>dc<*> <*>df<*>ce,0,0,1,0
+788,0,,The format matches typical log entries without indicating an error.,True,6.918603363999864,False,fpr<*>=<*> bdecab<*> fd<*>c<*> <*>df<*>ddff,0,0,1,0
+789,0,,The log message format does not indicate an error or abnormal condition.,True,7.843680482000309,False,fpr<*>=<*> bdf<*>e<*>c bd<*>be<*>c <*>dff<*>,0,0,1,0
+790,0,,The log message format matches typical operation logs.,True,6.3581281119995765,False,fpr<*>=<*> <*> <*> <*>f<*>a<*>,0,0,2,0
+791,1,,"The log message contains unexpected and truncated words, suggesting an error.",True,8.234649213000012,False,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,0,0,1,0
+792,0,,The log message format does not indicate an error or abnormal condition.,True,7.853644635999444,False,fpr<*>=<*> bef<*>e<*> cee<*>d<*> <*>f<*>a<*>e,0,0,1,0
+793,0,,The log message format matches typical operation logs.,True,6.798299985000085,False,fpr<*>=<*> bef<*> a<*>a<*>c<*> <*>f<*>a<*>e<*>b,0,0,1,0
+794,0,,The format matches typical log entries without indicating an error.,True,6.614082027999757,False,fpr<*>=<*> <*> <*> bf<*>,0,0,4,0
+795,1,,"The log message contains unexpected patterns and 'e' repeated multiple times, which is unusual.",True,9.561716043999695,False,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,0,0,1,0
+796,0,,The log message format does not indicate an error or abnormal condition.,True,7.817466419000084,False,fpr<*>=<*> <*>e<*>fde<*>c <*>fee<*> be<*>bcf,0,0,1,0
+797,1,,The log message contains unexpected characters and does not match the normal patterns.,True,8.08739922299992,False,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,0,0,1,0
+798,0,,The format matches typical log entries without indicating an error.,True,7.267690145000415,False,fpr<*>=<*> be<*>bc<*> bd<*>ac<*>d be<*>ba<*>ec,0,0,1,0
+799,0,,The format matches typical log entries without indicating an error.,True,6.506681126999865,False,fpr<*>=<*> <*>e<*> <*> <*>,0,0,2,0
+800,0,,The log message format does not indicate an error or abnormal condition.,True,7.335229155999514,False,fpr<*>=<*> bed<*>f<*> b<*>fb<*> <*>edb<*>e<*>,0,0,1,0
+801,0,,The format matches typical log entries without indicating an error.,True,6.904481370999747,False,fpr<*>=<*> <*>ec<*>d fea<*>a <*>edb<*>b,0,0,1,0
+802,0,,The log message format matches typical operation logs.,True,6.55616963600005,False,fpr<*>=<*> <*>edb<*>e <*>a<*>e <*>edb<*>bd,0,0,1,0
+803,0,,The log message format does not indicate an error or abnormal condition.,True,7.594322369999645,False,fpr<*>=<*> bed<*> <*>ec<*>cf<*> <*>ec<*>,0,0,1,0
+804,0,,The format matches typical log entries without indicating an error.,True,7.469390911000119,False,fpr<*>=<*> <*>ec<*>f<*> d<*>dbe<*>ae bed<*>,0,0,1,0
+805,0,,The log message contains typical kernel information about integer alignment exceptions.,True,10.77441490000001,False,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,2,0
+806,1,,Error message indicates a failure to load a program image.,True,8.130921527000282,False,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,0,0,1024,0
+807,0,,The format matches typical log entries without indicating an error.,True,6.777315841000018,False,fpr<*>=<*> <*>ffb<*> <*> <*>,0,0,6,0
+808,0,,The format matches typical log entries without indicating an error.,True,7.870113121000031,False,fpr<*>=<*> <*> d<*>d<*> <*>,0,0,2,0
+809,0,,The log message format does not indicate an error or abnormal condition.,True,9.083788158999596,False,fpr<*>=<*> <*>fe<*>b<*>e<*> <*>a bcf<*>b<*>f,0,0,1,0
+810,0,,The log message format matches typical operation logs.,True,6.037695300999985,False,fpr<*>=<*> <*>db<*> <*> <*>,0,0,3,0
+811,0,,The log message format matches typical operation logs.,True,5.8126903370002765,False,fpr<*>=<*> <*> f<*> <*>,0,0,2,0
+812,0,,The log message format matches typical operation logs.,True,6.098088552000263,False,fpr<*>=<*> <*> fffffe<*>a <*>,0,0,3,0
+813,0,,The format matches typical log entries.,True,5.8063941079999495,False,fpr<*>=<*> c<*>d<*>cb <*> <*>,0,0,1,0
+814,0,,The format matches typical log entries without indicating an error.,True,6.484257981000155,False,fpr<*>=<*> bf<*>d<*>cb <*> <*>,0,0,4,0
+815,0,,The format matches the normal example provided.,True,6.051269956999931,False,fpr<*>=<*> <*>c<*>a<*> <*> <*>,0,0,1,0
+816,0,,The format matches typical log entries without indicating an error.,True,6.8578759370002444,False,fpr<*>=<*> b<*>cac<*>bd <*> <*>,0,0,1,0
+817,0,,The format matches the normal example provided.,True,6.1522095410000475,False,fpr<*>=<*> <*>c<*>cb<*> <*> <*>,0,0,1,0
+818,0,,The format matches typical log entries.,True,6.0028743839993695,False,fpr<*>=<*> bc<*>c<*>f<*> <*>ecc <*>,0,0,1,0
+819,0,,The format matches typical log entries without indicating an error.,True,6.357470790999287,False,fpr<*>=<*> bc<*>cceb <*> <*>,0,0,1,0
+820,0,,The log message format does not indicate an error or abnormal condition.,True,7.674759857999561,False,fpr<*>=<*> bc<*>b<*> fa<*>c<*> <*>ce<*>,0,0,1,0
+821,0,,The format matches typical log entries without indicating an error.,True,7.000922797000385,False,fpr<*>=<*> bc<*>d<*> <*>decd<*> <*>cb<*>ddb,0,0,1,0
+822,0,,The format matches typical log entries without indicating an error.,True,5.804285557000185,False,fpr<*>=<*> bc<*>f <*> <*>,0,0,1,0
+823,0,,The format matches typical log entries without indicating an error.,True,6.101341397999931,False,fpr<*>=<*> bc<*>dd<*> <*> <*>,0,0,1,0
+824,0,,The format matches typical log entries without indicating an error.,True,6.014511097999275,False,fpr<*>=<*> bc<*>ecf <*> <*>,0,0,1,0
+825,0,,The format matches typical log entries without indicating an error.,True,6.203709072999118,False,fpr<*>=<*> bccac<*>e <*> <*>,0,0,1,0
+826,0,,The log message format does not indicate an error or abnormal condition.,True,7.228805783000098,False,fpr<*>=<*> <*>ce<*> <*>eab<*>e <*>cd<*>a<*>,0,0,1,0
+827,0,,The format matches typical log entries without indicating an error.,True,7.065217807000408,False,fpr<*>=<*> <*> <*>e<*>c<*>c<*> <*>fc<*>fc<*>b,0,0,1,0
+828,1,,The log message contains unexpected characters and does not match the normal patterns.,True,7.689222330000121,False,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,0,0,1,0
+829,1,,The log message contains unexpected characters and does not match the normal pattern.,True,7.910789759000181,False,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,0,0,1,0
+830,0,,The format matches typical log entries without indicating an error.,True,6.329652344000351,False,fpr<*>=<*> <*> <*>cd<*>b bfe<*>c<*>,0,0,1,0
+831,0,,The format matches typical log entries without indicating an error.,True,7.662630918999639,False,fpr<*>=<*> <*>a<*>f a<*>c<*> <*>f<*>ce<*>,0,0,1,0
+832,0,,The format matches typical log entries without indicating an error.,True,6.947433694999745,False,fpr<*>=<*> <*>b<*>d <*>d<*>d<*> <*>fc<*>c,0,0,1,0
+833,1,,The log message contains unexpected characters and does not match the normal pattern.,True,7.24905962900084,False,fpr<*>=<*> <*> <*> <*>fdfffff,0,0,2,0
+834,0,,The log message format does not indicate an error or abnormal condition.,True,7.314418953999848,False,fpr<*>=<*> <*> add<*>a<*> <*>e<*>fbcd,0,0,1,0
+835,0,,The format matches typical log entries without indicating an error.,True,7.025159719999465,False,fpr<*>=<*> bfb<*>b<*> <*> bc<*>bfd<*>,0,0,1,0
+836,1,,"The log message contains unexpected elements like 'fpr' and 'fee', which are not typical in normal operation logs.",True,9.887659418999647,False,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,0,0,2,0
+837,0,,The format matches typical log entries without indicating an error.,True,6.779989960000421,False,fpr<*>=<*> <*>f<*>f<*> <*> <*>,0,0,1,0
+838,1,,The log message contains unexpected patterns and errors.,True,7.0819815360000575,False,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,0,0,1,0
+839,0,,The log message format does not indicate an error or abnormal condition.,True,7.0557844289996865,False,fpr<*>=<*> <*> a<*>e <*>f<*>e<*>a,0,0,1,0
+840,1,,"The log message contains unexpected and fragmented text, suggesting an error.",True,7.5828624429996125,False,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,0,0,1,0
+841,0,,The log message format does not indicate an error or abnormal condition.,True,7.44826189000014,False,fpr<*>=<*> <*>b<*>d<*> dfd<*>f <*>f<*>b,0,0,1,0
+842,1,,The log message contains unexpected and error-like content.,True,6.720964548999291,False,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,0,0,1,0
+843,0,,The log message format does not indicate an error or abnormal condition.,True,7.412434522000694,False,fpr<*>=<*> fd<*> fcc<*>d<*>f<*> <*>,0,0,1,0
+844,0,,The log message format does not indicate an error or abnormal condition.,True,6.920021642999927,False,fpr<*>=<*> bb<*>e<*> fcd<*> <*>,0,0,1,0
+845,0,,The format matches typical log entries without indicating an error.,True,7.111732369000492,False,fpr<*>=<*> e<*>cb<*> <*>cd<*> f<*>bde<*>,0,0,1,0
+846,0,,The log message format does not indicate an error or abnormal condition.,True,7.537592933000269,False,fpr<*>=<*> <*> ba<*>feeb<*> <*>fdff<*>c,0,0,1,0
+847,0,,The format matches typical log entries without indicating an error.,True,6.566492726999968,False,fpr<*>=<*> <*> <*>bc<*>f<*>b <*>fdf<*>eff,0,0,1,0
+848,0,,The format matches typical log entries.,True,5.663645266999993,False,fpr<*>=<*> <*> c<*>f<*>ff <*>fdef<*>e<*>,0,0,1,0
+849,0,,The format matches typical log entries.,True,5.412169627000367,False,fpr<*>=<*> <*> b<*>c<*> <*>,0,0,2,0
+850,1,,The log message contains unexpected characters and does not match the normal patterns.,True,7.687082831000225,False,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,0,0,3,0
+851,1,,rts assertion failed indicates a problem,True,7.228708731000552,False,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",0,0,1,1
+852,0,,The log message format does not indicate an error or abnormal condition.,True,7.248020065999299,False,fpr<*>=<*> bfd<*>c <*> <*>,0,0,3,0
+853,0,,The format matches typical log entries without indicating an error.,True,7.17839542099955,False,fpr<*>=<*> <*>ff<*>e f<*>a <*>fd<*>cb<*>c,0,0,1,0
+854,0,,The format matches typical log entries without indicating an error.,True,7.1772655710001345,False,fpr<*>=<*> <*>ff<*>da<*> <*>b<*>e<*> <*>c<*>b<*>,0,0,1,0
+855,0,,The format matches the normal example pattern.,True,6.155209994999495,False,fpr<*>=<*> <*>c<*>f a<*>f<*> <*>ff<*>af,0,0,1,0
+856,1,,The log message contains unexpected characters and seems to indicate an error.,True,7.455250069000613,False,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,0,0,2,0
+857,1,,The log message contains error indicators and does not match normal operation patterns.,True,8.016148671999872,False,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,0,0,1,0
+858,0,,The log message format does not indicate an error or abnormal condition.,True,6.5434053260005385,False,fpr<*>=<*> <*>fe<*>e<*> <*> <*>,0,0,2,0
+859,1,,The log message contains unexpected characters and does not match the format of normal messages.,True,7.732826438999837,False,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,0,0,1,0
+860,0,,The log message format matches typical memory manager or similar system operations.,True,6.475109347000398,False,fpr<*>=<*> <*>ba<*> <*> c<*>df<*>c,0,0,1,0
+861,0,,The format matches typical log entries without indicating an error.,True,6.5549071629993705,False,fpr<*>=<*> <*> abdb<*>b<*> <*>ffd<*>f<*>,0,0,1,0
+862,0,,The format matches the normal example pattern.,True,5.023877855999672,False,fpr<*>=<*> <*> c<*>a <*>f<*>ed<*>,0,0,1,0
+863,0,,The log message format does not indicate an error or abnormal condition.,True,6.432440851999672,False,fpr<*>=<*> <*> ace<*>f<*> <*>eb<*>b,0,0,1,0
+864,0,,The format matches typical log entries without indicating an error.,True,6.398196035999717,False,fpr<*>=<*> <*> cf<*>aacc<*> bf<*>a<*>d<*>,0,0,1,0
+865,0,,The log message format matches typical operation logs.,True,7.856326246000208,False,fpr<*>=<*> <*> f<*>b<*>a<*>f<*> <*>fdb<*>c<*>e,0,0,1,0
+866,1,,The log message contains unexpected characters and seems to indicate an error.,True,8.979833739999776,False,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,0,0,1,0
+867,0,,The format matches typical log entries without indicating an error.,True,5.93239499900028,False,fpr<*>=<*> <*> <*>caf bfe<*>dfed,0,0,3,0
+868,0,,The format matches the normal pattern provided in the examples.,True,6.170403606000036,False,fpr<*>=<*> <*> c<*>b<*>bc<*> bfc<*>d<*>,0,0,1,0
+869,1,,Contains error and bad message header,True,6.721414786000423,False,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,0,0,3,0
+870,0,,The format matches typical log entries without indicating an error.,True,7.193555953000214,False,fpr<*>=<*> <*> <*> bc<*>,0,0,1,0
+871,0,,The format matches typical log entries.,True,5.333449777000169,False,fpr<*>=<*> <*> <*>f<*>c<*>f <*>f<*>c,0,0,1,0
+872,0,,The log message format matches typical operation logs.,True,5.835248940000383,False,fpr<*>=<*> <*> d<*>ee<*>f <*>a<*>c<*>,0,0,1,0
+873,0,,The format matches typical log entries without indicating an error.,True,6.042843811000239,False,fpr<*>=<*> <*> <*>cc<*> <*>f<*>fd<*>,0,0,2,0
+874,0,,The log message format does not indicate an error or abnormal condition.,True,7.214572009000221,False,fpr<*>=<*> bfdc<*>b<*> <*>e<*>f<*> <*>ef<*>f<*>b<*>,0,0,1,0
+875,0,,The log message format matches typical operation logs.,True,6.425089087999368,False,fpr<*>=<*> bfe<*>b<*> <*>da<*>e <*>f<*>d<*>a<*>,0,0,1,0
+876,0,,The format matches typical log entries without indicating an error.,True,6.140556451000521,False,fpr<*>=<*> bfdc<*>b<*>a <*> <*>,0,0,1,0
+877,1,,The log message contains unexpected characters and does not match the normal patterns.,True,7.328783724999994,False,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,0,0,1,0
+878,0,,The log message format does not indicate an error or abnormal condition.,True,7.948896685999898,False,fpr<*>=<*> <*>fa <*>e<*>b<*>fae <*>,0,0,1,0
+879,0,,The format matches typical log entries without indicating an error.,True,7.991888073999689,False,fpr<*>=<*> <*> <*>bb<*>c <*>ff<*>df,0,0,1,0
+880,0,,The format matches typical log entries without indicating an error.,True,5.787321755999983,False,fpr<*>=<*> <*> <*> bff<*>,0,0,5,0
+881,0,,The log message format does not indicate an error or abnormal condition.,True,6.836714834000304,False,fpr<*>=<*> <*>fbdb<*>a<*> <*>abca beb<*>e<*>b,0,0,1,0
+882,0,,The format matches typical log entries without indicating an error.,True,6.0821290089998,False,fpr<*>=<*> <*>c <*>ed<*>e <*>e<*>f<*>a,0,0,1,0
+883,0,,The log message format does not indicate an error.,True,5.798637423999935,False,fpr<*>=<*> <*>fb <*>fdd<*>d<*> <*>d<*>c<*>,0,0,1,0
+884,0,,The log message format matches typical operation logs.,True,5.491090686999996,False,fpr<*>=<*> <*> <*>ddf<*> <*>f<*>c<*>,0,0,1,0
+885,0,,The format matches typical log entries.,True,5.0750544550000996,False,fpr<*>=<*> <*> <*>bea<*>c<*> <*>c<*>ab,0,0,1,0
+886,1,,The log message contains unexpected characters and seems to indicate an error.,True,8.025560392999978,False,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,0,0,1,0
+887,1,,The log message contains unexpected characters and seems to indicate an error.,True,8.250900082999578,False,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,0,0,2,0
+888,0,,The log message format does not indicate an error or abnormal condition.,True,6.635381932999735,False,fpr<*>=<*> <*> a<*>ffca<*> <*>cfc<*>f,0,0,1,0
+889,0,,The format matches the normal example pattern.,True,5.047696749000352,False,fpr<*>=<*> <*> <*>c<*>eda<*> <*>fea<*>a,0,0,1,0
+890,0,,The format matches typical log entries without indicating an error.,True,5.415822873000252,False,fpr<*>=<*> <*>cf<*> <*> <*>,0,0,1,0
+891,1,,The log message contains unexpected characters and does not match the normal pattern.,True,6.960464098000557,False,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,0,0,1,0
+892,0,,The format matches typical log entries without indicating an error.,True,6.3280369589992915,False,fpr<*>=<*> bf<*> e<*>a<*>cb<*> <*>f<*>ce<*>d,0,0,2,0
+893,0,,The format matches typical log entries without indicating an error.,True,5.695107946999997,False,fpr<*>=<*> <*> <*> bfe<*>,0,0,3,0
+894,1,,"The log message contains unexpected patterns and multiple 'f' characters, which are not typical.",True,7.666932058000384,False,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,0,0,2,0
+895,1,,The log message contains unexpected patterns and abbreviations.,True,7.6164125330005845,False,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,0,0,1,0
+896,0,,The log message format matches typical operation logs.,True,7.225724986999921,False,fpr<*>=<*> <*> d<*>f<*>a<*>fc <*>f<*>d,0,0,3,0
+897,0,,The log message format does not indicate an error.,True,5.425249105000148,False,fpr<*>=<*> <*> <*> bfd<*>,0,0,2,0
+898,1,,The log message contains unexpected elements like 'bb' which are not typical in normal operation logs.,True,7.7664356670002235,False,fpr<*>=<*> <*> <*> <*>bb<*>,0,0,1,0
+899,1,,The log message contains an error related to a bad message header.,True,6.565186105999601,False,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,0,0,1,0
+900,0,,The log message format does not indicate an error or abnormal condition.,True,6.197098902999642,False,fpr<*>=<*> <*> <*>a<*>a <*>,0,0,2,0
+901,0,,The log message format does not indicate an error or abnormal condition.,True,6.7429713419996915,False,fpr<*>=<*> <*>fc<*>af<*> d<*>d<*>bdbb <*>ddb<*>cdf,0,0,1,0
+902,0,,The format matches typical log entries without indicating an error.,True,5.829701632000251,False,fpr<*>=<*> <*> <*>dc<*>fe<*> <*>,0,0,2,0
+903,0,,The format matches typical log entries without indicating an error.,True,5.747648196999762,False,fpr<*>=<*> <*> <*>fa<*> <*>fe<*>dba<*>,0,0,1,0
+904,0,,The format matches typical log entries without indicating an error.,True,5.615637577000598,False,fpr<*>=<*> <*> a<*> bfbb<*>c<*>b,0,0,1,0
+905,0,,The format matches typical log entries.,True,4.840055932999348,False,fpr<*>=<*> <*> <*> <*>fe<*>c<*>eb,0,0,2,0
+906,0,,The format matches typical log entries without indicating an error.,True,5.259856226000011,False,fpr<*>=<*> <*> <*> <*>fa<*>,0,0,1,0
+907,0,,The log message format matches typical operation logs.,True,5.3525569439998435,False,fpr<*>=<*> <*>fd<*>da<*>e <*> <*>,0,0,1,0
+908,0,,The log message format matches typical operation logs.,True,5.49667231300009,False,fpr<*>=<*> <*>f<*>b<*>f <*> <*>,0,0,1,0
+909,1,,The log message contains unexpected characters and does not match the format of normal messages.,True,6.920245581999552,False,fpr<*>=<*> <*>edde <*> <*>,0,0,1,0
+910,1,,The log message contains unexpected hexadecimal values and seems to indicate a failure.,True,7.412612242999785,False,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,0,0,1,0
+911,0,,The format matches typical log entries without indicating an error.,True,6.427830640999673,False,fpr<*>=<*> <*> <*> <*>fbb<*>,0,0,1,0
+912,0,,The format matches typical log entries.,True,5.399979482999697,False,fpr<*>=<*> <*> c<*>e<*> bfb<*>bf<*>d,0,0,1,0
+913,0,,The format matches typical log entries without indicating an error.,True,5.905681658000503,False,fpr<*>=<*> <*> cb<*>f<*> bc<*>ae<*>,0,0,1,0
+914,0,,The log message format does not indicate an error or abnormal condition.,True,6.778503586000625,False,fpr<*>=<*> <*> fa<*>ad<*>f <*>fecfc<*>c,0,0,1,0
+915,0,,The log message format does not indicate an error or abnormal condition.,True,6.592150614000275,False,fpr<*>=<*> <*> <*> <*>fdb<*>d<*>,0,0,1,0
+916,0,,The format matches the normal example provided.,True,5.570151064000129,False,fpr<*>=<*> <*> <*> <*>c<*>c<*>,0,0,1,0
+917,0,,The format matches typical log entries without indicating an error.,True,6.361462424999445,False,fpr<*>=<*> <*> <*>e<*>c<*> <*>fed<*>,0,0,1,0
+918,1,,The log message contains unexpected characters and does not match the format of normal messages.,True,7.64733633600008,False,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,0,0,1,0
+919,0,,The log message format does not indicate an error or abnormal condition.,True,6.837152482999954,False,fpr<*>=<*> <*> <*>dd<*>f<*>b <*>bcf<*>,0,0,1,0
+920,0,,The format matches typical log entries.,True,5.911410391000572,False,fpr<*>=<*> <*> f<*>f<*>f <*>b<*>cafc,0,0,1,0
+921,0,,The format matches the normal example provided.,True,6.055476462000115,False,fpr<*>=<*> <*> <*>fba<*>c<*>d bfca<*>fcc,0,0,1,0
+922,0,,The log message format does not indicate an error or abnormal condition.,True,7.251508018000095,False,fpr<*>=<*> <*>fe<*>a<*>f<*> <*>d <*>fbbf<*>b<*>,0,0,1,0
+923,0,,The format matches typical log entries without indicating an error.,True,7.579360119000739,False,fpr<*>=<*> <*> <*> bc<*>dc<*>,0,0,1,0

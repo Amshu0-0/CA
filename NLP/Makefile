@@ -9,6 +9,8 @@ CONFIG ?= configs/bgl.yaml
 PY     ?= python
 # Output directory of the experiment in CONFIG (paths.output_dir).
 OUT    ?= outputs/bgl
+# LLM response cache (llm.cache_dir); every prompt and raw answer, one JSONL file per model.
+CACHE  ?= outputs/llm_cache
 
 .PHONY: help install data data-2k preprocess logbert logbert-train logbert-eval \
         rules rule-guided keyword compare analyze results demo test lint format smoke all
@@ -52,12 +54,15 @@ compare:         ## Comparison table of every evaluated method
 analyze:         ## Error analysis tables for the report
 	$(PY) scripts/analyze.py --config $(CONFIG)
 
-results:         ## Copy the deliverables (metrics, rules, analysis, LogBERT checkpoint) into results/
-	mkdir -p results/rules results/analysis results/logbert
+results:         ## Copy the deliverables (metrics, rules, decisions, analysis, checkpoint, LLM cache) into results/
+	mkdir -p results/rules results/rule_guided results/analysis results/logbert results/llm_cache
 	cp $(OUT)/results/* results/
-	-cp $(OUT)/rules/rules.md $(OUT)/rules/rules.json $(OUT)/rules/induction_summary.json results/rules/
+	-cp $(OUT)/rules/rules.md $(OUT)/rules/rules.json $(OUT)/rules/candidates.json \
+	    $(OUT)/rules/induction_summary.json results/rules/
+	-cp $(OUT)/rule_guided/*_decisions.csv results/rule_guided/
 	-cp $(OUT)/analysis/* results/analysis/
 	-cp $(OUT)/logbert/model.pt $(OUT)/logbert/history.json $(OUT)/logbert/*_tuning_grid.csv results/logbert/
+	-cp $(CACHE)/*.jsonl results/llm_cache/
 
 demo:            ## Launch the Gradio demo
 	$(PY) app/demo.py --config $(CONFIG)

@@ -1,0 +1,5 @@
+template_id,template,missed_windows
+206,<*> <*> <*> socket closed,19
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",7
+716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,3
+65,ciod: LOGIN <*> failed: <*> <*>,2

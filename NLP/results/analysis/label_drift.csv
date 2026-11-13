@@ -1,0 +1,3 @@
+template_id,template,n_train,n_train_anomalous,n_test,n_test_anomalous
+65,ciod: LOGIN <*> failed: <*> <*>,472,0,816,816
+34,data <*> <*>,84360,63488,79,1

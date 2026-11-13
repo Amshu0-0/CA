@@ -1,0 +1,117 @@
+error,template_id,template,n_test,n_test_anomalous,rule,reason
+false positive,569,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",27510,0,,Signal reception often indicates an issue.
+false positive,341,"ciod: Error loading <*> invalid or missing program image, Permission denied",13952,0,,Error loading with permission denied suggests a failure.
+false positive,342,ciod: generated <*> core files for program <*>,6062,0,,Log mentions generation of core files which usually indicates a crash or error.
+false positive,59,ciod: pollControlDescriptors: Detected the debugger died.,5603,0,,Mentioned debugger died
+false positive,10,"ciod: Error loading <*> invalid or missing program image, No such file or directory",4752,0,,Error loading invalid or missing program image
+false positive,16,ciod: LOGIN <*> failed: No such file or directory,3623,0,,"The log indicates a failure to find a file, which is an error condition."
+false positive,568,fpr<*>=<*> ffffffff <*> <*>,1329,0,,The log message contains an error or unexpected state indicated by 'fpr' and 'fffffff'.
+false positive,806,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,1024,0,,Error message indicates a failure to load a program image.
+false negative,65,ciod: LOGIN <*> failed: <*> <*>,816,816,,"The log message indicates a login attempt failure, which is a normal operational event."
+false positive,114,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,658,0,,VPD check failure indicates a mismatch that needs attention.
+false positive,111,Node card is not fully functional,585,0,,The message indicates a hardware issue.
+false positive,112,Can not get assembly information for node card,585,0,,"The message indicates a failure to get assembly information, which is unusual."
+false positive,113,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,583,0,,MPGOOD ERROR LATCH IS ACTIVE
+false positive,555,invalid <*>,390,0,,Unrecognized or invalid parameters are typically errors.
+false positive,187,"ciod: Error loading <*> program image too big, <*> > <*>",208,0,,Error messages indicate a problem.
+false positive,550,invalid operation exception <*>,195,0,,Invalid operation exception suggests a problem.
+false positive,77,capture first <*> <*> error address..<*>,156,0,,"Contains error and address information, suggesting a problem."
+false positive,558,minus <*>,130,0,,The log message does not follow any of the normal patterns and includes 'minus' which is unusual.
+false positive,79,<*> error detected in <*> <*>,130,0,,Error detected usually indicates a problem.
+false negative,20,machine <*> <*>,127,4,,The log message is a standard system report.
+false positive,26,d-cache <*> parity <*>,106,0,,d-cache parity error indicates a hardware issue
+false positive,23,data <*> plb <*>,106,0,,"The message contains 'data' followed by an error indicator, suggesting a problem."
+false positive,80,<*> error detected in EDRAM bank <*>,104,0,,EDRAM errors are typically indicative of hardware issues.
+false positive,280,Ido packet timeout,92,0,,Packet timeout suggests a network issue.
+false positive,25,<*> parity <*>,79,0,,Unusual log message indicating a parity error.
+false positive,81,parity error in <*> <*>,78,0,,Parity errors typically indicate hardware issues.
+false positive,82,parity error in read queue <*>,78,0,,parity errors indicate hardware issues
+false positive,552,underflow exception......................<*>,65,0,,Contains an exception which is typically indicative of a problem.
+false positive,554,inexact exception........................<*>,65,0,,Contains an exception which is typically indicative of a problem.
+false positive,553,divide-by-zero exception.................<*>,65,0,,Divide-by-zero exceptions are typically errors.
+false positive,551,overflow exception.......................<*>,65,0,,Overflow exceptions are typically errors.
+false positive,563,invalid operation exception (int cnvt)...<*>,65,0,,"Contains an invalid operation exception, which is unusual."
+false positive,564,enable invalid operation exceptions......<*>,65,0,,The log message mentions 'enable invalid operation exceptions' which is unusual and likely indicates an error.
+false positive,548,exception summary........................<*>,65,0,,New log messages about exceptions are often indicative of problems.
+false positive,449,data cache <*> parity error detected. attempting to correct,55,0,,Parity errors typically indicate hardware issues.
+false positive,24,tlb error.........................<*>,53,0,,TLB errors are typically indicative of hardware or software issues that need attention.
+false positive,27,imprecise machine check...........<*>,53,0,,Machine check errors are typically indicative of hardware issues.
+false positive,538,Machine Check Status Register: <*>,53,0,,MCS register errors are typically indicative of hardware issues.
+false negative,86,DDR <*> <*> register: <*> <*>,52,26,,The log message describes a normal operation related to DDR registers.
+false positive,701,fpr<*>=<*> <*> <*> <*>ffff<*>,46,0,,The log message contains unexpected hexadecimal values.
+false negative,206,<*> <*> <*> socket closed,37,37,,The message indicates a normal socket operation.
+false positive,100,uncorrectable error...<*>,26,0,,Contains uncorrectable error
+false positive,104,DDR failing data registers: <*> <*>,26,0,,DDR failing data registers suggests a hardware issue.
+false positive,99,miscompare............<*>,26,0,,New log messages indicating miscompare are typically errors.
+false positive,93,memory manager / command manager address parity..<*>,26,0,,"The log indicates an issue with address parity, which is unusual."
+false positive,102,qw trapped............<*>,26,0,,Unrecognized command or error message.
+false positive,142,program interrupt: <*> <*>,24,0,,Program interrupts are typically errors.
+false positive,717,ciod: Error creating node map from file my_map.txt: No such file or directory,24,0,,The file does not exist.
+false negative,571,Power Good signal deactivated: <*> A service action may be required.,15,15,,The message indicates a status change rather than an error.
+false positive,55,rts internal error,12,0,,rts internal errors are typically indicative of problems.
+false positive,703,fpr<*>=<*> <*> <*> <*>e<*>,12,0,,The log message contains an error related to file system operations.
+false positive,707,fpr<*>=<*> <*> <*>ffff<*> <*>,10,0,,The log message contains unexpected elements like 'ffff' which is not typical.
+false positive,145,data store interrupt caused by <*>,8,0,,"The message indicates an interrupt in the data store, which is unusual."
+false positive,218,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,8,0,,It contains an error message.
+false positive,259,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",8,0,,Error messages typically indicate issues.
+false positive,179,ciod: Unexpected eof at line <*> of node map file <*>,8,0,,Unexpected EOF suggests a file read error.
+false negative,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",8,8,,The log message describes a specific failure but does not indicate an abnormal termination or critical error.
+false positive,722,fpr<*>=<*> <*> <*> <*>fffffff,7,0,,The log message contains an error code 'fffffff' which is unusual.
+false positive,149,program interrupt: fp cr field .............<*>,4,0,,"Program interrupts, especially those involving floating point issues, are typically indicative of an abnormal condition."
+false positive,147,byte ordering exception.....................<*>,4,0,,Byte ordering exception is an error condition.
+false positive,610,Exception Syndrome Register: <*>,4,0,,Unusual log entry related to Exception Syndrome Register.
+false positive,850,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,3,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,337,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",3,0,,The log indicates an issue with rank steering that may require hardware replacement.
+false positive,869,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,3,0,,Contains error and bad message header
+false negative,716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,2,2,,The log message describes a specific failure but does not indicate an abnormal termination or critical error.
+false positive,209,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,2,0,,PGOOD and MPGOOD error latches are active.
+false positive,675,fpr<*>=<*> <*> <*>e<*>b<*> <*>,2,0,,The log message contains an error indicator 'ebe' which suggests a problem.
+false positive,690,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,2,0,,The log message contains unexpected characters and does not match the normal pattern.
+false positive,833,fpr<*>=<*> <*> <*> <*>fdfffff,2,0,,The log message contains unexpected characters and does not match the normal pattern.
+false positive,856,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,2,0,,The log message contains unexpected characters and seems to indicate an error.
+false positive,887,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,2,0,,The log message contains unexpected characters and seems to indicate an error.
+false positive,894,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,2,0,,"The log message contains unexpected patterns and multiple 'f' characters, which are not typical."
+false positive,836,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,2,0,,"The log message contains unexpected elements like 'fpr' and 'fee', which are not typical in normal operation logs."
+false positive,673,fpr<*>=<*> <*> b<*>eae bfdc<*>,2,0,,The log message contains unexpected and error-like patterns.
+false positive,635,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,2,0,,The log message contains unexpected patterns and error indicators.
+false positive,651,fpr<*>=<*> <*> <*> <*>ffe<*>,2,0,,"The log message contains an error related to a bad message header, which is similar to the abnormal examples provided."
+false positive,115,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,1,0,,Error sending message indicates a problem
+false positive,677,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,1,0,,Contains unexpected error codes and terminated messages
+false positive,682,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,1,0,,"The log message contains unexpected and fragmented text, suggesting an error."
+false positive,671,fpr<*>=<*> <*> a<*>b<*> c<*>eb,1,0,,The log message contains unexpected elements that do not match the normal patterns.
+false positive,657,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,1,0,,The log message contains unexpected segments and 'Error' indicative of a problem.
+false positive,626,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,1,0,,Contains unexpected error codes and does not match normal operation patterns.
+false positive,669,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,1,0,,"The log message contains unexpected and fragmented text, which is unusual for normal operation."
+false positive,684,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,1,0,,The log message contains unexpected characters and does not match the format of normal operation logs.
+false positive,738,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,1,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,732,fpr<*>=<*> <*> <*> fffffffa,1,0,,The log message contains an error code 'fffffffa' which is unusual.
+false positive,731,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,1,0,,"The log message contains unexpected and fragmented text, suggesting an error."
+false positive,730,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,1,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,729,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,1,0,,The log message contains unexpected characters and does not match the format of normal operation logs.
+false positive,723,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,1,0,,The log message contains unexpected patterns and appears to be an error.
+false positive,694,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,1,0,,"The log message contains unexpected and truncated characters, which is unusual."
+false positive,710,fpr<*>=<*> <*> <*> <*>a<*>aa,1,0,,The log message contains unexpected elements that do not match the normal patterns.
+false positive,797,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,1,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,795,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,1,0,,"The log message contains unexpected patterns and 'e' repeated multiple times, which is unusual."
+false positive,791,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,1,0,,"The log message contains unexpected and truncated words, suggesting an error."
+false positive,829,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,1,0,,The log message contains unexpected characters and does not match the normal pattern.
+false positive,779,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,1,0,,The log message contains unexpected and fragmented components that do not match the normal patterns.
+false positive,741,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,1,0,,The log message contains unexpected characters and seems to indicate a failure.
+false positive,772,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,1,0,,"The log message contains unexpected and fragmented text, suggesting an error."
+false positive,771,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,1,0,,The log message contains unexpected patterns and does not match any normal operation template.
+false positive,842,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,1,0,,The log message contains unexpected and error-like content.
+false positive,840,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,1,0,,"The log message contains unexpected and fragmented text, suggesting an error."
+false positive,838,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,1,0,,The log message contains unexpected patterns and errors.
+false positive,828,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,1,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,866,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,1,0,,The log message contains unexpected characters and seems to indicate an error.
+false positive,859,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,1,0,,The log message contains unexpected characters and does not match the format of normal messages.
+false positive,877,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,1,0,,The log message contains unexpected characters and does not match the normal patterns.
+false positive,857,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,1,0,,The log message contains error indicators and does not match normal operation patterns.
+false positive,886,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,1,0,,The log message contains unexpected characters and seems to indicate an error.
+false positive,891,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,1,0,,The log message contains unexpected characters and does not match the normal pattern.
+false positive,895,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,1,0,,The log message contains unexpected patterns and abbreviations.
+false positive,898,fpr<*>=<*> <*> <*> <*>bb<*>,1,0,,The log message contains unexpected elements like 'bb' which are not typical in normal operation logs.
+false positive,899,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,1,0,,The log message contains an error related to a bad message header.
+false positive,909,fpr<*>=<*> <*>edde <*> <*>,1,0,,The log message contains unexpected characters and does not match the format of normal messages.
+false positive,910,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,1,0,,The log message contains unexpected hexadecimal values and seems to indicate a failure.
+false positive,918,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,1,0,,The log message contains unexpected characters and does not match the format of normal messages.

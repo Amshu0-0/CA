@@ -1,0 +1,12 @@
+caught_by,group_windows,template_id,template,windows
+only LogBERT,10,206,<*> <*> <*> socket closed,7
+only LogBERT,10,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",3
+only llm_rule_based,21,573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",8
+only llm_rule_based,21,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",6
+only llm_rule_based,21,631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,3
+only llm_rule_based,21,281,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,1
+only llm_rule_based,21,258,<*> exited abnormally due to signal: Aborted,1
+neither,18,206,<*> <*> <*> socket closed,14
+neither,18,65,ciod: LOGIN <*> failed: <*> <*>,2
+neither,18,34,data <*> <*>,1
+neither,18,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1

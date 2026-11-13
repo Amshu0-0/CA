@@ -1,0 +1,473 @@
+template_id,template,label,cited_rule,cited_rule_occurs,cited_rule_label_agrees,keyword_rule,keyword_label,has_alert,n_messages,reason
+1,instruction cache parity error corrected,0,,False,False,,0,False,33547,No specific keyword phrases match the log message.
+6,"CE sym <*>, at <*>, mask <*>",0,1,False,True,,0,False,19837,Describes a state or condition without indicating an error.
+10,"ciod: Error loading <*> invalid or missing program image, No such file or directory",1,4,False,True,2,0,False,4752,Error loading program image indicates a failure
+13,idoproxydb has been started: $Name: <*> $ Input parameters: -enableflush -loguserinfo db.properties BlueGene<*>,0,18,True,True,2,0,False,26,has been started
+14,ciodb has been restarted.,0,18,False,True,,0,False,44,has been started
+16,ciod: LOGIN <*> failed: No such file or directory,1,4,False,True,,0,False,3623,indicates a system error or failure
+18,<*> TLB error interrupt,1,24,True,True,24,1,True,12,TLB error interrupt is typically abnormal
+19,instruction <*> <*>,0,1,False,True,,0,False,166,Describes normal system operations
+20,machine <*> <*>,0,30,False,True,,0,True,127,Describes a state or condition without indicating an error.
+23,data <*> plb <*>,0,1,False,True,,0,False,106,describes a state or condition without indicating an error
+24,tlb error.........................<*>,1,24,False,True,,0,False,53,contains 'tlb error interrupt'
+25,<*> parity <*>,0,,False,False,,0,False,79,No specific rule triggered.
+26,d-cache <*> parity <*>,0,,False,False,,0,False,106,No specific keyword phrases match the log message.
+27,imprecise machine check...........<*>,1,4,False,True,,0,False,53,contains 'machine check interrupt'
+29,<*> state <*>,0,30,False,True,,0,False,132,Describes a state or condition without indicating an error.
+30,<*> input interrupt enable...<*>,0,1,True,True,1,0,False,132,input interrupt enable is a normal system operation
+31,floating point <*> <*>,0,1,False,True,,0,False,66,Describes normal system operations
+32,floating pt ex mode <*> enable......<*>,0,1,False,True,,0,False,132,Describes a state or condition without indicating an error.
+33,debug <*> <*>,0,1,False,True,,0,False,132,Describes normal system operations
+34,data <*> <*>,0,1,False,True,,0,True,79,Describes normal system operations or status updates.
+36,disable <*> <*>,0,,False,False,,0,False,158,No specific keyword phrases trigger an abnormal condition.
+37,disable apu instruction broadcast........<*>,0,6,False,False,5,0,False,66,no keyword phrases from critical failure rules match
+38,guaranteed <*> cache block <*>,0,,False,False,,0,False,132,No specific keyword phrases trigger an alert.
+39,force load/store alignment...............<*>,0,,False,False,,0,False,66,No specific keyword phrases trigger an alert.
+40,icache prefetch <*>,0,1,False,True,,0,False,132,Describes a normal system operation
+48,rts panic! - stopping execution,1,7,True,True,6,1,True,68,contains 'rts panic! - stopping execution'
+55,rts internal error,1,7,False,True,,0,False,12,indicates a critical system failure
+59,ciod: pollControlDescriptors: Detected the debugger died.,1,11,False,True,,0,False,5603,Signals system or hardware issues that require attention.
+60,"ciod: for node <*>, <*> <*> <*> <*> <*> <*> <*>",0,,False,False,,0,False,38,No specific keyword phrases trigger an abnormal condition.
+65,ciod: LOGIN <*> failed: <*> <*>,0,,False,False,,0,True,816,No specific keyword phrases trigger an abnormal condition.
+66,machine check interrupt (bit=<*>): <*> <*> <*> <*>,1,3,True,True,3,1,True,7,machine check interrupt
+67,L<*> <*> <*> register: <*>,0,30,False,True,,0,False,78,Describes a state or condition without indicating an error.
+68,start <*>,0,18,False,True,,0,False,104,Signals the start of a process or service.
+69,close EDRAM pages as soon as possible....<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+70,size of <*> <*> <*> <*> (<*>M),0,1,False,True,,0,False,52,Describes normal system operations or status updates.
+71,disable all access to cache directory....<*>,0,2,True,True,2,0,False,26,log message related to normal operations
+72,write buffer commit threshold............<*>,0,1,False,True,,0,False,26,Describes a system state without indicating an error
+73,prefetch depth for <*> <*>,0,1,False,True,,0,False,78,Describes normal system operations
+74,max number of outstanding prefetches.....<*>,0,1,False,True,,0,False,26,Describes a state or condition without indicating an error.
+75,turn on hidden refreshes.................<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+76,disable write lines <*>:<*>..................<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+77,capture first <*> <*> error address..<*>,1,4,False,True,,0,False,156,contains 'terminated for reason'
+78,disable flagging of DDR UE's as major internal error.<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+79,<*> error detected in <*> <*>,0,,False,False,,0,False,130,No specific keyword phrases trigger an abnormal condition.
+80,<*> error detected in EDRAM bank <*>,1,4,False,True,,0,False,104,contains 'error detected' which is indicative of a system failure
+81,parity error in <*> <*>,1,24,False,True,,0,False,78,mentions 'parity error' which is indicative of a hardware issue
+82,parity error in read queue <*>,0,,False,False,,0,False,78,No specific keyword phrases match the log message.
+83,number of correctable errors detected in L<*> <*>,0,1,False,True,,0,False,52,describes a normal system operation
+84,interrupt threshold...<*>,0,1,False,True,,0,False,52,Describes normal system operations
+85,number of lines with parity errors written to L<*> EDRAMs...<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+86,DDR <*> <*> register: <*> <*>,0,1,False,True,,0,True,52,Describes normal system operations or status updates.
+87,memory and bus summary...........................<*>,0,1,False,True,,0,False,26,Describes normal system operations
+88,command manager unit summary.....................<*>,0,1,False,True,,0,False,26,Describes a state or condition without indicating an error.
+89,memory manager <*> <*>,0,1,False,True,,0,False,104,Describes normal system operations
+90,memory manager <*> <*> <*>,0,1,False,True,,0,False,104,Describes normal system operations or status updates.
+91,memory manager <*>,0,1,False,True,,0,False,52,Describes normal system operations
+92,state machine....................................<*>,0,30,False,True,,0,False,26,describes a state or condition without indicating an error
+93,memory manager / command manager address parity..<*>,1,16,False,True,,0,False,26,contains 'parityAlignment'
+94,regctl scancom interface.........................<*>,0,30,False,True,,0,False,26,machine state register: indicates a system state without error
+96,capture valid.........<*>,0,1,False,True,,0,False,26,Describes a state or condition without indicating an error.
+97,symbol................<*>,0,,False,False,,0,False,26,No specific keyword phrases match the log message.
+98,mask..................<*>,0,,False,False,,0,False,26,No specific keyword phrases match the log message.
+99,miscompare............<*>,0,1,False,True,,0,False,26,Describes a state or condition without indicating an error.
+100,uncorrectable error...<*>,1,4,False,True,,0,False,26,uncorrectable error
+101,correctable error.....<*>,0,1,False,True,,0,False,26,Describes a normal system operation
+102,qw trapped............<*>,0,1,False,True,,0,False,26,Describes a state or condition without indicating an error.
+103,chip select...........<*>,0,,False,False,,0,False,26,No specific keyword phrases trigger an alert.
+104,DDR failing data registers: <*> <*>,1,4,False,True,,0,False,26,contains 'terminated for reason'
+105,<*> <*>,0,,False,False,,0,False,78,No specific keywords matched.
+110,EndServiceAction <*> performed upon <*> by <*>,0,,False,False,,0,False,40,Log message describes a normal operation without indicating an error.
+111,Node card is not fully functional,0,17,True,True,17,0,False,585,not fully functional
+112,Can not get assembly information for node card,0,,False,False,,0,False,585,No specific keyword phrases match the log message.
+113,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,0,12,True,True,12,0,False,583,indicates a communication failure between nodes or services
+114,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,0,,False,False,2,0,False,658,No specific keyword phrases trigger an abnormal rule.
+115,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,1,9,False,True,2,0,False,1,contains 'terminated'
+138,Starting SystemController,0,18,False,True,,0,False,16,signals the start of a process or service
+140,Running as background command,0,,False,False,,0,False,16,Log message does not match any specific rule.
+142,program interrupt: <*> <*>,0,1,True,True,1,0,False,24,describes a normal system operation
+143,floating point operation....................<*>,0,1,False,True,,0,False,4,describes a normal system operation
+144,store operation.............................<*>,0,1,False,True,,0,False,4,describes a normal system operation
+145,data store interrupt caused by <*>,0,1,False,True,,0,False,8,Describes a normal system operation
+146,auxiliary processor.........................<*>,0,1,False,True,2,0,False,4,Describes a state or condition without indicating an error.
+147,byte ordering exception.....................<*>,0,6,False,False,5,0,False,4,byte ordering exception is a normal operational message
+148,program interrupt: fp cr update.............<*>,0,1,True,True,1,0,False,4,describes a normal system operation
+149,program interrupt: fp cr field .............<*>,0,1,True,True,1,0,False,4,describes a normal system operation
+155,external input interrupt (unit=<*> bit=<*>): <*> <*> <*> <*> <*> <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations
+160,Ido chip status changed: <*> ip=<*> v=<*> t=<*> status=M <*> <*> <*> <*>:<*>:<*> <*> <*>,0,1,False,True,,0,False,443,<*>:<*>eeeeeee
+179,ciod: Unexpected eof at line <*> of node map file <*>,1,14,False,True,,0,False,8,indicates abnormal termination
+187,"ciod: Error loading <*> program image too big, <*> > <*>",1,4,False,True,2,0,False,208,program image too big
+189,job <*> timed out. Block freed.,0,1,False,True,,0,False,36,Describes normal system operations
+193,ciod: <*> <*> <*> <*> <*> <*> <*> at line <*> of node map file <*>,0,,False,False,,0,False,24,No specific keyword phrases trigger an abnormal condition.
+206,<*> <*> <*> socket closed,0,,False,False,,0,True,37,No specific keyword phrases match the log message.
+209,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,0,,False,False,12,0,False,2,Log describes system status without indicating an error.
+218,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,1,11,False,True,,0,False,8,Signals system or hardware issues that require attention.
+219,shutdown complete,0,,False,False,,0,False,3,Log message does not match any specific rule and indicates a normal operation.
+220,"PrepareForService is being done on this Midplane (mLctn(R<*>-M<*>), <*> <*> by <*>",0,,False,False,,0,False,46,The log message describes a state or condition without indicating an error.
+221,PrepareForService is being done on this rack (R<*>) by <*>,0,,False,False,,0,False,2,No specific keyword phrases indicating an error or abnormal condition.
+226,ciod: In packet from node <*>.<*> <*> message code <*> is not <*> or <*> <*> <*> <*> <*>),0,,False,False,,0,False,9,No specific keyword phrases trigger an abnormal rule.
+258,<*> exited abnormally due to signal: Aborted,1,14,True,True,8,1,True,19,exited abnormally
+259,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",1,4,False,True,2,0,False,8,contains 'Error loading' and invalid image
+280,Ido packet timeout,0,,False,False,,0,False,92,No specific keyword matches the log message.
+281,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,1,26,True,True,26,1,True,2,connection lost
+282,ciod: Error reading message prefix after <*> on CioStream socket to <*>:<*>: <*> <*> <*> <*>,1,11,False,True,3,1,True,336,machine check interrupt
+305,"Node card VPD check: missing U<*> node, VPD ecid <*> in processor card slot J<*>",0,,False,False,2,0,False,2,No specific keyword phrases trigger an abnormal rule.
+309,Controlling BG/L rows [ <*> <*> <*> <*> <*> <*> <*> <*> ],0,1,False,True,,0,False,16,Describes normal system operations
+320,Lustre mount FAILED : bglio<*> : block_id : location,1,25,True,True,3,1,True,2210,contains 'lustre mount failed'
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",1,11,False,True,,0,True,8,machine check interrupt
+337,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",0,1,False,True,,0,False,3,Describes a normal system operation or status update.
+341,"ciod: Error loading <*> invalid or missing program image, Permission denied",1,4,False,True,2,0,False,13952,contains 'Error loading' and permission denied
+342,ciod: generated <*> core files for program <*>,0,1,False,True,2,0,False,6062,Describes a normal system operation
+348,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties <*> --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*>,0,18,True,True,2,0,False,9,has been started
+449,data cache <*> parity error detected. attempting to correct,0,,False,False,,0,False,55,No specific keyword phrases trigger an abnormal rule.
+475,L<*> major internal error,1,4,False,True,,0,True,2,contains 'terminated for reason'
+480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",0,,False,False,,0,True,1,No specific keyword phrases trigger an abnormal rule.
+481,ddr: activating redundant bit steering for next allocation: rank=<*> symbol=<*>,0,1,False,True,,0,False,225,Describes normal system operations
+528,BGLMaster has been started: ./BGLMaster --consoleip <*> --consoleport <*> --configfile bglmaster.init --autorestart y --db<*>profile /u/bgdb<*>cli/sqllib/db<*>profile --dbproperties db.properties,0,18,True,True,2,0,False,24,has been started
+529,"critical input interrupt (unit=<*> bit=<*>): warning for <*> <*> wire, suppressing further interrupts of same type",0,1,False,True,,0,False,3288,Describes normal system operations
+530,<*> tree receiver <*> in re-synch state event(s) (dcr <*>) detected over <*> seconds,0,1,False,True,,0,False,3003,Describes normal system operations
+531,<*> torus receiver <*> input pipe error(s) (dcr <*>) detected and corrected over <*> seconds,0,2,False,True,,0,False,2642,log message related to normal operations
+532,"<*> ddr error(s) detected and corrected on rank <*>, symbol <*> over <*> seconds",0,2,False,True,,0,False,9980,log message related to normal operations
+533,total of <*> ddr error(s) detected and corrected over <*> seconds,0,2,True,True,2,0,False,9959,log message related to normal operations
+534,<*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,0,2,False,True,,0,False,1412,log message related to normal operations
+538,Machine Check Status Register: <*>,1,3,False,True,,0,False,53,contains 'machine check interrupt'
+539,Machine State Register: <*>,0,30,True,True,5,0,False,66,Describes a state or condition without indicating an error.
+540,Core Configuration Register <*>: <*>,0,1,False,True,,0,False,66,Describes a state or condition without indicating an error.
+541,DDR failing info register: DDR Fail Info Register: <*>,0,1,False,True,,0,False,26,Describes a normal system operation or status update.
+542,<*> <*> Registers:,0,30,False,True,,0,False,196,Describes a state or condition without indicating an error.
+543,r<*>=<*> r<*>=<*> r<*>=<*> r<*>=<*>,0,30,False,True,,0,False,523,Describes a state or condition without indicating an error.
+544,lr=<*> cr=<*> xer=<*> ctr=<*>,0,30,False,True,,0,False,65,Describes a state or condition without indicating an error.
+545,msr=<*> dear=<*> esr=<*> fpscr=<*>,0,30,False,True,,0,False,65,Describes a state or condition without indicating an error.
+546,dbcr<*>=<*> dbsr=<*> ccr<*>=<*>,0,30,False,True,,0,False,65,Describes a state or condition without indicating an error.
+547,Floating Point Status and Control Register: <*>,0,,False,False,,0,False,65,No specific keyword phrases trigger an alert.
+548,exception summary........................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+549,enabled exception summary................<*>,0,,False,False,,0,False,65,No specific keyword phrases trigger an alert.
+550,invalid operation exception <*>,0,,False,False,,0,False,195,No specific rule triggered by 'invalid operation exception'.
+551,overflow exception.......................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+552,underflow exception......................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+553,divide-by-zero exception.................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+554,inexact exception........................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+555,invalid <*>,0,,False,False,,0,False,390,No specific rule triggered by 'invalid <*>'.
+556,fraction <*>,0,1,False,True,,0,False,130,Describes normal system operations
+557,quiet NaN................................<*>,0,,False,False,,0,False,65,No triggering keywords found.
+558,minus <*>,0,,False,False,,0,False,130,Log message does not contain any keyword from the rules.
+559,minus <*> <*>,0,,False,False,,0,False,130,No specific keyword phrases match the log message.
+560,plus <*>,0,,False,False,,0,False,130,No specific keyword phrases match the log message.
+561,plus <*> <*>,0,,False,False,,0,False,130,No specific keyword phrases match the log message.
+562,reserved.................................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+563,invalid operation exception (int cnvt)...<*>,0,,False,False,,0,False,65,The log message describes a state or condition without indicating an error.
+564,enable invalid operation exceptions......<*>,0,,False,False,,0,False,65,No specific keyword phrases match the log message.
+565,enable <*> <*>,0,,False,False,,0,False,325,No specific keyword phrases trigger an alert.
+566,round nearest............................<*>,0,1,False,True,,0,False,65,Describes normal system operations
+567,round toward <*>,0,1,False,True,,0,False,195,Describes normal system operations
+568,fpr<*>=<*> ffffffff <*> <*>,0,1,False,True,,0,False,1329,describes a state or condition without indicating an error
+569,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",1,8,False,True,,0,False,27510,contains 'terminated'
+570,<*> <*> <*> <*> <*> <*> <*> <*> <*> as part of Service Action <*>,0,,False,False,,0,False,732,No specific keyword phrases trigger an alert.
+571,Power Good signal deactivated: <*> A service action may be required.,1,26,False,True,,0,True,15,power deactivated
+572,<*> torus <*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,0,2,False,True,,0,False,279,log message related to normal operations
+573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",1,11,False,True,3,1,True,25325,machine check interrupt or power module status fault detected
+610,Exception Syndrome Register: <*>,0,30,False,True,,0,False,4,Describes a state or condition without indicating an error.
+611,fpr<*>=<*> <*> <*> <*>,0,1,False,True,,0,False,111,Describes normal system operations
+612,fpr<*>=<*> <*> <*> <*>fdc<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+613,fpr<*>=<*> <*> f<*>dd<*>f c<*>ba<*>,0,1,False,True,,0,False,1,describes normal system operations
+614,fpr<*>=<*> <*> <*> c<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+615,fpr<*>=<*> c<*>d<*> <*> <*>,0,1,False,True,,0,False,4,Describes normal system operations or status updates
+616,fpr<*>=<*> c<*>f<*>ed<*> b<*>f<*>a<*> <*>cbea,0,1,False,True,,0,False,1,<*>:<*>d<*>e<*>c<*>
+617,fpr<*>=<*> <*> <*> c<*>f<*>,0,1,False,True,,0,False,7,Describes normal system operations or status updates
+618,fpr<*>=<*> <*> <*>b<*> <*>,0,1,False,True,,0,False,7,Describes normal system operations
+619,fpr<*>=<*> <*>f<*>b<*> <*>b<*>fd c<*>fac,0,1,False,True,,0,False,1,<*>:<*>d<*>e<*>c<*>
+620,fpr<*>=<*> <*>c<*> <*> <*>,0,1,False,True,,0,False,14,Describes normal system operations or status updates
+621,fpr<*>=<*> <*> fe<*>a<*> c<*>b<*>ec,0,1,False,True,,0,False,1,Describes normal system operations
+622,fpr<*>=<*> <*> <*> c<*>a<*>,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+623,fpr<*>=<*> <*>e<*>be <*>f<*>d <*>d<*>f,0,1,False,True,,0,False,1,describes normal system operations
+624,fpr<*>=<*> c<*>a<*> <*> <*>,0,1,False,True,,0,False,3,Describes normal system operations
+625,fpr<*>=<*> c<*>dd<*> <*>c<*>f<*> bff<*>ea,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+626,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+627,fpr<*>=<*> <*>d<*>a <*> <*>,0,1,False,True,,0,False,2,describes a normal system operation
+628,fpr<*>=<*> c<*>ec <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+629,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties db.properties --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*> --shutdown-timeout <*>,0,18,True,True,2,0,False,18,has been started
+630,ciod: In packet from node <*>.<*> <*> message still ready for node <*> <*> <*> <*> <*>),0,,False,False,,0,False,2,No specific keyword phrases trigger an alert.
+631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,1,3,True,True,3,1,True,23,contains 'machine check interrupt'
+632,fpr<*>=<*> c<*>f<*> <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+633,fpr<*>=<*> <*> <*>de<*>d<*> <*>,0,1,False,True,,0,False,1,describes normal system operations
+634,fpr<*>=<*> <*> cb<*>ef<*> <*>cf<*>c,0,1,False,True,,0,False,1,Describes normal system operations
+635,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,0,1,False,True,,0,False,2,Describes normal system operations
+636,fpr<*>=<*> <*> <*> <*>fd<*>,0,1,False,True,,0,False,6,Describes normal system operations
+637,fpr<*>=<*> <*> <*>f<*> <*>,0,1,False,True,,0,False,4,Describes normal system operations or status updates
+638,fpr<*>=<*> <*> <*> c<*>b<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+639,fpr<*>=<*> bf<*>c<*> e<*>e <*>fc<*>d<*>,0,1,False,True,,0,False,1,describes normal system operations
+640,fpr<*>=<*> <*> <*> c<*>c<*>,0,1,False,True,,0,False,8,Describes normal system operations or status updates
+641,fpr<*>=<*> <*> <*> <*>c<*>,0,1,False,True,,0,False,16,Describes normal system operations or status updates
+642,fpr<*>=<*> <*> b<*>b<*> <*>,0,1,False,True,,0,False,2,Describes a state or condition without indicating an error.
+643,fpr<*>=<*> <*>f<*> <*> <*>,0,1,False,True,,0,False,10,Describes normal system operations or status updates
+644,fpr<*>=<*> <*> <*> <*>f<*>,0,1,False,True,,0,False,9,Describes normal system operations or status updates
+645,fpr<*>=<*> <*> <*> c<*>d<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+646,fpr<*>=<*> <*>eddf<*> ae<*>ee<*>be bfaf<*>cf,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+647,fpr<*>=<*> bfe<*>ae<*> d<*>bce c<*>b,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+648,fpr<*>=<*> c<*>fbc<*>d <*> <*>fd<*>f<*>,0,1,False,True,,0,False,1,Describes normal system operations
+649,fpr<*>=<*> <*> c<*>d<*>cf<*> <*>dfb<*>a,0,1,False,True,,0,False,2,matches rule 1 keywords
+650,fpr<*>=<*> <*> <*>e<*> <*>,0,1,False,True,,0,False,9,Describes normal system operations
+651,fpr<*>=<*> <*> <*> <*>ffe<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+652,fpr<*>=<*> <*> <*>c<*>a bb<*>a<*>,0,1,False,True,,0,False,1,describes a state or condition without indicating an error
+653,fpr<*>=<*> <*> <*> <*>b<*>d,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+654,fpr<*>=<*> <*> <*>dcda<*> bb<*>f<*>,0,1,False,True,,0,False,1,matches normal system operations
+655,fpr<*>=<*> c<*>a<*>b <*>c<*>d<*>fd <*>b<*>d<*>,0,1,False,True,,0,False,1,Describes normal system operations
+656,fpr<*>=<*> <*>ec<*>d<*> <*> <*>cb<*>e<*>,0,,False,False,,0,False,1,"{""label"": ""normal"", ""rule"": 1, ""reason"": ""<*>ec<*>d<*> <*> <*>cb<*>e<*>"" matches the pattern of normal system operations or status updates as described in rule 1.}"
+657,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,0,1,False,True,,0,False,1,Describes normal system operations
+658,fpr<*>=<*> <*> <*>aa<*>a <*>f<*>a,0,1,False,True,,0,False,1,Describes normal system operations
+659,fpr<*>=<*> <*> <*>b<*>e<*>c<*> bfd<*>fac<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+660,fpr<*>=<*> <*>e<*>ca<*> d<*>a<*>c<*> bfb<*>f<*>e,0,1,False,True,,0,False,1,matches rule 1 keywords
+661,fpr<*>=<*> bffe<*>d<*> d<*>a<*>c<*>c <*>fbd<*>d<*>,0,1,False,True,,0,False,1,describes normal system operations
+662,fpr<*>=<*> <*> df<*>abd<*> <*>fc<*>b<*>,0,1,False,True,,0,False,1,describes normal system operations
+663,fpr<*>=<*> <*> <*> <*>cb<*>,0,1,False,True,,0,False,3,Describes normal system operations
+664,fpr<*>=<*> <*> d<*>f<*>d<*>b <*>,0,2,False,True,,0,False,1,log message related to normal operations
+665,fpr<*>=<*> <*> <*>f<*>c c<*>c<*>cf,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+666,fpr<*>=<*> <*> cd<*>d<*>b<*> <*>d<*>b<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+667,fpr<*>=<*> <*> <*>c<*>ed bfd<*>fba<*>,0,1,False,True,,0,False,2,Describes normal system operations
+668,fpr<*>=<*> c<*>fba <*>a<*>b<*> bfb<*>ba,0,1,False,True,,0,False,1,Describes normal system operations or status updates.
+669,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+670,fpr<*>=<*> <*> <*>be<*>a <*>edf<*>,0,1,False,True,,0,False,1,Describes normal system operations
+671,fpr<*>=<*> <*> a<*>b<*> c<*>eb,0,1,False,True,,0,False,1,Describes normal system operations
+672,fpr<*>=<*> <*> <*>b<*>d<*> <*>db<*>d,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+673,fpr<*>=<*> <*> b<*>eae bfdc<*>,0,1,False,True,,0,False,2,matches normal system operations
+674,fpr<*>=<*> c<*>e<*> <*>ad<*>c<*> bfc<*>e<*>fa,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+675,fpr<*>=<*> <*> <*>e<*>b<*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+676,fpr<*>=<*> <*>fb<*>c<*>c <*>a<*>e<*>c <*>fb<*>b<*>,0,1,False,True,,0,False,1,<*>:<*>d<*>e<*>c<*>
+677,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+678,fpr<*>=<*> <*> a<*>c<*>cf <*>dc<*>,0,1,False,True,,0,False,1,Describes normal system operations
+679,fpr<*>=<*> <*> <*>fcd c<*>a<*>a,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+680,fpr<*>=<*> <*> f<*>c<*>bd <*>ba,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+681,fpr<*>=<*> <*> <*>cd<*>b<*>c bfb<*>b<*>,0,1,False,True,,0,False,2,<*>:<*>cd<*>b<*>c bfb<*>b<*>
+682,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,0,1,False,True,,0,False,1,matches normal system operations
+683,fpr<*>=<*> <*>f<*>ea<*>c <*>cc<*>a<*>c c<*>e<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+684,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+685,fpr<*>=<*> <*> <*> <*>fa<*>c<*>,0,1,False,True,,0,False,2,Describes normal system operations
+686,fpr<*>=<*> <*> f<*>b<*>c<*>fd bf<*>c<*>b<*>,0,1,False,True,,0,False,1,Describes normal system operations
+687,fpr<*>=<*> <*> <*> <*>b<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+688,fpr<*>=<*> <*> <*>a<*>c<*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+689,fpr<*>=<*> <*> <*> <*>ff<*>,0,1,False,True,,0,False,16,describes normal system operations
+690,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,0,1,False,True,,0,False,2,Describes normal system operations
+691,fpr<*>=<*> c<*>c<*>f<*>c <*>c<*>e<*>ce bf<*>a<*>,0,1,False,True,,0,False,1,<*>:<*>c<*>f<*>c <*>c<*>e<*>ce is a normal system operation
+692,fpr<*>=<*> <*> <*>a<*> <*>,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+693,fpr<*>=<*> <*> <*>d<*>ac<*>c bf<*>e<*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+694,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+695,fpr<*>=<*> <*> b<*>a<*>a<*>c <*>ee<*>f<*>,0,1,False,True,,0,False,1,Describes normal system operations
+696,fpr<*>=<*> <*> f<*>f<*>a<*>a <*>d<*>f<*>b,0,1,False,True,,0,False,1,Describes normal system operations
+697,fpr<*>=<*> <*> c<*>d<*>c<*>c <*>f<*>cf<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+698,fpr<*>=<*> <*> <*> <*>f<*>d<*>,0,1,False,True,,0,False,2,describes normal system operations
+699,fpr<*>=<*> c<*>c<*>ec <*>f<*>a bf<*>c<*>,0,1,False,True,,0,False,1,describes normal system operations
+700,fpr<*>=<*> <*> ea<*>dfa<*>e bf<*>ec<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+701,fpr<*>=<*> <*> <*> <*>ffff<*>,0,1,False,True,,0,False,46,Describes normal system operations or status updates.
+702,fpr<*>=<*> <*> <*> <*>d,0,1,False,True,,0,False,4,Describes normal system operations
+703,fpr<*>=<*> <*> <*> <*>e<*>,0,1,False,True,,0,False,12,Describes normal system operations or status updates
+704,fpr<*>=<*> <*>d <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations
+705,fpr<*>=<*> <*> <*> <*>ffff<*>c<*>,0,1,False,True,,0,False,10,Describes normal system operations or status updates.
+706,fpr<*>=<*> <*>cfaf<*> <*> <*>,0,1,False,True,,0,False,10,Describes normal system operations or status updates
+707,fpr<*>=<*> <*> <*>ffff<*> <*>,0,1,False,True,,0,False,10,Describes normal system operations or status updates
+708,fpr<*>=<*> <*>ffff<*> <*> <*>,0,1,False,True,,0,False,23,describes normal system operations
+709,fpr<*>=<*> <*> <*> <*>f<*>af,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+710,fpr<*>=<*> <*> <*> <*>a<*>aa,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+711,fpr<*>=<*> <*>e <*> <*>,0,1,False,True,,0,False,7,Describes normal system operations or status updates
+712,fpr<*>=<*> <*> <*> <*>a<*>a,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+713,fpr<*>=<*> <*> <*> <*>b<*>b,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+714,fpr<*>=<*> <*> <*> <*>c<*>c,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+715,fpr<*>=<*> <*>f <*> <*>,0,1,False,True,,0,False,4,Describes normal system operations
+716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,1,11,False,True,,0,True,2,machine check interrupt or power module status fault detected
+717,ciod: Error creating node map from file my_map.txt: No such file or directory,1,4,False,True,,0,False,24,Error creating node map from file
+718,fpr<*>=<*> <*> <*>d<*> <*>,0,1,False,True,,0,False,4,matches rule 1 keywords
+719,fpr<*>=<*> <*> <*> <*>a<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+720,fpr<*>=<*> <*>cd<*>f<*> <*>ff<*>a<*> <*>ffff<*>f<*>,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+721,fpr<*>=<*> <*>ffff<*>d<*> <*>ff<*>f<*> <*>ffff<*>b<*>,0,1,False,True,,0,False,1,describes normal system operations
+722,fpr<*>=<*> <*> <*> <*>fffffff,0,1,False,True,,0,False,7,Describes normal system operations
+723,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,0,1,False,True,,0,False,1,<*>:<*>d<*>f<*>c<*> is a normal keyword
+724,fpr<*>=<*> c<*>b <*>ec<*>c<*> bff<*>ed<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+725,fpr<*>=<*> bfed<*>fde <*>d<*>bbc<*> <*>fe<*>f,0,1,False,True,,0,False,1,matches rule 1 keywords
+726,fpr<*>=<*> <*>fdc<*> <*>c<*>ab bfec<*>f,0,1,False,True,,0,False,1,Describes normal system operations
+727,fpr<*>=<*> <*>ff<*>cd<*> c<*>b<*>d c<*>e<*>d,0,1,False,True,,0,False,1,matches rule 1 keywords
+728,fpr<*>=<*> c<*>cb<*>d <*>a<*>d<*>dd<*> c<*>aec,0,1,False,True,,0,False,1,Describes normal system operations
+729,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,0,1,False,True,,0,False,1,Describes normal system operations
+730,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+731,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+732,fpr<*>=<*> <*> <*> fffffffa,0,1,False,True,,0,False,1,describes a normal system operation
+733,fpr<*>=<*> <*>aaba <*>dc<*>a<*> <*>afc,0,1,False,True,,0,False,1,matches rule 1 keywords
+734,fpr<*>=<*> bff<*>ab <*>c<*>bc<*>e c<*>d<*>b,0,1,False,True,,0,False,1,Describes normal system operations
+735,fpr<*>=<*> <*> <*> c<*>e,0,1,False,True,,0,False,2,describes normal system operations
+736,fpr<*>=<*> <*> <*>c<*> <*>,0,1,False,True,,0,False,4,Describes normal system operations
+737,fpr<*>=<*> bff<*> <*> <*>,0,1,False,True,,0,False,3,Describes normal system operations
+738,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,0,1,False,True,,0,False,1,describes normal system operations
+739,fpr<*>=<*> <*>c<*>d<*> <*> <*>,0,1,False,True,,0,False,2,describes normal system operations
+740,fpr<*>=<*> bfea<*>f <*>fdbbf<*> bffcbf<*>a,0,,False,False,,0,False,1,No specific keyword phrases match the log message.
+741,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+742,fpr<*>=<*> bff<*>dec<*> <*>e<*>b<*>df<*> c<*>b<*>b,0,1,False,True,,0,False,1,matches the pattern for normal system operations
+743,fpr<*>=<*> <*>ff<*> <*> <*>,0,1,False,True,,0,False,6,describes normal system operations
+744,fpr<*>=<*> <*>ff<*>a<*> <*>da<*>ea<*> <*>b<*>c<*>,0,30,False,True,,0,False,1,matches the pattern of machine state register
+745,fpr<*>=<*> c<*> f<*>ccd<*> c<*>dfcf,0,1,False,True,,0,False,1,Describes normal system operations
+746,fpr<*>=<*> <*>be<*> <*>ac<*>b<*> <*>d<*>,0,1,False,True,,0,False,1,Describes normal system operations
+747,fpr<*>=<*> bfff<*> <*>b<*>f c<*>a,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+748,fpr<*>=<*> <*>e<*>f <*> <*>,0,1,False,True,,0,False,1,describes a normal system operation
+749,<*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,1,False,True,,0,False,135092,Describes normal system operations
+750,"<*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,1,False,True,,0,False,135092,Describes normal system operations or status updates.
+751,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,1,False,True,,0,False,4,Describes normal system operations or status updates.
+752,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,1,False,True,,0,False,4,describes normal system operations
+753,fpr<*>=<*> <*>aa<*> <*> <*>,0,1,False,True,,0,False,2,describes a normal system operation
+754,fpr<*>=<*> <*> <*> <*>fe<*>,0,1,False,True,,0,False,10,Describes normal system operations or status updates
+755,fpr<*>=<*> <*> <*>e<*>a<*> c<*>d<*>cb,0,1,False,True,,0,False,4,Describes normal system operations
+756,fpr<*>=<*> <*>d<*> <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+757,fpr<*>=<*> <*>fffff <*> <*>,0,1,False,True,,0,False,2,describes normal system operations
+758,"external input interrupt (unit=<*> bit=<*>): number of corrected SRAM errors has exceeded threshold, suppressing further interrupts of same type",0,1,False,True,,0,False,57,describes a normal system operation
+759,ddr: Suppressing further CE interrupts,0,1,False,True,,0,False,302,Describes normal system operations
+760,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,30,False,True,,0,False,22175,describes a state or condition without indicating an error
+761,fpr<*>=<*> bfb<*>a<*> a<*>aa<*>ac bfc<*>f<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+762,fpr<*>=<*> bfbaf<*>fe b<*>cf<*> bfc<*>d<*>c,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+763,fpr<*>=<*> bfcb<*>d e<*>cdf<*> <*>fcab<*>f<*>,0,1,False,True,,0,False,1,<*>:<*>d<*>c<*> matches rule 1
+764,fpr<*>=<*> bfa<*>c<*>c <*>a<*>e<*> <*>fc<*>e,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+765,fpr<*>=<*> <*>fe<*>b<*> <*>c<*>f<*>c<*> <*>fbcbeb<*>,0,1,False,True,,0,False,1,Describes normal system operations
+766,fpr<*>=<*> <*> <*>b <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+767,fpr<*>=<*> <*> <*>afb<*> <*>a,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+768,fpr<*>=<*> c<*>cdf<*> <*>c<*>a<*> bfcefc<*>,0,1,False,True,,0,False,1,Describes normal system operations
+769,fpr<*>=<*> c<*>cf<*>e <*> c<*>cd<*>,0,1,False,True,,0,False,1,describes normal system operations
+770,fpr<*>=<*> <*>b<*> <*> <*>,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+771,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,0,1,False,True,,0,False,1,Describes normal system operations
+772,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates.
+773,fpr<*>=<*> c<*>d <*>aef<*>ff c<*>ac<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+774,fpr<*>=<*> c<*>bc<*> ee<*>caaa <*>ff<*>af<*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+775,fpr<*>=<*> <*>a<*> <*> <*>,0,1,False,True,,0,False,6,Describes normal system operations or status updates
+776,fpr<*>=<*> <*> a<*>b<*>ace <*>e,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+777,fpr<*>=<*> bfc<*>b<*>d <*>cbfb<*> c<*>a<*>bc,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+778,fpr<*>=<*> <*> <*>f<*>e<*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+779,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,0,1,False,True,,0,False,1,Describes normal system operations
+780,fpr<*>=<*> c<*>c e<*>ca<*>f<*> c<*>f<*>a<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+781,fpr<*>=<*> <*>fd<*>fef<*> <*>e<*>c<*>de bfeb<*>ad<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+782,fpr<*>=<*> <*>ff<*>fbd<*> <*>c<*>decd bfeb<*>b<*>e,0,1,False,True,,0,False,1,matches rule 1 keywords
+783,fpr<*>=<*> bfe<*>cfc<*> <*>b<*>fa<*>d<*> bfe<*>cf<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates.
+784,fpr<*>=<*> <*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*>,0,1,False,True,,0,False,1,<*>:<*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*> matches rule 1
+785,fpr<*>=<*> <*> <*> bff<*>d<*>,0,1,False,True,,0,False,2,Describes normal system operations
+786,fpr<*>=<*> bdd<*>fe c<*>b<*>fb <*>df<*>dd<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+787,fpr<*>=<*> <*>df<*>ed <*>dc<*> <*>df<*>ce,0,1,False,True,,0,False,1,matches rule 1 keywords
+788,fpr<*>=<*> bdecab<*> fd<*>c<*> <*>df<*>ddff,0,1,False,True,,0,False,1,matches rule 1 keywords
+789,fpr<*>=<*> bdf<*>e<*>c bd<*>be<*>c <*>dff<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+790,fpr<*>=<*> <*> <*> <*>f<*>a<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+791,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,0,1,False,True,,0,False,1,describes normal system operations
+792,fpr<*>=<*> bef<*>e<*> cee<*>d<*> <*>f<*>a<*>e,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+793,fpr<*>=<*> bef<*> a<*>a<*>c<*> <*>f<*>a<*>e<*>b,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+794,fpr<*>=<*> <*> <*> bf<*>,0,1,False,True,,0,False,4,Describes normal system operations
+795,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,1,4,False,True,,0,False,1,contains 'terminated for reason'
+796,fpr<*>=<*> <*>e<*>fde<*>c <*>fee<*> be<*>bcf,0,1,False,True,,0,False,1,matches normal system operations
+797,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,0,1,False,True,,0,False,1,describes normal system operations
+798,fpr<*>=<*> be<*>bc<*> bd<*>ac<*>d be<*>ba<*>ec,0,1,False,True,,0,False,1,Describes normal system operations
+799,fpr<*>=<*> <*>e<*> <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+800,fpr<*>=<*> bed<*>f<*> b<*>fb<*> <*>edb<*>e<*>,0,1,False,True,,0,False,1,Describes normal system operations
+801,fpr<*>=<*> <*>ec<*>d fea<*>a <*>edb<*>b,0,1,False,True,,0,False,1,<*>ec<*>d fea<*>a <*>edb<*>b matches rule 1
+802,fpr<*>=<*> <*>edb<*>e <*>a<*>e <*>edb<*>bd,0,1,False,True,,0,False,1,<*>:<*>d<*>e<*>c<*>
+803,fpr<*>=<*> bed<*> <*>ec<*>cf<*> <*>ec<*>,0,1,False,True,,0,False,1,Describes normal system operations
+804,fpr<*>=<*> <*>ec<*>f<*> d<*>dbe<*>ae bed<*>,0,1,False,True,,0,False,1,matches normal system operations
+805,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,30,False,True,,0,False,2,machine state register: descriptions without indicating an error
+806,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,1,25,False,True,2,0,False,1024,mentions 'mount failed'
+807,fpr<*>=<*> <*>ffb<*> <*> <*>,0,1,False,True,,0,False,6,Describes normal system operations
+808,fpr<*>=<*> <*> d<*>d<*> <*>,0,2,False,True,,0,False,2,log message related to normal operations
+809,fpr<*>=<*> <*>fe<*>b<*>e<*> <*>a bcf<*>b<*>f,0,1,False,True,,0,False,1,Describes normal system operations
+810,fpr<*>=<*> <*>db<*> <*> <*>,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+811,fpr<*>=<*> <*> f<*> <*>,0,1,False,True,,0,False,2,Describes normal system operations
+812,fpr<*>=<*> <*> fffffe<*>a <*>,0,1,False,True,,0,False,3,Describes a normal system operation or status update.
+813,fpr<*>=<*> c<*>d<*>cb <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+814,fpr<*>=<*> bf<*>d<*>cb <*> <*>,0,1,False,True,,0,False,4,Describes normal system operations
+815,fpr<*>=<*> <*>c<*>a<*> <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+816,fpr<*>=<*> b<*>cac<*>bd <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+817,fpr<*>=<*> <*>c<*>cb<*> <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+818,fpr<*>=<*> bc<*>c<*>f<*> <*>ecc <*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+819,fpr<*>=<*> bc<*>cceb <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+820,fpr<*>=<*> bc<*>b<*> fa<*>c<*> <*>ce<*>,0,1,False,True,,0,False,1,Describes normal system operations
+821,fpr<*>=<*> bc<*>d<*> <*>decd<*> <*>cb<*>ddb,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+822,fpr<*>=<*> bc<*>f <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+823,fpr<*>=<*> bc<*>dd<*> <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+824,fpr<*>=<*> bc<*>ecf <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+825,fpr<*>=<*> bccac<*>e <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+826,fpr<*>=<*> <*>ce<*> <*>eab<*>e <*>cd<*>a<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+827,fpr<*>=<*> <*> <*>e<*>c<*>c<*> <*>fc<*>fc<*>b,0,1,False,True,,0,False,1,Describes normal system operations or status updates.
+828,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,0,1,False,True,,0,False,1,matches normal system operations
+829,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,0,1,False,True,,0,False,1,Describes normal system operations
+830,fpr<*>=<*> <*> <*>cd<*>b bfe<*>c<*>,0,1,False,True,,0,False,1,Describes normal system operations
+831,fpr<*>=<*> <*>a<*>f a<*>c<*> <*>f<*>ce<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+832,fpr<*>=<*> <*>b<*>d <*>d<*>d<*> <*>fc<*>c,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+833,fpr<*>=<*> <*> <*> <*>fdfffff,0,1,False,True,,0,False,2,Describes normal system operations or status updates.
+834,fpr<*>=<*> <*> add<*>a<*> <*>e<*>fbcd,0,1,False,True,,0,False,1,Describes normal system operations
+835,fpr<*>=<*> bfb<*>b<*> <*> bc<*>bfd<*>,0,1,False,True,,0,False,1,Describes normal system operations
+836,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+837,fpr<*>=<*> <*>f<*>f<*> <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+838,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,0,1,False,True,,0,False,1,describes normal system operations
+839,fpr<*>=<*> <*> a<*>e <*>f<*>e<*>a,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+840,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+841,fpr<*>=<*> <*>b<*>d<*> dfd<*>f <*>f<*>b,0,1,False,True,,0,False,1,Describes normal system operations
+842,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+843,fpr<*>=<*> fd<*> fcc<*>d<*>f<*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+844,fpr<*>=<*> bb<*>e<*> fcd<*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+845,fpr<*>=<*> e<*>cb<*> <*>cd<*> f<*>bde<*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+846,fpr<*>=<*> <*> ba<*>feeb<*> <*>fdff<*>c,0,,False,False,,0,False,1,No specific keyword phrases match the log message.
+847,fpr<*>=<*> <*> <*>bc<*>f<*>b <*>fdf<*>eff,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+848,fpr<*>=<*> <*> c<*>f<*>ff <*>fdef<*>e<*>,0,1,False,True,,0,False,1,Describes normal system operations
+849,fpr<*>=<*> <*> b<*>c<*> <*>,0,1,False,True,,0,False,2,Describes a state or condition without indicating an error.
+850,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,0,1,False,True,,0,False,3,matches normal system operations
+851,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",1,16,False,True,,0,True,1,contains 'rts: bad message header'
+852,fpr<*>=<*> bfd<*>c <*> <*>,0,1,False,True,,0,False,3,Describes normal system operations or status updates
+853,fpr<*>=<*> <*>ff<*>e f<*>a <*>fd<*>cb<*>c,0,1,False,True,,0,False,1,Describes normal system operations
+854,fpr<*>=<*> <*>ff<*>da<*> <*>b<*>e<*> <*>c<*>b<*>,0,1,False,True,,0,False,1,describes normal system operations
+855,fpr<*>=<*> <*>c<*>f a<*>f<*> <*>ff<*>af,0,1,False,True,,0,False,1,<*>:<*>ffaf describes a normal state update
+856,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,0,1,False,True,,0,False,2,matches rule 1 keywords
+857,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+858,fpr<*>=<*> <*>fe<*>e<*> <*> <*>,0,1,False,True,,0,False,2,Describes normal system operations
+859,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,0,1,False,True,,0,False,1,describes normal system operations
+860,fpr<*>=<*> <*>ba<*> <*> c<*>df<*>c,0,1,False,True,,0,False,1,matches normal system operations
+861,fpr<*>=<*> <*> abdb<*>b<*> <*>ffd<*>f<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+862,fpr<*>=<*> <*> c<*>a <*>f<*>ed<*>,0,1,False,True,,0,False,1,describes normal system operations
+863,fpr<*>=<*> <*> ace<*>f<*> <*>eb<*>b,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+864,fpr<*>=<*> <*> cf<*>aacc<*> bf<*>a<*>d<*>,0,1,False,True,,0,False,1,Describes normal system operations
+865,fpr<*>=<*> <*> f<*>b<*>a<*>f<*> <*>fdb<*>c<*>e,0,1,False,True,,0,False,1,Describes normal system operations
+866,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+867,fpr<*>=<*> <*> <*>caf bfe<*>dfed,0,1,False,True,,0,False,3,Describes normal system operations
+868,fpr<*>=<*> <*> c<*>b<*>bc<*> bfc<*>d<*>,0,1,False,True,,0,False,1,Describes normal system operations
+869,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,0,1,False,True,,0,False,3,Describes normal system operations
+870,fpr<*>=<*> <*> <*> bc<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+871,fpr<*>=<*> <*> <*>f<*>c<*>f <*>f<*>c,0,1,False,True,,0,False,1,Describes normal system operations
+872,fpr<*>=<*> <*> d<*>ee<*>f <*>a<*>c<*>,0,1,False,True,,0,False,1,describes normal system operations
+873,fpr<*>=<*> <*> <*>cc<*> <*>f<*>fd<*>,0,1,False,True,,0,False,2,Describes normal system operations
+874,fpr<*>=<*> bfdc<*>b<*> <*>e<*>f<*> <*>ef<*>f<*>b<*>,0,1,False,True,,0,False,1,<*>:<*>eeeeeee
+875,fpr<*>=<*> bfe<*>b<*> <*>da<*>e <*>f<*>d<*>a<*>,0,1,False,True,,0,False,1,describes a state or condition without indicating an error
+876,fpr<*>=<*> bfdc<*>b<*>a <*> <*>,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+877,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,0,1,False,True,,0,False,1,Describes a state or condition without indicating an error.
+878,fpr<*>=<*> <*>fa <*>e<*>b<*>fae <*>,0,1,False,True,,0,False,1,Describes normal system operations
+879,fpr<*>=<*> <*> <*>bb<*>c <*>ff<*>df,0,1,False,True,,0,False,1,Describes normal system operations
+880,fpr<*>=<*> <*> <*> bff<*>,0,1,False,True,,0,False,5,Describes normal system operations
+881,fpr<*>=<*> <*>fbdb<*>a<*> <*>abca beb<*>e<*>b,0,1,False,True,,0,False,1,Describes normal system operations
+882,fpr<*>=<*> <*>c <*>ed<*>e <*>e<*>f<*>a,0,1,False,True,,0,False,1,matches rule 1 keywords
+883,fpr<*>=<*> <*>fb <*>fdd<*>d<*> <*>d<*>c<*>,0,1,False,True,,0,False,1,matches keywords for normal system operations
+884,fpr<*>=<*> <*> <*>ddf<*> <*>f<*>c<*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+885,fpr<*>=<*> <*> <*>bea<*>c<*> <*>c<*>ab,0,1,False,True,,0,False,1,<*>:<*>bea<*>c<*> is a normal keyword
+886,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+887,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,0,1,False,True,,0,False,2,matches normal system operations
+888,fpr<*>=<*> <*> a<*>ffca<*> <*>cfc<*>f,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+889,fpr<*>=<*> <*> <*>c<*>eda<*> <*>fea<*>a,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+890,fpr<*>=<*> <*>cf<*> <*> <*>,0,1,False,True,,0,False,1,describes a normal system operation
+891,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+892,fpr<*>=<*> bf<*> e<*>a<*>cb<*> <*>f<*>ce<*>d,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+893,fpr<*>=<*> <*> <*> bfe<*>,0,1,False,True,,0,False,3,Describes normal system operations
+894,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+895,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,0,1,False,True,,0,False,1,Describes normal system operations
+896,fpr<*>=<*> <*> d<*>f<*>a<*>fc <*>f<*>d,0,1,False,True,,0,False,3,Describes normal system operations
+897,fpr<*>=<*> <*> <*> bfd<*>,0,1,False,True,,0,False,2,Describes normal system operations
+898,fpr<*>=<*> <*> <*> <*>bb<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+899,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+900,fpr<*>=<*> <*> <*>a<*>a <*>,0,1,False,True,,0,False,2,Describes normal system operations or status updates
+901,fpr<*>=<*> <*>fc<*>af<*> d<*>d<*>bdbb <*>ddb<*>cdf,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+902,fpr<*>=<*> <*> <*>dc<*>fe<*> <*>,0,1,False,True,,0,False,2,matches rule 1 keywords
+903,fpr<*>=<*> <*> <*>fa<*> <*>fe<*>dba<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+904,fpr<*>=<*> <*> a<*> bfbb<*>c<*>b,0,1,False,True,,0,False,1,Describes normal system operations
+905,fpr<*>=<*> <*> <*> <*>fe<*>c<*>eb,0,1,False,True,,0,False,2,matches rule 1 keywords
+906,fpr<*>=<*> <*> <*> <*>fa<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+907,fpr<*>=<*> <*>fd<*>da<*>e <*> <*>,0,1,False,True,,0,False,1,describes normal system operations
+908,fpr<*>=<*> <*>f<*>b<*>f <*> <*>,0,1,False,True,,0,False,1,Describes normal system operations
+909,fpr<*>=<*> <*>edde <*> <*>,0,1,False,True,,0,False,1,matches rule 1 keywords
+910,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,0,1,False,True,,0,False,1,<*>:<*>ffd<*> fffffffc describes a normal system state
+911,fpr<*>=<*> <*> <*> <*>fbb<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+912,fpr<*>=<*> <*> c<*>e<*> bfb<*>bf<*>d,0,1,False,True,,0,False,1,Describes normal system operations
+913,fpr<*>=<*> <*> cb<*>f<*> bc<*>ae<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+914,fpr<*>=<*> <*> fa<*>ad<*>f <*>fecfc<*>c,0,1,False,True,,0,False,1,Describes normal system operations
+915,fpr<*>=<*> <*> <*> <*>fdb<*>d<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+916,fpr<*>=<*> <*> <*> <*>c<*>c<*>,0,1,False,True,,0,False,1,Describes normal system operations
+917,fpr<*>=<*> <*> <*>e<*>c<*> <*>fed<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+918,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,0,1,False,True,,0,False,1,matches the pattern for normal system operations
+919,fpr<*>=<*> <*> <*>dd<*>f<*>b <*>bcf<*>,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+920,fpr<*>=<*> <*> f<*>f<*>f <*>b<*>cafc,0,1,False,True,,0,False,1,Describes normal system operations or status updates
+921,fpr<*>=<*> <*> <*>fba<*>c<*>d bfca<*>fcc,0,1,False,True,,0,False,1,Describes normal system operations
+922,fpr<*>=<*> <*>fe<*>a<*>f<*> <*>d <*>fbbf<*>b<*>,0,1,False,True,,0,False,1,Describes normal system operations
+923,fpr<*>=<*> <*> <*> bc<*>dc<*>,0,1,False,True,,0,False,1,matches rule 1 keywords

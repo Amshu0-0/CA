@@ -1,0 +1,12 @@
+error,template_id,template,n_test,n_test_anomalous,rule,reason
+false negative,65,ciod: LOGIN <*> failed: <*> <*>,816,816,,no rule fired
+false negative,20,machine <*> <*>,127,4,,no rule fired
+false negative,34,data <*> <*>,79,1,,no rule fired
+false negative,86,DDR <*> <*> register: <*> <*>,52,26,,no rule fired
+false negative,206,<*> <*> <*> socket closed,37,37,,no rule fired
+false negative,571,Power Good signal deactivated: <*> A service action may be required.,15,15,,no rule fired
+false negative,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",8,8,,no rule fired
+false negative,475,L<*> major internal error,2,2,,no rule fired
+false negative,716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,2,2,,no rule fired
+false negative,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1,1,,no rule fired
+false negative,851,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",1,1,,no rule fired
