@@ -74,6 +74,19 @@ def keys_covered_by(template_ids: np.ndarray, windows) -> np.ndarray:
     return np.unique(template_ids[covered])
 
 
+# Keep the first copy of every distinct sequence, in their original order.
+# Arrays are compared by their raw bytes, so only exact duplicates collapse.
+def unique_sequences(sequences: list[np.ndarray]) -> list[np.ndarray]:
+    seen: set[bytes] = set()
+    unique = []
+    for sequence in sequences:
+        key = sequence.tobytes()
+        if key not in seen:
+            seen.add(key)
+            unique.append(sequence)
+    return unique
+
+
 # Select LogBERT's training material from the processed dataset.
 #
 # 1. Keep only *normal* windows of the training period (LogBERT is trained
@@ -81,7 +94,7 @@ def keys_covered_by(template_ids: np.ndarray, windows) -> np.ndarray:
 # 2. Hold out the chronologically last `dev_fraction` of them for early stopping.
 # 3. Build the vocabulary from all keys in normal training windows.
 # 4. Turn windows into sequences, dropping ones shorter than `min_len` keys,
-#    and optionally subsample the training sequences.
+#    optionally drop exact duplicates and subsample the training sequences.
 def prepare_training_data(logs: ProcessedLogs, config: LogBERTConfig, seed: int) -> TrainingData:
     windows = logs.windows_in("train")
     normal = windows[windows["label"] == 0].reset_index(drop=True)
@@ -99,6 +112,10 @@ def prepare_training_data(logs: ProcessedLogs, config: LogBERTConfig, seed: int)
     dev_sequences, _ = build_sequences(
         logs.template_ids, dev_windows, vocab, config.max_len, min_keys=config.min_len
     )
+
+    if config.dedupe_sequences:
+        train_sequences = unique_sequences(train_sequences)
+        dev_sequences = unique_sequences(dev_sequences)
 
     if config.max_train_sequences and len(train_sequences) > config.max_train_sequences:
         rng = np.random.default_rng(seed)

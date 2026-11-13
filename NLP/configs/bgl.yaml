@@ -48,6 +48,7 @@ logbert:
   max_len: 512                        # incl. <dist>; longer windows are chunked
   min_len: 10                         # skip shorter training windows (LogBERT)
   dev_fraction: 0.1                   # last 10% of normal train windows -> early stopping
+  dedupe_sequences: false             # true = keep one copy of identical chunks
   max_train_sequences: null           # e.g. 20000 for a quick CPU run
   mask_ratio: 0.5
   vhm_weight: 0.1                     # loss = MLKP + 0.1 * VHM

@@ -12,6 +12,7 @@ from logad.logbert.trainer import (
     keys_covered_by,
     load_checkpoint,
     prepare_training_data,
+    unique_sequences,
 )
 from logad.logbert.vocab import NUM_SPECIAL
 
@@ -21,6 +22,26 @@ def test_keys_covered_by() -> None:
     template_ids = np.array([5, 6, 7, 8, 9, 10])
     windows = pd.DataFrame({"start_idx": [0, 1], "end_idx": [2, 3]})  # covers 0..2
     assert keys_covered_by(template_ids, windows).tolist() == [5, 6, 7]
+
+
+# Only exact duplicates collapse, and the first copies keep their order.
+def test_unique_sequences() -> None:
+    a, b = np.array([2, 4, 5]), np.array([2, 5, 4])
+    kept = unique_sequences([a, b, a.copy(), np.array([2, 4, 5, 5]), b.copy()])
+    assert [s.tolist() for s in kept] == [[2, 4, 5], [2, 5, 4], [2, 4, 5, 5]]
+
+
+# With dedupe_sequences on, no training or dev sequence appears twice. The
+# periodic synthetic log repeats itself, so many windows collapse.
+def test_prepare_training_data_dedupe(processed_synthetic) -> None:
+    config, logs = processed_synthetic
+    plain = prepare_training_data(logs, config.logbert, seed=0)
+    config.logbert.dedupe_sequences = True
+    deduped = prepare_training_data(logs, config.logbert, seed=0)
+    for sequences in (deduped.train_sequences, deduped.dev_sequences):
+        assert len({s.tobytes() for s in sequences}) == len(sequences)
+    assert 0 < len(deduped.train_sequences) < len(plain.train_sequences)
+    assert deduped.vocab.keys == plain.vocab.keys
 
 
 # Only normal training windows are used, and the dev set is their time tail.

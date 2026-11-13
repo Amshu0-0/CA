@@ -115,6 +115,10 @@ class LogBERTConfig:
     # Chronologically last fraction of normal training windows held out for
     # early stopping (the labeled validation period is used for g / r only).
     dev_fraction: float = 0.1
+    # Keep one copy of byte-identical sequences. Overlapping windows and alert
+    # storms repeat the same keys, so on BGL most chunks are duplicates; this
+    # keeps every distinct pattern for a fraction of the compute.
+    dedupe_sequences: bool = False
     # Randomly subsample training sequences (e.g. for quick CPU runs); null = all.
     max_train_sequences: int | None = None
     # --- objective ---

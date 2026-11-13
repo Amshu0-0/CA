@@ -3,9 +3,10 @@
 #
 # Same data, split, windows and LogBERT architecture as configs/bgl.yaml. Only
 # the amount of LogBERT training is reduced so that it finishes in about an
-# hour: a random subsample of the normal training sequences and fewer epochs.
-# Results from this config are reported as a reduced-training run; on a GPU,
-# use configs/bgl.yaml instead.
+# hour and a half: duplicate sequences are dropped, the hypersphere centre is
+# estimated from fewer sequences, and fewer epochs run. Results from this
+# config are reported as a reduced-training run; on a GPU, use
+# configs/bgl.yaml instead.
 #
 #   python scripts/train_logbert.py --config configs/bgl_cpu.yaml
 #   python scripts/evaluate_logbert.py --config configs/bgl_cpu.yaml
@@ -20,8 +21,14 @@ paths:
   output_dir: outputs/bgl_cpu
 
 logbert:
-  max_train_sequences: 30000          # random subsample of normal training sequences
-  epochs: 8
+  # On full BGL, 35,035 normal training chunks hold only 12,394 distinct
+  # sequences (3.2M keys): overlapping windows repeat the same alert storms.
+  # Training on the distinct ones keeps every pattern at about 1/4 of the cost
+  # (measured on 4 cores: ~3,300 keys/s at length 512).
+  dedupe_sequences: true
+  max_train_sequences: null
+  center_samples: 4000                # centre re-estimated every epoch
+  epochs: 6
   patience: 3
   warmup_steps: 200
   device: cpu
