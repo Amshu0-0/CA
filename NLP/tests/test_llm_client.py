@@ -80,6 +80,7 @@ def test_create_client_errors(tmp_path: Path, monkeypatch) -> None:
 
 # Local OpenAI-compatible servers (Ollama, vLLM) work without an API key.
 def test_local_server_needs_no_key(tmp_path: Path, monkeypatch) -> None:
+    pytest.importorskip("openai")
     monkeypatch.delenv("MISSING_KEY_FOR_TEST", raising=False)
     config = LLMBackendConfig(
         model="qwen2.5:7b-instruct",
