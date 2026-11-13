@@ -7,9 +7,11 @@
 
 CONFIG ?= configs/bgl.yaml
 PY     ?= python
+# Output directory of the experiment in CONFIG (paths.output_dir).
+OUT    ?= outputs/bgl
 
 .PHONY: help install data data-2k preprocess logbert logbert-train logbert-eval \
-        rules rule-guided keyword compare analyze report-tables demo test lint format smoke all
+        rules rule-guided keyword compare analyze results demo test lint format smoke all
 
 help:            ## List the available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -49,6 +51,13 @@ compare:         ## Comparison table of every evaluated method
 
 analyze:         ## Error analysis tables for the report
 	$(PY) scripts/analyze.py --config $(CONFIG)
+
+results:         ## Copy the deliverables (metrics, rules, analysis, LogBERT checkpoint) into results/
+	mkdir -p results/rules results/analysis results/logbert
+	cp $(OUT)/results/* results/
+	-cp $(OUT)/rules/rules.md $(OUT)/rules/rules.json $(OUT)/rules/induction_summary.json results/rules/
+	-cp $(OUT)/analysis/* results/analysis/
+	-cp $(OUT)/logbert/model.pt $(OUT)/logbert/history.json $(OUT)/logbert/*_tuning_grid.csv results/logbert/
 
 demo:            ## Launch the Gradio demo
 	$(PY) app/demo.py --config $(CONFIG)
