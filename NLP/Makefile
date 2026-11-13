@@ -13,7 +13,7 @@ OUT    ?= outputs/bgl
 CACHE  ?= outputs/llm_cache
 
 .PHONY: help install data data-2k preprocess logbert logbert-train logbert-eval \
-        rules rule-guided keyword compare analyze results demo test lint format smoke all
+        rules rule-guided keyword compare analyze results restore demo test lint format smoke all
 
 help:            ## List the available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -63,6 +63,19 @@ results:         ## Copy the deliverables (metrics, rules, decisions, analysis, 
 	-cp $(OUT)/analysis/* results/analysis/
 	-cp $(OUT)/logbert/model.pt $(OUT)/logbert/history.json $(OUT)/logbert/*_tuning_grid.csv results/logbert/
 	-cp $(CACHE)/*.jsonl results/llm_cache/
+
+restore:         ## Copy the committed results/ back into $(OUT), e.g. to run the demo without retraining
+	@test ! -e $(OUT)/logbert/model.pt || { echo "$(OUT) already holds a run; pick another OUT=..."; exit 1; }
+	mkdir -p $(OUT)/results $(OUT)/rules $(OUT)/rule_guided $(OUT)/logbert $(CACHE)
+	cp results/*.json $(OUT)/results/
+	cp results/rules/* $(OUT)/rules/
+	cp results/rule_guided/* $(OUT)/rule_guided/
+	cp results/logbert/* $(OUT)/logbert/
+	@# Never overwrite an existing response cache: it may hold answers of other runs.
+	@for f in results/llm_cache/*.jsonl; do \
+	  if [ -e "$(CACHE)/$$(basename $$f)" ]; then echo "kept existing $(CACHE)/$$(basename $$f)"; \
+	  else cp "$$f" $(CACHE)/ && echo "copied $$f"; fi; \
+	done
 
 demo:            ## Launch the Gradio demo
 	$(PY) app/demo.py --config $(CONFIG)
