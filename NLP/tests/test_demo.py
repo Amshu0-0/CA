@@ -74,6 +74,7 @@ def test_inserted_alert_is_detected(engine: DemoEngine) -> None:
     assert "Without your line: 0 missed (normal)" in verdicts["A"].summary
     assert list(analysis.messages.columns[:3]) == ["#", "ground truth", "LogBERT"]
     assert verdicts["B4"].anomalous and "Rule #1" in verdicts["B4"].summary
+    assert "Your line: abnormal. Without your line: 0 flagged (normal)." in verdicts["B4"].summary
     row = analysis.messages[analysis.messages["#"].str.contains("your line")].iloc[0]
     assert row["ground truth"] == "KERNDTLB" and row["keyword"] == "abnormal"
 

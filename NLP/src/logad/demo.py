@@ -352,13 +352,25 @@ class DemoEngine:
         return verdicts
 
     # One Approach B verdict: flagged if any message is abnormal; explain the
-    # first flagged message (preferring the inserted one) and its rule.
+    # first flagged message (preferring the inserted one) and its rule. With an
+    # inserted line, also state the line's own label and what the window gets
+    # without it, as LogBERT's verdict does: on the full test period the
+    # context window may already contain (false) alarms of its own.
     def _summarize_b(
         self, name: str, decisions: list[TemplateDecision | None], inserted: int | None
     ) -> Verdict:
         flagged = [i for i, d in enumerate(decisions) if d is not None and d.label == 1]
+        note = ""
+        if inserted is not None:
+            own = decisions[inserted]
+            label = "no decision" if own is None else ("abnormal" if own.label else "normal")
+            others = sum(1 for i in flagged if i != inserted)
+            note = (
+                f" Your line: {label}. Without your line: {others} flagged "
+                f"({'already flagged' if others else 'normal'})."
+            )
         if not flagged:
-            return Verdict(name, True, False, "no message matched an abnormal rule")
+            return Verdict(name, True, False, f"no message matched an abnormal rule.{note}")
         focus = inserted if inserted in flagged else flagged[0]
         decision = decisions[focus]
         assert decision is not None
@@ -370,5 +382,5 @@ class DemoEngine:
             name,
             True,
             True,
-            f"{len(flagged)} message(s) flagged; message #{focus}{reason}.{rule}",
+            f"{len(flagged)} message(s) flagged; message #{focus}{reason}.{rule}{note}",
         )
