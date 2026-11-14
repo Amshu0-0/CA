@@ -1,0 +1,10 @@
+pipeline-viewer   can list pods?       yes
+pipeline-viewer   can delete pods?     no
+pipeline-operator can start a replay?  yes
+pipeline-operator can scale the API?   yes
+pipeline-operator can read secrets?    no
+processor pod     can read secrets?    no
+bootstrap Job     can create secrets?  yes
+bootstrap Job     can read secrets?    no
+bootstrap Job     can change secrets?  no
+bootstrap Job     can delete pods?     no

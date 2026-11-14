@@ -1,0 +1,22 @@
+kubectl get svc -A --field-selector spec.type!=ClusterIP     (every Service that is reachable from outside the cluster)
+NAMESPACE   NAME      TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+nlp         restapi   NodePort   10.43.216.241   <none>        8443:30080/TCP   60m
+
+Port check from this computer: 3 nodes x 11 ports (connection timeout 3 s)
+
+  port  what                                  server     agent-1    agent-2    
+  22    SSH                                   open       open       open       
+  2379  etcd                                  no answer  no answer  no answer  
+  6443  Kubernetes API                        open       no answer* no answer* 
+  8000  processor metrics                     no answer  no answer  no answer  
+  8443  REST API (container port)             no answer  no answer  no answer  
+  9092  Kafka                                 no answer  no answer  no answer  
+  10250 kubelet                               no answer  no answer  no answer  
+  27017 MongoDB                               no answer  no answer  no answer  
+  30080 REST API node port                    open       open       open       
+  30081 another node port                     no answer  no answer  no answer  
+  32767 last node port                        no answer  no answer  no answer  
+
+  * not judged: only the server runs the Kubernetes API, so the other machines have nothing to show on port 6443
+
+RESULT: PASS - on all 3 nodes only 22 (SSH), 6443 (Kubernetes API, server only), 30080 (REST API node port) answer; the other 8 ports are dropped

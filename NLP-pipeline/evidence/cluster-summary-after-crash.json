@@ -1,0 +1,57 @@
+{
+  "anomalous_windows": 116,
+  "detectors": {
+    "keyword": {
+      "f1": 0.9689,
+      "false_positive_rate": 0.0,
+      "fn": 7,
+      "fp": 0,
+      "name": "keyword rules (B4)",
+      "precision": 1.0,
+      "recall": 0.9397,
+      "tn": 278,
+      "tp": 109
+    },
+    "llm": {
+      "f1": 0.6768,
+      "false_positive_rate": 0.3633,
+      "fn": 5,
+      "fp": 101,
+      "name": "rule-guided LLM, saved decisions (B3)",
+      "precision": 0.5236,
+      "recall": 0.9569,
+      "tn": 177,
+      "tp": 111
+    },
+    "logbert": {
+      "f1": 0.5864,
+      "false_positive_rate": 0.554,
+      "fn": 4,
+      "fp": 154,
+      "name": "LogBERT, full coverage (A+)",
+      "precision": 0.4211,
+      "recall": 0.9655,
+      "tn": 124,
+      "tp": 112
+    }
+  },
+  "lines": {
+    "llm_has_no_saved_decision": 22,
+    "stored": 30000,
+    "template_not_known": 0,
+    "with_alert_tag": 8423
+  },
+  "logbert_ms_per_window": {
+    "max": 379.3,
+    "mean": 64.1,
+    "p95": 278.0
+  },
+  "run": {
+    "expected_lines": 30000,
+    "finished_at": 1794635016.1832454,
+    "run": "run-20261114-054234",
+    "started_at": 1794634955.2996874,
+    "status": "complete"
+  },
+  "windows": 394
+}

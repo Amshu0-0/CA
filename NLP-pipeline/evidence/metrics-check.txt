@@ -1,0 +1,45 @@
+NS=nlp KUBECTL=kubectl python3 scripts/metrics-check.py 
+Monitoring check (namespace nlp): asks Prometheus, Loki and Grafana from inside their pods
+
+[1/4] Prometheus reads every program
+      Prometheus says: Prometheus Server is Ready.
+      processor         1 of 1 targets up
+      restapi           2 of 2 targets up
+      kafka-exporter    1 of 1 targets up
+      mongodb-exporter  1 of 1 targets up
+      prometheus        1 of 1 targets up
+      producer          no pod right now (it exists only while a replay or a smoke test runs)
+
+[2/4] The numbers of the pipeline exist
+      processor ready (models loaded, Kafka and MongoDB connected)  1
+      messages the producer handed to Kafka (last 24 hours)         55211
+      consumer lag of the group processor, messages                 0
+      database writes per second (MongoDB's own count of inserts and updates)0
+      log lines stored by the processor since it started            0
+      windows scored by the processor since it started              0
+      windows flagged by LogBERT since it started                   no value (nothing to measure yet)
+      windows flagged by the rule-guided LLM since it started       no value (nothing to measure yet)
+      windows flagged by the keyword rules since it started         no value (nothing to measure yet)
+      LogBERT seconds per window, mean                              no value (nothing to measure yet)
+      REST requests per second                                      0.7833
+      REST server errors per second (status 5xx)                    0
+      REST latency, 95% of the answers faster than (seconds)        0.0431
+
+[3/4] Loki holds the logs of every program
+      Loki says: ready
+      programs with logs in Loki: alloy, bootstrap, grafana, kafka, kafka-exporter, loki, mongo, mongodb-exporter, processor, producer, prometheus, restapi
+      levels seen in the logs:    error, info, warning
+
+[4/4] Grafana has the dashboard and both data sources
+      health: database ok, version 11.3.0
+      dashboards found: NLP, NLP log pipeline
+      data source prometheus OK: Successfully queried the Prometheus API.
+      data source loki       OK: Data source successfully connected.
+
+Summary
+  PASS  prometheus every one of the 6 targets is up
+  PASS  numbers    all 13 numbers exist
+  PASS  loki       logs of 7 programs are in Loki, with level labels
+  PASS  grafana    the dashboard is loaded and both data sources answer
+
+RESULT: PASS - 4 of 4 monitoring checks passed

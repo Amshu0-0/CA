@@ -1,0 +1,36 @@
+NS=nlp KUBECTL=kubectl TERRAFORM=terraform python3 scripts/smoke-test.py 
+Smoke test: one tagged log line through the whole pipeline (namespace nlp)
+
+[1/6] The stack is running
+      kafka-0 and mongo-0 are ready; 1 processor pod and 2 REST API pods are ready
+
+[2/6] Send one log line with a unique trace id
+      trace id: smoke-1114-054202-4ec2
+      the producer pod finished after 8 s and printed:
+        {"ts":"2026-11-14T05:42:05.421+00:00","level":"info","service":"producer","msg":"sent","trace_id":"smoke-1114-054202-4ec2","topic":"system-logs","partition":0,"offset":30002}
+      Kafka stored the message in partition 0 at offset 30002 of topic system-logs
+
+[3/6] Kafka holds it
+      read back from partition 0, offset 30002 with kafka-console-consumer:
+        {"trace_id": "smoke-1114-054202-4ec2", "kind": "smoke", "line": "APPSEV 1132912056 2005.11.25 R51-M0-N4-I:J18-U01 2005-11-25-<public-ip>...", "...": "0 more fields"}
+      topic system-logs: 1 partition(s), replication factor 1, 30003 messages in total (30003)
+
+[4/6] The processor read it, ran the detectors and stored it
+      [pod/processor-8bcb898bf-tjdp4/processor] {"ts":"2026-11-14T05:42:05.423+00:00","level":"info","service":"processor","msg":"stored","trace_id":"smoke-1114-054202-4ec2","topic":"system-logs","partition":0,"offset":30002,"template_id":573,"keyword":1,"llm":1}
+      it is the same partition and offset that the producer was told
+      the detectors said: template 573, keyword rules 1, saved LLM decision 1
+      consumer group processor: partition 0 at 30003 of 30003 (behind: 0)
+
+[5/6] MongoDB holds the line
+      1 line with this trace id: {"trace_id": "smoke-1114-054202-4ec2", "run": "smoke", "smoke": true, "template_id": 573, "truth": "APPSEV", "alert": 1, "keyword": 1, "llm": 1, "content": "ciod: Error reading message prefix on CioStream socket to 172.16.96.11...", "...": "8 more fields"}
+      the collection holds 30002 lines in total
+
+[6/6] The REST API returns it to this computer
+      GET /events/smoke-1114-054202-4ec2    (HTTPS, node port 30080 of the server; the login is read from the Secret restapi-login, the password is not printed)
+      the same request with curl:  curl -s --cacert ca.crt --resolve restapi.nlp.test:30080:<server-public-ip> -u USER:PASSWORD https://restapi.nlp.test:30080/events/smoke-1114-054202-4ec2   (README: Calling the API)
+      answer: HTTP 200
+        {"found": true, "event": {"trace_id": "smoke-1114-054202-4ec2", "run": "smoke", "smoke": true, "template_id": 573, "truth": "APPSEV", "alert": 1, "keyword": 1, "llm": 1, "content": "ciod: Error reading message prefix on CioStream socket to 172.16.96.11...", "...": "8 more fields"}}
+      GET /stats  ->  HTTP 200 {"collection":"events","collections":{"events":30002,"runs":1,"windows":394},"database":"nlp","documents":30002}
+
+RESULT: PASS - line smoke-1114-054202-4ec2 went producer -> Kafka (partition 0, offset 30002) -> processor (detectors) -> MongoDB -> REST API in 30 s
+        To follow the same line through the logs of every program (needs the monitoring):  make logs-trace TRACE=smoke-1114-054202-4ec2

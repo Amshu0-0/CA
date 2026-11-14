@@ -1,0 +1,39 @@
+kubectl context: nlp-k3s   (kubeconfig: /Users/<user>/Desktop/CA/NLP-pipeline/.secrets/kubeconfig.yaml)
+kubectl -n nlp delete job producer-replay --ignore-not-found --wait=true && \
+    kubectl apply -f producer/job-replay.yaml && \
+    echo "The producer is sending the replay file to Kafka (about a minute). Waiting for it..." && \
+    ( kubectl -n nlp wait --for=condition=complete job/producer-replay --timeout=900s || \
+      { echo "The producer Job did not finish. Its log:"; kubectl -n nlp logs job/producer-replay -c producer --tail=15; echo "Run:  make diagnose"; exit 1; } ) && \
+    echo "All lines are in Kafka. The processor is scoring the windows now (minutes). Waiting for it..." && \
+    NS=nlp KUBECTL=kubectl TERRAFORM=terraform python3 scripts/results.py --replay-job --wait 1800 --compare evidence/local-replay.json --json evidence/cluster-summary-after-crash.json
+job.batch "producer-replay" deleted from nlp namespace
+job.batch/producer-replay created
+The producer is sending the replay file to Kafka (about a minute). Waiting for it...
+job.batch/producer-replay condition met
+All lines are in Kafka. The processor is scoring the windows now (minutes). Waiting for it...
+Waiting for the processor to finish the replay run-20261114-054234 (up to 1800 s)...
+
+Replay run-20261114-054234   status: complete
+  log lines: 30000, of which with an alert tag (the ground truth): 8423
+  windows:   394, of which anomalous (they hold at least one alert line): 116
+  lines whose template Drain does not know: 0.  Lines for which the LLM has no saved decision (counted as not flagged): 22
+
+  detector                                  flagged     TP     FP     TN     FN  precision   recall      F1       FP rate
+  LogBERT, full coverage (A+)                   266    112    154    124      4      0.421    0.966   0.586         55.4%
+  rule-guided LLM, saved decisions (B3)         212    111    101    177      5      0.524    0.957   0.677         36.3%
+  keyword rules (B4)                            109    109      0    278      7      1.000    0.940   0.969          0.0%
+
+  LogBERT needed per window: 64.1 ms on average, 95% of the windows under 278.0 ms, the slowest 379.3 ms
+
+For comparison, the NLP project's report on its whole test period (5742 windows; results/comparison.csv). The replay file is a slice of that period, so the numbers differ:
+  LogBERT, full coverage (A+)              precision 0.184   recall 0.897   F1 0.305
+  rule-guided LLM (B3)                     precision 0.489   recall 0.943   F1 0.644
+  keyword rules (B4)                       precision 1.000   recall 0.915   F1 0.956
+
+The cluster built exactly the windows that the NLP code expects from the replay file: 394 windows, 116 anomalous, 8423 alert lines.
+
+The cluster and your computer (evidence/local-replay.json) give the same numbers for every detector.
+
+The summary is saved in evidence/cluster-summary-after-crash.json
+
+RESULT: PASS - the replay run-20261114-054234 is complete

@@ -1,0 +1,37 @@
+NS=nlp KUBECTL=kubectl TERRAFORM=terraform python3 scripts/results.py --run run-20261114-053508 --windows 10 --compare evidence/local-replay.json
+
+Replay run-20261114-053508   status: complete
+  log lines: 30000, of which with an alert tag (the ground truth): 8423
+  windows:   394, of which anomalous (they hold at least one alert line): 116
+  lines whose template Drain does not know: 0.  Lines for which the LLM has no saved decision (counted as not flagged): 22
+
+  detector                                  flagged     TP     FP     TN     FN  precision   recall      F1       FP rate
+  LogBERT, full coverage (A+)                   266    112    154    124      4      0.421    0.966   0.586         55.4%
+  rule-guided LLM, saved decisions (B3)         212    111    101    177      5      0.524    0.957   0.677         36.3%
+  keyword rules (B4)                            109    109      0    278      7      1.000    0.940   0.969          0.0%
+
+  LogBERT needed per window: 71.9 ms on average, 95% of the windows under 280.9 ms, the slowest 551.9 ms
+
+The first 10 windows that hold an alert line (the dataset says: anomalous). 1 = the detector flagged the window:
+  start (UTC)         lines  alert lines  LogBERT   LLM  keywords  missed keys
+  2005-11-25 09:43      248          233        1     1         1  244
+  2005-11-25 09:44      605          590        1     1         1  507
+  2005-11-25 09:45      956          941        1     1         1  507
+  2005-11-25 09:46     1049         1022        1     1         1  511
+  2005-11-25 09:48      801          789        1     1         1  511
+  2005-11-25 09:49      444          432        1     1         1  444
+  2005-11-25 09:50       93           81        1     1         1  93
+  2005-11-25 17:39      253          237        1     1         1  250
+  2005-11-25 17:40      609          593        1     1         1  507
+  2005-11-25 17:41      973          954        1     1         1  507
+
+For comparison, the NLP project's report on its whole test period (5742 windows; results/comparison.csv). The replay file is a slice of that period, so the numbers differ:
+  LogBERT, full coverage (A+)              precision 0.184   recall 0.897   F1 0.305
+  rule-guided LLM (B3)                     precision 0.489   recall 0.943   F1 0.644
+  keyword rules (B4)                       precision 1.000   recall 0.915   F1 0.956
+
+The cluster built exactly the windows that the NLP code expects from the replay file: 394 windows, 116 anomalous, 8423 alert lines.
+
+The cluster and your computer (evidence/local-replay.json) give the same numbers for every detector.
+
+RESULT: PASS - the replay run-20261114-053508 is complete

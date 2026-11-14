@@ -1,0 +1,38 @@
+NS=nlp KUBECTL=kubectl TERRAFORM=terraform python3 scripts/heal-check.py 
+Self-healing test: rest, processor, mongo, kafka
+
+[1/4] A REST API pod dies
+      deleting restapi-84d7b57fbd-87bqn while this computer calls GET /health every 0.4 seconds...
+      Kubernetes started a new pod (restapi-84d7b57fbd-822rm); both REST API pods are ready again 7 s after the delete
+      calls made meanwhile: 18, failed: 0
+
+[2/4] The processor is away, Kafka keeps the line
+      scaling the processor down to 0 pods...
+      with no processor running, the producer sent the line smoke-1114-054549-b489
+      Kafka stored it at partition 0, offset 60004
+      it is in Kafka (read back with kafka-console-consumer)
+      the REST API says: HTTP 404 (the line is not in MongoDB: nobody reads Kafka)
+      scaling the processor up to 1 pod...
+      HTTP 200: the new processor loaded the models, read the waiting line from Kafka and stored it, 9 s after it was started
+
+[3/4] MongoDB dies, the disk keeps the data
+      before: 60003 lines in MongoDB, the disk is pvc-5c574174-f690-4a72-a9c6-9c83e6864c1f (Bound)
+      deleting mongo-0...
+      a new mongo-0 is ready after 14 s, and it uses the disk pvc-5c574174-f690-4a72-a9c6-9c83e6864c1f (Bound)
+      after: 60003 lines; GET /events/smoke-1114-054549-b489 -> HTTP 200
+
+[4/4] Kafka dies, the log is on its disk
+      before: 60005 messages in topic system-logs, the disk is pvc-5df5194d-a3c9-4586-a35c-ec2c710e5027 (Bound)
+      deleting kafka-0...
+      a new kafka-0 is ready after 25 s, and it uses the disk pvc-5df5194d-a3c9-4586-a35c-ec2c710e5027 (Bound)
+      60005 messages in the topic
+      a new log line went through the restarted broker: partition 0, offset 60005
+      HTTP 200 from the REST API: producer, Kafka, processor, MongoDB and REST API all work again
+
+Summary
+  PASS  rest       one REST pod deleted, 2 ready again after 7 s, 0 of 18 calls failed
+  PASS  processor  a line sent while the processor was away reached MongoDB 9 s after the processor started
+  PASS  mongo      mongo-0 deleted, a new pod was ready after 14 s with the same disk, all 60003 lines still there
+  PASS  kafka      kafka-0 deleted, a new pod was ready after 25 s with the same disk and the same messages, and a new log line went all the way through
+
+RESULT: PASS - 4 of 4 recovery tests passed

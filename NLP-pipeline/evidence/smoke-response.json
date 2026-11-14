@@ -1,0 +1,22 @@
+{
+  "event": {
+    "alert": 1,
+    "component": "APP",
+    "content": "ciod: Error reading message prefix on CioStream socket to 172.16.96.116:54528, Link has been severed",
+    "keyword": 1,
+    "keyword_rule": 3,
+    "level": "FATAL",
+    "llm": 1,
+    "node": "R51-M0-N4-I:J18-U01",
+    "offset": 0,
+    "run": "smoke",
+    "seq": null,
+    "smoke": true,
+    "template": "ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",
+    "template_id": 573,
+    "trace_id": "smoke-1114-053436-91ac",
+    "truth": "APPSEV",
+    "ts": 1132912056
+  },
+  "found": true
+}

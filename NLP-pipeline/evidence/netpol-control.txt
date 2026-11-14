@@ -1,0 +1,8 @@
+NS=nlp KUBECTL=kubectl python3 scripts/netpol-check.py --control
+NetworkPolicy test: 25 policies in namespace nlp, control experiment
+
+Clean-up: no probe pod and no namespace nlp-intruder left
+
+RESULT: FAIL
+  - no pod is ready behind the Service producer-metrics, so the test could not see an open connection to it. Run:  make status   (and  make diagnose  if a pod is stuck)
+make: *** [netpol-control] Error 1
