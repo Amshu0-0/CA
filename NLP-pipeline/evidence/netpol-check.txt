@@ -1,8 +1,18 @@
 NS=nlp KUBECTL=kubectl python3 scripts/netpol-check.py
 NetworkPolicy test: 25 policies in namespace nlp
+Traceback (most recent call last):
+  File "/Users/<user>/Desktop/CA/NLP-pipeline/scripts/netpol-check.py", line 412, in <module>
+    leave_out([t[0] for t in TARGETS if t[0] in OPTIONAL and not has_ready_pod(t[1])])
+                                                                 ~~~~~~~~~~~~~^^^^^^
+  File "/Users/<user>/Desktop/CA/NLP-pipeline/scripts/netpol-check.py", line 175, in has_ready_pod
+    return any(e.get("conditions", {}).get("ready") is not False for s in slices for e in s.get("endpoints", []))
+  File "/Users/<user>/Desktop/CA/NLP-pipeline/scripts/netpol-check.py", line 175, in <genexpr>
+    return any(e.get("conditions", {}).get("ready") is not False for s in slices for e in s.get("endpoints", []))
+                                                                                          ~~~~~^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not iterable
 
 Clean-up: no probe pod and no namespace nlp-intruder left
 
 RESULT: FAIL
-  - no pod is ready behind the Service producer-metrics, so the test could not see an open connection to it. Run:  make status   (and  make diagnose  if a pod is stuck)
+  - the test itself broke (see the error above)
 make: *** [netpol-check] Error 1

@@ -113,7 +113,7 @@ cd NLP-pipeline
 make test
 ```
 
-166 tests, about half a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
+202 tests, under a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
 
 ### Step 3. The images (push, wait, make public)
 
@@ -179,27 +179,20 @@ The producer sends the 30,000 lines (about a minute), then the processor scores 
 
 It ends with `RESULT: PASS - the replay run-... is complete`. `make results` prints the same again at any time, for the newest replay or one named with `make results RESULTS_ARGS="--run run-..."`.
 
-### Kill the processor during a replay
+### Kill the processor during a replay (`make crash-test`)
 
-This is the check of the restart design: if the processor dies in the middle of a replay, the finished result must be the same as without the crash. Open two terminal windows.
-
-Window 1:
+This is the check of the restart design: if the processor dies in the middle of a replay, the finished result must be the same as without the crash.
 
 ```bash
 cd NLP-pipeline
-make replay RESULTS_ARGS="--compare evidence/local-replay.json"
+make crash-test 2>&1 | tee evidence/crash-test.txt
 ```
 
-Window 2, as soon as window 1 says that the producer is sending (within the first 30 seconds):
+The program starts a replay, waits until the processor has stored 8,000 of the 30,000 lines, and then kills the processor pod at once (`kubectl delete pod --grace-period=0 --force`: no warning and no goodbye to Kafka, which is what a crash looks like). It prints where the consumer group had committed its offset, waits for the new pod, waits for the end of the replay, and prints the table of `make results` compared with your computer. `make crash-test CRASH_ARGS="--kill-after 12000"` kills later. A replay is over in about a minute and a half, so killing by hand in a second window is a race: the first try on the real cluster (13 November 2026) came after the replay had ended and proved nothing, which is why the program does it.
 
-```bash
-cd NLP-pipeline
-KUBECONFIG=.secrets/kubeconfig.yaml kubectl -n nlp delete pod -l app.kubernetes.io/name=processor
-```
+Kubernetes starts a new processor pod (the Deployment uses `Recreate`, so there is never a moment with two). It needs a minute or two to load the models. The producer keeps sending, and Kafka holds the lines. The new processor continues where the old one stopped: it commits a Kafka offset only after the documents are written, and never past the oldest line that an open window still needs, so Kafka hands those lines out again; the documents have fixed ids, so writing them a second time changes nothing; and LogBERT's masks are seeded by the position of the chunk in the window, so a window scored again gets the same answer. Expected, at the end: the same three rows as the replay without the crash (109, 212 and 266 windows flagged), `The cluster and your computer (evidence/local-replay.json) give the same numbers for every detector`, and `RESULT: PASS - the processor was killed after N lines of run-...`. `processor_redelivered_lines_total` (Prometheus, and *delivered twice (skipped)* in the panel *Lines that needed care* of the dashboard) counts the lines that Kafka handed out again after a restart and that the processor skipped.
 
-Kubernetes starts a new processor pod (the Deployment uses `Recreate`, so there is never a moment with two). It needs a minute or two to load the models. The producer keeps sending, and Kafka holds the lines. The new processor continues where the old one stopped: it commits a Kafka offset only after the documents are written, and never past the oldest line that an open window still needs, so Kafka hands those lines out again; the documents have fixed ids, so writing them a second time changes nothing; and LogBERT's masks are seeded by the position of the chunk in the window, so a window scored again gets the same answer. Expected: window 1 ends with the same numbers as the replay without the crash, no window missing and none twice. `processor_redelivered_lines_total` (Prometheus, and *delivered twice (skipped)* in the panel *Lines that needed care* of the dashboard) counts the lines that Kafka handed out again after a restart and that the processor skipped.
-
-`tests/test_restart.py` crashes the processor at every possible place against fakes of Kafka and MongoDB and compares the result with an uninterrupted run. That proves the logic. The check above is the same thing on the real cluster.
+`tests/test_restart.py` crashes the processor at every possible place against fakes of Kafka and MongoDB and compares the result with an uninterrupted run. That proves the logic. `make crash-test` is the same thing on the real cluster; `tests/test_crash_test.py` tests the program itself (when it kills, and that it never kills a replay that is already over).
 
 ### Step 7. The checks
 
@@ -209,7 +202,7 @@ Run them after `make replay`, in this order, from the folder `NLP-pipeline`:
 |---|---|---|
 | `make rest-check` | The REST API answers from this computer on all three nodes, HTTPS only, login required | `RESULT: PASS - 3 of 3 nodes answered correctly ...` |
 | `make metrics-check` | Prometheus, Loki and Grafana receive the numbers and the logs, and the dashboard is loaded | `RESULT: PASS - N of N monitoring checks passed` |
-| `make netpol-check` | 169 real connections (13 kinds of pod, 13 targets) behave as the NetworkPolicies say | `RESULT: PASS - all 169 connections behave as the policies say` |
+| `make netpol-check` | 169 real connections (13 kinds of pod, 13 targets) behave as the NetworkPolicies say. The producer is a Job, so its metrics port (13 of the 169) exists only during a replay; when none runs, that column is left out, the report says so, and the count is 156 | `RESULT: PASS - all 169 connections behave as the policies say` (156 when no replay runs) |
 | `make netpol-control` | The same test with the policies deleted, then put back: proves the policies do the blocking | `RESULT: PASS - without the policies every connection worked ...` |
 | `make heal-check` | Delete a REST pod, MongoDB and Kafka, and stop and start the processor, one at a time; each comes back and no data is lost. Do not run it during a replay | `RESULT: PASS - 4 of 4 recovery tests passed` |
 | `make exposure-check` | Only the intended ports of the machines answer from this computer | `RESULT: PASS - on all 3 nodes only ... answer` |
@@ -301,7 +294,7 @@ What it does not cover (the same list as CA3, which also says why):
 3. **LogBERT in the cluster is not bit-for-bit the offline evaluation.** In the NLP project's evaluation all chunks of all windows go through one call, and the random mask of a chunk is seeded by `(seed, the number of the chunk in that call)`. The processor scores one window per call, so a chunk is numbered inside its window and gets another random mask. Model, g, r, mask ratio and seed are the same, but the verdicts of some windows can differ from the report. The check that counts is `make results` with `--compare`, which compares the cluster with the same program on your computer.
 4. **One processor, no scaling.** The speed of a replay is set by LogBERT on two CPUs per pod and by `LINES_PER_SECOND` (500). A bigger replay file takes proportionally longer, and there is no way to add a second reader.
 5. **One Kafka broker and one MongoDB, no replication.** Their disks are `local-path` volumes on one machine: a pod can be replaced without losing data, a machine cannot. `make heal-check` deletes pods, not machines.
-6. **Nothing on the cluster side had been run on a cluster when this was written (13 November 2026).** It is described from the files and checked by tests with fakes. `evidence/` holds the output of whatever was run since (see *Testing and verification*).
+6. **The cluster side has run once, on 13 and 14 November 2026.** The smoke test, two replays, the REST, monitoring, healing, exposure and rights checks passed on a real cluster (see *Testing and verification* and `evidence/`). Not run on a cluster yet: the NetworkPolicy checks after their fix, `make crash-test`, a fresh deploy of version 1.0.1 and the teardown.
 7. **Terraform's state is local** (`infra/terraform/`, ignored by Git) and holds the administrator's address. If it is lost, `terraform destroy` cannot find the resources; the cleanup scan asks AWS and not the state file, so it still can.
 8. **Only a Mac was the operator's computer** in CA3; Linux and Windows were not tried.
 
@@ -311,15 +304,22 @@ The state when this was written, 13 November 2026. What was run later is in `evi
 
 | What | How | Where it was run |
 |---|---|---|
-| The programs: windows, restart after a crash at every point, sink, producer, REST API, results tables, export of the bundle, the image workflow, the dashboard, the consistency checks | `make test`: 166 tests, about 25 seconds | Claude's sandbox, with fakes for Kafka and MongoDB. **Run it on your computer too (Step 2)** |
+| The programs: windows, restart after a crash at every point, the processor's start-up, sink, producer, REST API, results tables, export of the bundle, the image workflow, the dashboard, the consistency checks | `make test`: 202 tests, under a minute | Claude's sandbox, with fakes for Kafka and MongoDB. **Run it on your computer too (Step 2)** |
 | The files agree with each other (images and tags, ports, settings, Secrets, NetworkPolicies against Services, Prometheus targets, rights, names used by the scripts, evidence free of addresses) | `make verify`: 13 checks, each shown to fail on 25 deliberate mistakes | Claude's sandbox, with the built-in manifest reader (no `kubectl` there). **Run it on your computer: it then uses `kubectl kustomize`** |
 | The detectors on the replay file | `make local-replay` | The author's Mac, 13 November 2026 (`evidence/local-replay.json`). It needs the processed folder of the run that the models come from (Step 1) |
 | Manifests against the Kubernetes schemas | `make validate` (needs `kubeconform`) | Not yet |
-| Images, cluster, stack, smoke test, replay, restart under a replay, REST API, monitoring, NetworkPolicies, healing, teardown | Steps 3 to 8 | **Not run yet.** Save the output in `evidence/` as you go (`evidence/README.md` says how) |
+| The images, the cluster and the stack | `make check-images`, `make cluster-up`, `make up` | The author's Mac and AWS, 13 November 2026: the three packages are public; 19 resources made and 3 nodes `Ready`; every part of the stack started except the processor, which stopped at its start-up (fixed in 1.0.1, see below) |
+| Smoke test and replay | `make smoke`, `make replay` (Steps 5 and 6) | The author's Mac and AWS, 13 and 14 November 2026: **passed**, twice. One line went through all five stages in 26 to 30 s. The replay (30,000 lines, 394 windows, 116 anomalous, 8,423 alert lines) gave the same numbers as `make local-replay` for every detector, LogBERT included: 266, 212 and 109 windows flagged. LogBERT needed 64 to 72 ms per window on two CPUs |
+| REST API, monitoring, healing, exposure, rights | `make rest-check`, `metrics-check`, `heal-check`, `exposure-check`, `rbac-check` | The same days: **all passed** (3 of 3 nodes; 4 of 4 monitoring checks; 4 of 4 recovery tests; only ports 22, 6443 and 30080 answer; ten rights as they must be). The output is in `evidence/` |
+| NetworkPolicies | `make netpol-check`, `make netpol-control` | First run: **both stopped** with `no pod is ready behind the Service producer-metrics`: the producer is a Job, and the check had been written for CA3, where it ran all the time. Fixed in this version (the column is left out when no replay runs; `tests/test_netpol_check.py`). **Run again and replace the two files in `evidence/`** |
+| Restart under a replay | `make crash-test` | The first try, by hand, came after the replay had ended. Replaced by a program that kills at the right moment. **Not run yet** |
+| Teardown | Step 8 | **Not run yet** |
 
 The first run on the author's Mac (13 November 2026) found three things that the sandbox could not: the default processed folder was not the one the models come from (see Step 1), a refused export had left a mix in `bundle/` (fixed: the files are checked before they are put in place), and 7 of the 156 tests failed because of the tests' own mistakes, not the programs': four depended on whether `bundle/` held the real export, three ran a step of the workflow with the Mac's bash 3.2, which does not know `${var,,}`. All three are fixed and have tests of their own; the suite now also fails if a test touches the real `bundle/`.
 
-**Not tested** (at the time of writing): the `.dockerignore` allowlists under the real image builder; the GitHub workflow; the CPU PyTorch image; a real Kafka, MongoDB and k3s; whether MongoDB counts the processor's upserts as `update` operations (the dashboard and `make metrics-check` count `insert|update`); whether Prometheus finds every number the dashboard asks for (`make metrics-check` checks it); LogBERT's verdicts on ARM against x86; the speed of a replay; and everything under *Known limitations*.
+The first run on the cluster (the same day) found one more mistake, in the processor: it stopped at its start-up when the topic `system-logs` did not exist yet. Kafka makes a topic when the first message is sent, so a processor that starts before the producer sees a topic that is not there yet; the Kafka library in the image says so with an empty set, and the check of the processor took the empty set for a topic with the wrong number of partitions. The pod stopped after four seconds and Kubernetes started it again and again (`CrashLoopBackOff`). No test went through the start-up (`main()` in `processor/processor.py`), only through the loop. Fixed in version 1.0.1: a topic that does not exist yet is waited for; a topic with more than one partition still stops the processor. `tests/test_processor_main.py` now runs the start-up against stand-ins for Kafka, MongoDB and the models; it fails on the code of version 1.0.0 and passes on the fixed code.
+
+**Not tested** (at the time of writing; the image builder, the workflow, the CPU PyTorch image, k3s, and the start of Kafka and MongoDB with TLS have run since, see the table): the `.dockerignore` allowlists under the real image builder; the GitHub workflow; the CPU PyTorch image; a real Kafka, MongoDB and k3s; whether MongoDB counts the processor's upserts as `update` operations (the dashboard and `make metrics-check` count `insert|update`); whether Prometheus finds every number the dashboard asks for (`make metrics-check` checks it); LogBERT's verdicts on ARM against x86; the speed of a replay; and everything under *Known limitations*.
 
 ## If something does not work
 
@@ -335,6 +335,8 @@ The first run on the author's Mac (13 November 2026) found three things that the
 | A pod is in `ImagePullBackOff` | The same: the package is private, or the tag in the manifest is not one that was pushed. `make verify` checks the tags against `VERSION` |
 | The cluster runs an old model after you exported again | The image tag did not change, so a node kept its copy. Change `VERSION` and the tag in the five manifests together (`make images-info` lists them), push, and wait for the build |
 | `make up` stops with an error | Read the first error. Then `make diagnose` (read-only: states, events, logs). It is safe to run `make up` again |
+| The processor is in `CrashLoopBackOff` and `make logs` shows `the topic must have exactly one partition` with `"partitions":0` | Version 1.0.0 only: the topic did not exist yet. Use version 1.0.1 or later (change `VERSION` as above), or create the topic once by hand and restart the processor: `KUBECONFIG=.secrets/kubeconfig.yaml kubectl -n nlp exec kafka-0 -c kafka -- sh -c 'kafka-topics --bootstrap-server 127.0.0.1:9094 --create --if-not-exists --topic system-logs --partitions 1 --replication-factor 1'`, then `kubectl -n nlp delete pod -l app.kubernetes.io/name=processor` |
+| The processor stops with `the topic must have exactly one partition` and a number of 2 or more | The topic was made with another number of partitions, and the windows need exactly one. `make down`, then `make up`, starts again without the old topic (all stored data is removed) |
 | The processor pod is `Running` but not ready for minutes | It is loading PyTorch and the models; `make logs` shows it. If it is killed with `OOMKilled`, `make diagnose` says so: the memory limit in `processor/processor.yaml` is too low for the window that it was scoring |
 | `make replay` says the producer Job did not finish | Its last log lines are printed above that message. Then `make diagnose` |
 | `make replay` waits and then says the replay is not complete | The processor is behind or stopped. `make status` and `make logs`. The numbers shown are those of the windows scored so far; `make results` prints them again later |

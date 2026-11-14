@@ -1,0 +1,51 @@
+NS=nlp KUBECTL=kubectl TERRAFORM=terraform python3 scripts/crash-test.py 
+Crash test: the processor is killed in the middle of a replay (namespace nlp)
+
+[1/5] The stack is running
+      the processor pod is processor-8bcb898bf-bzpkd
+
+[2/5] Start a replay
+      the producer started the replay run-20261114-065755 (it sends the replay file to Kafka for about a minute)
+
+[3/5] Wait until the processor has stored 8000 lines of it, then kill it
+      lines stored so far: 1256
+      lines stored so far: 4741
+      lines stored so far: 7612
+      killed processor-8bcb898bf-bzpkd with no warning (--grace-period=0 --force) when it had stored 8720 lines of run-20261114-065755
+      the consumer group has committed up to offset 68037; Kafka holds the topic up to offset 70849 (and the producer keeps sending)
+      the new processor starts at 68037: it reads those lines again, also the ones that the old pod had already stored, and writes them under the same ids
+
+[4/5] The new processor pod loads the models and goes on
+      processor-8bcb898bf-67gmz is ready 18 s after the kill
+
+[5/5] Wait for the end of the replay and compare it with your computer
+Waiting for the processor to finish the replay run-20261114-065755 (up to 1800 s)...
+  running: 16894 lines and 154 windows stored so far
+  running: 24108 lines and 307 windows stored so far
+
+Replay run-20261114-065755   status: complete
+  log lines: 30000, of which with an alert tag (the ground truth): 8423
+  windows:   394, of which anomalous (they hold at least one alert line): 116
+  lines whose template Drain does not know: 0.  Lines for which the LLM has no saved decision (counted as not flagged): 22
+
+  detector                                  flagged     TP     FP     TN     FN  precision   recall      F1       FP rate
+  LogBERT, full coverage (A+)                   266    112    154    124      4      0.421    0.966   0.586         55.4%
+  rule-guided LLM, saved decisions (B3)         212    111    101    177      5      0.524    0.957   0.677         36.3%
+  keyword rules (B4)                            109    109      0    278      7      1.000    0.940   0.969          0.0%
+
+  LogBERT needed per window: 67.1 ms on average, 95% of the windows under 288.9 ms, the slowest 319.7 ms
+
+For comparison, the NLP project's report on its whole test period (5742 windows; results/comparison.csv). The replay file is a slice of that period, so the numbers differ:
+  LogBERT, full coverage (A+)              precision 0.184   recall 0.897   F1 0.305
+  rule-guided LLM (B3)                     precision 0.489   recall 0.943   F1 0.644
+  keyword rules (B4)                       precision 1.000   recall 0.915   F1 0.956
+
+The cluster built exactly the windows that the NLP code expects from the replay file: 394 windows, 116 anomalous, 8423 alert lines.
+
+The cluster and your computer (evidence/local-replay.json) give the same numbers for every detector.
+
+The summary is saved in evidence/cluster-summary-after-crash.json
+
+Comparison: PASS - the replay run-20261114-065755 is complete
+
+RESULT: PASS - the processor was killed after 8720 lines of run-20261114-065755; a new pod finished the replay and the result is that of a replay without a crash

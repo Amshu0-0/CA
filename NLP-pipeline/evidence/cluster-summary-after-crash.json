@@ -42,15 +42,15 @@
     "with_alert_tag": 8423
   },
   "logbert_ms_per_window": {
-    "max": 379.3,
-    "mean": 64.1,
-    "p95": 278.0
+    "max": 319.7,
+    "mean": 67.1,
+    "p95": 288.9
   },
   "run": {
     "expected_lines": 30000,
-    "finished_at": 1794635016.1832454,
-    "run": "run-20261114-054234",
-    "started_at": 1794634955.2996874,
+    "finished_at": 1794639536.9189043,
+    "run": "run-20261114-065755",
+    "started_at": 1794639476.0901566,
     "status": "complete"
   },
   "windows": 394

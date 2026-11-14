@@ -26,6 +26,7 @@
 #   make validate      check every manifest against the Kubernetes schemas (needs no cluster)
 #   make verify        check that manifests, programs and cluster code agree with each other (needs no cluster)
 #   make netpol-check  test what each kind of pod can and cannot reach (the NetworkPolicy test)
+#   make crash-test    kill the processor in the middle of a replay and check that the finished result is the same
 #   make heal-check    delete pods on purpose and check that Kubernetes brings them back with their data
 #   make metrics-check ask Prometheus, Loki and Grafana if the numbers and the logs arrive and the dashboard is loaded
 #   make logs-trace    follow one trace id through the logs of every program (TRACE=<id>, the smoke test prints one)
@@ -58,6 +59,7 @@ NLP_CONFIG   ?= configs/bgl_cpu.yaml
 LOCAL_ARGS   ?=
 TRACE        ?=
 SCAN_ARGS    ?=
+CRASH_ARGS   ?=
 FILES        ?=
 
 # How long "make replay" waits for the producer to finish, and then for the processor to finish the windows (seconds).
@@ -73,7 +75,7 @@ export KUBECONFIG
 .DEFAULT_GOAL := help
 .PHONY: help validate verify test export-bundle local-replay check-images cluster-key cluster-check cluster-plan cluster-up cluster-status cluster-down \
     context up status get-all logs diagnose rbac-check rest-check exposure-check images-info down \
-    smoke replay results netpol-check netpol-control heal-check scan scrub teardown dry-run \
+    smoke replay results crash-test netpol-check netpol-control heal-check scan scrub teardown dry-run \
     metrics-check logs-trace grafana grafana-login prometheus
 
 help: ; @printf '%s\n' \
@@ -105,7 +107,8 @@ help: ; @printf '%s\n' \
     "  make diagnose        explain why a pod is not ready: states, events and logs (read-only)" \
     "  make exposure-check  show which ports of the nodes answer from this computer" \
     "  make rbac-check      prove the access rules with kubectl auth can-i" \
-    "  make netpol-check    test what each kind of pod can reach (169 connections, compared with the policies)" \
+    "  make crash-test      kill the processor in the middle of a replay and check that nothing is lost or changed (about 4 minutes)" \
+    "  make netpol-check    test what each kind of pod can reach (169 connections, 156 when no replay runs; compared with the policies)" \
     "  make netpol-control  the same test, then again with the policies deleted: proves the policies do the blocking" \
     "  make heal-check      delete pods on purpose and check that they come back with their data (run it when no replay is running)" \
     "  make metrics-check   ask Prometheus, Loki and Grafana if the numbers and logs arrive and the dashboard is loaded (run it after make replay)" \
@@ -264,6 +267,11 @@ replay: context ; $(KUBECTL) -n $(NS) delete job producer-replay --ignore-not-fo
 # What each detector said about the newest replay (or the one named with --run). It needs the stack and the REST API, and changes nothing.
 results: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/results.py $(RESULTS_ARGS)
 
+# The kill test: starts a replay, kills the processor when it has stored part of it, waits for the new pod and the end of the replay, and compares.
+# A replay is over in about a minute and a half, so the kill is made by the program (see the top of scripts/crash-test.py).
+crash-test: ; NS=$(NS) KUBECTL=$(KUBECTL) TERRAFORM=$(TERRAFORM) python3 scripts/crash-test.py $(CRASH_ARGS)
+
+# The producer is a Job, so its metrics port exists only during a replay: without a producer the table has 156 connections, not 169.
 netpol-check: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py
 
 netpol-control: ; NS=$(NS) KUBECTL=$(KUBECTL) python3 scripts/netpol-check.py --control

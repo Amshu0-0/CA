@@ -19,6 +19,11 @@
 # is created with an owner, its own namespace (the way the kubelet's mirror pods belong to their node): a controller leaves a pod alone that
 # already belongs to something else. Found on the first real run, where 12 of the 13 probes started and this one was gone after a second.
 #
+# One column needs more: the producer's metrics port 8001 (prod-metrics). The producer is a Job: its pod, and so the port behind the Service
+# producer-metrics, exists only while a replay or a smoke test runs. Without a pod behind a Service every connection to it fails whatever the
+# policies say, so "blocked" would prove nothing. When no producer runs, that column is left out of the table and the report says so. (Found on
+# the first real run: the check stopped with "no pod is ready behind the Service producer-metrics". It came from CA3, where the producer ran all the time.)
+#
 # The rules reach a new pod a few seconds after it starts, so an answer that is not the expected one is tried again for up
 # to --patience seconds before it counts, and the report says when that was needed.
 # The probe pods and the namespace nlp-intruder are removed at the end, also when the test fails.
@@ -65,6 +70,12 @@ MONITORING = [("prometheus", "prometheus", 9090), ("grafana", "grafana", 3000), 
               ("mongodb-exporter", "mongodb-exporter", 9216), ("prod-metrics", "producer-metrics", 8001), ("rest-metrics", "restapi-metrics", 9102)]
 TARGETS = PIPELINE + MONITORING
 
+# The targets that the control experiment tries (the stranger and the intruder against these nine).
+CONTROL_TARGETS = ["kafka", "mongo", "processor", "restapi", "prometheus", "grafana", "loki", "kafka-exporter", "mongodb-exporter"]
+
+# Targets that have a pod only some of the time (see the top of this file). They are tried when a pod is there and left out when it is not.
+OPTIONAL = ("prod-metrics",)
+
 # What the policies say should happen: the connections that must WORK. Every other connection in the tables must be blocked. A connection needs
 # two permissions: the sender needs an egress rule and the receiver needs an ingress rule. Everything is denied by default, except DNS (allow-dns-egress).
 OPEN = {
@@ -103,6 +114,19 @@ MEANING = [
 ]
 
 failed = []
+left_out = []  # the titles of the optional targets that were not tried because nothing listens behind them right now
+
+
+# Take targets out of the tables (the tables are the lists above and the expected answers; every other part of the script follows them).
+def leave_out(titles):
+    for table in (PIPELINE, MONITORING, TARGETS):
+        table[:] = [t for t in table if t[0] not in titles]
+
+    for answers in EXPECT.values():
+        for title in titles:
+            answers.pop(title, None)
+
+    left_out.extend(titles)
 
 
 def pod_manifest(short, namespace, labels):
@@ -285,7 +309,14 @@ def judge(done, expected, label="", why="the rules reach a new pod a few seconds
 def run_table(hosts, patience):
     print("\nStarting " + str(len(PROBES)) + " probe pods (busybox; one of them in the namespace " + INTRUDER_NS + ")...")
     start_probes([p[0] for p in PROBES])
-    print("Trying " + str(len(PROBES) * len(TARGETS)) + " connections (a blocked one can take up to 3 seconds to give up)...\n")
+    print("Trying " + str(len(PROBES) * len(TARGETS)) + " connections (a blocked one can take up to 3 seconds to give up)...")
+
+    if left_out:
+        print("Not tried: the producer's metrics port 8001 (" + ", ".join(left_out) + "). The producer is a Job and none is running, so nothing listens there and every\n"
+              "connection would fail whatever the policies say. The policy that governs it, producer-metrics-ingress (only Prometheus may connect), is not tested by this run;\n"
+              "that Prometheus can read the producer is shown by  make metrics-check  (the number of messages the producer handed to Kafka).")
+
+    print()
     done = run_probes(PROBES, hosts, EXPECT, patience)
     print("The pipeline (" + str(len(PROBES) * len(PIPELINE)) + " connections):")
     show(done, EXPECT, [t[0] for t in PIPELINE], hosts)
@@ -312,7 +343,7 @@ def run_table(hosts, patience):
 def run_control(hosts, policies):
     names = ("stranger", "intruder")
     probes = [p for p in PROBES if p[0] in names]
-    keep = ["kafka", "mongo", "processor", "restapi", "prometheus", "grafana", "loki", "kafka-exporter", "mongodb-exporter"]
+    keep = CONTROL_TARGETS
     with_policies = {n: {t: EXPECT[n][t] for t in keep} for n in names}
     without_policies = {n: {t: True for t in keep} for n in names}
     where = {t: hosts[t] for t in keep}
@@ -370,10 +401,15 @@ try:
     if problems:
         raise lib.Fail("the stack is not ready: " + ", ".join(problems) + ". Run:  make status")
 
-    silent = sorted({t[1] for t in TARGETS if t[1] and "." not in t[1] and not has_ready_pod(t[1])})
+    # The control experiment tries only its own targets. The table tries all of them, but a target that has a pod only some of the time is left out when it has none.
+    tried = [t for t in TARGETS if t[0] in CONTROL_TARGETS] if args.control else list(TARGETS)
+    silent = sorted({t[1] for t in tried if t[1] and "." not in t[1] and t[0] not in OPTIONAL and not has_ready_pod(t[1])})
 
     if silent:
         raise lib.Fail("no pod is ready behind the Service " + ", ".join(silent) + ", so the test could not see an open connection to it. Run:  make status   (and  make diagnose  if a pod is stuck)")
+
+    if not args.control:
+        leave_out([t[0] for t in TARGETS if t[0] in OPTIONAL and not has_ready_pod(t[1])])
 
     cleanup()
     run_control(hosts, policies) if args.control else run_table(hosts, args.patience)
@@ -404,4 +440,5 @@ if args.control:
 else:
     allowed = sum(1 for answers in EXPECT.values() for expected in answers.values() if expected)
     total = len(PROBES) * len(TARGETS)
-    print("\nRESULT: PASS - all " + str(total) + " connections behave as the policies say (" + str(allowed) + " allowed, " + str(total - allowed) + " blocked)")
+    print("\nRESULT: PASS - all " + str(total) + " connections behave as the policies say (" + str(allowed) + " allowed, " + str(total - allowed) + " blocked)"
+          + ("; not tried: the producer's metrics port (no replay is running)" if left_out else ""))
