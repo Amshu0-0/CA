@@ -25,16 +25,21 @@
 # lines if data/raw/BGL.log is there, otherwise they are rebuilt from messages.parquet in the same layout; either way every line is parsed
 # again and compared with messages.parquet (timestamp, alert tag, node, component, level, text) before the file is written.
 #
-# At the end the processor's own loader reads the bundle (the same code the processor runs at start-up). It stops with a clear message if
-# drain.pkl does not belong to model.pt and the decisions, which would make every verdict wrong without any error.
+# The files are made in a folder of their own next to bundle/ (.bundle-new-...), and the processor's own loader reads them there (the same code
+# the processor runs at start-up). It stops with a clear message if drain.pkl does not belong to model.pt and the decisions, which would make
+# every verdict wrong without any error. Only when everything is right are the files put into bundle/; a run that stops leaves bundle/ exactly
+# as the last good run left it. (An earlier version wrote into bundle/ first and checked afterwards, so a refused run left a mix of two runs.)
 #
 # Nothing in your NLP folder is changed. Needs: pandas, pyarrow, PyYAML, numpy and torch (the environment of your NLP project).
 
 import argparse
 import filecmp
 import json
+import os
+import shlex
 import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -44,6 +49,9 @@ REPO = PIPELINE.parent
 
 # The columns of messages.parquet that the replay file is made from (written by logad.data.bgl.read_bgl and logad.data.preprocess).
 COLUMNS = ["line_id", "timestamp", "node", "component", "level", "content", "alert_tag", "label", "template_id", "split"]
+
+# The files of the bundle, in the order in which they are put in place (the facts about the replay file last).
+BUNDLE_FILES = ("drain.pkl", "model.pt", "rules.json", "llm_rule_based_decisions.csv", "settings.json", "bgl-replay.log", "replay-info.json")
 
 # A window of the replay with more lines than this is reported (the processor handles much more, see processor.yaml, but it is worth knowing).
 BIG_WINDOW = 20000
@@ -301,6 +309,75 @@ def check_bundle(directory, rows):
     return detectors, agree, unseen
 
 
+# When the parser of the processed folder does not belong to the model: the folders next to it (data/processed/*) whose parser does. The
+# NLP project can hold several runs of  make preprocess  side by side (a small sample for trying things, the full log), and the configuration
+# names only one of them. The check is the loader's own. `stage` is the folder the files were made in; it is thrown away afterwards, so its
+# drain.pkl may be replaced here. Returns the text to add to the message ("" when no other folder fits).
+def other_folders_that_fit(stage, processed):
+    from engine import Detectors
+
+    siblings = sorted(p for p in processed.parent.iterdir() if p.is_dir() and p != processed and not p.name.startswith(".")) if processed.parent.is_dir() else []
+    fitting = []
+
+    for folder in siblings[:20]:
+        if not all((folder / name).is_file() for name in ("drain.pkl", "messages.parquet", "windows.parquet")):
+            continue
+
+        shutil.copyfile(folder / "drain.pkl", stage / "drain.pkl")
+
+        try:
+            Detectors.load(stage)
+        except Exception:
+            continue
+
+        fitting.append(folder)
+
+    if not fitting:
+        return ""
+
+    command = "make export-bundle BUNDLE_ARGS=" + shlex.quote("--processed " + json.dumps(str(fitting[0])))
+    more = "" if len(fitting) == 1 else "  (the others that fit: " + ", ".join(p.name for p in fitting[1:]) + ")"
+
+    return (f"\n\nThe processed folder that was used is {processed}. A folder next to it holds a parser that does belong to this model:\n"
+            f"  {fitting[0]}{more}\n"
+            f"Make the bundle from that one (nothing was changed in bundle/):\n  {command}")
+
+
+# Do the templates of the parser equal those of templates.csv (written by the same  make preprocess  as drain.pkl and messages.parquet)?
+# Returns (places that differ, places compared), or None when there is no templates.csv to compare with.
+def compare_with_templates_csv(templates, path):
+    import pandas as pd
+
+    if not path.is_file():
+        return None
+
+    table = pd.read_csv(path, keep_default_na=False)
+
+    if not {"template_id", "template"} <= set(table.columns):
+        return None
+
+    expected = {int(i): str(text) for i, text in zip(table["template_id"], table["template"])}
+    ids = set(expected) | set(templates)
+
+    return sum(1 for i in ids if expected.get(i) != templates.get(i)), len(ids)
+
+
+# Put the checked files of `stage` into `out`. The names of the files that were there before and differ are returned.
+def install(stage, out):
+    out.mkdir(parents=True, exist_ok=True)
+    replaced = []
+
+    for name in BUNDLE_FILES:
+        target = out / name
+
+        if target.is_file() and not filecmp.cmp(stage / name, target, shallow=False):
+            replaced.append(name)
+
+        os.replace(stage / name, target)
+
+    return replaced
+
+
 # ---------------------------------------------------------------- main
 
 def main(argv=None):
@@ -395,25 +472,38 @@ def run(args):
     facts = describe(rows, size, step)
     facts.update({"source": f"messages {begin - first} to {end - first - 1} of the test period of {config.get('name', 'the experiment')}", "line_source": origin})
 
-    # The files.
+    # The files are made in a folder of their own, checked there, and put into bundle/ only when everything is right. A run that stops
+    # (for example because drain.pkl does not belong to the model) leaves the bundle of the last good run as it was.
     out = Path(args.out).resolve()
-    out.mkdir(parents=True, exist_ok=True)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    stage = Path(tempfile.mkdtemp(prefix=".bundle-new-", dir=out.parent))
 
-    for name, source in (("drain.pkl", where["drain"]), ("model.pt", where["model"]), ("rules.json", where["rules"]), ("llm_rule_based_decisions.csv", where["decisions"])):
-        shutil.copyfile(source, out / name)
+    try:
+        for name, source in (("drain.pkl", where["drain"]), ("model.pt", where["model"]), ("rules.json", where["rules"]), ("llm_rule_based_decisions.csv", where["decisions"])):
+            shutil.copyfile(source, stage / name)
 
-    (out / "settings.json").write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
-    (out / "bgl-replay.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (stage / "settings.json").write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+        (stage / "bgl-replay.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    # The check: the processor's loader, and Drain against the table.
-    detectors, agree, unseen = check_bundle(out, rows)
-    facts["template_ids_agree"] = {"lines": int(len(rows)), "same_as_messages_parquet": int(agree), "unseen": int(unseen)}
-    (out / "replay-info.json").write_text(json.dumps(facts, indent=2) + "\n", encoding="utf-8")
+        # The check: the processor's loader, and Drain against the table.
+        try:
+            detectors, agree, unseen = check_bundle(stage, rows)
+        except Problem as problem:
+            raise Problem(str(problem) + other_folders_that_fit(stage, where["processed"])) from None
+
+        facts["template_ids_agree"] = {"lines": int(len(rows)), "same_as_messages_parquet": int(agree), "unseen": int(unseen)}
+        (stage / "replay-info.json").write_text(json.dumps(facts, indent=2) + "\n", encoding="utf-8")
+        replaced = install(stage, out)
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
 
     say("\nWritten to " + str(out) + ":")
 
-    for name in ("drain.pkl", "model.pt", "rules.json", "llm_rule_based_decisions.csv", "settings.json", "bgl-replay.log", "replay-info.json"):
+    for name in BUNDLE_FILES:
         say("  %-32s %8.1f KB" % (name, (out / name).stat().st_size / 1024))
+
+    if replaced:
+        say("\nThe bundle was there already. Replaced, because the new file differs: " + ", ".join(replaced) + ".")
 
     say("\nThe replay file")
     say(f"  lines:            {facts['lines']}   (from {origin})")
@@ -429,15 +519,27 @@ def run(args):
     if facts["largest_window_lines"] > BIG_WINDOW:
         say(f"\nNote: one window holds {facts['largest_window_lines']} lines. The processor can score it (processor.yaml says how much memory that needs), but it takes a few seconds.")
 
+    # Lines whose template is another one than messages.parquet holds. Drain puts each line into the nearest group while it reads the log
+    # (similarity 0.3); the processor, like the NLP demo, asks the finished tree for an exact match. So a few percent are normal, and the
+    # percentage alone cannot tell a normal difference from files of two runs. templates.csv can: it was written together with drain.pkl.
     different = len(rows) - agree
+    same_run = compare_with_templates_csv(detectors.extractor.templates, where["processed"] / "templates.csv")
 
-    if different and different <= 0.02 * len(rows):
+    if same_run is not None and same_run[0]:
+        say(f"\nWARNING: the templates of drain.pkl differ from templates.csv in {same_run[0]} of {same_run[1]} places. The two files were not written together by one "
+            "run of  make preprocess . Do not go on until you know which run each of them belongs to.")
+    elif same_run is not None and different:
+        say(f"\nNote: for {different} of {len(rows)} lines ({100 * different / len(rows):.1f}%) the parser's template is not the one in messages.parquet. This is not a mix-up of "
+            f"files: the {same_run[1]} templates of drain.pkl are exactly those of templates.csv. It comes from the way Drain works: while  make preprocess  reads the log it puts "
+            "each line into the nearest group it knows, and the processor (like your NLP demo) asks the finished tree for an exact match. The cluster and  make local-replay  use the "
+            "same parser, so they agree with each other; compared with your report, a few windows can differ for this reason too.")
+    elif different and different <= 0.02 * len(rows):
         say(f"\nNote: for {different} lines Drain's template differs from the one in messages.parquet. That is expected for a few lines: Drain's tree "
             "grows while it reads the log, and the processor uses the finished tree (like the NLP demo). Such a line can differ from the table in the verdict of LogBERT.")
     elif different:
-        say(f"\nWARNING: for {different} of {len(rows)} lines ({100 * different / len(rows):.1f}%) Drain's template differs from the one in messages.parquet. A few percent "
-            "can happen, more than that means that drain.pkl and messages.parquet may not come from the same run of  make preprocess . "
-            "Look at the NLP folder: both files must have been written together. Do not go on until you know which it is.")
+        say(f"\nWARNING: for {different} of {len(rows)} lines ({100 * different / len(rows):.1f}%) Drain's template differs from the one in messages.parquet, and there is no "
+            "templates.csv next to it to show whether the files were written together. A few percent can happen, more than that means that drain.pkl and messages.parquet may not "
+            "come from the same run of  make preprocess . Do not go on until you know which it is.")
 
     say("\nNext: make local-replay   (the same detectors on this file, without a cluster)")
     return 0

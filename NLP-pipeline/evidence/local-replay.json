@@ -1,8 +1,8 @@
 {
   "run": {
     "status": "complete",
-    "started_at": 1794624914.1487732,
-    "finished_at": 1794624925.407577,
+    "started_at": 1794628618.034723,
+    "finished_at": 1794628626.895062,
     "expected_lines": 30000,
     "run": "local"
   },
@@ -50,8 +50,8 @@
     }
   },
   "logbert_ms_per_window": {
-    "mean": 25.7,
-    "p95": 94.4,
-    "max": 243.4
+    "mean": 20.1,
+    "p95": 73.7,
+    "max": 123.5
   }
 }

@@ -26,6 +26,10 @@ import tables
 
 DEFAULT_JOB = "producer-replay"
 
+# What the NLP code expects from the replay file (written by  make export-bundle ). A name of its own, so that the tests can point elsewhere
+# and do not depend on whether the real bundle is there (they did once: they failed on a computer that had run the export).
+REPLAY_INFO = Path(__file__).resolve().parent.parent / "bundle" / "replay-info.json"
+
 
 # The name of the replay that the Job's producer started: the "producer started" line of its log. The last one counts (a producer that
 # was restarted by Kubernetes starts a new replay under a new name).
@@ -160,7 +164,7 @@ def main(argv=None):
             print(("\n" if text.startswith("For comparison") else "") + text)
 
         problems = []
-        info_file = Path(__file__).resolve().parent.parent / "bundle" / "replay-info.json"
+        info_file = REPLAY_INFO
 
         if info_file.is_file() and summary["run"].get("status") == "complete":
             info = json.loads(info_file.read_text(encoding="utf-8"))

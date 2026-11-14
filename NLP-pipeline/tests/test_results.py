@@ -59,18 +59,23 @@ def row(status, lines, windows):
     return {"run": "run-new", "status": status, "lines_stored": lines, "windows_stored": windows}
 
 
+# The facts about the replay file (bundle/replay-info.json) are looked for in a folder of the test, where there is none unless a test writes one:
+# the real bundle of the computer that runs the tests (after  make export-bundle  it holds the numbers of the real 30,000-line file) must not
+# decide whether a test with a 30-line stand-in cluster passes, and a test must not write into it.
 @pytest.fixture
-def world(monkeypatch):
+def world(monkeypatch, tmp_path):
     clock = SimpleNamespace(now=0.0)
     fake_time = SimpleNamespace(monotonic=lambda: clock.now, sleep=lambda seconds: setattr(clock, "now", clock.now + seconds))
     monkeypatch.setattr(results, "time", fake_time)
     monkeypatch.setattr(nlplib, "kubectl", lambda *args, **kwargs: (0, LOG, ""))
+    replay_info = tmp_path / "bundle-of-the-test" / "replay-info.json"
+    monkeypatch.setattr(results, "REPLAY_INFO", replay_info)
 
     def use(cluster):
         monkeypatch.setattr(nlplib, "rest_json", cluster.rest_json)
         return cluster
 
-    return SimpleNamespace(use=use, clock=clock, monkeypatch=monkeypatch)
+    return SimpleNamespace(use=use, clock=clock, monkeypatch=monkeypatch, replay_info=replay_info)
 
 
 def test_the_replay_of_the_job_is_the_last_one_its_producer_started(world):
@@ -166,27 +171,29 @@ def test_the_cluster_is_compared_with_the_laptop(world, tmp_path, capsys):
     assert "keyword rules (B4): fp laptop" in capsys.readouterr().out
 
 
-def test_the_windows_of_the_nlp_code_are_compared_with_the_cluster(world, tmp_path, capsys):
+def test_the_windows_of_the_nlp_code_are_compared_with_the_cluster(world, capsys):
     world.use(Cluster([row("complete", 30, 5)]))
-    bundle = results.Path(results.__file__).resolve().parent.parent / "bundle"
-    info_file = bundle / "replay-info.json"
-    existed = info_file.exists()
-    before = info_file.read_text(encoding="utf-8") if existed else None
-    bundle.mkdir(exist_ok=True)
+    info_file = world.replay_info
+    info_file.parent.mkdir()
 
-    try:
-        info_file.write_text(json.dumps({"lines": 30, "alert_lines": 2, "windows": 5, "anomalous_windows": 2}), encoding="utf-8")
-        assert results.main([]) == 0
-        assert "built exactly the windows that the NLP code expects" in capsys.readouterr().out
+    info_file.write_text(json.dumps({"lines": 30, "alert_lines": 2, "windows": 5, "anomalous_windows": 2}), encoding="utf-8")
+    assert results.main([]) == 0
+    assert "built exactly the windows that the NLP code expects" in capsys.readouterr().out
 
-        info_file.write_text(json.dumps({"lines": 30, "alert_lines": 2, "windows": 6, "anomalous_windows": 2}), encoding="utf-8")
-        assert results.main([]) == 1
-        assert "windows: the NLP code expects 6, the cluster has 5" in capsys.readouterr().out
-    finally:
-        if existed:
-            info_file.write_text(before, encoding="utf-8")
-        else:
-            info_file.unlink()
+    info_file.write_text(json.dumps({"lines": 30, "alert_lines": 2, "windows": 6, "anomalous_windows": 2}), encoding="utf-8")
+    assert results.main([]) == 1
+    assert "windows: the NLP code expects 6, the cluster has 5" in capsys.readouterr().out
+
+
+def test_the_real_bundle_of_the_computer_does_not_decide_these_tests(world, capsys):
+    # the tests use a stand-in cluster of 30 lines; a replay-info.json of the real bundle (30,000 lines) is not looked at
+    real = results.Path(results.__file__).resolve().parent.parent / "bundle" / "replay-info.json"
+
+    assert world.replay_info != real and not world.replay_info.exists()
+    world.use(Cluster([row("complete", 30, 5)]))
+
+    assert results.main([]) == 0
+    assert "NLP code" not in capsys.readouterr().out
 
 
 def test_a_cluster_that_does_not_answer_is_reported_with_the_address_hint(world, capsys):

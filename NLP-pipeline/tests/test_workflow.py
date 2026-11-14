@@ -100,10 +100,25 @@ def test_the_image_name_and_version_are_the_ones_the_manifests_pull(component, t
 
     # GitHub gives the owner as it is spelled on GitHub; the registry wants lowercase
     done = bash(run_of("Work out the image name", component), tmp_path, GITHUB_REPOSITORY_OWNER=owner.upper(), GITHUB_OUTPUT=str(out))
-    values = dict(line.split("=", 1) for line in out.read_text().splitlines())
 
-    assert done.returncode == 0, done.stderr
+    assert done.returncode == 0, done.stderr  # (first: a Mac's bash 3.2 stops here with "bad substitution" at ${var,,}, and no file is written)
+    values = dict(line.split("=", 1) for line in out.read_text().splitlines())
     assert values["image"] + ":" + values["version"] == pulled[0]
+
+
+# The tests run the steps of the workflow with the bash of the computer that runs them, and a Mac has bash 3.2 (2007) in /bin/bash. GitHub's
+# runners have a recent one, so code that only a recent bash understands passes there and fails on the Mac. Found on the Mac: ${var,,}.
+BASH_4_ONLY = [r"\$\{[A-Za-z_][A-Za-z_0-9]*(,,|,|\^\^|\^)\}", r"\bmapfile\b", r"\breadarray\b", r"\bdeclare\s+-[a-zA-Z]*A", r"\|&", r"&>>", r"\blocal\s+-n\b",
+               r"\$\{[A-Za-z_][A-Za-z_0-9]*@[QEPAaU]\}", r"\bcoproc\b", r"\[\[\s+-v\s"]
+
+
+def test_the_steps_of_the_workflow_use_only_what_bash_3_2_understands():
+    code = [s["run"] for s in workflow()["jobs"]["build"]["steps"] if "run" in s]
+    assert len(code) >= 5
+
+    for text in code:
+        for pattern in BASH_4_ONLY:
+            assert not re.search(pattern, text), f"{pattern} is not understood by the bash of a Mac:\n{text}"
 
 
 @pytest.mark.parametrize("component", ("producer", "processor"))

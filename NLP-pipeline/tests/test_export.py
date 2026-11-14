@@ -329,3 +329,179 @@ def test_make_export_bundle_uses_the_configuration_that_the_committed_results_co
     assert (REPO / "NLP" / default).is_file()
     assert "configs/bgl_cpu.yaml" in readme and default == "configs/bgl_cpu.yaml"
     assert re.search(r"^export-bundle:\s*;.*--config \$\(NLP_CONFIG\)", makefile, re.M)
+
+
+# ---------------------------------------------------------------- a run that stops must not touch the bundle
+
+# Found in a real run: the default processed folder held a small sample (another run of make preprocess than the one the trained files come
+# from). The loader refused it, as it should, but the files had been copied into bundle/ before it was asked, so drain.pkl and the replay file
+# of the earlier good export had been overwritten and the bundle was a mix of two runs - which was committed and pushed.
+
+def standin(texts=None):
+    texts = texts or template_texts()
+    patch = pytest.MonkeyPatch()
+    patch.setattr(engine.TemplateExtractor, "load", staticmethod(lambda path: FakeDrain(texts)))
+    return patch
+
+
+def snapshot(folder):
+    return {p.name: p.read_bytes() for p in sorted(folder.iterdir())}
+
+
+def test_an_export_that_stops_leaves_the_bundle_of_the_last_good_run_as_it_was(nlp_root, tmp_path, capsys):
+    out = tmp_path / "bundle"
+    good = standin()
+
+    try:
+        run_export(nlp_root, out)
+    finally:
+        good.undo()
+
+    before = snapshot(out)
+    capsys.readouterr()
+
+    # another slice; the parser is now the made-up project's own, which does not belong to the trained model, so the last check refuses it
+    code = load_script().main(["--nlp-root", str(nlp_root), "--lines", "1000", "--out", str(out)])
+    seen = capsys.readouterr()
+
+    assert code == 1 and "does not belong to the model" in seen.err
+    assert snapshot(out) == before
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["bundle"]  # and nothing is left over next to it
+
+
+def test_a_first_export_that_stops_writes_no_file(nlp_root, tmp_path, capsys):
+    out = tmp_path / "bundle"
+    code = load_script().main(["--nlp-root", str(nlp_root), "--lines", "1500", "--out", str(out)])
+
+    assert code == 1 and "does not belong to the model" in capsys.readouterr().err
+    assert not out.exists() or list(out.iterdir()) == []
+    assert [p.name for p in tmp_path.iterdir() if p.name != "bundle"] == []
+
+
+def test_a_good_export_says_which_files_of_an_earlier_bundle_it_replaced(nlp_root, tmp_path, capsys):
+    out = tmp_path / "bundle"
+    good = standin()
+
+    try:
+        run_export(nlp_root, out)
+        first = capsys.readouterr().out
+        run_export(nlp_root, out, "--lines", "1000")
+        second = capsys.readouterr().out
+    finally:
+        good.undo()
+
+    assert "Replaced" not in first
+    assert re.search(r"Replaced.*bgl-replay\.log", second) and "replay-info.json" in second
+    assert "model.pt" not in re.search(r"Replaced[^\n]*", second).group(0)  # the same trained files again: not a change
+
+
+def test_a_parser_that_does_not_fit_points_to_the_folder_next_to_it_that_does(nlp_root, tmp_path, capsys):
+    # the NLP folder of the real run: data/processed/bgl is a small sample, data/processed/bgl_full is the run the trained files come from
+    copy = tmp_path / "nlp"
+    shutil.copytree(nlp_root, copy)
+    processed = copy / "data" / "processed"
+    shutil.copytree(processed / "bgl", processed / "bgl_full")
+    shutil.copytree(processed / "bgl", processed / "bgl_old")  # another run that does not fit either
+    (processed / "bgl_full" / "drain.pkl").write_bytes(b"the parser of the run that the model belongs to")
+    (processed / "bgl_incomplete").mkdir()  # a folder without the files of a processed run is not looked at
+    (processed / "bgl_incomplete" / "drain.pkl").write_bytes(b"the parser of the run that the model belongs to")
+    texts = template_texts()
+    patch = pytest.MonkeyPatch()
+    patch.setattr(engine.TemplateExtractor, "load", staticmethod(
+        lambda path: FakeDrain(texts) if open(path, "rb").read().startswith(b"the parser of the run") else FakeDrain({1: "text that is in no saved decision"})))
+
+    try:
+        out = tmp_path / "bundle"
+        script = load_script()
+        code = script.main(["--nlp-root", str(copy), "--lines", "1500", "--out", str(out)])
+        error = capsys.readouterr().err
+
+        assert code == 1 and "does not belong to the model" in error
+        assert str(processed / "bgl_full") in error and "--processed" in error and "make export-bundle" in error
+        assert "bgl_old" not in error and "bgl_incomplete" not in error  # only a folder that the loader accepts is named
+        assert not out.exists() or list(out.iterdir()) == []
+
+        # with the folder that fits, it works, and it says which folder it took
+        code = script.main(["--nlp-root", str(copy), "--lines", "1500", "--out", str(out), "--processed", str(processed / "bgl_full")])
+        shown = capsys.readouterr().out
+
+        assert code == 0 and "processed data:  " + str(processed / "bgl_full") in shown
+        assert (out / "drain.pkl").read_bytes().startswith(b"the parser of the run")
+    finally:
+        patch.undo()
+
+
+def test_without_another_folder_that_fits_the_message_does_not_invent_one(nlp_root, tmp_path, capsys):
+    code = load_script().main(["--nlp-root", str(nlp_root), "--lines", "1500", "--out", str(tmp_path / "bundle")])
+    error = capsys.readouterr().err
+
+    assert code == 1 and "does not belong to the model" in error
+    assert "next to it" not in error and "BUNDLE_ARGS" not in error
+
+
+# ---------------------------------------------------------------- how many lines get another template, and what that means
+
+# A real run (the full BGL log) had 3.3% of the lines with another template than messages.parquet holds, although drain.pkl and templates.csv
+# were written together. Drain puts each line into the nearest group while it learns (similarity 0.3); the processor asks the finished tree for
+# an exact match. So the percentage alone says nothing about the files; templates.csv does.
+
+def write_templates_csv(folder, texts):
+    pd.DataFrame(sorted(texts.items()), columns=["template_id", "template"]).to_csv(folder / "templates.csv", index=False)
+
+
+def test_lines_with_another_template_are_no_warning_when_templates_csv_and_drain_pkl_agree(nlp_root, tmp_path, capsys):
+    copy = tmp_path / "nlp"
+    shutil.copytree(nlp_root, copy)
+    texts = template_texts()
+    write_templates_csv(copy / "data" / "processed" / "bgl", texts)
+    patch = standin(texts)
+
+    try:
+        run_export(copy, tmp_path / "bundle")
+    finally:
+        patch.undo()
+
+    shown = capsys.readouterr().out
+    agree = int(re.search(r"holds for (\d+) of (\d+) lines", shown).group(1))
+
+    assert agree < 1500  # the stand-in parser knows other templates than the made-up table
+    assert "WARNING" not in shown
+    assert re.search(r"Note: for \d+ of 1500 lines \(\d+\.\d%\) the parser's template is not the one in messages.parquet", shown)
+    assert f"the {len(texts)} templates of drain.pkl are exactly those of templates.csv" in shown
+
+
+def test_templates_that_differ_from_templates_csv_are_a_warning_whatever_the_percentage(nlp_root, tmp_path, capsys):
+    copy = tmp_path / "nlp"
+    shutil.copytree(nlp_root, copy)
+    texts = template_texts()
+    changed = dict(texts)
+    first = min(changed)
+    changed[first] = changed[first] + " and more"
+    write_templates_csv(copy / "data" / "processed" / "bgl", changed)
+    patch = standin(texts)
+
+    try:
+        run_export(copy, tmp_path / "bundle")
+    finally:
+        patch.undo()
+
+    shown = capsys.readouterr().out
+
+    assert "WARNING: the templates of drain.pkl differ from templates.csv in 1 of %d places" % len(texts) in shown
+    assert "exactly those of templates.csv" not in shown
+
+
+def test_without_templates_csv_the_old_rule_of_thumb_is_all_there_is(nlp_root, tmp_path, capsys):
+    copy = tmp_path / "nlp"
+    shutil.copytree(nlp_root, copy)
+    (copy / "data" / "processed" / "bgl" / "templates.csv").unlink()
+    patch = standin()
+
+    try:
+        run_export(copy, tmp_path / "bundle")
+    finally:
+        patch.undo()
+
+    shown = capsys.readouterr().out
+
+    assert "WARNING: for " in shown and "exactly those of templates.csv" not in shown

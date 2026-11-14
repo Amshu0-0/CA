@@ -75,12 +75,16 @@ The steps are in order. Each ends with a line that says whether it worked.
 
 It gathers into `bundle/` what the processor and the producer need: the Drain parser, LogBERT, the keyword rules, the saved LLM decisions, the settings (g, r, mask ratio, seed, window, number of rules) and `bgl-replay.log`, a run of 30,000 consecutive lines of the **test period** (the period the detectors were not tuned on), placed where the windows are most evenly mixed between anomalous and normal. Nothing in `../NLP` is changed.
 
+It needs a processed folder of the NLP project (`drain.pkl`, `messages.parquet`, `windows.parquet`, `templates.csv`). If there is none on this computer, make it first with `make data` and `make preprocess` in `NLP` (the raw log is about 700 MB), or copy the folder from the computer where you ran the NLP project.
+
+**Which processed folder.** The NLP folder can hold several processed runs side by side, and the configuration names only one (`data/processed/bgl`). On the author's computer that one is a sample of 100,000 messages, while the trained files in `NLP/results/` were made from the full log in `data/processed/bgl_memcheck` (4,747,963 messages, 5,742 test windows). The export has to read the folder that the models come from:
+
 ```bash
 cd NLP-pipeline
-make export-bundle
+make export-bundle BUNDLE_ARGS='--processed ../NLP/data/processed/bgl_memcheck'
 ```
 
-It needs `NLP/data/processed/bgl/` (`drain.pkl`, `messages.parquet`, `windows.parquet`). If that folder is not on this computer, make it first with `make data` and `make preprocess` in `NLP` (the raw log is about 700 MB), or copy the folder from the computer where you ran the NLP project.
+(Plain `make export-bundle` reads the folder that the configuration names; use that where it is the run your models come from.) If you give the wrong folder, the script stops with "does not belong to the model", names a folder next to it that does fit, prints the command to use, and leaves `bundle/` exactly as it was. (An earlier version of the script wrote into `bundle/` before checking, so a refused run left a mix of two runs behind; the first real run found it.)
 
 The trained files are taken from `NLP/results/` (the run of your report, made with `configs/bgl_cpu.yaml`). A run that is only in `NLP/outputs/` is taken with `make export-bundle BUNDLE_ARGS="--prefer-outputs"`, a run made with another configuration with `make export-bundle NLP_CONFIG=configs/bgl.yaml`. If a file exists in both places and they differ, the script says which one it took.
 
@@ -93,7 +97,7 @@ Expected, at the end:
 Next: make local-replay   (the same detectors on this file, without a cluster)
 ```
 
-A few lines may differ from `messages.parquet` (Drain's tree grows while it reads the log, and the processor uses the finished tree); the script says so and by how many. **More than 2% is a warning: stop and find out why**, because `drain.pkl` and `messages.parquet` may then come from different runs of `make preprocess`.
+Some lines get another template than `messages.parquet` holds. While `make preprocess` reads the log, Drain puts each line into the nearest group it knows; the processor (like the NLP demo) asks the finished tree for an exact match. On the author's computer it was 978 of 30,000 lines (3.3%). The percentage alone does not say whether the files belong together, so the script compares `drain.pkl` with `templates.csv`, which `make preprocess` wrote together with it: if they agree it prints a `Note` with the number (go on), if they differ it prints a `WARNING` (**stop**: the two files come from different runs). Without a `templates.csv` it falls back to a rule of thumb: more than 2% is a warning. What the difference means for the results: the cluster and `make local-replay` use the same parser, so they agree with each other; against the report of the NLP project a few windows can differ for this reason too (besides the slice and LogBERT's random masks, see *Why it is built this way*).
 
 ### Step 2. The numbers on your computer (`make local-replay`, `make test`)
 
@@ -109,7 +113,7 @@ cd NLP-pipeline
 make test
 ```
 
-About 150 tests, about half a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
+166 tests, about half a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
 
 ### Step 3. The images (push, wait, make public)
 
@@ -307,21 +311,25 @@ The state when this was written, 13 November 2026. What was run later is in `evi
 
 | What | How | Where it was run |
 |---|---|---|
-| The programs: windows, restart after a crash at every point, sink, producer, REST API, results tables, export of the bundle, the image workflow, the dashboard, the consistency checks | `make test`: 156 tests, about 25 seconds | Claude's sandbox, with fakes for Kafka and MongoDB. **Run it on your computer too (Step 2)** |
+| The programs: windows, restart after a crash at every point, sink, producer, REST API, results tables, export of the bundle, the image workflow, the dashboard, the consistency checks | `make test`: 166 tests, about 25 seconds | Claude's sandbox, with fakes for Kafka and MongoDB. **Run it on your computer too (Step 2)** |
 | The files agree with each other (images and tags, ports, settings, Secrets, NetworkPolicies against Services, Prometheus targets, rights, names used by the scripts, evidence free of addresses) | `make verify`: 13 checks, each shown to fail on 25 deliberate mistakes | Claude's sandbox, with the built-in manifest reader (no `kubectl` there). **Run it on your computer: it then uses `kubectl kustomize`** |
-| The detectors on the replay file | `make local-replay` | Not yet: needs your `data/processed/bgl` |
+| The detectors on the replay file | `make local-replay` | The author's Mac, 13 November 2026 (`evidence/local-replay.json`). It needs the processed folder of the run that the models come from (Step 1) |
 | Manifests against the Kubernetes schemas | `make validate` (needs `kubeconform`) | Not yet |
 | Images, cluster, stack, smoke test, replay, restart under a replay, REST API, monitoring, NetworkPolicies, healing, teardown | Steps 3 to 8 | **Not run yet.** Save the output in `evidence/` as you go (`evidence/README.md` says how) |
 
-**Not tested** (at the time of writing): your real `drain.pkl` and `messages.parquet` (the export script's last check tells you if they belong together); the `.dockerignore` allowlists under the real image builder; the GitHub workflow; the CPU PyTorch image; a real Kafka, MongoDB and k3s; whether MongoDB counts the processor's upserts as `update` operations (the dashboard and `make metrics-check` count `insert|update`); whether Prometheus finds every number the dashboard asks for (`make metrics-check` checks it); LogBERT's verdicts on ARM against x86; the speed of a replay; and everything under *Known limitations*.
+The first run on the author's Mac (13 November 2026) found three things that the sandbox could not: the default processed folder was not the one the models come from (see Step 1), a refused export had left a mix in `bundle/` (fixed: the files are checked before they are put in place), and 7 of the 156 tests failed because of the tests' own mistakes, not the programs': four depended on whether `bundle/` held the real export, three ran a step of the workflow with the Mac's bash 3.2, which does not know `${var,,}`. All three are fixed and have tests of their own; the suite now also fails if a test touches the real `bundle/`.
+
+**Not tested** (at the time of writing): the `.dockerignore` allowlists under the real image builder; the GitHub workflow; the CPU PyTorch image; a real Kafka, MongoDB and k3s; whether MongoDB counts the processor's upserts as `update` operations (the dashboard and `make metrics-check` count `insert|update`); whether Prometheus finds every number the dashboard asks for (`make metrics-check` checks it); LogBERT's verdicts on ARM against x86; the speed of a replay; and everything under *Known limitations*.
 
 ## If something does not work
 
 | If this happens | Do this |
 |---|---|
 | `make export-bundle` says `drain.pkl ... was not found` | The processed data is not on this computer. Run `make data` and `make preprocess` in `NLP`, or copy `NLP/data/processed/bgl` from the computer where you ran them |
-| `make export-bundle` stops with "does not belong to the model" | `drain.pkl` and `model.pt` come from different preprocessing runs. Use the pair that was made together: the processed data that you trained on |
-| `make export-bundle` says `WARNING: for N of M lines ... Drain's template differs` | More than 2% of the lines get another template than `messages.parquet` has. Do not go on. Run `make preprocess` again and export again |
+| `make export-bundle` stops with "does not belong to the model" | The processed folder is not the run that the trained files in `NLP/results/` come from (the configuration names `data/processed/bgl`, a small sample). The message names a folder next to it that does fit and prints the command; `bundle/` was not changed. If it names none, `drain.pkl` and `model.pt` really come from different preprocessing runs: use the processed data that you trained on |
+| `make export-bundle` prints `Note: for N of M lines ... the parser's template is not the one in messages.parquet` | Go on. It is the way Drain works (Step 1), and `drain.pkl` and `templates.csv` agree |
+| `make export-bundle` prints `WARNING: the templates of drain.pkl differ from templates.csv` | Do not go on: the two files come from different runs of `make preprocess`. Run it again, or copy both from the same run |
+| `make export-bundle` prints `WARNING: for N of M lines ...` and there is no `templates.csv` | Do not go on until you know whether `drain.pkl` and `messages.parquet` were written together |
 | The workflow stops with "a file of the bundle is missing" | Run `make export-bundle`, then `git add NLP-pipeline/bundle`, commit and push |
 | `make check-images` says an image cannot be pulled | The package is still private. Make it public (Step 3) |
 | A pod is in `ImagePullBackOff` | The same: the package is private, or the tag in the manifest is not one that was pushed. `make verify` checks the tags against `VERSION` |

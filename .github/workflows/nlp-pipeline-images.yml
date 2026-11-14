@@ -64,10 +64,11 @@ jobs:
           exit $missing
 
       # The registry requires a lowercase name. The version comes from NLP-pipeline/VERSION, so it is changed in one place.
+      # (tr and not ${owner,,}: the tests run this step on a Mac, whose bash is version 3.2 and does not know that expansion.)
       - name: Work out the image name and version
         id: meta
         run: |
-          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          owner="$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
           version="$(tr -d '[:space:]' < NLP-pipeline/VERSION)"
           echo "image=ghcr.io/${owner}/nlp-${{ matrix.component }}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"

@@ -21,3 +21,5 @@ infra/ansible/*.retry
 
 # bundle/ (the trained models and the replay file, made by "make export-bundle") is NOT ignored on purpose: the workflow that builds the
 # images reads it from the repository (.github/workflows/nlp-pipeline-images.yml). The model is 6.7 MB, and GitHub refuses files above 100 MB; export-nlp-bundle.py prints the size of every file it writes.
+# The export makes its files in a folder next to bundle/ first and removes it at the end; one that is left behind (the computer was switched off in the middle) is not to be committed.
+.bundle-new-*/
