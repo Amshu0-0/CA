@@ -1,0 +1,1060 @@
+if kubectl --request-timeout=10s get namespace kube-system > /dev/null 2>&1; then \
+        /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory down || echo "make down did not finish. The machines are destroyed next, and that removes the stack with them."; \
+        echo; echo "What is left inside Kubernetes (no nlp namespace, no volumes):"; kubectl get namespace; kubectl get pv; echo; \
+    else echo "The cluster does not answer, so there is no stack to delete: going on to destroy the machines."; fi ; \
+    /Applications/Xcode.app/Contents/Developer/usr/bin/make --no-print-directory cluster-down && python3 scripts/cleanup-scan.py --wait 180 
+kubectl delete namespace nlp-intruder --ignore-not-found --wait=false ; kubectl delete -k . --ignore-not-found --wait=true && echo "Deleted. Check:  kubectl get namespace nlp   (it should say NotFound)"
+namespace "nlp" deleted
+serviceaccount "alloy" deleted from nlp namespace
+serviceaccount "bootstrap" deleted from nlp namespace
+serviceaccount "grafana" deleted from nlp namespace
+serviceaccount "kafka" deleted from nlp namespace
+serviceaccount "kafka-exporter" deleted from nlp namespace
+serviceaccount "loki" deleted from nlp namespace
+serviceaccount "mongo" deleted from nlp namespace
+serviceaccount "mongodb-exporter" deleted from nlp namespace
+serviceaccount "pipeline-operator" deleted from nlp namespace
+serviceaccount "pipeline-viewer" deleted from nlp namespace
+serviceaccount "processor" deleted from nlp namespace
+serviceaccount "producer" deleted from nlp namespace
+serviceaccount "prometheus" deleted from nlp namespace
+serviceaccount "restapi" deleted from nlp namespace
+role.rbac.authorization.k8s.io "alloy" deleted from nlp namespace
+role.rbac.authorization.k8s.io "bootstrap" deleted from nlp namespace
+role.rbac.authorization.k8s.io "pipeline-operator" deleted from nlp namespace
+role.rbac.authorization.k8s.io "pipeline-viewer" deleted from nlp namespace
+rolebinding.rbac.authorization.k8s.io "alloy" deleted from nlp namespace
+rolebinding.rbac.authorization.k8s.io "bootstrap" deleted from nlp namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-operator" deleted from nlp namespace
+rolebinding.rbac.authorization.k8s.io "pipeline-viewer" deleted from nlp namespace
+configmap "alloy-config" deleted from nlp namespace
+configmap "grafana-dashboards" deleted from nlp namespace
+configmap "grafana-provisioning" deleted from nlp namespace
+configmap "loki-config" deleted from nlp namespace
+configmap "mongo-init" deleted from nlp namespace
+configmap "pipeline-config" deleted from nlp namespace
+configmap "processor-config" deleted from nlp namespace
+configmap "prometheus-config" deleted from nlp namespace
+service "grafana" deleted from nlp namespace
+service "kafka" deleted from nlp namespace
+service "kafka-exporter" deleted from nlp namespace
+service "kafka-headless" deleted from nlp namespace
+service "loki" deleted from nlp namespace
+service "mongo" deleted from nlp namespace
+service "mongo-headless" deleted from nlp namespace
+service "mongodb-exporter" deleted from nlp namespace
+service "processor" deleted from nlp namespace
+service "processor-metrics" deleted from nlp namespace
+service "producer-metrics" deleted from nlp namespace
+service "prometheus" deleted from nlp namespace
+service "restapi" deleted from nlp namespace
+service "restapi-metrics" deleted from nlp namespace
+deployment.apps "grafana" deleted from nlp namespace
+deployment.apps "kafka-exporter" deleted from nlp namespace
+deployment.apps "loki" deleted from nlp namespace
+deployment.apps "mongodb-exporter" deleted from nlp namespace
+deployment.apps "processor" deleted from nlp namespace
+deployment.apps "prometheus" deleted from nlp namespace
+deployment.apps "restapi" deleted from nlp namespace
+statefulset.apps "kafka" deleted from nlp namespace
+statefulset.apps "mongo" deleted from nlp namespace
+daemonset.apps "alloy" deleted from nlp namespace
+job.batch "bootstrap" deleted from nlp namespace
+networkpolicy.networking.k8s.io "allow-dns-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "alloy-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "bootstrap-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "default-deny-all" deleted from nlp namespace
+networkpolicy.networking.k8s.io "grafana-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "kafka-exporter-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "kafka-exporter-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "kafka-exporter-to-kafka" deleted from nlp namespace
+networkpolicy.networking.k8s.io "kafka-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "kafka-self" deleted from nlp namespace
+networkpolicy.networking.k8s.io "loki-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "mongo-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "mongodb-exporter-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "mongodb-exporter-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "mongodb-exporter-to-mongo" deleted from nlp namespace
+networkpolicy.networking.k8s.io "observer-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "processor-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "processor-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "producer-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "producer-metrics-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "prometheus-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "prometheus-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "restapi-egress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "restapi-ingress" deleted from nlp namespace
+networkpolicy.networking.k8s.io "restapi-metrics-ingress" deleted from nlp namespace
+Deleted. Check:  kubectl get namespace nlp   (it should say NotFound)
+
+What is left inside Kubernetes (no nlp namespace, no volumes):
+NAME              STATUS   AGE
+default           Active   146m
+kube-node-lease   Active   146m
+kube-public       Active   146m
+kube-system       Active   146m
+No resources found
+
+terraform -chdir=infra/terraform init -input=false > /dev/null && terraform -chdir=infra/terraform destroy -input=false -auto-approve && \
+    rm -f infra/ansible/inventory.ini infra/ansible/known_hosts "/Users/<user>/Desktop/CA/NLP-pipeline/.secrets/kubeconfig.yaml" && \
+    echo "Cluster destroyed."
+data.http.my_ip[0]: Reading...
+data.http.my_ip[0]: Read complete after 0s [id=https://checkip.amazonaws.com]
+data.aws_availability_zones.available[0]: Reading...
+data.aws_ami.ubuntu[0]: Reading...
+aws_key_pair.cluster: Refreshing state... [id=nlp-key]
+aws_vpc.main: Refreshing state... [id=vpc-05064579b6dffd978]
+data.aws_availability_zones.available[0]: Read complete after 1s [id=us-east-2]
+data.aws_ami.ubuntu[0]: Read complete after 1s [id=ami-096d6538c463eb1db]
+aws_default_security_group.default: Refreshing state... [id=sg-08b7a7fe678874537]
+aws_internet_gateway.main: Refreshing state... [id=igw-058f86403c48928ed]
+aws_subnet.nodes: Refreshing state... [id=subnet-047e5c26003148489]
+aws_security_group.cluster: Refreshing state... [id=sg-05836ad200db575e9]
+aws_route_table.public: Refreshing state... [id=rtb-0f70756db5ef30f61]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Refreshing state... [id=sgr-001b52b7d12c4dd7f]
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Refreshing state... [id=sgr-0385e0ae6bf7b731f]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Refreshing state... [id=sgr-0a74d6b1d4b90ab23]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Refreshing state... [id=sgr-0f7335347d6137a39]
+aws_vpc_security_group_egress_rule.all_out: Refreshing state... [id=sgr-04401b260e5e3e04b]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Refreshing state... [id=sgr-0bb4339f8cc8eac58]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Refreshing state... [id=sgr-0aa4b0365d61e73bb]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Refreshing state... [id=sgr-00a04e1a43b84bb12]
+aws_route_table_association.nodes: Refreshing state... [id=rtbassoc-04b9bd938449d8aea]
+aws_instance.agent[0]: Refreshing state... [id=i-0647124be9d5ef476]
+aws_instance.server: Refreshing state... [id=i-023f2b43ba4c201fb]
+aws_instance.agent[1]: Refreshing state... [id=i-0db859373b9d47ebe]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_default_security_group.default will be destroyed
+  - resource "aws_default_security_group" "default" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group/sg-08b7a7fe678874537" -> null
+      - description            = "default VPC security group" -> null
+      - egress                 = [] -> null
+      - id                     = "sg-08b7a7fe678874537" -> null
+      - ingress                = [] -> null
+      - name                   = "default" -> null
+      - owner_id               = "<12-digit-number>" -> null
+      - region                 = "us-east-2" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "nlp-default-locked"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-default-locked"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_id                 = "vpc-05064579b6dffd978" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_instance.agent[0] will be destroyed
+  - resource "aws_instance" "agent" {
+      - ami                                  = "ami-096d6538c463eb1db" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<12-digit-number>:instance/i-0647124be9d5ef476" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-0647124be9d5ef476" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "nlp-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-066dc8ef1dff0b9ab" -> null
+      - private_dns                          = "ip-10-20-1-12.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.12" -> null
+      - public_dns                           = "<ec2-host>" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-047e5c26003148489" -> null
+      - tags                                 = {
+          - "Name" = "nlp-agent-1"
+          - "Role" = "k3s-agent"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-agent-1"
+          - "Project"    = "CS5287-NLP"
+          - "Role"       = "k3s-agent"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-agent-1-root"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-05836ad200db575e9",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-066dc8ef1dff0b9ab" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<12-digit-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-0280f744c81e5759c" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_instance.agent[1] will be destroyed
+  - resource "aws_instance" "agent" {
+      - ami                                  = "ami-096d6538c463eb1db" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<12-digit-number>:instance/i-0db859373b9d47ebe" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-0db859373b9d47ebe" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "nlp-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-0da55dbae2e23472c" -> null
+      - private_dns                          = "ip-10-20-1-241.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.241" -> null
+      - public_dns                           = "<ec2-host>" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-047e5c26003148489" -> null
+      - tags                                 = {
+          - "Name" = "nlp-agent-2"
+          - "Role" = "k3s-agent"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-agent-2"
+          - "Project"    = "CS5287-NLP"
+          - "Role"       = "k3s-agent"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-agent-2-root"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-05836ad200db575e9",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-0da55dbae2e23472c" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<12-digit-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-0ed5419f7e4ff650f" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_instance.server will be destroyed
+  - resource "aws_instance" "server" {
+      - ami                                  = "ami-096d6538c463eb1db" -> null
+      - arn                                  = "arn:aws:ec2:us-east-2:<12-digit-number>:instance/i-023f2b43ba4c201fb" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-east-2a" -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - force_destroy                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-023f2b43ba4c201fb" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "running" -> null
+      - instance_type                        = "t3.medium" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "nlp-key" -> null
+      - monitoring                           = false -> null
+      - placement_partition_number           = 0 -> null
+      - primary_network_interface_id         = "eni-05eeef6445097bce0" -> null
+      - private_dns                          = "ip-10-20-1-47.us-east-2.compute.internal" -> null
+      - private_ip                           = "10.20.1.47" -> null
+      - public_dns                           = "<ec2-host>" -> null
+      - public_ip                            = "<public-ip>" -> null
+      - region                               = "us-east-2" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-047e5c26003148489" -> null
+      - tags                                 = {
+          - "Name" = "nlp-server"
+          - "Role" = "k3s-server"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-server"
+          - "Project"    = "CS5287-NLP"
+          - "Role"       = "k3s-server"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - volume_tags                          = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-server-root"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_security_group_ids               = [
+          - "sg-05836ad200db575e9",
+        ] -> null
+        # (8 unchanged attributes hidden)
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - cpu_options {
+          - core_count            = 1 -> null
+          - threads_per_core      = 2 -> null
+            # (2 unchanged attributes hidden)
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_protocol_ipv6          = "disabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "required" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - primary_network_interface {
+          - delete_on_termination = true -> null
+          - network_interface_id  = "eni-05eeef6445097bce0" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = true -> null
+          - iops                  = 3000 -> null
+          - kms_key_id            = "arn:aws:kms:us-east-2:<12-digit-number>:key/2230cabd-10d1-4ab0-a9c7-f1f4a1788a32" -> null
+          - tags                  = {} -> null
+          - tags_all              = {} -> null
+          - throughput            = 125 -> null
+          - volume_id             = "vol-065cb12a00483e01c" -> null
+          - volume_size           = 30 -> null
+          - volume_type           = "gp3" -> null
+        }
+    }
+
+  # aws_internet_gateway.main will be destroyed
+  - resource "aws_internet_gateway" "main" {
+      - arn      = "arn:aws:ec2:us-east-2:<12-digit-number>:internet-gateway/igw-058f86403c48928ed" -> null
+      - id       = "igw-058f86403c48928ed" -> null
+      - owner_id = "<12-digit-number>" -> null
+      - region   = "us-east-2" -> null
+      - tags     = {
+          - "Name" = "nlp-igw"
+        } -> null
+      - tags_all = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-igw"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_id   = "vpc-05064579b6dffd978" -> null
+    }
+
+  # aws_key_pair.cluster will be destroyed
+  - resource "aws_key_pair" "cluster" {
+      - arn             = "arn:aws:ec2:us-east-2:<12-digit-number>:key-pair/nlp-key" -> null
+      - fingerprint     = "psOotqkxgjPZafBHV8Z/TR5Y6o3ldX3eFlX7tJDfu9s=" -> null
+      - id              = "nlp-key" -> null
+      - key_name        = "nlp-key" -> null
+      - key_pair_id     = "key-00fe5409ebc7738f0" -> null
+      - key_type        = "ed25519" -> null
+      - public_key      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHVrnAP2ZDAWhbBptZZkDj812bJLX1SdMqHskz+dTv8s nlp-cluster" -> null
+      - region          = "us-east-2" -> null
+      - tags            = {} -> null
+      - tags_all        = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_route_table.public will be destroyed
+  - resource "aws_route_table" "public" {
+      - arn              = "arn:aws:ec2:us-east-2:<12-digit-number>:route-table/rtb-0f70756db5ef30f61" -> null
+      - id               = "rtb-0f70756db5ef30f61" -> null
+      - owner_id         = "<12-digit-number>" -> null
+      - propagating_vgws = [] -> null
+      - region           = "us-east-2" -> null
+      - route            = [
+          - {
+              - cidr_block                 = "0.0.0.0/0"
+              - gateway_id                 = "igw-058f86403c48928ed"
+                # (12 unchanged attributes hidden)
+            },
+        ] -> null
+      - tags             = {
+          - "Name" = "nlp-public-rt"
+        } -> null
+      - tags_all         = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-public-rt"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_id           = "vpc-05064579b6dffd978" -> null
+    }
+
+  # aws_route_table_association.nodes will be destroyed
+  - resource "aws_route_table_association" "nodes" {
+      - id             = "rtbassoc-04b9bd938449d8aea" -> null
+      - region         = "us-east-2" -> null
+      - route_table_id = "rtb-0f70756db5ef30f61" -> null
+      - subnet_id      = "subnet-047e5c26003148489" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_security_group.cluster will be destroyed
+  - resource "aws_security_group" "cluster" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group/sg-05836ad200db575e9" -> null
+      - description            = "NLP-pipeline k3s cluster: admin access from one address, node-to-node traffic only inside the group" -> null
+      - egress                 = [
+          - {
+              - cidr_blocks      = [
+                  - "0.0.0.0/0",
+                ]
+              - description      = "Outbound: image pulls, package downloads and the k3s installer"
+              - from_port        = 0
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "-1"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 0
+            },
+        ] -> null
+      - id                     = "sg-05836ad200db575e9" -> null
+      - ingress                = [
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "Kubernetes API, used by kubectl on the admin computer"
+              - from_port        = 6443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 6443
+            },
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "REST API node port: the one application port that is published"
+              - from_port        = 30080
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 30080
+            },
+          - {
+              - cidr_blocks      = [
+                  - "<public-ip>/32",
+                ]
+              - description      = "SSH, used by Ansible and for debugging"
+              - from_port        = 22
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = false
+              - to_port          = 22
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "agents talk to the Kubernetes API on the server"
+              - from_port        = 6443
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 6443
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "ping, for troubleshooting"
+              - from_port        = -1
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "icmp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = -1
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "pod-to-pod traffic between nodes (VXLAN overlay network)"
+              - from_port        = 8472
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "udp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 8472
+            },
+          - {
+              - cidr_blocks      = []
+              - description      = "the control plane and metrics-server read each node kubelet"
+              - from_port        = 10250
+              - ipv6_cidr_blocks = []
+              - prefix_list_ids  = []
+              - protocol         = "tcp"
+              - security_groups  = []
+              - self             = true
+              - to_port          = 10250
+            },
+        ] -> null
+      - name                   = "nlp-cluster" -> null
+      - owner_id               = "<12-digit-number>" -> null
+      - region                 = "us-east-2" -> null
+      - revoke_rules_on_delete = false -> null
+      - tags                   = {
+          - "Name" = "nlp-cluster-sg"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-cluster-sg"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_id                 = "vpc-05064579b6dffd978" -> null
+        # (1 unchanged attribute hidden)
+    }
+
+  # aws_subnet.nodes will be destroyed
+  - resource "aws_subnet" "nodes" {
+      - arn                                            = "arn:aws:ec2:us-east-2:<12-digit-number>:subnet/subnet-047e5c26003148489" -> null
+      - assign_ipv6_address_on_creation                = false -> null
+      - availability_zone                              = "us-east-2a" -> null
+      - availability_zone_id                           = "use2-az1" -> null
+      - cidr_block                                     = "10.20.1.0/24" -> null
+      - enable_dns64                                   = false -> null
+      - enable_lni_at_device_index                     = 0 -> null
+      - enable_resource_name_dns_a_record_on_launch    = false -> null
+      - enable_resource_name_dns_aaaa_record_on_launch = false -> null
+      - id                                             = "subnet-047e5c26003148489" -> null
+      - ipv6_native                                    = false -> null
+      - map_customer_owned_ip_on_launch                = false -> null
+      - map_public_ip_on_launch                        = true -> null
+      - owner_id                                       = "<12-digit-number>" -> null
+      - private_dns_hostname_type_on_launch            = "ip-name" -> null
+      - region                                         = "us-east-2" -> null
+      - tags                                           = {
+          - "Name" = "nlp-nodes-subnet"
+        } -> null
+      - tags_all                                       = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-nodes-subnet"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - vpc_id                                         = "vpc-05064579b6dffd978" -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # aws_vpc.main will be destroyed
+  - resource "aws_vpc" "main" {
+      - arn                                  = "arn:aws:ec2:us-east-2:<12-digit-number>:vpc/vpc-05064579b6dffd978" -> null
+      - assign_generated_ipv6_cidr_block     = false -> null
+      - cidr_block                           = "10.20.0.0/16" -> null
+      - default_network_acl_id               = "acl-093ff030ac1261fb9" -> null
+      - default_route_table_id               = "rtb-08b4273de196a3c6d" -> null
+      - default_security_group_id            = "sg-08b7a7fe678874537" -> null
+      - dhcp_options_id                      = "dopt-04d422551fc74e766" -> null
+      - enable_dns_hostnames                 = true -> null
+      - enable_dns_support                   = true -> null
+      - enable_network_address_usage_metrics = false -> null
+      - id                                   = "vpc-05064579b6dffd978" -> null
+      - instance_tenancy                     = "default" -> null
+      - ipv6_netmask_length                  = 0 -> null
+      - main_route_table_id                  = "rtb-08b4273de196a3c6d" -> null
+      - owner_id                             = "<12-digit-number>" -> null
+      - region                               = "us-east-2" -> null
+      - tags                                 = {
+          - "Name" = "nlp-vpc"
+        } -> null
+      - tags_all                             = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-vpc"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+        # (4 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_egress_rule.all_out will be destroyed
+  - resource "aws_vpc_security_group_egress_rule" "all_out" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-04401b260e5e3e04b" -> null
+      - cidr_ipv4              = "0.0.0.0/0" -> null
+      - description            = "Outbound: image pulls, package downloads and the k3s installer" -> null
+      - id                     = "sgr-04401b260e5e3e04b" -> null
+      - ip_protocol            = "-1" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id = "sgr-04401b260e5e3e04b" -> null
+      - tags                   = {
+          - "Name" = "nlp-all-out"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-all-out"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["flannel"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-0aa4b0365d61e73bb" -> null
+      - description                  = "pod-to-pod traffic between nodes (VXLAN overlay network)" -> null
+      - from_port                    = 8472 -> null
+      - id                           = "sgr-0aa4b0365d61e73bb" -> null
+      - ip_protocol                  = "udp" -> null
+      - referenced_security_group_id = "sg-05836ad200db575e9" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id       = "sgr-0aa4b0365d61e73bb" -> null
+      - tags                         = {
+          - "Name" = "nlp-flannel"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-flannel"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                      = 8472 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kube_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-0a74d6b1d4b90ab23" -> null
+      - description                  = "agents talk to the Kubernetes API on the server" -> null
+      - from_port                    = 6443 -> null
+      - id                           = "sgr-0a74d6b1d4b90ab23" -> null
+      - ip_protocol                  = "tcp" -> null
+      - referenced_security_group_id = "sg-05836ad200db575e9" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id       = "sgr-0a74d6b1d4b90ab23" -> null
+      - tags                         = {
+          - "Name" = "nlp-kube_api"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-kube_api"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                      = 6443 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["kubelet"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-0385e0ae6bf7b731f" -> null
+      - description                  = "the control plane and metrics-server read each node kubelet" -> null
+      - from_port                    = 10250 -> null
+      - id                           = "sgr-0385e0ae6bf7b731f" -> null
+      - ip_protocol                  = "tcp" -> null
+      - referenced_security_group_id = "sg-05836ad200db575e9" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id       = "sgr-0385e0ae6bf7b731f" -> null
+      - tags                         = {
+          - "Name" = "nlp-kubelet"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-kubelet"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                      = 10250 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.between_nodes["ping"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "between_nodes" {
+      - arn                          = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-001b52b7d12c4dd7f" -> null
+      - description                  = "ping, for troubleshooting" -> null
+      - from_port                    = -1 -> null
+      - id                           = "sgr-001b52b7d12c4dd7f" -> null
+      - ip_protocol                  = "icmp" -> null
+      - referenced_security_group_id = "sg-05836ad200db575e9" -> null
+      - region                       = "us-east-2" -> null
+      - security_group_id            = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id       = "sgr-001b52b7d12c4dd7f" -> null
+      - tags                         = {
+          - "Name" = "nlp-ping"
+        } -> null
+      - tags_all                     = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-ping"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                      = -1 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["kube_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-00a04e1a43b84bb12" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "Kubernetes API, used by kubectl on the admin computer" -> null
+      - from_port              = 6443 -> null
+      - id                     = "sgr-00a04e1a43b84bb12" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id = "sgr-00a04e1a43b84bb12" -> null
+      - tags                   = {
+          - "Name" = "nlp-kube_api"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-kube_api"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                = 6443 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["rest_api"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-0f7335347d6137a39" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "REST API node port: the one application port that is published" -> null
+      - from_port              = 30080 -> null
+      - id                     = "sgr-0f7335347d6137a39" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id = "sgr-0f7335347d6137a39" -> null
+      - tags                   = {
+          - "Name" = "nlp-rest_api"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-rest_api"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                = 30080 -> null
+    }
+
+  # aws_vpc_security_group_ingress_rule.from_admin["ssh"] will be destroyed
+  - resource "aws_vpc_security_group_ingress_rule" "from_admin" {
+      - arn                    = "arn:aws:ec2:us-east-2:<12-digit-number>:security-group-rule/sgr-0bb4339f8cc8eac58" -> null
+      - cidr_ipv4              = "<public-ip>/32" -> null
+      - description            = "SSH, used by Ansible and for debugging" -> null
+      - from_port              = 22 -> null
+      - id                     = "sgr-0bb4339f8cc8eac58" -> null
+      - ip_protocol            = "tcp" -> null
+      - region                 = "us-east-2" -> null
+      - security_group_id      = "sg-05836ad200db575e9" -> null
+      - security_group_rule_id = "sgr-0bb4339f8cc8eac58" -> null
+      - tags                   = {
+          - "Name" = "nlp-ssh"
+        } -> null
+      - tags_all               = {
+          - "Assignment" = "NLP-pipeline"
+          - "Course"     = "CS5287"
+          - "ManagedBy"  = "terraform"
+          - "Name"       = "nlp-ssh"
+          - "Project"    = "CS5287-NLP"
+        } -> null
+      - to_port                = 22 -> null
+    }
+
+Plan: 0 to add, 0 to change, 19 to destroy.
+
+Changes to Outputs:
+  - admin_cidr_in_use = "<public-ip>/32" -> null
+  - agent_public_ips  = [
+      - "<public-ip>",
+      - "<public-ip>",
+    ] -> null
+  - ami_in_use        = "ami-096d6538c463eb1db" -> null
+  - ansible_inventory = <<-EOT
+        # Generated by Terraform ("make cluster-up"). Do not edit: it is rewritten on every run.
+        [server]
+        nlp-server ansible_host=<public-ip> node_ip=10.20.1.47
+        
+        [agents]
+        nlp-agent-1 ansible_host=<public-ip> node_ip=10.20.1.12
+        nlp-agent-2 ansible_host=<public-ip> node_ip=10.20.1.241
+        
+        [k3s:children]
+        server
+        agents
+        
+        [k3s:vars]
+        ansible_user=ubuntu
+        ansible_ssh_private_key_file=/Users/<user>/Desktop/CA/NLP-pipeline/.secrets/nlp-key
+    EOT -> null
+  - server_public_ip  = "<public-ip>" -> null
+  - vpc_id            = "vpc-05064579b6dffd978" -> null
+aws_route_table_association.nodes: Destroying... [id=rtbassoc-04b9bd938449d8aea]
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Destroying... [id=sgr-0bb4339f8cc8eac58]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Destroying... [id=sgr-00a04e1a43b84bb12]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Destroying... [id=sgr-001b52b7d12c4dd7f]
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Destroying... [id=sgr-0f7335347d6137a39]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Destroying... [id=sgr-0aa4b0365d61e73bb]
+aws_default_security_group.default: Destroying... [id=sg-08b7a7fe678874537]
+aws_instance.agent[0]: Destroying... [id=i-0647124be9d5ef476]
+aws_instance.agent[1]: Destroying... [id=i-0db859373b9d47ebe]
+aws_instance.server: Destroying... [id=i-023f2b43ba4c201fb]
+aws_default_security_group.default: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Destroying... [id=sgr-0385e0ae6bf7b731f]
+aws_vpc_security_group_ingress_rule.between_nodes["flannel"]: Destruction complete after 0s
+aws_route_table_association.nodes: Destruction complete after 0s
+aws_vpc_security_group_egress_rule.all_out: Destroying... [id=sgr-04401b260e5e3e04b]
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Destroying... [id=sgr-0a74d6b1d4b90ab23]
+aws_vpc_security_group_ingress_rule.from_admin["kube_api"]: Destruction complete after 0s
+aws_route_table.public: Destroying... [id=rtb-0f70756db5ef30f61]
+aws_vpc_security_group_ingress_rule.between_nodes["ping"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.between_nodes["kubelet"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.from_admin["rest_api"]: Destruction complete after 0s
+aws_vpc_security_group_ingress_rule.from_admin["ssh"]: Destruction complete after 1s
+aws_vpc_security_group_egress_rule.all_out: Destruction complete after 1s
+aws_vpc_security_group_ingress_rule.between_nodes["kube_api"]: Destruction complete after 1s
+aws_route_table.public: Destruction complete after 1s
+aws_internet_gateway.main: Destroying... [id=igw-058f86403c48928ed]
+aws_instance.agent[0]: Still destroying... [id=i-0647124be9d5ef476, 00m10s elapsed]
+aws_instance.server: Still destroying... [id=i-023f2b43ba4c201fb, 00m10s elapsed]
+aws_instance.agent[1]: Still destroying... [id=i-0db859373b9d47ebe, 00m10s elapsed]
+aws_internet_gateway.main: Still destroying... [id=igw-058f86403c48928ed, 00m10s elapsed]
+aws_instance.agent[0]: Destruction complete after 20s
+aws_instance.agent[1]: Still destroying... [id=i-0db859373b9d47ebe, 00m20s elapsed]
+aws_instance.server: Still destroying... [id=i-023f2b43ba4c201fb, 00m20s elapsed]
+aws_internet_gateway.main: Still destroying... [id=igw-058f86403c48928ed, 00m20s elapsed]
+aws_internet_gateway.main: Destruction complete after 27s
+aws_instance.server: Destruction complete after 30s
+aws_instance.agent[1]: Destruction complete after 30s
+aws_key_pair.cluster: Destroying... [id=nlp-key]
+aws_subnet.nodes: Destroying... [id=subnet-047e5c26003148489]
+aws_security_group.cluster: Destroying... [id=sg-05836ad200db575e9]
+aws_key_pair.cluster: Destruction complete after 0s
+aws_security_group.cluster: Destruction complete after 1s
+aws_subnet.nodes: Destruction complete after 1s
+aws_vpc.main: Destroying... [id=vpc-05064579b6dffd978]
+aws_vpc.main: Destruction complete after 0s
+
+Destroy complete! Resources: 19 destroyed.
+Cluster destroyed.
+NLP-pipeline cleanup scan
+  time    : 2026-11-14 07:01 UTC
+  account : ...3215
+  region  : us-east-2
+  tag     : Project=CS5287-NLP
+
+Created by this project (tagged Project=CS5287-NLP)
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] VPCs
+  [none ] Subnets
+  [none ] Security groups
+  [none ] Internet gateways
+  [none ] Route tables
+  [none ] Key pairs
+
+Anything else with that tag, in any AWS service
+  [none ] Tagged resources
+            (AWS's tag list names 12 items that do not exist any more. Asked for each one directly,
+             AWS says 'not found', so they are not left over; AWS removes such entries from its list by itself.
+             The entries: security-group-rule/sgr-0aa4b0365d61e73bb, security-group-rule/sgr-0385e0ae6bf7b731f, security-group-rule/sgr-0f7335347d6137a39, security-group-rule/sgr-0a74d6b1d4b90ab23, security-group-rule/sgr-00a04e1a43b84bb12, security-group/sg-08b7a7fe678874537, volume/vol-0280f744c81e5759c, volume/vol-065cb12a00483e01c, volume/vol-0ed5419f7e4ff650f, security-group-rule/sgr-0bb4339f8cc8eac58, security-group-rule/sgr-04401b260e5e3e04b, security-group-rule/sgr-001b52b7d12c4dd7f)
+
+Every kind of EC2 resource with that tag (asked of EC2, which needs no extra permission)
+  [none ] Tagged EC2 resources
+            (AWS's tag list names 11 items that do not exist any more. Asked for each one directly,
+             AWS says 'not found', so they are not left over; AWS removes such entries from its list by itself.
+             The entries: vol-0280f744c81e5759c, vol-065cb12a00483e01c, vol-0ed5419f7e4ff650f, sgr-001b52b7d12c4dd7f, sgr-00a04e1a43b84bb12, sgr-0385e0ae6bf7b731f, sgr-04401b260e5e3e04b, sgr-0a74d6b1d4b90ab23, sgr-0aa4b0365d61e73bb, sgr-0bb4339f8cc8eac58, sgr-0f7335347d6137a39)
+
+Resources that cost money, tagged or not, in us-east-2
+  [none ] EC2 instances
+  [none ] EBS volumes
+  [none ] Elastic IP addresses
+  [none ] NAT gateways
+  [none ] Load balancers
+
+RESULT: CLEAN - nothing tagged Project=CS5287-NLP is left, and no billable resources are running in us-east-2.
+        AWS's tag lists still name 12 deleted items; each was asked for directly and does not exist, so none of them is a leftover.
