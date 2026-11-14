@@ -1,0 +1,473 @@
+template_id,label,rule,reason,parsed,latency_seconds,cached,template,n_val,n_val_anomalous,n_test,n_test_anomalous
+1,0,,No specific keywords match the log message.,True,3.1554486819995873,True,instruction cache parity error corrected,5206,0,33547,0
+6,0,1.0,log contains normal operational message,True,3.3016956920000666,True,"CE sym <*>, at <*>, mask <*>",67817,0,19837,0
+10,1,30.0,exited abnormally,True,3.0443958519999796,True,"ciod: Error loading <*> invalid or missing program image, No such file or directory",12944,0,4752,0
+13,0,27.0,general informational message about system state,True,3.0814677859998483,True,idoproxydb has been started: $Name: <*> $ Input parameters: -enableflush -loguserinfo db.properties BlueGene<*>,32,0,26,0
+14,0,,log indicates a normal restart of ciodb,True,3.2212518640008057,True,ciodb has been restarted.,31,0,44,0
+16,0,,Login failure due to missing file is not a critical error.,True,3.80844036399958,True,ciod: LOGIN <*> failed: No such file or directory,2376,0,3623,0
+18,0,,TLB error interrupt is not covered by any specific rule.,True,3.589873955999792,True,<*> TLB error interrupt,0,0,12,12
+19,0,,No specific keywords match the log message.,True,3.1739596579991485,True,instruction <*> <*>,180,0,166,0
+20,0,,No specific keywords match the given log message.,True,3.215210264000234,True,machine <*> <*>,105,37,127,4
+23,0,27.0,general informational message about system state,True,3.3438892149997628,True,data <*> plb <*>,126,0,106,0
+24,1,8.0,tlb error is a kernel termination due to an error,True,3.7314585020003506,True,tlb error.........................<*>,63,0,53,0
+25,1,25.0,Parity errors in communication,True,3.1598301719996016,True,<*> parity <*>,68,0,79,0
+26,1,25.0,Parity errors in communication,True,3.120889349999743,True,d-cache <*> parity <*>,126,0,106,0
+27,1,22.0,machine check interrupt suggests hardware failure,True,3.3461575549999907,True,imprecise machine check...........<*>,62,0,53,0
+29,0,,The log does not contain any keywords that match the defined rules.,True,3.8871645819999685,True,<*> state <*>,128,0,132,0
+30,0,,No specific keywords match the given log message.,True,3.229464496000219,True,<*> input interrupt enable...<*>,128,0,132,0
+31,0,,No specific keyword phrases match the log message.,True,3.220985398999801,True,floating point <*> <*>,63,1,66,0
+32,0,1.0,The log message does not contain any keywords from the abnormal rules.,True,3.6792950520002705,True,floating pt ex mode <*> enable......<*>,112,0,132,0
+33,0,1.0,contains only debug message without any critical keywords,True,3.516489388000082,True,debug <*> <*>,116,0,132,0
+34,0,,No specific keywords match the log message.,True,3.152842325000165,True,data <*> <*>,56,2,79,1
+36,0,,The log message does not contain any keywords that match the defined rules.,True,3.594512257999668,True,disable <*> <*>,101,0,158,0
+37,0,,No specific keywords match the log message.,True,3.2921771629999057,True,disable apu instruction broadcast........<*>,49,0,66,0
+38,0,,No specific keywords trigger any abnormal conditions.,True,3.5447085860005245,True,guaranteed <*> cache block <*>,92,0,132,0
+39,0,,The log message does not contain any keywords from the defined rules.,True,3.4864977010001894,True,force load/store alignment...............<*>,46,0,66,0
+40,0,,No specific keywords match the log message.,True,3.1215049520005778,True,icache prefetch <*>,91,0,132,0
+48,1,14.0,rts panic! indicates a critical error,True,3.2539198929998747,True,rts panic! - stopping execution,60,60,68,68
+55,1,8.0,rts internal error indicates a kernel termination due to an error,True,3.8746692099994107,True,rts internal error,4,0,12,0
+59,1,30.0,Detected the debugger died suggests an abnormal exit,True,3.3334414880000622,True,ciod: pollControlDescriptors: Detected the debugger died.,298,0,5603,0
+60,0,27.0,general informational message about system state,True,3.071701593999933,True,"ciod: for node <*>, <*> <*> <*> <*> <*> <*> <*>",0,0,38,0
+65,0,,Login failure is not necessarily an abnormal condition.,True,3.242106331999821,True,ciod: LOGIN <*> failed: <*> <*>,0,0,816,816
+66,1,22.0,machine check interrupt suggests hardware failure,True,3.5962537400000656,True,machine check interrupt (bit=<*>): <*> <*> <*> <*>,7,7,7,7
+67,0,,No specific keywords match the given log message.,True,3.248005307999847,True,L<*> <*> <*> register: <*>,15,0,78,0
+68,0,,The log message does not contain any keywords from the defined rules.,True,3.461963497000397,True,start <*>,20,0,104,0
+69,0,,The log message does not contain any keywords that would indicate an abnormal condition.,True,3.600655619000463,True,close EDRAM pages as soon as possible....<*>,5,0,26,0
+70,0,,The log message does not contain any keywords that would indicate an abnormal condition.,True,4.1373237939997125,True,size of <*> <*> <*> <*> (<*>M),10,0,52,0
+71,0,,The log message does not contain any keywords that match the defined rules.,True,3.5468983119999393,True,disable all access to cache directory....<*>,5,0,26,0
+72,0,1.0,The log message does not contain any keywords from the abnormal rules.,True,3.486471729999721,True,write buffer commit threshold............<*>,5,0,26,0
+73,0,1.0,log contains only normal operational message without any keywords triggering abnormal conditions,True,3.6500675400002365,True,prefetch depth for <*> <*>,15,0,78,0
+74,0,1.0,log contains only normal operational message about system settings,True,3.578529069999604,True,max number of outstanding prefetches.....<*>,5,0,26,0
+75,0,1.0,The log message does not contain any keywords from the abnormal rules.,True,3.5181553060001534,True,turn on hidden refreshes.................<*>,5,0,26,0
+76,0,,The log message does not contain any keywords that match the defined rules.,True,3.5916167060004227,True,disable write lines <*>:<*>..................<*>,5,0,26,0
+77,1,30.0,exited abnormally,True,3.2784801329999027,True,capture first <*> <*> error address..<*>,30,0,156,0
+78,0,,log does not contain any critical keywords,True,3.425311655000769,True,disable flagging of DDR UE's as major internal error.<*>,5,0,26,0
+79,0,,The log does not contain any specific keywords that would indicate an abnormal condition.,True,3.6406142949999776,True,<*> error detected in <*> <*>,25,0,130,0
+80,0,,No specific rule triggered for the given log message.,True,3.2879243460001817,True,<*> error detected in EDRAM bank <*>,20,0,104,0
+81,1,25.0,parity errors in communication,True,3.2149066200008747,True,parity error in <*> <*>,15,0,78,0
+82,1,25.0,Parity errors in communication,True,3.4864273630000753,True,parity error in read queue <*>,15,0,78,0
+83,0,,No specific keyword phrases match the given log message.,True,3.3176290070005052,True,number of correctable errors detected in L<*> <*>,10,0,52,0
+84,0,,No specific keywords match the log message.,True,3.160655270999996,True,interrupt threshold...<*>,10,0,52,0
+85,1,25.0,Parity errors in communication,True,3.20703211,True,number of lines with parity errors written to L<*> EDRAMs...<*>,5,0,26,0
+86,0,,No specific keywords trigger an abnormal condition.,True,3.6497049720001087,True,DDR <*> <*> register: <*> <*>,10,5,52,26
+87,0,1.0,The log message does not contain any keywords that would indicate an abnormal condition.,True,3.618700402000286,True,memory and bus summary...........................<*>,5,0,26,0
+88,0,,No specific keywords trigger an abnormal condition.,True,3.152307393999763,True,command manager unit summary.....................<*>,5,0,26,0
+89,0,,No specific keywords match the log message.,True,3.17020962999959,True,memory manager <*> <*>,20,0,104,0
+90,0,,The log does not contain any keywords that match the defined rules.,True,4.067479811000339,True,memory manager <*> <*> <*>,20,0,104,0
+91,0,,No specific keyword phrases match the log message.,True,3.24152906099971,True,memory manager <*>,10,0,52,0
+92,0,1.0,indicates a normal operational message,True,3.029775320999761,True,state machine....................................<*>,5,0,26,0
+93,1,27.0,general informational messages about system state,True,3.152666877000229,True,memory manager / command manager address parity..<*>,5,0,26,0
+94,0,27.0,general informational message about system state,True,3.458981956000571,True,regctl scancom interface.........................<*>,5,0,26,0
+96,0,,No specific keyword phrases match any of the defined rules.,True,3.3376171429999886,True,capture valid.........<*>,5,0,26,0
+97,0,,No specific keywords match the given log message.,True,3.18921550900086,True,symbol................<*>,5,0,26,0
+98,0,1.0,log contains only a mask without any specific keyword triggering an alert,True,3.398462811999707,True,mask..................<*>,5,0,26,0
+99,1,30.0,exited abnormally,True,3.3982666490001066,True,miscompare............<*>,5,0,26,0
+100,1,8.0,Kernel terminations and panics are severe errors,True,3.287633148999703,True,uncorrectable error...<*>,5,0,26,0
+101,0,,The log message does not contain any keywords that match the defined rules.,True,3.5866027559995928,True,correctable error.....<*>,5,0,26,0
+102,0,1.0,The log message does not contain any keywords from the abnormal rules.,True,3.477461419000065,True,qw trapped............<*>,5,0,26,0
+103,0,,No specific keywords match the log message.,True,3.54568662300062,True,chip select...........<*>,5,0,26,0
+104,1,30.0,Denotes a system or process exiting abnormally,True,3.334627893000288,True,DDR failing data registers: <*> <*>,5,0,26,0
+105,0,,No specific keywords matched any of the rules.,True,3.2488690069994846,True,<*> <*>,15,0,78,0
+110,0,,The log message does not contain any keywords that would indicate an abnormal condition.,True,3.6076289029997497,True,EndServiceAction <*> performed upon <*> by <*>,23,0,40,0
+111,0,27.0,general informational message about system state,True,3.4571745549992556,True,Node card is not fully functional,732,0,585,0
+112,0,,No specific keyword phrases match the log message.,True,3.21101906199965,True,Can not get assembly information for node card,732,0,585,0
+113,1,3.0,mpgood error latch is active,True,3.2742726129999937,True,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,731,0,583,0
+114,0,27.0,general informational message about system state,True,3.1539515200001915,True,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,764,0,658,0
+115,1,30.0,exited abnormally,True,3.433166232000076,True,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,0,0,1,0
+138,0,,The log message does not contain any keywords from the defined rules.,True,3.6513056989997494,True,Starting SystemController,10,0,16,0
+140,0,,The log does not contain any keywords from the defined rules.,True,3.4167425590003404,True,Running as background command,10,0,16,0
+142,1,8.0,kernel terminated,True,2.850687315999494,True,program interrupt: <*> <*>,30,0,24,0
+143,0,1.0,floating point operation is a normal operational message,True,3.4814018580000266,True,floating point operation....................<*>,5,0,4,0
+144,0,1.0,indicates a normal operational message,True,3.3910991009997815,True,store operation.............................<*>,5,0,4,0
+145,0,,No specific keyword phrases match the given log message.,True,3.3082082179998906,True,data store interrupt caused by <*>,10,0,8,0
+146,0,,No specific keywords match the log message.,True,3.171172899999874,True,auxiliary processor.........................<*>,5,0,4,0
+147,0,,No specific rule matches the log message.,True,3.341544203999547,True,byte ordering exception.....................<*>,5,0,4,0
+148,0,,No specific keywords match the given log message.,True,3.584971726999356,True,program interrupt: fp cr update.............<*>,5,0,4,0
+149,0,,No specific keywords match the given log message.,True,3.2630531200002224,True,program interrupt: fp cr field .............<*>,5,0,4,0
+155,0,,No specific keywords match the log message.,True,3.1757450490003976,True,external input interrupt (unit=<*> bit=<*>): <*> <*> <*> <*> <*> <*> <*>,12,0,2,0
+160,0,,No specific keywords from the rules match the log message.,True,3.5071848079996926,True,Ido chip status changed: <*> ip=<*> v=<*> t=<*> status=M <*> <*> <*> <*>:<*>:<*> <*> <*>,161,0,443,0
+179,0,,log indicates an unexpected end of file but does not suggest a critical error,True,3.88138883099964,True,ciod: Unexpected eof at line <*> of node map file <*>,32,0,8,0
+187,1,30.0,exited abnormally,True,3.041596128000492,True,"ciod: Error loading <*> program image too big, <*> > <*>",1272,0,208,0
+189,0,,The log does not contain any keywords that match the defined rules.,True,3.502517378000448,True,job <*> timed out. Block freed.,84,0,36,0
+193,0,27.0,general informational message about system state,True,3.221508724999694,True,ciod: <*> <*> <*> <*> <*> <*> <*> at line <*> of node map file <*>,32,0,24,0
+206,1,9.0,socket closed,True,3.1899413689998255,True,<*> <*> <*> socket closed,55,55,37,37
+209,0,1.0,log contains normal operational status updates,True,3.201249321999967,True,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,1,0,2,0
+218,0,27.0,general informational message about system state,True,3.1032092980003654,True,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,8,0,8,0
+219,0,,shutdown complete is a normal termination message,True,3.0700738240002465,True,shutdown complete,51,0,3,0
+220,0,27.0,general informational message about system state,True,3.542491572000472,True,"PrepareForService is being done on this Midplane (mLctn(R<*>-M<*>), <*> <*> by <*>",32,0,46,0
+221,0,,The log message does not contain any keywords that would indicate an abnormal condition.,True,3.6023255390000486,True,PrepareForService is being done on this rack (R<*>) by <*>,0,0,2,0
+226,0,,log contains general informational message about system state,True,3.156441425000594,True,ciod: In packet from node <*>.<*> <*> message code <*> is not <*> or <*> <*> <*> <*> <*>),11,0,9,0
+258,1,30.0,exited abnormally due to signal,True,3.23825186600061,True,<*> exited abnormally due to signal: Aborted,0,0,19,19
+259,1,30.0,exited abnormally,True,3.414839607000431,True,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",1032,0,8,0
+280,1,18.0,bglerr_ido_pkt_timeout,True,3.238094842999999,True,Ido packet timeout,2,0,92,0
+281,1,18.0,communication failure,True,2.9336656979994586,True,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,2,2,2,2
+282,1,18.0,communication failure,True,2.922173694999401,True,ciod: Error reading message prefix after <*> on CioStream socket to <*>:<*>: <*> <*> <*> <*>,3110,3110,336,336
+305,0,27.0,general informational message about system state,True,3.5358837939993464,True,"Node card VPD check: missing U<*> node, VPD ecid <*> in processor card slot J<*>",0,0,2,0
+309,0,,The log message does not contain any keywords from the defined rules.,True,3.505902120000428,True,Controlling BG/L rows [ <*> <*> <*> <*> <*> <*> <*> <*> ],10,0,16,0
+320,1,12.0,FileSystem mounting failure,True,2.9498471150000114,True,Lustre mount FAILED : bglio<*> : block_id : location,1769,1769,2210,2210
+328,1,13.0,network and communication issues,True,3.0485127640004066,True,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",0,0,8,8
+337,0,,The log message is informational about a DDR issue and does not indicate a severe error.,True,4.30830777599931,True,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",141,0,3,0
+341,1,30.0,exited abnormally,True,3.0339225139996415,True,"ciod: Error loading <*> invalid or missing program image, Permission denied",17280,0,13952,0
+342,0,,The log message does not contain any keywords that trigger the defined rules.,True,3.5917309019996537,True,ciod: generated <*> core files for program <*>,20646,0,6062,0
+348,0,27.0,log message is about starting a server and does not contain any keywords triggering abnormal conditions,True,3.818377270000383,True,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties <*> --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*>,30,0,9,0
+449,1,25.0,parity errors in communication,True,3.421995505999803,True,data cache <*> parity error detected. attempting to correct,13951,0,55,0
+475,1,3.0,major internal error,True,2.871209405000627,True,L<*> major internal error,1,1,2,2
+480,1,30.0,Error receiving packet on tree network suggests a communication failure,True,3.4709074430002147,True,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",6144,6144,1,1
+481,0,,No triggering keywords found in the log message.,True,3.2344524010004534,True,ddr: activating redundant bit steering for next allocation: rank=<*> symbol=<*>,267,0,225,0
+528,0,1.0,The log message indicates the start of a process without any error or abnormal termination keywords.,True,4.46657690199936,True,BGLMaster has been started: ./BGLMaster --consoleip <*> --consoleport <*> --configfile bglmaster.init --autorestart y --db<*>profile /u/bgdb<*>cli/sqllib/db<*>profile --dbproperties db.properties,7,0,24,0
+529,0,,The log message does not contain any keywords from the defined rules.,True,3.4890889580001385,True,"critical input interrupt (unit=<*> bit=<*>): warning for <*> <*> wire, suppressing further interrupts of same type",258,0,3288,0
+530,0,,No specific keywords trigger an abnormal condition.,True,3.154935478999505,True,<*> tree receiver <*> in re-synch state event(s) (dcr <*>) detected over <*> seconds,145,0,3003,0
+531,0,,No specific keywords triggering any abnormal conditions.,True,3.190914222000174,True,<*> torus receiver <*> input pipe error(s) (dcr <*>) detected and corrected over <*> seconds,870,0,2642,0
+532,0,1.0,The log indicates a correction of DDR errors which is a normal operational message.,True,4.19838043100026,True,"<*> ddr error(s) detected and corrected on rank <*>, symbol <*> over <*> seconds",456,0,9980,0
+533,0,1.0,No keywords from critical error rules match.,True,3.154983409000124,True,total of <*> ddr error(s) detected and corrected over <*> seconds,456,0,9959,0
+534,0,1.0,No keywords from critical error rules match.,True,3.152089872000033,True,<*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,103,0,1412,0
+538,1,22.0,machine check interrupt suggests hardware failure,True,3.1435357359996488,True,Machine Check Status Register: <*>,3,0,53,0
+539,0,1.0,Indicates a normal operational message,True,3.3843300190001173,True,Machine State Register: <*>,3,0,66,0
+540,0,1.0,Indicates a normal operational message,True,3.0119078679999802,True,Core Configuration Register <*>: <*>,3,0,66,0
+541,0,,The log message does not contain any keywords that match the defined rules.,True,3.5231368369995835,True,DDR failing info register: DDR Fail Info Register: <*>,3,0,26,0
+542,0,1.0,The log does not contain any keywords that trigger abnormal conditions.,True,3.3835303830001067,True,<*> <*> Registers:,9,0,196,0
+543,0,1.0,log contains only normal operational messages,True,3.4297966930007533,True,r<*>=<*> r<*>=<*> r<*>=<*> r<*>=<*>,24,0,523,0
+544,0,1.0,log contains only system state keywords without any anomalies,True,3.2351937499997803,True,lr=<*> cr=<*> xer=<*> ctr=<*>,3,0,65,0
+545,0,,No specific keywords match the given log message.,True,3.23118606800017,True,msr=<*> dear=<*> esr=<*> fpscr=<*>,3,0,65,0
+546,0,,No specific keywords match the given log message.,True,3.215850522000437,True,dbcr<*>=<*> dbsr=<*> ccr<*>=<*>,3,0,65,0
+547,0,1.0,No keyword phrases from the rules match the log message.,True,3.8223397849997127,True,Floating Point Status and Control Register: <*>,3,0,65,0
+548,0,,No specific keywords match the given log message.,True,3.2193447970003035,True,exception summary........................<*>,3,0,65,0
+549,0,1.0,The log message does not contain any keywords that would indicate an abnormal condition.,True,3.620433746999879,True,enabled exception summary................<*>,3,0,65,0
+550,1,20.0,rts panic! and invalid operation exception indicate a critical system error,True,3.514351503999933,True,invalid operation exception <*>,9,0,195,0
+551,0,,No specific keyword phrases match the given log message.,True,3.7474035479999657,True,overflow exception.......................<*>,3,0,65,0
+552,1,30.0,denotes a system or process exiting abnormally,True,3.3680603339998925,True,underflow exception......................<*>,3,0,65,0
+553,1,30.0,denotes a system or process exiting abnormally,True,3.3521756680002,True,divide-by-zero exception.................<*>,3,0,65,0
+554,1,30.0,exited abnormally,True,3.0174317700002575,True,inexact exception........................<*>,3,0,65,0
+555,1,11.0,rts: kernel terminated,True,3.4108669769993867,True,invalid <*>,18,0,390,0
+556,0,,No specific keyword phrases match the given log message.,True,3.280910567000319,True,fraction <*>,6,0,130,0
+557,0,,The log does not contain any keywords from the defined rules.,True,3.4070270540005367,True,quiet NaN................................<*>,3,0,65,0
+558,0,,No specific keywords matched any of the rules.,True,3.201539211999261,True,minus <*>,6,0,130,0
+559,0,,No specific keywords match the log message.,True,3.537138157999834,True,minus <*> <*>,6,0,130,0
+560,0,,No specific keywords match the log message.,True,3.1562146880005457,True,plus <*>,6,0,130,0
+561,0,,No specific keywords matched any of the rules.,True,3.2312716790002014,True,plus <*> <*>,6,0,130,0
+562,0,,No specific keywords match the log message.,True,3.1382584530001623,True,reserved.................................<*>,3,0,65,0
+563,1,20.0,rts panic! and invalid operation exception suggest critical error,True,3.938262429999668,True,invalid operation exception (int cnvt)...<*>,3,0,65,0
+564,0,,The log message does not contain any keywords that match the defined rules.,True,3.5654297320006663,True,enable invalid operation exceptions......<*>,3,0,65,0
+565,0,,The log message does not contain any keywords that match the defined rules.,True,3.533806516000368,True,enable <*> <*>,15,0,325,0
+566,0,1.0,The log message does not contain any keywords from the abnormal rules.,True,3.476890146000187,True,round nearest............................<*>,3,0,65,0
+567,0,,The log message does not contain any of the keywords specified in the rules.,True,4.181685814999582,True,round toward <*>,9,0,195,0
+568,0,1.0,The log contains only fee keywords which indicate a normal operational message.,True,3.4826502300002176,True,fpr<*>=<*> ffffffff <*> <*>,96,0,1329,0
+569,1,30.0,exited abnormally,True,3.0197334180002144,True,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",11947,0,27510,0
+570,0,27.0,general informational message about system state,True,3.084705593999388,True,<*> <*> <*> <*> <*> <*> <*> <*> <*> as part of Service Action <*>,34,0,732,0
+571,1,21.0,power deactivated,True,3.2194999109997298,True,Power Good signal deactivated: <*> A service action may be required.,79,79,15,15
+572,0,1.0,No keywords from critical error rules match.,True,3.146568709999883,True,<*> torus <*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,770,0,279,0
+573,1,9.0,communication failure,True,2.8433359209993796,True,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",3477,3477,25325,25325
+610,1,8.0,kernel terminated for reason,True,2.9567157150004277,True,Exception Syndrome Register: <*>,0,0,4,0
+611,0,1.0,The log contains only normal operational keywords.,True,3.5907565460001933,True,fpr<*>=<*> <*> <*> <*>,0,0,111,0
+612,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.59493893599938,True,fpr<*>=<*> <*> <*> <*>fdc<*>,0,0,2,0
+613,0,1.0,Contains fee keyword,True,2.832421672000237,True,fpr<*>=<*> <*> f<*>dd<*>f c<*>ba<*>,0,0,1,0
+614,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.54154713600019,True,fpr<*>=<*> <*> <*> c<*>,0,0,2,0
+615,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,4.078297130000465,True,fpr<*>=<*> c<*>d<*> <*> <*>,0,0,4,0
+616,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.217168060000404,True,fpr<*>=<*> c<*>f<*>ed<*> b<*>f<*>a<*> <*>cbea,0,0,1,0
+617,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.4808085360000405,True,fpr<*>=<*> <*> <*> c<*>f<*>,0,0,7,0
+618,0,1.0,The log contains only general keywords without any specific error or warning indicators.,True,3.530708856000274,True,fpr<*>=<*> <*> <*>b<*> <*>,0,0,7,0
+619,0,1.0,Contains normal operational message keywords,True,3.302253818999816,True,fpr<*>=<*> <*>f<*>b<*> <*>b<*>fd c<*>fac,0,0,1,0
+620,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,3.7133862040000167,True,fpr<*>=<*> <*>c<*> <*> <*>,0,0,14,0
+621,0,1.0,Contains fee keyword,True,2.800301068999943,True,fpr<*>=<*> <*> fe<*>a<*> c<*>b<*>ec,0,0,1,0
+622,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.459393258000091,True,fpr<*>=<*> <*> <*> c<*>a<*>,0,0,3,0
+623,0,1.0,"Contains keywords fee, indicating a normal operational message",True,3.6149263639999845,True,fpr<*>=<*> <*>e<*>be <*>f<*>d <*>d<*>f,0,0,1,0
+624,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.4180627030000323,True,fpr<*>=<*> c<*>a<*> <*> <*>,0,0,3,0
+625,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.4798794199996337,True,fpr<*>=<*> c<*>dd<*> <*>c<*>f<*> bff<*>ea,0,0,1,0
+626,0,1.0,Contains fee keyword indicating a normal operational message,True,3.1565915959999984,True,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,0,0,1,0
+627,0,1.0,Contains only normal operational keywords,True,3.343732344000273,True,fpr<*>=<*> <*>d<*>a <*> <*>,0,0,2,0
+628,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.3645165689995338,True,fpr<*>=<*> c<*>ec <*> <*>,0,0,1,0
+629,0,27.0,general informational message about system state,True,3.1596843770003034,True,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties db.properties --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*> --shutdown-timeout <*>,0,0,18,0
+630,0,,log contains general communication information without any error keywords,True,3.2389907080005287,True,ciod: In packet from node <*>.<*> <*> message still ready for node <*> <*> <*> <*> <*>),0,0,2,0
+631,1,22.0,machine check interrupt suggests hardware failure,True,3.5837766899994676,True,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,0,0,23,23
+632,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.6220549239997126,True,fpr<*>=<*> c<*>f<*> <*> <*>,0,0,2,0
+633,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.4964614370001073,True,fpr<*>=<*> <*> <*>de<*>d<*> <*>,0,0,1,0
+634,0,1.0,Contains fee keyword,True,2.8664148160005425,True,fpr<*>=<*> <*> cb<*>ef<*> <*>cf<*>c,0,0,1,0
+635,0,1.0,Contains fee keyword,True,3.160373165999772,True,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,0,0,2,0
+636,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.7667761679995238,True,fpr<*>=<*> <*> <*> <*>fd<*>,0,0,6,0
+637,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,3.7505516810006156,True,fpr<*>=<*> <*> <*>f<*> <*>,0,0,4,0
+638,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.3520965349998733,True,fpr<*>=<*> <*> <*> c<*>b<*>,0,0,2,0
+639,0,1.0,Contains only operational keywords without any anomalies,True,3.535066752999228,True,fpr<*>=<*> bf<*>c<*> e<*>e <*>fc<*>d<*>,0,0,1,0
+640,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.5135527329994147,True,fpr<*>=<*> <*> <*> c<*>c<*>,0,0,8,0
+641,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.5396684500001356,True,fpr<*>=<*> <*> <*> <*>c<*>,0,0,16,0
+642,0,1.0,The log contains only general system state information without any of the keywords triggering abnormal conditions.,True,3.7681868740000937,True,fpr<*>=<*> <*> b<*>b<*> <*>,0,0,2,0
+643,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,4.308301609999944,True,fpr<*>=<*> <*>f<*> <*> <*>,0,0,10,0
+644,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.422200251000504,True,fpr<*>=<*> <*> <*> <*>f<*>,0,0,9,0
+645,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.581281757999932,True,fpr<*>=<*> <*> <*> c<*>d<*>,0,0,2,0
+646,0,1.0,Contains keywords indicating normal operational message,True,3.147081572999923,True,fpr<*>=<*> <*>eddf<*> ae<*>ee<*>be bfaf<*>cf,0,0,1,0
+647,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.5509115730001213,True,fpr<*>=<*> bfe<*>ae<*> d<*>bce c<*>b,0,0,1,0
+648,0,1.0,Contains only normal operational keywords,True,2.9798724510001193,True,fpr<*>=<*> c<*>fbc<*>d <*> <*>fd<*>f<*>,0,0,1,0
+649,0,1.0,log contains normal fee keyword,True,2.974816863000342,True,fpr<*>=<*> <*> c<*>d<*>cf<*> <*>dfb<*>a,0,0,2,0
+650,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.5008377979993384,True,fpr<*>=<*> <*> <*>e<*> <*>,0,0,9,0
+651,0,1.0,contains 'fee' indicating a normal operational message,True,3.697015900000224,True,fpr<*>=<*> <*> <*> <*>ffe<*>,0,0,2,0
+652,0,1.0,Contains fee keyword,True,2.834985833999781,True,fpr<*>=<*> <*> <*>c<*>a bb<*>a<*>,0,0,1,0
+653,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.5582697729996653,True,fpr<*>=<*> <*> <*> <*>b<*>d,0,0,2,0
+654,0,1.0,Contains fee keyword,True,2.8313008730001457,True,fpr<*>=<*> <*> <*>dcda<*> bb<*>f<*>,0,0,1,0
+655,0,27.0,general informational message about system state,True,3.4830180090002614,True,fpr<*>=<*> c<*>a<*>b <*>c<*>d<*>fd <*>b<*>d<*>,0,0,1,0
+656,0,1.0,Contains fee keyword indicating normal operational message,True,3.086886672000219,True,fpr<*>=<*> <*>ec<*>d<*> <*> <*>cb<*>e<*>,0,0,1,0
+657,0,1.0,Contains fee keyword,True,2.835466677999648,True,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,0,0,1,0
+658,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.222209804999693,True,fpr<*>=<*> <*> <*>aa<*>a <*>f<*>a,0,0,1,0
+659,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.941327493999779,True,fpr<*>=<*> <*> <*>b<*>e<*>c<*> bfd<*>fac<*>,0,0,2,0
+660,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.229419080000298,True,fpr<*>=<*> <*>e<*>ca<*> d<*>a<*>c<*> bfb<*>f<*>e,0,0,1,0
+661,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.4230359659995884,True,fpr<*>=<*> bffe<*>d<*> d<*>a<*>c<*>c <*>fbd<*>d<*>,0,0,1,0
+662,0,1.0,Contains only normal operational keywords,True,2.93582157200035,True,fpr<*>=<*> <*> df<*>abd<*> <*>fc<*>b<*>,0,0,1,0
+663,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,4.017072276000363,True,fpr<*>=<*> <*> <*> <*>cb<*>,0,0,3,0
+664,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.1660724459998164,True,fpr<*>=<*> <*> d<*>f<*>d<*>b <*>,0,0,1,0
+665,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.3228156880004462,True,fpr<*>=<*> <*> <*>f<*>c c<*>c<*>cf,0,0,1,0
+666,0,1.0,log contains only fee keyword,True,2.9730563309994977,True,fpr<*>=<*> <*> cd<*>d<*>b<*> <*>d<*>b<*>,0,0,1,0
+667,0,1.0,Contains fee keyword,True,3.1233066650002,True,fpr<*>=<*> <*> <*>c<*>ed bfd<*>fba<*>,0,0,2,0
+668,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.7394227049999245,True,fpr<*>=<*> c<*>fba <*>a<*>b<*> bfb<*>ba,0,0,1,0
+669,0,1.0,Contains only normal operational keywords,True,2.97005266799988,True,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,0,0,1,0
+670,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.5063816350002526,True,fpr<*>=<*> <*> <*>be<*>a <*>edf<*>,0,0,1,0
+671,0,1.0,Contains fee keyword,True,3.06514916299966,True,fpr<*>=<*> <*> a<*>b<*> c<*>eb,0,0,1,0
+672,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.7609374699995897,True,fpr<*>=<*> <*> <*>b<*>d<*> <*>db<*>d,0,0,1,0
+673,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.3125276869996014,True,fpr<*>=<*> <*> b<*>eae bfdc<*>,0,0,2,0
+674,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.275536046000525,True,fpr<*>=<*> c<*>e<*> <*>ad<*>c<*> bfc<*>e<*>fa,0,0,1,0
+675,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.53754961300001,True,fpr<*>=<*> <*> <*>e<*>b<*> <*>,0,0,2,0
+676,0,1.0,Contains only operational keywords without any anomalies,True,3.4012400910005454,True,fpr<*>=<*> <*>fb<*>c<*>c <*>a<*>e<*>c <*>fb<*>b<*>,0,0,1,0
+677,0,1.0,Contains fee keyword indicating normal operational message,True,3.112067083000511,True,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,0,0,1,0
+678,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.1770754159997523,True,fpr<*>=<*> <*> a<*>c<*>cf <*>dc<*>,0,0,1,0
+679,0,1.0,The log contains keywords related to normal operational messages.,True,3.4794207360000655,True,fpr<*>=<*> <*> <*>fcd c<*>a<*>a,0,0,1,0
+680,0,1.0,Contains only normal operational keywords,True,3.423032159000286,True,fpr<*>=<*> <*> f<*>c<*>bd <*>ba,0,0,1,0
+681,0,1.0,Contains only normal operational keywords,True,3.0040897779999796,True,fpr<*>=<*> <*> <*>cd<*>b<*>c bfb<*>b<*>,0,0,2,0
+682,0,1.0,Contains fee keyword,True,2.882304992999707,True,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,0,0,1,0
+683,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.287093361999723,True,fpr<*>=<*> <*>f<*>ea<*>c <*>cc<*>a<*>c c<*>e<*>,0,0,1,0
+684,0,1.0,Contains only normal operational keywords,True,3.3713461440001993,True,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,0,0,1,0
+685,0,1.0,contains 'fee' which is a keyword for normal operational message,True,3.4919433089999075,True,fpr<*>=<*> <*> <*> <*>fa<*>c<*>,0,0,2,0
+686,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.3312871200005247,True,fpr<*>=<*> <*> f<*>b<*>c<*>fd bf<*>c<*>b<*>,0,0,1,0
+687,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.571077435999541,True,fpr<*>=<*> <*> <*> <*>b<*>,0,0,2,0
+688,0,1.0,Contains only normal operational keywords,True,3.3356910689999495,True,fpr<*>=<*> <*> <*>a<*>c<*> <*>,0,0,2,0
+689,0,1.0,The log contains only fee keywords which indicate normal operational messages.,True,3.4211512190004214,True,fpr<*>=<*> <*> <*> <*>ff<*>,0,0,16,0
+690,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.245329147999655,True,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,0,0,2,0
+691,0,1.0,Contains only normal operational keywords,True,3.0004380520003906,True,fpr<*>=<*> c<*>c<*>f<*>c <*>c<*>e<*>ce bf<*>a<*>,0,0,1,0
+692,0,1.0,The log contains only general informational keywords without any specific abnormal conditions.,True,4.013714813999286,True,fpr<*>=<*> <*> <*>a<*> <*>,0,0,3,0
+693,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.263052999000138,True,fpr<*>=<*> <*> <*>d<*>ac<*>c bf<*>e<*>,0,0,1,0
+694,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.2384277959999963,True,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,0,0,1,0
+695,0,1.0,log contains fee which is a keyword for normal operational message,True,3.3774860140001692,True,fpr<*>=<*> <*> b<*>a<*>a<*>c <*>ee<*>f<*>,0,0,1,0
+696,0,1.0,Contains fee keyword,True,3.20504669499951,True,fpr<*>=<*> <*> f<*>f<*>a<*>a <*>d<*>f<*>b,0,0,1,0
+697,0,1.0,Contains fee keyword,True,2.850761982000222,True,fpr<*>=<*> <*> c<*>d<*>c<*>c <*>f<*>cf<*>,0,0,2,0
+698,0,1.0,Contains only normal operational keywords,True,2.9888457799997923,True,fpr<*>=<*> <*> <*> <*>f<*>d<*>,0,0,2,0
+699,0,1.0,Contains fee keyword,True,2.855934246999823,True,fpr<*>=<*> c<*>c<*>ec <*>f<*>a bf<*>c<*>,0,0,1,0
+700,0,1.0,Contains fee keyword,True,2.907724337000218,True,fpr<*>=<*> <*> ea<*>dfa<*>e bf<*>ec<*>,0,0,1,0
+701,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.852725675000329,True,fpr<*>=<*> <*> <*> <*>ffff<*>,0,0,46,0
+702,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.5520411800007423,True,fpr<*>=<*> <*> <*> <*>d,0,0,4,0
+703,0,1.0,Contains 'fee' indicating a normal operational message,True,3.2173575750002783,True,fpr<*>=<*> <*> <*> <*>e<*>,0,0,12,0
+704,0,1.0,The log contains only normal operational keywords.,True,3.3337746590004826,True,fpr<*>=<*> <*>d <*> <*>,0,0,2,0
+705,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.846395861000019,True,fpr<*>=<*> <*> <*> <*>ffff<*>c<*>,0,0,10,0
+706,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.5635309409999536,True,fpr<*>=<*> <*>cfaf<*> <*> <*>,0,0,10,0
+707,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,3.74240602700047,True,fpr<*>=<*> <*> <*>ffff<*> <*>,0,0,10,0
+708,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,4.268625718000294,True,fpr<*>=<*> <*>ffff<*> <*> <*>,0,0,23,0
+709,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.30777920500077,True,fpr<*>=<*> <*> <*> <*>f<*>af,0,0,1,0
+710,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.50251299699994,True,fpr<*>=<*> <*> <*> <*>a<*>aa,0,0,1,0
+711,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.372545541999898,True,fpr<*>=<*> <*>e <*> <*>,0,0,7,0
+712,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.9679457519996504,True,fpr<*>=<*> <*> <*> <*>a<*>a,0,0,3,0
+713,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.671340662000148,True,fpr<*>=<*> <*> <*> <*>b<*>b,0,0,1,0
+714,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.559491235999303,True,fpr<*>=<*> <*> <*> <*>c<*>c,0,0,1,0
+715,0,1.0,The log contains only normal operational keywords.,True,3.148965163999492,True,fpr<*>=<*> <*>f <*> <*>,0,0,4,0
+716,1,13.0,network and communication issues,True,3.449689271000352,True,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,0,0,2,2
+717,0,,"Log indicates a file not found error, which is not critical for system operation.",True,3.7040013659998294,True,ciod: Error creating node map from file my_map.txt: No such file or directory,0,0,24,0
+718,0,1.0,The log contains only general informational keywords without any specific abnormal conditions.,True,3.6210474289991907,True,fpr<*>=<*> <*> <*>d<*> <*>,0,0,4,0
+719,0,1.0,The log contains only general informational keywords without any specific abnormal conditions.,True,3.6247954789996584,True,fpr<*>=<*> <*> <*> <*>a<*>,0,0,2,0
+720,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.6215559629999916,True,fpr<*>=<*> <*>cd<*>f<*> <*>ff<*>a<*> <*>ffff<*>f<*>,0,0,1,0
+721,0,1.0,Contains only fee keyword,True,2.970674071000758,True,fpr<*>=<*> <*>ffff<*>d<*> <*>ff<*>f<*> <*>ffff<*>b<*>,0,0,1,0
+722,0,1.0,The log contains only fee keyword which is associated with normal operational messages.,True,3.6073270690003483,True,fpr<*>=<*> <*> <*> <*>fffffff,0,0,7,0
+723,0,1.0,Contains fee keyword,True,2.8741048290003164,True,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,0,0,1,0
+724,0,1.0,Contains only fee keyword,True,3.3661652119999417,True,fpr<*>=<*> c<*>b <*>ec<*>c<*> bff<*>ed<*>,0,0,1,0
+725,0,1.0,log contains only fee which matches rule 1,True,4.238983447999999,True,fpr<*>=<*> bfed<*>fde <*>d<*>bbc<*> <*>fe<*>f,0,0,1,0
+726,0,1.0,"Contains only fee keyword, indicating normal operation",True,8.854526798000052,False,fpr<*>=<*> <*>fdc<*> <*>c<*>ab bfec<*>f,0,0,1,0
+727,0,1.0,log contains only fee keyword,True,2.7249716049999506,False,fpr<*>=<*> <*>ff<*>cd<*> c<*>b<*>d c<*>e<*>d,0,0,1,0
+728,0,1.0,Contains fee keyword,True,2.431818634000024,False,fpr<*>=<*> c<*>cb<*>d <*>a<*>d<*>dd<*> c<*>aec,0,0,1,0
+729,0,1.0,Contains fee keyword,True,2.5291201450000926,False,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,0,0,1,0
+730,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.296646448000047,False,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,0,0,1,0
+731,0,1.0,Contains only fee keyword which is normal,True,2.7134688190000134,False,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,0,0,1,0
+732,0,1.0,The log contains only fee-related keywords which indicate a normal operational message.,True,3.165506829000037,False,fpr<*>=<*> <*> <*> fffffffa,0,0,1,0
+733,0,1.0,Contains fee keyword,True,2.449038158999997,False,fpr<*>=<*> <*>aaba <*>dc<*>a<*> <*>afc,0,0,1,0
+734,0,1.0,Contains fee keyword,True,2.6193985449999673,False,fpr<*>=<*> bff<*>ab <*>c<*>bc<*>e c<*>d<*>b,0,0,1,0
+735,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.7513197709999986,False,fpr<*>=<*> <*> <*> c<*>e,0,0,2,0
+736,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.007003311999938,False,fpr<*>=<*> <*> <*>c<*> <*>,0,0,4,0
+737,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.214620405000005,False,fpr<*>=<*> bff<*> <*> <*>,0,0,3,0
+738,0,1.0,Contains keywords indicating normal operational message,True,2.7078587539999717,False,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,0,0,1,0
+739,0,1.0,The log contains only general system state information without any keywords triggering an abnormal condition.,True,3.9114716660000113,False,fpr<*>=<*> <*>c<*>d<*> <*> <*>,0,0,2,0
+740,0,1.0,Contains only operational keywords without any anomalies,True,2.826663207000024,False,fpr<*>=<*> bfea<*>f <*>fdbbf<*> bffcbf<*>a,0,0,1,0
+741,0,1.0,Contains fee keyword,True,2.5511031560000674,False,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,0,0,1,0
+742,0,1.0,Contains only normal operational keywords,True,2.693961219000016,False,fpr<*>=<*> bff<*>dec<*> <*>e<*>b<*>df<*> c<*>b<*>b,0,0,1,0
+743,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.142689650999955,False,fpr<*>=<*> <*>ff<*> <*> <*>,0,0,6,0
+744,0,1.0,Contains fee keyword,True,2.913121892999925,False,fpr<*>=<*> <*>ff<*>a<*> <*>da<*>ea<*> <*>b<*>c<*>,0,0,1,0
+745,0,1.0,Contains only fee keyword,True,2.6603838119999637,False,fpr<*>=<*> c<*> f<*>ccd<*> c<*>dfcf,0,0,1,0
+746,0,1.0,Contains fee keyword,True,2.6448905070000137,False,fpr<*>=<*> <*>be<*> <*>ac<*>b<*> <*>d<*>,0,0,1,0
+747,0,1.0,The log contains only operational keywords without any of the abnormal keywords.,True,3.2696612739999864,False,fpr<*>=<*> bfff<*> <*>b<*>f c<*>a,0,0,1,0
+748,0,1.0,log contains fee keyword indicating normal operation,True,3.0554747239999642,False,fpr<*>=<*> <*>e<*>f <*> <*>,0,0,1,0
+749,0,1.0,log contains no keywords triggering any abnormal conditions,True,3.4138085520000914,False,<*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,135092,0
+750,0,1.0,log contains only operational metrics without any error or critical event keywords,True,3.2012240730000485,False,"<*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,135092,0
+751,0,1.0,The log contains no keywords that trigger any abnormal conditions.,True,3.1414895479999814,False,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,4,0
+752,0,1.0,log contains normal operational message without any error keywords,True,3.06789576999995,False,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,4,0
+753,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.5253193420001026,False,fpr<*>=<*> <*>aa<*> <*> <*>,0,0,2,0
+754,0,1.0,contains 'fee' indicating a normal operational message,True,3.043381108999938,False,fpr<*>=<*> <*> <*> <*>fe<*>,0,0,10,0
+755,0,1.0,Contains fee keyword,True,2.7710610490000818,False,fpr<*>=<*> <*> <*>e<*>a<*> c<*>d<*>cb,0,0,4,0
+756,0,1.0,The log contains only general operational keywords without any specific error or abnormal termination indications.,True,3.5108686599999146,False,fpr<*>=<*> <*>d<*> <*> <*>,0,0,2,0
+757,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.9632004259999576,False,fpr<*>=<*> <*>fffff <*> <*>,0,0,2,0
+758,0,,No specific keywords match the log message.,True,3.1071572219998416,False,"external input interrupt (unit=<*> bit=<*>): number of corrected SRAM errors has exceeded threshold, suppressing further interrupts of same type",0,0,57,0
+759,0,,No specific keywords match the log message.,True,3.0672588830000223,False,ddr: Suppressing further CE interrupts,0,0,302,0
+760,0,,No specific keyword phrases from the rules match the log message.,True,3.3940418950001003,False,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,22175,0
+761,0,1.0,Contains only normal operational keywords,True,3.094746716999907,False,fpr<*>=<*> bfb<*>a<*> a<*>aa<*>ac bfc<*>f<*>,0,0,1,0
+762,0,1.0,Contains only fee keyword which is normal,True,3.3940213609998864,False,fpr<*>=<*> bfbaf<*>fe b<*>cf<*> bfc<*>d<*>c,0,0,1,0
+763,0,1.0,Contains only normal operational keywords,True,2.8659181520001766,False,fpr<*>=<*> bfcb<*>d e<*>cdf<*> <*>fcab<*>f<*>,0,0,1,0
+764,0,1.0,log contains only fee keyword,True,2.9050452569999834,False,fpr<*>=<*> bfa<*>c<*>c <*>a<*>e<*> <*>fc<*>e,0,0,1,0
+765,0,1.0,Contains fee keyword indicating normal operational message,True,3.068872147000093,False,fpr<*>=<*> <*>fe<*>b<*> <*>c<*>f<*>c<*> <*>fbcbeb<*>,0,0,1,0
+766,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,4.016696536999916,False,fpr<*>=<*> <*> <*>b <*>,0,0,2,0
+767,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.3822451309999906,False,fpr<*>=<*> <*> <*>afb<*> <*>a,0,0,1,0
+768,0,1.0,Contains only operational keywords without any anomalies,True,3.0326927139999498,False,fpr<*>=<*> c<*>cdf<*> <*>c<*>a<*> bfcefc<*>,0,0,1,0
+769,0,1.0,Contains fee keyword,True,2.8610008230000403,False,fpr<*>=<*> c<*>cf<*>e <*> c<*>cd<*>,0,0,1,0
+770,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,4.2252581750001355,False,fpr<*>=<*> <*>b<*> <*> <*>,0,0,3,0
+771,0,1.0,Contains only normal operational keywords,True,2.8713794049999706,False,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,0,0,1,0
+772,0,1.0,Contains fee keyword indicating normal operational message,True,3.0021378000001278,False,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,0,0,1,0
+773,0,1.0,Contains only normal operational keywords,True,2.8982621259999632,False,fpr<*>=<*> c<*>d <*>aef<*>ff c<*>ac<*>,0,0,1,0
+774,0,1.0,Contains fee keyword,True,2.8801139720001174,False,fpr<*>=<*> c<*>bc<*> ee<*>caaa <*>ff<*>af<*>,0,0,1,0
+775,0,1.0,Contains only normal operational keywords,True,3.272501254999952,False,fpr<*>=<*> <*>a<*> <*> <*>,0,0,6,0
+776,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.1957771080001294,False,fpr<*>=<*> <*> a<*>b<*>ace <*>e,0,0,1,0
+777,0,1.0,log contains only normal operational keywords,True,2.9438209720001396,False,fpr<*>=<*> bfc<*>b<*>d <*>cbfb<*> c<*>a<*>bc,0,0,1,0
+778,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.12340908200008,False,fpr<*>=<*> <*> <*>f<*>e<*> <*>,0,0,2,0
+779,0,1.0,Contains fee keyword,True,3.095352534000085,False,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,0,0,1,0
+780,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.542103044999976,False,fpr<*>=<*> c<*>c e<*>ca<*>f<*> c<*>f<*>a<*>,0,0,1,0
+781,0,1.0,Contains only normal operational keywords,True,2.8881618750001508,False,fpr<*>=<*> <*>fd<*>fef<*> <*>e<*>c<*>de bfeb<*>ad<*>,0,0,1,0
+782,0,1.0,Contains only operational keywords without any anomalies,True,3.018577725000114,False,fpr<*>=<*> <*>ff<*>fbd<*> <*>c<*>decd bfeb<*>b<*>e,0,0,1,0
+783,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.559067690999882,False,fpr<*>=<*> bfe<*>cfc<*> <*>b<*>fa<*>d<*> bfe<*>cf<*>,0,0,1,0
+784,0,1.0,Contains fee keyword indicating a normal operational message,True,3.4002357279998705,False,fpr<*>=<*> <*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*>,0,0,1,0
+785,0,1.0,Contains only normal operational keywords,True,2.93417261899981,False,fpr<*>=<*> <*> <*> bff<*>d<*>,0,0,2,0
+786,0,1.0,Contains only operational keywords without any anomalies,True,3.0202204520001033,False,fpr<*>=<*> bdd<*>fe c<*>b<*>fb <*>df<*>dd<*>,0,0,1,0
+787,0,1.0,Contains only normal operational keywords,True,2.8991501909999897,False,fpr<*>=<*> <*>df<*>ed <*>dc<*> <*>df<*>ce,0,0,1,0
+788,0,1.0,log contains only normal operational message keywords,True,3.521468595999977,False,fpr<*>=<*> bdecab<*> fd<*>c<*> <*>df<*>ddff,0,0,1,0
+789,0,27.0,general informational message about system state,True,3.0400686380000934,False,fpr<*>=<*> bdf<*>e<*>c bd<*>be<*>c <*>dff<*>,0,0,1,0
+790,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.147026753999853,False,fpr<*>=<*> <*> <*> <*>f<*>a<*>,0,0,2,0
+791,0,1.0,"Contains 'fee', which is a keyword for normal operational messages.",True,3.42809540799999,False,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,0,0,1,0
+792,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.6248759939999218,False,fpr<*>=<*> bef<*>e<*> cee<*>d<*> <*>f<*>a<*>e,0,0,1,0
+793,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.1750249039998835,False,fpr<*>=<*> bef<*> a<*>a<*>c<*> <*>f<*>a<*>e<*>b,0,0,1,0
+794,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.0635743709999588,False,fpr<*>=<*> <*> <*> bf<*>,0,0,4,0
+795,0,1.0,Contains fee keyword indicating a normal operational message,True,3.046149812000067,False,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,0,0,1,0
+796,0,1.0,log contains fee keyword,True,2.965025945999969,False,fpr<*>=<*> <*>e<*>fde<*>c <*>fee<*> be<*>bcf,0,0,1,0
+797,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.791186221000089,False,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,0,0,1,0
+798,0,1.0,Contains only normal operational keywords,True,2.8702601780000805,False,fpr<*>=<*> be<*>bc<*> bd<*>ac<*>d be<*>ba<*>ec,0,0,1,0
+799,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.2673972530001265,False,fpr<*>=<*> <*>e<*> <*> <*>,0,0,2,0
+800,0,1.0,Contains only normal operational keywords,True,2.8620172329999605,False,fpr<*>=<*> bed<*>f<*> b<*>fb<*> <*>edb<*>e<*>,0,0,1,0
+801,0,1.0,log contains 'fea' which matches rule 1,True,3.730612899999869,False,fpr<*>=<*> <*>ec<*>d fea<*>a <*>edb<*>b,0,0,1,0
+802,0,1.0,Contains only operational keywords without any anomalies,True,3.051617752000084,False,fpr<*>=<*> <*>edb<*>e <*>a<*>e <*>edb<*>bd,0,0,1,0
+803,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.474622689000171,False,fpr<*>=<*> bed<*> <*>ec<*>cf<*> <*>ec<*>,0,0,1,0
+804,0,1.0,Contains fee keyword,True,2.7530168729999787,False,fpr<*>=<*> <*>ec<*>f<*> d<*>dbe<*>ae bed<*>,0,0,1,0
+805,0,1.0,Contains normal operational message keywords,True,3.3766476549999425,False,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,2,0
+806,0,,The log message does not contain any keywords from the defined rules.,True,3.4526626110000507,False,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,0,0,1024,0
+807,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.1891204319999815,False,fpr<*>=<*> <*>ffb<*> <*> <*>,0,0,6,0
+808,0,1.0,The log contains only general operational keywords without any specific error or abnormal termination indications.,True,3.5876731020000534,False,fpr<*>=<*> <*> d<*>d<*> <*>,0,0,2,0
+809,0,1.0,"contains 'fee', indicating a normal operational message",True,3.6276443209999343,False,fpr<*>=<*> <*>fe<*>b<*>e<*> <*>a bcf<*>b<*>f,0,0,1,0
+810,0,1.0,Contains only normal operational keywords,True,2.8806297539999832,False,fpr<*>=<*> <*>db<*> <*> <*>,0,0,3,0
+811,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,3.6331631539999307,False,fpr<*>=<*> <*> f<*> <*>,0,0,2,0
+812,0,1.0,The log contains only general fee-related keywords without any specific error or abnormal termination indications.,True,3.656304197000054,False,fpr<*>=<*> <*> fffffe<*>a <*>,0,0,3,0
+813,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.811373969999977,False,fpr<*>=<*> c<*>d<*>cb <*> <*>,0,0,1,0
+814,0,1.0,The log contains only fee-related keywords and no other critical error indicators.,True,3.446278861999872,False,fpr<*>=<*> bf<*>d<*>cb <*> <*>,0,0,4,0
+815,0,1.0,Contains only normal operational keywords,True,2.8719576080000024,False,fpr<*>=<*> <*>c<*>a<*> <*> <*>,0,0,1,0
+816,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.4708434330000273,False,fpr<*>=<*> b<*>cac<*>bd <*> <*>,0,0,1,0
+817,0,1.0,The log contains only fee-related keywords which indicate normal operation.,True,3.9594781579999108,False,fpr<*>=<*> <*>c<*>cb<*> <*> <*>,0,0,1,0
+818,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.082611713999995,False,fpr<*>=<*> bc<*>c<*>f<*> <*>ecc <*>,0,0,1,0
+819,0,1.0,The log contains only operational keywords without any of the abnormal keywords.,True,3.426924303000078,False,fpr<*>=<*> bc<*>cceb <*> <*>,0,0,1,0
+820,0,1.0,Contains only normal operational keywords,True,2.934771253000008,False,fpr<*>=<*> bc<*>b<*> fa<*>c<*> <*>ce<*>,0,0,1,0
+821,0,1.0,The log contains only operational keywords without any of the abnormal keywords.,True,3.9722155150000162,False,fpr<*>=<*> bc<*>d<*> <*>decd<*> <*>cb<*>ddb,0,0,1,0
+822,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.052799448000087,False,fpr<*>=<*> bc<*>f <*> <*>,0,0,1,0
+823,0,1.0,log contains only fee keyword,True,2.8485103470000013,False,fpr<*>=<*> bc<*>dd<*> <*> <*>,0,0,1,0
+824,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.105291847999979,False,fpr<*>=<*> bc<*>ecf <*> <*>,0,0,1,0
+825,0,1.0,Contains only operational keywords without any anomalies,True,3.222125329999926,False,fpr<*>=<*> bccac<*>e <*> <*>,0,0,1,0
+826,0,1.0,Contains fee keyword,True,3.108558799000093,False,fpr<*>=<*> <*>ce<*> <*>eab<*>e <*>cd<*>a<*>,0,0,1,0
+827,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.465470833999916,False,fpr<*>=<*> <*> <*>e<*>c<*>c<*> <*>fc<*>fc<*>b,0,0,1,0
+828,0,1.0,contains 'fee' which is a keyword for normal operational message,True,3.363349685000003,False,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,0,0,1,0
+829,0,1.0,Contains fee keyword indicating normal operational message,True,2.995858958000099,False,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,0,0,1,0
+830,0,1.0,Contains fee keyword,True,3.1059023180000622,False,fpr<*>=<*> <*> <*>cd<*>b bfe<*>c<*>,0,0,1,0
+831,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.376335367000138,False,fpr<*>=<*> <*>a<*>f a<*>c<*> <*>f<*>ce<*>,0,0,1,0
+832,0,1.0,log contains only fee keyword,True,2.8568363849999514,False,fpr<*>=<*> <*>b<*>d <*>d<*>d<*> <*>fc<*>c,0,0,1,0
+833,0,1.0,The log contains only general system state information without any keywords triggering an abnormal condition.,True,3.5899693750000097,False,fpr<*>=<*> <*> <*> <*>fdfffff,0,0,2,0
+834,0,1.0,Contains fee keyword,True,3.0812813469999583,False,fpr<*>=<*> <*> add<*>a<*> <*>e<*>fbcd,0,0,1,0
+835,0,1.0,log contains only normal operational keywords,True,2.946035337000012,False,fpr<*>=<*> bfb<*>b<*> <*> bc<*>bfd<*>,0,0,1,0
+836,0,1.0,"contains 'fee', indicating a normal operational message",True,3.1006788969998524,False,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,0,0,2,0
+837,0,1.0,Contains only normal operational keywords,True,2.897300679999944,False,fpr<*>=<*> <*>f<*>f<*> <*> <*>,0,0,1,0
+838,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.2858428100000765,False,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,0,0,1,0
+839,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.5384593640001185,False,fpr<*>=<*> <*> a<*>e <*>f<*>e<*>a,0,0,1,0
+840,0,1.0,Contains fee keyword,True,2.744571020999956,False,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,0,0,1,0
+841,0,1.0,Contains fee keyword,True,2.7090590059999613,False,fpr<*>=<*> <*>b<*>d<*> dfd<*>f <*>f<*>b,0,0,1,0
+842,0,1.0,"Contains keywords 'fee', indicating a normal operational message",True,3.1805649760001415,False,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,0,0,1,0
+843,0,1.0,The log contains only general file descriptor and file control commands without any keywords triggering abnormal conditions.,True,4.340736252999932,False,fpr<*>=<*> fd<*> fcc<*>d<*>f<*> <*>,0,0,1,0
+844,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.1787543699999787,False,fpr<*>=<*> bb<*>e<*> fcd<*> <*>,0,0,1,0
+845,0,1.0,Contains only fee keyword,True,2.78381234099993,False,fpr<*>=<*> e<*>cb<*> <*>cd<*> f<*>bde<*>,0,0,1,0
+846,0,1.0,Contains feeb which is a keyword for normal operational message,True,3.2943647079998755,False,fpr<*>=<*> <*> ba<*>feeb<*> <*>fdff<*>c,0,0,1,0
+847,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.568773255999986,False,fpr<*>=<*> <*> <*>bc<*>f<*>b <*>fdf<*>eff,0,0,1,0
+848,0,1.0,Contains fee keyword,True,2.719895979000057,False,fpr<*>=<*> <*> c<*>f<*>ff <*>fdef<*>e<*>,0,0,1,0
+849,0,1.0,The log contains only general system state information without any of the keywords triggering abnormal conditions.,True,3.6272640409999894,False,fpr<*>=<*> <*> b<*>c<*> <*>,0,0,2,0
+850,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.3478873799999747,False,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,0,0,3,0
+851,1,19.0,signals a failure in the execution flow or program logic,True,3.8207950010000786,False,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",0,0,1,1
+852,0,1.0,The log contains only operational keywords without any of the abnormal keywords.,True,3.3994379480000134,False,fpr<*>=<*> bfd<*>c <*> <*>,0,0,3,0
+853,0,1.0,Contains fee keyword,True,2.7244136950000666,False,fpr<*>=<*> <*>ff<*>e f<*>a <*>fd<*>cb<*>c,0,0,1,0
+854,0,1.0,Contains fee keyword,True,2.737448901000107,False,fpr<*>=<*> <*>ff<*>da<*> <*>b<*>e<*> <*>c<*>b<*>,0,0,1,0
+855,0,1.0,Contains only fee keyword,True,3.026689710000028,False,fpr<*>=<*> <*>c<*>f a<*>f<*> <*>ff<*>af,0,0,1,0
+856,0,1.0,contains 'fee' indicating a normal operational message,True,3.429773757000021,False,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,0,0,2,0
+857,0,1.0,Contains fee keyword,True,2.7550334780000867,False,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,0,0,1,0
+858,0,1.0,contains 'fee' which is a keyword for normal operational message,True,3.342318374999877,False,fpr<*>=<*> <*>fe<*>e<*> <*> <*>,0,0,2,0
+859,0,1.0,Contains fee keyword indicating normal operational message,True,2.9977888529999746,False,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,0,0,1,0
+860,0,1.0,Contains only normal operational keywords,True,3.2235680060000504,False,fpr<*>=<*> <*>ba<*> <*> c<*>df<*>c,0,0,1,0
+861,0,27.0,general informational message about system state,True,2.985764141000118,False,fpr<*>=<*> <*> abdb<*>b<*> <*>ffd<*>f<*>,0,0,1,0
+862,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.1282331569998405,False,fpr<*>=<*> <*> c<*>a <*>f<*>ed<*>,0,0,1,0
+863,0,1.0,The log contains only operational keywords without any of the abnormal keywords.,True,3.3484664410000278,False,fpr<*>=<*> <*> ace<*>f<*> <*>eb<*>b,0,0,1,0
+864,0,1.0,Contains fee keyword,True,3.1123840039999777,False,fpr<*>=<*> <*> cf<*>aacc<*> bf<*>a<*>d<*>,0,0,1,0
+865,0,1.0,Contains only normal operational keywords,True,3.003904428999931,False,fpr<*>=<*> <*> f<*>b<*>a<*>f<*> <*>fdb<*>c<*>e,0,0,1,0
+866,0,1.0,Contains fee keyword,True,2.7329009259999566,False,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,0,0,1,0
+867,0,1.0,Contains fee keyword,True,2.721677469999804,False,fpr<*>=<*> <*> <*>caf bfe<*>dfed,0,0,3,0
+868,0,1.0,Contains only fee keyword,True,2.82038711600012,False,fpr<*>=<*> <*> c<*>b<*>bc<*> bfc<*>d<*>,0,0,1,0
+869,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.56378106499983,False,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,0,0,3,0
+870,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.0555555250000452,False,fpr<*>=<*> <*> <*> bc<*>,0,0,1,0
+871,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.045311201000004,False,fpr<*>=<*> <*> <*>f<*>c<*>f <*>f<*>c,0,0,1,0
+872,0,1.0,Contains fee keyword indicating normal operational message,True,2.971714681000094,False,fpr<*>=<*> <*> d<*>ee<*>f <*>a<*>c<*>,0,0,1,0
+873,0,1.0,"Contains only fee keyword, indicating a normal operational message",True,3.6321081720000166,False,fpr<*>=<*> <*> <*>cc<*> <*>f<*>fd<*>,0,0,2,0
+874,0,1.0,Contains only fee keyword which is normal,True,3.0827665230001458,False,fpr<*>=<*> bfdc<*>b<*> <*>e<*>f<*> <*>ef<*>f<*>b<*>,0,0,1,0
+875,0,1.0,Contains only normal operational keywords,True,2.8528758020001987,False,fpr<*>=<*> bfe<*>b<*> <*>da<*>e <*>f<*>d<*>a<*>,0,0,1,0
+876,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.4021643900000527,False,fpr<*>=<*> bfdc<*>b<*>a <*> <*>,0,0,1,0
+877,0,1.0,contains 'fee' indicating a normal operational message,True,3.3111030130000927,False,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,0,0,1,0
+878,0,1.0,Contains fee keyword,True,3.2059916149999026,False,fpr<*>=<*> <*>fa <*>e<*>b<*>fae <*>,0,0,1,0
+879,0,1.0,Contains only normal operational keywords,True,2.862025997999808,False,fpr<*>=<*> <*> <*>bb<*>c <*>ff<*>df,0,0,1,0
+880,0,1.0,Contains only normal operational keywords,True,2.8577943059999598,False,fpr<*>=<*> <*> <*> bff<*>,0,0,5,0
+881,0,1.0,Contains only normal operational keywords,True,2.832522132999884,False,fpr<*>=<*> <*>fbdb<*>a<*> <*>abca beb<*>e<*>b,0,0,1,0
+882,0,1.0,Contains keywords fee indicating a normal operational message,True,3.500613598999962,False,fpr<*>=<*> <*>c <*>ed<*>e <*>e<*>f<*>a,0,0,1,0
+883,0,1.0,log contains only fee keyword,True,2.8928794840001046,False,fpr<*>=<*> <*>fb <*>fdd<*>d<*> <*>d<*>c<*>,0,0,1,0
+884,0,1.0,Contains only normal operational keywords,True,2.8274105739999413,False,fpr<*>=<*> <*> <*>ddf<*> <*>f<*>c<*>,0,0,1,0
+885,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.3619330550000086,False,fpr<*>=<*> <*> <*>bea<*>c<*> <*>c<*>ab,0,0,1,0
+886,0,1.0,contains 'fee' which is a keyword for normal operational message,True,3.5498904209998727,False,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,0,0,1,0
+887,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.7350311679999777,False,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,0,0,2,0
+888,0,1.0,"Contains only fee keyword, indicating normal operation.",True,3.0892157739999675,False,fpr<*>=<*> <*> a<*>ffca<*> <*>cfc<*>f,0,0,1,0
+889,0,1.0,Contains keywords from normal operational message,True,2.8976852470000267,False,fpr<*>=<*> <*> <*>c<*>eda<*> <*>fea<*>a,0,0,1,0
+890,0,1.0,"Contains only fee keyword, indicating a normal operational message.",True,3.3873037260000274,False,fpr<*>=<*> <*>cf<*> <*> <*>,0,0,1,0
+891,0,1.0,"Contains 'fee', indicating a normal operational message",True,3.4754725150000922,False,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,0,0,1,0
+892,0,1.0,log contains only fee keyword,True,2.839457282000012,False,fpr<*>=<*> bf<*> e<*>a<*>cb<*> <*>f<*>ce<*>d,0,0,2,0
+893,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.024089179999919,False,fpr<*>=<*> <*> <*> bfe<*>,0,0,3,0
+894,0,1.0,The log contains only fee keywords which indicate normal operational messages.,True,3.2974231709999913,False,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,0,0,2,0
+895,0,1.0,Contains only fee keyword which is normal,True,3.3951749440000185,False,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,0,0,1,0
+896,0,1.0,Contains only normal operational keywords,True,2.8299090709999746,False,fpr<*>=<*> <*> d<*>f<*>a<*>fc <*>f<*>d,0,0,3,0
+897,0,1.0,Contains 'fpr' which is not covered by any specific abnormal keywords but is a normal operational message.,True,3.8918816000000334,False,fpr<*>=<*> <*> <*> bfd<*>,0,0,2,0
+898,0,1.0,The log contains only normal operational keywords without any of the abnormal keywords.,True,3.451861235000024,False,fpr<*>=<*> <*> <*> <*>bb<*>,0,0,1,0
+899,0,1.0,contains 'fee' which is a keyword for normal operational message,True,3.806630522999967,False,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,0,0,1,0
+900,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.359545045999994,False,fpr<*>=<*> <*> <*>a<*>a <*>,0,0,2,0
+901,0,1.0,log contains only operational keywords without any error or abnormal termination signals,True,3.349783787999968,False,fpr<*>=<*> <*>fc<*>af<*> d<*>d<*>bdbb <*>ddb<*>cdf,0,0,1,0
+902,0,1.0,Contains only normal operational keywords,True,2.849613352999995,False,fpr<*>=<*> <*> <*>dc<*>fe<*> <*>,0,0,2,0
+903,0,1.0,Contains keywords 'fee' indicating a normal operational message,True,3.6489300440000534,False,fpr<*>=<*> <*> <*>fa<*> <*>fe<*>dba<*>,0,0,1,0
+904,0,1.0,Contains fee keyword,True,2.7014947280001707,False,fpr<*>=<*> <*> a<*> bfbb<*>c<*>b,0,0,1,0
+905,0,1.0,contains 'fee' indicating a normal operational message,True,3.0784260010000253,False,fpr<*>=<*> <*> <*> <*>fe<*>c<*>eb,0,0,2,0
+906,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.3842757739998888,False,fpr<*>=<*> <*> <*> <*>fa<*>,0,0,1,0
+907,0,1.0,Contains only normal operational keywords,True,3.1674208819999876,False,fpr<*>=<*> <*>fd<*>da<*>e <*> <*>,0,0,1,0
+908,0,1.0,Contains only normal operational keywords,True,3.098515303000113,False,fpr<*>=<*> <*>f<*>b<*>f <*> <*>,0,0,1,0
+909,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.357948135000015,False,fpr<*>=<*> <*>edde <*> <*>,0,0,1,0
+910,0,1.0,The log contains only fee keywords which indicate normal operational messages.,True,3.287855377999904,False,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,0,0,1,0
+911,0,1.0,log contains only fee keyword,True,2.954435101999934,False,fpr<*>=<*> <*> <*> <*>fbb<*>,0,0,1,0
+912,0,1.0,Contains only fee keyword,True,3.1529309340000964,False,fpr<*>=<*> <*> c<*>e<*> bfb<*>bf<*>d,0,0,1,0
+913,0,1.0,"Contains only fee keyword, indicating normal operation",True,3.049444203000121,False,fpr<*>=<*> <*> cb<*>f<*> bc<*>ae<*>,0,0,1,0
+914,0,1.0,log contains only fee keyword which is normal,True,3.0630959330001133,False,fpr<*>=<*> <*> fa<*>ad<*>f <*>fecfc<*>c,0,0,1,0
+915,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.3987965970000005,False,fpr<*>=<*> <*> <*> <*>fdb<*>d<*>,0,0,1,0
+916,0,1.0,The log contains only general system state information without any keywords triggering an abnormal condition.,True,4.194635152000046,False,fpr<*>=<*> <*> <*> <*>c<*>c<*>,0,0,1,0
+917,0,1.0,Contains 'fee' which is a keyword for normal operational messages.,True,3.436861090999855,False,fpr<*>=<*> <*> <*>e<*>c<*> <*>fed<*>,0,0,1,0
+918,0,1.0,Contains fee keyword,True,2.7256384879999587,False,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,0,0,1,0
+919,0,1.0,Contains fee keyword,True,2.724571782999874,False,fpr<*>=<*> <*> <*>dd<*>f<*>b <*>bcf<*>,0,0,1,0
+920,0,1.0,Contains fee keyword,True,3.1052463139999418,False,fpr<*>=<*> <*> f<*>f<*>f <*>b<*>cafc,0,0,1,0
+921,0,1.0,log contains normal fee keyword,True,3.0261360590000095,False,fpr<*>=<*> <*> <*>fba<*>c<*>d bfca<*>fcc,0,0,1,0
+922,0,1.0,"contains 'fee', indicating a normal operational message",True,3.1147273589999713,False,fpr<*>=<*> <*>fe<*>a<*>f<*> <*>d <*>fbbf<*>b<*>,0,0,1,0
+923,0,1.0,Contains only normal operational keywords,True,2.853154327000084,False,fpr<*>=<*> <*> <*> bc<*>dc<*>,0,0,1,0

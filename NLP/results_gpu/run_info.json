@@ -1,0 +1,15 @@
+{
+  "finished": "2026-11-14 14:18",
+  "config": "configs/bgl_gpu.yaml",
+  "smoke_test": false,
+  "gpu": "Tesla T4",
+  "torch": "2.14.1+cu130",
+  "python": "3.13.16",
+  "approach_b": "run again on this GPU with Qwen/Qwen2.5-7B-Instruct (4-bit)",
+  "minutes_in_this_session": {
+    "classify": 14.8,
+    "compare": 0.0,
+    "analyze": 0.5,
+    "figures": 2.0
+  }
+}

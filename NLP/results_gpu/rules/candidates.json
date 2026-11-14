@@ -1,0 +1,1765 @@
+[
+  {
+    "text": "Indicates termination of kernel due to unexpected reasons.",
+    "keywords": [
+      "kernel",
+      "terminated",
+      "reason"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17199,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical failure in the system's ability to mount filesystems.",
+    "keywords": [
+      "unable",
+      "mount",
+      "filesystem"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 3,
+    "message_coverage": 28272,
+    "proposals": 1,
+    "precision": 0.4286
+  },
+  {
+    "text": "Signals a machine check interrupt which can be a sign of hardware failure.",
+    "keywords": [
+      "machine",
+      "check",
+      "interrupt"
+    ],
+    "label": "abnormal",
+    "support": 28,
+    "correct": 5,
+    "message_coverage": 152806,
+    "proposals": 2,
+    "precision": 0.1786
+  },
+  {
+    "text": "Signals a failure in the system's ability to steer memory ranks.",
+    "keywords": [
+      "steer",
+      "rank",
+      "symbol"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Indicates a node card VPD check failure.",
+    "keywords": [
+      "vpd",
+      "node",
+      "card"
+    ],
+    "label": "abnormal",
+    "support": 41,
+    "correct": 2,
+    "message_coverage": 13,
+    "proposals": 1,
+    "precision": 0.0488
+  },
+  {
+    "text": "Signals a Lustre mount failure.",
+    "keywords": [
+      "lustre",
+      "mount",
+      "failed"
+    ],
+    "label": "abnormal",
+    "support": 18,
+    "correct": 6,
+    "message_coverage": 34427,
+    "proposals": 5,
+    "precision": 0.3333
+  },
+  {
+    "text": "Signals a kernel panic, a serious system error.",
+    "keywords": [
+      "kernel",
+      "panic"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 21054,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a failure in the system's ability to receive train data.",
+    "keywords": [
+      "receivetrain",
+      "iap",
+      "failed"
+    ],
+    "label": "abnormal",
+    "support": 17,
+    "correct": 5,
+    "message_coverage": 33707,
+    "proposals": 1,
+    "precision": 0.2941
+  },
+  {
+    "text": "Indicates an unsupported operation or missing component.",
+    "keywords": [
+      "unsupportedoperationexception",
+      "not present"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical error condition related to hardware or software failure.",
+    "keywords": [
+      "uncorrectable torus error",
+      "torus error",
+      "external input interrupt",
+      "error reading message prefix",
+      "socket closed",
+      "bglerr_ido_pkt_timeout"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 5,
+    "message_coverage": 19905,
+    "proposals": 1,
+    "precision": 0.7143
+  },
+  {
+    "text": "Reflects a failure in the communication or network infrastructure.",
+    "keywords": [
+      "no ethernet link",
+      "socket to",
+      "socket closed"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 25882,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Denotes a system or process exiting abnormally.",
+    "keywords": [
+      "exited abnormally",
+      "segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 18,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a failure in the initialization or setup phase of the system.",
+    "keywords": [
+      "monitor caught",
+      "microloader assertion",
+      "rts panic!"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 5360,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a failure in the execution flow or program logic.",
+    "keywords": [
+      "stopping execution",
+      "assertion"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 5358,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Represents a warning or informational message about a recoverable issue.",
+    "keywords": [
+      "input pipe error(s) detected and corrected",
+      "instruction cache parity error corrected"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 67171,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Generalizes messages related to normal operational activities or status updates.",
+    "keywords": [
+      "torus receiver",
+      "tree/torus link training failed",
+      "mmcs_server exited"
+    ],
+    "label": "normal",
+    "support": 10,
+    "correct": 9,
+    "message_coverage": 8525,
+    "proposals": 1,
+    "precision": 0.9
+  },
+  {
+    "text": "Indicates a Lustre mount failure.",
+    "keywords": [
+      "lustre mount",
+      "mount failed"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Signals an external input interrupt issue.",
+    "keywords": [
+      "external input interrupt",
+      "tree header"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 2,
+    "message_coverage": 3,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Highlights a TLB error interrupt.",
+    "keywords": [
+      "tlb error interrupt"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 152723,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to a machine check interrupt related to cache unit data parity error.",
+    "keywords": [
+      "machine check interrupt",
+      "dcache unit data parity error"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 4,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a kernel termination due to bad message header.",
+    "keywords": [
+      "rts: kernel terminated",
+      "bad message header"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 3,
+    "precision": 0.5714
+  },
+  {
+    "text": "Indicates a power deactivation event.",
+    "keywords": [
+      "power deactivated"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 192,
+    "proposals": 4,
+    "precision": 1.0
+  },
+  {
+    "text": "Contains a NullPointerException in database operations.",
+    "keywords": [
+      "while inserting monitor info",
+      "java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Signals a termination due to an invalid CPU in the message header.",
+    "keywords": [
+      "rts: kernel terminated",
+      "invalid cpu"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates termination due to an error",
+    "keywords": [
+      "terminated",
+      "bad message header",
+      "connection lost",
+      "socket closed",
+      "error loading",
+      "external input interrupt",
+      "uncorrectable torus error",
+      "failed to read message prefix",
+      "error reading message prefix"
+    ],
+    "label": "abnormal",
+    "support": 20,
+    "correct": 10,
+    "message_coverage": 43075,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Signals system issues like overheating or hardware malfunction",
+    "keywords": [
+      "temperature sensor chip",
+      "not fully functional",
+      "torus error",
+      "power module not present"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.2
+  },
+  {
+    "text": "Logs related to network communication issues",
+    "keywords": [
+      "bglerr_ido_pkt_timeout",
+      "socket closed",
+      "link card",
+      "ciostream socket"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 4,
+    "message_coverage": 25885,
+    "proposals": 1,
+    "precision": 0.8
+  },
+  {
+    "text": "System monitoring and maintenance activities",
+    "keywords": [
+      "added subnets and addresses to db",
+      "data plb",
+      "monitor caught"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "General informational messages about system state",
+    "keywords": [
+      "nodecard temperature sensor chip",
+      "this link card",
+      "data plb",
+      "added subnets and addresses to db"
+    ],
+    "label": "normal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 27,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Kernel termination due to bad message headers signals severe system failure.",
+    "keywords": [
+      "rts",
+      "kernel",
+      "terminated",
+      "bad",
+      "message",
+      "header"
+    ],
+    "label": "abnormal",
+    "support": 35,
+    "correct": 9,
+    "message_coverage": 46811,
+    "proposals": 1,
+    "precision": 0.2571
+  },
+  {
+    "text": "Data errors often indicate problems with memory or storage.",
+    "keywords": [
+      "data"
+    ],
+    "label": "abnormal",
+    "support": 9,
+    "correct": 2,
+    "message_coverage": 84392,
+    "proposals": 1,
+    "precision": 0.2222
+  },
+  {
+    "text": "Connection timeouts indicate network or communication issues.",
+    "keywords": [
+      "connection",
+      "lost",
+      "timeout"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 0.1429
+  },
+  {
+    "text": "Midplane switch controller failures are critical for the system's operation.",
+    "keywords": [
+      "midplaneswitchcontroller",
+      "parityalignment"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 196,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "Java exceptions like NullPointerException can cause system instability.",
+    "keywords": [
+      "java",
+      "lang",
+      "nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 11,
+    "correct": 2,
+    "message_coverage": 4,
+    "proposals": 1,
+    "precision": 0.1818
+  },
+  {
+    "text": "Power deactivation is a serious issue for the system's operation.",
+    "keywords": [
+      "power",
+      "deactivated"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 3,
+    "message_coverage": 195,
+    "proposals": 2,
+    "precision": 0.6
+  },
+  {
+    "text": "Signals external input errors",
+    "keywords": [
+      "external input interrupt",
+      "uncorrectable torus error"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 2,
+    "message_coverage": 3,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Parity errors in communication",
+    "keywords": [
+      "parityalignment",
+      "data parity"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 46,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Machine check interrupts due to hardware errors",
+    "keywords": [
+      "machine check interrupt",
+      "l dcache unit data parity error"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Connection loss events",
+    "keywords": [
+      "connection lost"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "System controller failures",
+    "keywords": [
+      "midplaneswitchcontroller"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 196,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "General system errors",
+    "keywords": [
+      "error",
+      "interrupt",
+      "error interrupt",
+      "data error",
+      "midplane switch"
+    ],
+    "label": "abnormal",
+    "support": 67,
+    "correct": 7,
+    "message_coverage": 173299,
+    "proposals": 1,
+    "precision": 0.1045
+  },
+  {
+    "text": "Indicates termination of the kernel.",
+    "keywords": [
+      "kernel",
+      "terminated"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17199,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a TLB error interrupt.",
+    "keywords": [
+      "tlb",
+      "error",
+      "interrupt"
+    ],
+    "label": "abnormal",
+    "support": 67,
+    "correct": 7,
+    "message_coverage": 173299,
+    "proposals": 2,
+    "precision": 0.1045
+  },
+  {
+    "text": "Signals a midplane switch controller issue.",
+    "keywords": [
+      "midplaneswitchcontroller",
+      "sendtrain",
+      "receivetrain"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 196,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "Indicates an abnormal exit due to a signal.",
+    "keywords": [
+      "exited",
+      "abnormally",
+      "due",
+      "signal"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 3,
+    "message_coverage": 29,
+    "proposals": 1,
+    "precision": 0.4286
+  },
+  {
+    "text": "Signals a power module status fault.",
+    "keywords": [
+      "power",
+      "module",
+      "status",
+      "fault"
+    ],
+    "label": "abnormal",
+    "support": 17,
+    "correct": 4,
+    "message_coverage": 198,
+    "proposals": 2,
+    "precision": 0.2353
+  },
+  {
+    "text": "Signals a machine check interrupt related to cache unit data parity error.",
+    "keywords": [
+      "machine",
+      "check",
+      "interrupt",
+      "bit",
+      "dcache",
+      "unit",
+      "data",
+      "parity",
+      "error"
+    ],
+    "label": "abnormal",
+    "support": 91,
+    "correct": 9,
+    "message_coverage": 257673,
+    "proposals": 1,
+    "precision": 0.0989
+  },
+  {
+    "text": "Signals a failure in the RTS kernel related to message header issues.",
+    "keywords": [
+      "rts",
+      "bad",
+      "message",
+      "header"
+    ],
+    "label": "abnormal",
+    "support": 34,
+    "correct": 8,
+    "message_coverage": 46799,
+    "proposals": 1,
+    "precision": 0.2353
+  },
+  {
+    "text": "Indicates a system termination or critical failure",
+    "keywords": [
+      "terminated",
+      "panic!",
+      "bad message header",
+      "tree header with no target waiting",
+      "torus error",
+      "connection lost"
+    ],
+    "label": "abnormal",
+    "support": 11,
+    "correct": 8,
+    "message_coverage": 21057,
+    "proposals": 1,
+    "precision": 0.7273
+  },
+  {
+    "text": "Signals a hardware issue or malfunction",
+    "keywords": [
+      "uncorrectable torus error",
+      "torus link training failed",
+      "parityalignment"
+    ],
+    "label": "abnormal",
+    "support": 10,
+    "correct": 2,
+    "message_coverage": 16,
+    "proposals": 1,
+    "precision": 0.2
+  },
+  {
+    "text": "Signals a Java runtime exception",
+    "keywords": [
+      "java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 3,
+    "precision": 0.5
+  },
+  {
+    "text": "Signals a communication failure",
+    "keywords": [
+      "failed to read message prefix",
+      "bglerr_ido_pkt_timeout"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 5995,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a system initialization or setup issue",
+    "keywords": [
+      "while initializing",
+      "while inserting",
+      "expected but found"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.25
+  },
+  {
+    "text": "Indicates a normal operational message",
+    "keywords": [
+      "fee"
+    ],
+    "label": "normal",
+    "support": 25,
+    "correct": 25,
+    "message_coverage": 33,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a general informational message",
+    "keywords": [
+      "while",
+      "expected",
+      "caught"
+    ],
+    "label": "normal",
+    "support": 13,
+    "correct": 11,
+    "message_coverage": 1096,
+    "proposals": 1,
+    "precision": 0.8462
+  },
+  {
+    "text": "Indicates a kernel termination due to an error.",
+    "keywords": [
+      "rts",
+      "kernel",
+      "terminated"
+    ],
+    "label": "abnormal",
+    "support": 23,
+    "correct": 6,
+    "message_coverage": 21054,
+    "proposals": 1,
+    "precision": 0.2609
+  },
+  {
+    "text": "Signals a machine check interrupt related to cache errors.",
+    "keywords": [
+      "machine",
+      "check",
+      "interrupt",
+      "dcache",
+      "unit",
+      "data",
+      "parity",
+      "error"
+    ],
+    "label": "abnormal",
+    "support": 89,
+    "correct": 9,
+    "message_coverage": 257673,
+    "proposals": 2,
+    "precision": 0.1011
+  },
+  {
+    "text": "Signals a Lustre I/O error.",
+    "keywords": [
+      "bglio",
+      "point"
+    ],
+    "label": "abnormal",
+    "support": 8,
+    "correct": 3,
+    "message_coverage": 27554,
+    "proposals": 1,
+    "precision": 0.375
+  },
+  {
+    "text": "Signals a process exiting abnormally.",
+    "keywords": [
+      "exited",
+      "abnormally"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 29,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "Signals a process exiting normally.",
+    "keywords": [
+      "exited",
+      "normally"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 29,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "Signals a midplane switch port disconnection.",
+    "keywords": [
+      "midplaneswitchcontroller",
+      "sendtrain",
+      "port",
+      "disconnected"
+    ],
+    "label": "abnormal",
+    "support": 9,
+    "correct": 4,
+    "message_coverage": 198,
+    "proposals": 1,
+    "precision": 0.4444
+  },
+  {
+    "text": "Indicates a failure in receiving a train",
+    "keywords": [
+      "iap failed",
+      "midplaneswitchcontroller::receivetrain"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 158,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a segmentation fault",
+    "keywords": [
+      "segmentation fault",
+      "mmcs_server exited abnormally due to signal: segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 3,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Socket closure indicates a network issue",
+    "keywords": [
+      "socket closed"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 117,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Kernel termination due to bad message header",
+    "keywords": [
+      "rts: kernel terminated for reason",
+      "rts: bad message header"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 1,
+    "precision": 0.5714
+  },
+  {
+    "text": "Java unsupported operation indicates a runtime issue",
+    "keywords": [
+      "java.lang.unsupportedoperationexception",
+      "power module u"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Machine check interrupt suggests hardware failure",
+    "keywords": [
+      "machine check interrupt"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "FileSystem mounting failure",
+    "keywords": [
+      "lustre mount failed",
+      "error: unable to mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 28272,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "System log entries related to abnormal termination",
+    "keywords": [
+      "exited abnormally",
+      "terminated for reason"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 17205,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a service action being performed.",
+    "keywords": [
+      "as part of service action"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2600,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an error in reading message prefix.",
+    "keywords": [
+      "error reading message prefix",
+      "failed to read message prefix"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 25756,
+    "proposals": 4,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a connection issue.",
+    "keywords": [
+      "connection lost",
+      "bglerr_ido_pkt_timeout"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical system error.",
+    "keywords": [
+      "rts panic!",
+      "rts: kernel terminated"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 21042,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a hardware error.",
+    "keywords": [
+      "uncorrectable torus error",
+      "torus link training failed"
+    ],
+    "label": "abnormal",
+    "support": 9,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.1111
+  },
+  {
+    "text": "Signals a power issue.",
+    "keywords": [
+      "power deactivated:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 192,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a midplane switch controller failure.",
+    "keywords": [
+      "midplaneswitchcontroller::parityalignment() pap failed:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 14,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a hardware error",
+    "keywords": [
+      "uncorrectable torus error",
+      "sram errors has exceeded threshold"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 0.5
+  },
+  {
+    "text": "Signals a software issue",
+    "keywords": [
+      "microloader assertion",
+      "java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 2,
+    "message_coverage": 1505,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Indicates a specific type of interrupt",
+    "keywords": [
+      "external input interrupt",
+      "capture first"
+    ],
+    "label": "normal",
+    "support": 5,
+    "correct": 3,
+    "message_coverage": 1432,
+    "proposals": 1,
+    "precision": 0.6
+  },
+  {
+    "text": "Abnormal exits due to signals suggest process termination problems.",
+    "keywords": [
+      "exited abnormally due to signal",
+      "aborted"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 18,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Lustre mount failures are critical system errors.",
+    "keywords": [
+      "lustre mount failed"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "External input interrupts with specific units and bits often indicate hardware or communication issues.",
+    "keywords": [
+      "external input interrupt",
+      "unit=",
+      "bit="
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 4,
+    "message_coverage": 83,
+    "proposals": 1,
+    "precision": 0.5714
+  },
+  {
+    "text": "Power module status faults are serious hardware errors.",
+    "keywords": [
+      "power module status fault detected"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Logs mentioning 'COMMUNICATION_ERROR' state indicate network or communication issues.",
+    "keywords": [
+      "communication_error",
+      "sequencenumberisok=false"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Indicates a failure to mount a filesystem",
+    "keywords": [
+      "mount",
+      "failed",
+      "unable to mount"
+    ],
+    "label": "abnormal",
+    "support": 18,
+    "correct": 6,
+    "message_coverage": 34427,
+    "proposals": 1,
+    "precision": 0.3333
+  },
+  {
+    "text": "Signals a communication error between services",
+    "keywords": [
+      "communication error",
+      "java.io.ioexception"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a segmentation fault",
+    "keywords": [
+      "segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 3,
+    "proposals": 3,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a kernel panic",
+    "keywords": [
+      "kernel panic"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical error in the Lustre filesystem",
+    "keywords": [
+      "lustre mount",
+      "fs error"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical error in the system's midplane switch controller",
+    "keywords": [
+      "midplaneswitchcontroller::receivetrain"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 158,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a failure in mounting a filesystem.",
+    "keywords": [
+      "nfs mount failed",
+      "lustre mount failed"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Signals a critical system event such as a hardware failure.",
+    "keywords": [
+      "external input interrupt",
+      "tree header with no target waiting",
+      "tlb error interrupt"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 3,
+    "message_coverage": 152726,
+    "proposals": 1,
+    "precision": 0.6
+  },
+  {
+    "text": "Indicates a communication issue between nodes.",
+    "keywords": [
+      "packet from node",
+      "error creating node map"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a failure in the midplane switch controller.",
+    "keywords": [
+      "midplaneswitchcontroller::parityalignment",
+      "midplaneswitchcontroller::sendtrain"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 38,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a power issue.",
+    "keywords": [
+      "power deactivated",
+      "power module status fault detected"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 193,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a kernel termination due to an error.",
+    "keywords": [
+      "rts: kernel terminated"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a failure in the network interface.",
+    "keywords": [
+      "bad cable going into linkcard"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Machine check interrupts indicate hardware issues.",
+    "keywords": [
+      "machine check interrupt",
+      "machine check status register"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Abnormal exits with signals like 'Abort' or 'Segmentation fault' are errors.",
+    "keywords": [
+      "exited abnormally due to signal: aborted",
+      "exited abnormally due to signal: segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 18,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Failed mounts and filesystem errors are abnormal.",
+    "keywords": [
+      "mount failed",
+      "unable to mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 3,
+    "message_coverage": 28272,
+    "proposals": 1,
+    "precision": 0.75
+  },
+  {
+    "text": "Kernel terminations and panics are severe errors.",
+    "keywords": [
+      "kernel terminated for reason",
+      "kernel panic"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17199,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Midplane switch controller failures are critical.",
+    "keywords": [
+      "midplaneswitchcontroller::receivetrain() iap failed"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 158,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Error loading program images indicates a failure.",
+    "keywords": [
+      "ciod: error loading"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Alerts about node card statuses with multiple alerts are abnormal.",
+    "keywords": [
+      "node card status: alert",
+      "alert"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Indicates a login failure",
+    "keywords": [
+      "login failed:"
+    ],
+    "label": "abnormal",
+    "support": 0,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a microloader assertion failure",
+    "keywords": [
+      "microloader assertion"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1503,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a kernel termination due to a bad message header",
+    "keywords": [
+      "kernel terminated for reason bad message header"
+    ],
+    "label": "abnormal",
+    "support": 0,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Indicates a connection loss",
+    "keywords": [
+      "bglerr_ido_pkt_timeout connection lost to node/link/service card"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical system error",
+    "keywords": [
+      "rts panic!",
+      "monitor caught java.lang.unsupportedoperationexception"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 3857,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an uncorrectable error",
+    "keywords": [
+      "uncorrectable error",
+      "external input interrupt uncorrectable torus error"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a failure in the RTS tree/torus link training",
+    "keywords": [
+      "rts tree/torus link training failed"
+    ],
+    "label": "abnormal",
+    "support": 8,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a kernel termination due to bad message header.",
+    "keywords": [
+      "rts: kernel terminated for reason",
+      "bad message header"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 1,
+    "precision": 0.5714
+  },
+  {
+    "text": "Signals a disk I/O error.",
+    "keywords": [
+      "bglio"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Indicates communication issues with DirectIDo objects.",
+    "keywords": [
+      "directido",
+      "com.ibm.ido"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Signals a timeout issue.",
+    "keywords": [
+      "bglerr_ido_pkt_timeout",
+      "communication_error"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 0.1429
+  },
+  {
+    "text": "Signals a connection loss.",
+    "keywords": [
+      "connection lost to node/link/service card"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an unsupported operation.",
+    "keywords": [
+      "unsupportedoperationexception"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a hardware error.",
+    "keywords": [
+      "torus error"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates termination due to an error",
+    "keywords": [
+      "terminated",
+      "bad message header",
+      "rts panic!",
+      "stopping execution",
+      "failed to read message prefix",
+      "error reading message prefix",
+      "bglerr_ido_pkt_timeout",
+      "external input interrupt",
+      "torus error",
+      "segmentation fault",
+      "exited abnormally due to signal",
+      "connection lost to node/link/service card",
+      "uncorrectable torus error",
+      "nio: socket closed",
+      "nio: bglerr_ido_pkt_timeout"
+    ],
+    "label": "abnormal",
+    "support": 17,
+    "correct": 12,
+    "message_coverage": 46831,
+    "proposals": 1,
+    "precision": 0.7059
+  },
+  {
+    "text": "Signals normal operational messages",
+    "keywords": [
+      "write buffer commit threshold",
+      "disable flagging of ddr ue's",
+      "disable write lines",
+      "floating point alignment exceptions",
+      "monitor caught java.lang.unsupportedoperationexception",
+      "no ethernet link"
+    ],
+    "label": "normal",
+    "support": 6,
+    "correct": 4,
+    "message_coverage": 184298,
+    "proposals": 1,
+    "precision": 0.6667
+  },
+  {
+    "text": "Signals a failure in the MidplaneSwitchController module.",
+    "keywords": [
+      "midplaneswitchcontroller",
+      "failed"
+    ],
+    "label": "abnormal",
+    "support": 19,
+    "correct": 6,
+    "message_coverage": 33731,
+    "proposals": 1,
+    "precision": 0.3158
+  },
+  {
+    "text": "Indicates a database operation failure.",
+    "keywords": [
+      "caught",
+      "java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 9,
+    "correct": 2,
+    "message_coverage": 4,
+    "proposals": 1,
+    "precision": 0.2222
+  },
+  {
+    "text": "Signals a microloader assertion failure.",
+    "keywords": [
+      "microloader",
+      "assertion"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1503,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an external input interrupt with specific parameters that may indicate a hardware issue.",
+    "keywords": [
+      "external",
+      "input",
+      "interrupt",
+      "unit=",
+      "bit="
+    ],
+    "label": "abnormal",
+    "support": 19,
+    "correct": 5,
+    "message_coverage": 152806,
+    "proposals": 1,
+    "precision": 0.2632
+  },
+  {
+    "text": "Indicates termination or failure",
+    "keywords": [
+      "terminated",
+      "bad message header",
+      "socket closed",
+      "failed to read message prefix",
+      "error reading message prefix",
+      "exited abnormally",
+      "panic!",
+      "stopped execution",
+      "mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 14,
+    "correct": 11,
+    "message_coverage": 47653,
+    "proposals": 1,
+    "precision": 0.7857
+  },
+  {
+    "text": "System status alerts",
+    "keywords": [
+      "alert",
+      "clock mode",
+      "temperature mask",
+      "temperature limit error latch",
+      "temperature error",
+      "pgood error latch",
+      "mpgood error latch"
+    ],
+    "label": "normal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 16196,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Network and communication issues",
+    "keywords": [
+      "ethernet link",
+      "ciostream socket",
+      "vdp ecid"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 25765,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Core dump generation",
+    "keywords": [
+      "generated core files"
+    ],
+    "label": "normal",
+    "support": 0,
+    "correct": 0,
+    "message_coverage": 0,
+    "proposals": 1,
+    "precision": 0.0
+  },
+  {
+    "text": "Job timeout",
+    "keywords": [
+      "timed out"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 186,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "General error messages",
+    "keywords": [
+      "error",
+      "failed",
+      "not present"
+    ],
+    "label": "abnormal",
+    "support": 72,
+    "correct": 11,
+    "message_coverage": 206959,
+    "proposals": 1,
+    "precision": 0.1528
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "method": "llm_zero_shot",
+  "approach": "B",
+  "condition": "zero_shot",
+  "classifier": "transformers:Qwen/Qwen2.5-7B-Instruct",
+  "settings": {
+    "n_rules": null,
+    "few_shot_examples": null
+  },
+  "n_templates_classified": 472,
+  "n_unparsed_answers": 0,
+  "n_cached_answers": 472,
+  "test": {
+    "tp": 495,
+    "fp": 4219,
+    "tn": 1028,
+    "fn": 0,
+    "precision": 0.10500636402206194,
+    "recall": 1.0,
+    "f1": 0.19005567287387212,
+    "false_positive_rate": 0.8040785210596532,
+    "support": 5742
+  },
+  "test_message_level": {
+    "tp": 28884,
+    "fp": 146678,
+    "tn": 306738,
+    "fn": 31,
+    "precision": 0.16452307446941822,
+    "recall": 0.9989278920975272,
+    "f1": 0.2825158819818366,
+    "false_positive_rate": 0.32349542142315224,
+    "support": 482331
+  },
+  "inference_seconds": 918.2629211109979,
+  "inference_seconds_by_split": {
+    "test": 918.2629211109979
+  }
+}

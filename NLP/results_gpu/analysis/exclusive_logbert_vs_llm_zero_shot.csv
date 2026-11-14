@@ -1,0 +1,6 @@
+caught_by,group_windows,template_id,template,windows
+only llm_zero_shot,39,206,<*> <*> <*> socket closed,14
+only llm_zero_shot,39,573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",8
+only llm_zero_shot,39,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",6
+only llm_zero_shot,39,631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,3
+only llm_zero_shot,39,65,ciod: LOGIN <*> failed: <*> <*>,2

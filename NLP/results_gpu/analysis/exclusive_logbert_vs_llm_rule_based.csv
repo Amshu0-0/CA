@@ -1,0 +1,8 @@
+caught_by,group_windows,template_id,template,windows
+only LogBERT,2,18,<*> TLB error interrupt,2
+only llm_rule_based,37,206,<*> <*> <*> socket closed,14
+only llm_rule_based,37,573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",8
+only llm_rule_based,37,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",6
+only llm_rule_based,37,631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,3
+only llm_rule_based,37,34,data <*> <*>,1
+neither,2,65,ciod: LOGIN <*> failed: <*> <*>,2

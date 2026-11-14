@@ -1,0 +1,9 @@
+template_id,template,missed_windows
+206,<*> <*> <*> socket closed,13
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",4
+65,ciod: LOGIN <*> failed: <*> <*>,2
+631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,2
+258,<*> exited abnormally due to signal: Aborted,1
+48,rts panic! - stopping execution,1
+851,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",1
+573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",1

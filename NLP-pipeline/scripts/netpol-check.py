@@ -169,25 +169,26 @@ def leftovers():
 
 
 # A Service with no ready pod behind it cannot accept a connection, so a connection that the policies allow could not be seen as "open".
+# The EndpointSlice of a Service that has no pod is still there, and its "endpoints" is null (not a list): that is "no pod", not an error.
 def has_ready_pod(service):
     slices = lib.kube_json("-n", lib.NS, "get", "endpointslices", "-l", "kubernetes.io/service-name=" + service)["items"]
 
-    return any(e.get("conditions", {}).get("ready") is not False for s in slices for e in s.get("endpoints", []))
+    return any((e.get("conditions") or {}).get("ready") is not False for s in slices for e in (s.get("endpoints") or []))
 
 
 # A probe pod is "running" when its container has started. It is never "ready" (see the top of this file).
 def is_running(pod):
-    status = pod.get("status", {})
-    containers = status.get("containerStatuses", [])
+    status = pod.get("status") or {}
+    containers = status.get("containerStatuses") or []
 
     return not pod.get("metadata", {}).get("deletionTimestamp") and status.get("phase") == "Running" and bool(containers) and all("running" in c.get("state", {}) for c in containers)
 
 
 # One line about a probe pod that is not running: its phase, why a container waits (for example ImagePullBackOff), or why it has no node.
 def why_not_ready(pod):
-    status = pod.get("status", {})
-    waiting = [c["state"]["waiting"].get("reason", "waiting") for c in status.get("containerStatuses", []) if "waiting" in c.get("state", {})]
-    unplaced = [c.get("message", "") for c in status.get("conditions", []) if c.get("type") == "PodScheduled" and c.get("status") == "False"]
+    status = pod.get("status") or {}
+    waiting = [c["state"]["waiting"].get("reason", "waiting") for c in (status.get("containerStatuses") or []) if "waiting" in (c.get("state") or {})]
+    unplaced = [c.get("message", "") for c in (status.get("conditions") or []) if c.get("type") == "PodScheduled" and c.get("status") == "False"]
 
     return pod["metadata"]["name"] + ": " + status.get("phase", "?") + (", " + ", ".join(waiting) if waiting else "") + (", no node yet: " + unplaced[0][:140] if unplaced else "")
 

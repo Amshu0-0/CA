@@ -19,12 +19,14 @@ anomalous system events?
 Both approaches are evaluated on **the same 5-minute test windows** of BGL, after a **chronological
 60/20/20 split**, by **the same evaluation code**.
 
-- Results, trained model, rules and LLM answers: [`results/`](results/README.md)
-- Full GPU run on Colab: [`notebooks/colab_full_run.ipynb`](notebooks/colab_full_run.ipynb)
+- Run 1 (4-core CPU): results, trained model, rules and LLM answers in [`results/`](results/README.md);
+  every number and figure of it embedded in [`notebooks/results_reported_run.ipynb`](notebooks/results_reported_run.ipynb)
+- Run 2 (the full recipe on a free Colab GPU): [`notebooks/train_on_gpu.ipynb`](notebooks/train_on_gpu.ipynb),
+  with its results in [`results_gpu/`](results_gpu/README.md)
 
 ## Results
 
-Full BGL (4,747,963 messages), test period: 5,742 windows, of which 495 are anomalous. Run on a 4-core
+**Run 1.** Full BGL (4,747,963 messages), test period: 5,742 windows, of which 495 are anomalous. Run on a 4-core
 CPU with `configs/bgl_cpu.yaml`; Approach B used Qwen2.5-7B-Instruct (4-bit) for both rule induction
 and classification.
 
@@ -44,13 +46,38 @@ In short, the rule-guided approach wins clearly, and its rules win without the L
 - **The LLM applies the rules loosely.** It follows the rules' sentences rather than their verified
   keywords: the cited rule's keyword occurs in the template in only 20 of 420 citations.
 
-[`results/`](results/README.md) has every table, the trained model, the rules and all LLM answers.
+### Run 2: the full recipe on a free GPU
+
+The same data, split, windows and models, run again on a Colab Tesla T4 with the full LogBERT recipe
+(every training chunk kept, up to 50 epochs, 20,000 samples for the centre) and Qwen2.5-7B-Instruct
+through `transformers` in 4 bits, which also wrote a new set of rules (54 verified, 99 in run 1).
+Notebook: [`notebooks/train_on_gpu.ipynb`](notebooks/train_on_gpu.ipynb). Files: [`results_gpu/`](results_gpu/README.md).
+
+| Code | Method | Precision | Recall | F1 | F1 in run 1 | False positives | Inference |
+|---|---|---:|---:|---:|---:|---:|---:|
+| A | LogBERT, original random masking | 0.175 | 0.921 | 0.294 | 0.293 | 2,149 | 4.9 s |
+| A+ | LogBERT with full-coverage masking | 0.162 | 0.952 | 0.276 | 0.305 | 2,445 | 10 s |
+| B1 | LLM zero-shot | 0.105 | 1.000 | 0.190 | 0.194 | 4,219 | 15 min |
+| B2 | LLM few-shot (case-based) | 0.439 | 0.939 | 0.598 | 0.481 | 595 | 16 min |
+| B3 | LLM rule-based | 0.416 | 0.992 | 0.586 | 0.644 | 690 | 26 min |
+| B4 | the same induced rules as plain keyword matching (no LLM) | 0.889 | 0.954 | **0.920** | 0.956 | 59 | 19 ms |
+
+- **LogBERT is unchanged** (F1 0.294 against 0.293) after 22 epochs instead of 6: it was not
+  under-trained, new templates are the problem.
+- **The rules still win without the LLM**, but not without false alarms: all 59 of B4 come from four
+  normal templates that contain the word `kernel`, which one rule uses as a keyword.
+- **The middle moves.** B2 and B3 swap places, because the model wrote other rules. Read the ends of
+  the ranking (rules above the LLM above LogBERT), not differences of about 0.1 between the LLM conditions.
+
+[`results/`](results/README.md) (run 1) and [`results_gpu/`](results_gpu/README.md) (run 2) have every
+table, the trained model, the rules and the decisions. Run 1 also has all LLM answers; run 2's cache stays
+in the Google Drive folder of the notebook.
 
 ## Repository layout
 
 ```
-configs/            experiment settings (bgl.yaml = full BGL, bgl_cpu.yaml = the reported CPU run,
-                    bgl_2k.yaml = smoke test)
+configs/            experiment settings (bgl.yaml = full BGL, bgl_cpu.yaml = run 1 on a CPU,
+                    bgl_gpu.yaml = run 2 on a Colab T4, bgl_2k.yaml = smoke test)
 prompts/            every LLM prompt, as plain text (induction + 3 classification conditions)
 src/logad/
   config.py         typed YAML config with `extends:` and --set overrides
@@ -62,9 +89,12 @@ src/logad/
   demo.py           UI-free back end of the demo
 scripts/            one command-line entry point per pipeline stage
 app/demo.py         Gradio demo
-notebooks/          Colab notebook for the full GPU run
+notebooks/          train_on_gpu.ipynb (run 2 on a Colab GPU, results embedded),
+                    results_reported_run.ipynb (run 1, results embedded),
+                    colab_full_run.ipynb (first version of the Colab notebook, superseded)
 tests/              148 unit and integration tests (offline; stub LLMs only)
-results/            the reported run: metrics, LogBERT checkpoint, rules, decisions, analysis, LLM cache
+results/            run 1: metrics, LogBERT checkpoint, rules, decisions, analysis, LLM cache
+results_gpu/        run 2 (GPU): the same, without the LLM cache
 ```
 
 ## Setup
@@ -99,8 +129,8 @@ checks that everything runs.
 ## Full experiment
 
 Run every step with `make all` or follow along below. Each script accepts `--config` and any
-number of `--set section.key=value` overrides. A GPU is strongly recommended; the Colab notebook does
-everything on a free T4.
+number of `--set section.key=value` overrides. A GPU is strongly recommended; the notebook
+`notebooks/train_on_gpu.ipynb` does everything on a free Colab T4 (run 2).
 
 ```bash
 python scripts/download_data.py      # full BGL from Loghub (Zenodo), ~700 MB unpacked
@@ -234,10 +264,10 @@ GitHub Actions runs lint and tests on Python 3.10 and 3.12 for every push.
 | Course requirement | Where |
 |---|---|
 | Documented, reproducible code | `src/logad/`, `scripts/`, `configs/`, `Makefile`, tests and CI |
-| Trained models | `results/logbert/model.pt` |
+| Trained models | `results/logbert/model.pt`, `results_gpu/logbert/model.pt` |
 | Induced rules, all prompts and every LLM answer | `results/rules/rules.md`, `prompts/`, `results/llm_cache/` |
 | Results and error analysis | `results/comparison.md`, `results/analysis/analysis.md` |
-| Run instructions | this README, `results/README.md`, `notebooks/colab_full_run.ipynb` |
+| Run instructions | this README, `results/README.md`, `notebooks/train_on_gpu.ipynb` |
 | Interactive demo | `app/demo.py` |
 
 ## References

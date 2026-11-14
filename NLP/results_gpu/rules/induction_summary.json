@@ -1,0 +1,8 @@
+{
+  "generator": "transformers:Qwen/Qwen2.5-7B-Instruct",
+  "n_batches": 42,
+  "n_candidates": 130,
+  "n_kept": 54,
+  "cache_hits": 0,
+  "cache_misses": 42
+}

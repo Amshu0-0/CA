@@ -434,12 +434,11 @@ def fig_training_curve(output_dir: Path, out: Path, data: dict) -> None:
         arrowprops={"arrowstyle": "-", "color": AXIS, "linewidth": 1},
     )
     ax.set_xlim(0.7, epochs[-1] + 0.3)
-    ax.set_ylim(0, max(train) * 1.1)
+    ax.set_ylim(0, max(max(train), max(dev)) * 1.12)   # dev loss can start above the training loss
     ax.set_xticks(epochs)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Loss (MLKP + 0.1 × VHM)")
-    ax.grid(axis="y")
-    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 1.0))
+    ax.grid(axis="y")   # no legend: each line is labelled at its right end
     save(fig, out, "03_logbert_training")
     data["training"] = {"epoch": epochs, "train_loss": train, "dev_loss": dev}
 

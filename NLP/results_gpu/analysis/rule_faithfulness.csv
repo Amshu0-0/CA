@@ -1,0 +1,473 @@
+template_id,template,label,cited_rule,cited_rule_occurs,cited_rule_label_agrees,keyword_rule,keyword_label,has_alert,n_messages,reason
+1,instruction cache parity error corrected,0,,False,False,,0,False,33547,No specific keywords match the log message.
+6,"CE sym <*>, at <*>, mask <*>",0,1,False,True,,0,False,19837,log contains normal operational message
+10,"ciod: Error loading <*> invalid or missing program image, No such file or directory",1,30,False,True,,0,False,4752,exited abnormally
+13,idoproxydb has been started: $Name: <*> $ Input parameters: -enableflush -loguserinfo db.properties BlueGene<*>,0,27,False,True,,0,False,26,general informational message about system state
+14,ciodb has been restarted.,0,,False,False,,0,False,44,log indicates a normal restart of ciodb
+16,ciod: LOGIN <*> failed: No such file or directory,0,,False,False,,0,False,3623,Login failure due to missing file is not a critical error.
+18,<*> TLB error interrupt,0,,False,False,,0,True,12,TLB error interrupt is not covered by any specific rule.
+19,instruction <*> <*>,0,,False,False,,0,False,166,No specific keywords match the log message.
+20,machine <*> <*>,0,,False,False,,0,True,127,No specific keywords match the given log message.
+23,data <*> plb <*>,0,27,False,True,,0,False,106,general informational message about system state
+24,tlb error.........................<*>,1,8,False,True,,0,False,53,tlb error is a kernel termination due to an error
+25,<*> parity <*>,1,25,False,True,,0,False,79,Parity errors in communication
+26,d-cache <*> parity <*>,1,25,False,True,,0,False,106,Parity errors in communication
+27,imprecise machine check...........<*>,1,22,False,True,,0,False,53,machine check interrupt suggests hardware failure
+29,<*> state <*>,0,,False,False,,0,False,132,The log does not contain any keywords that match the defined rules.
+30,<*> input interrupt enable...<*>,0,,False,False,,0,False,132,No specific keywords match the given log message.
+31,floating point <*> <*>,0,,False,False,,0,False,66,No specific keyword phrases match the log message.
+32,floating pt ex mode <*> enable......<*>,0,1,False,True,,0,False,132,The log message does not contain any keywords from the abnormal rules.
+33,debug <*> <*>,0,1,False,True,,0,False,132,contains only debug message without any critical keywords
+34,data <*> <*>,0,,False,False,,0,True,79,No specific keywords match the log message.
+36,disable <*> <*>,0,,False,False,,0,False,158,The log message does not contain any keywords that match the defined rules.
+37,disable apu instruction broadcast........<*>,0,,False,False,,0,False,66,No specific keywords match the log message.
+38,guaranteed <*> cache block <*>,0,,False,False,,0,False,132,No specific keywords trigger any abnormal conditions.
+39,force load/store alignment...............<*>,0,,False,False,,0,False,66,The log message does not contain any keywords from the defined rules.
+40,icache prefetch <*>,0,,False,False,,0,False,132,No specific keywords match the log message.
+48,rts panic! - stopping execution,1,14,True,True,3,1,True,68,rts panic! indicates a critical error
+55,rts internal error,1,8,False,True,,0,False,12,rts internal error indicates a kernel termination due to an error
+59,ciod: pollControlDescriptors: Detected the debugger died.,1,30,False,True,,0,False,5603,Detected the debugger died suggests an abnormal exit
+60,"ciod: for node <*>, <*> <*> <*> <*> <*> <*> <*>",0,27,False,True,,0,False,38,general informational message about system state
+65,ciod: LOGIN <*> failed: <*> <*>,0,,False,False,,0,True,816,Login failure is not necessarily an abnormal condition.
+66,machine check interrupt (bit=<*>): <*> <*> <*> <*>,1,22,True,True,22,1,True,7,machine check interrupt suggests hardware failure
+67,L<*> <*> <*> register: <*>,0,,False,False,,0,False,78,No specific keywords match the given log message.
+68,start <*>,0,,False,False,,0,False,104,The log message does not contain any keywords from the defined rules.
+69,close EDRAM pages as soon as possible....<*>,0,,False,False,,0,False,26,The log message does not contain any keywords that would indicate an abnormal condition.
+70,size of <*> <*> <*> <*> (<*>M),0,,False,False,,0,False,52,The log message does not contain any keywords that would indicate an abnormal condition.
+71,disable all access to cache directory....<*>,0,,False,False,,0,False,26,The log message does not contain any keywords that match the defined rules.
+72,write buffer commit threshold............<*>,0,1,False,True,,0,False,26,The log message does not contain any keywords from the abnormal rules.
+73,prefetch depth for <*> <*>,0,1,False,True,,0,False,78,log contains only normal operational message without any keywords triggering abnormal conditions
+74,max number of outstanding prefetches.....<*>,0,1,False,True,,0,False,26,log contains only normal operational message about system settings
+75,turn on hidden refreshes.................<*>,0,1,False,True,,0,False,26,The log message does not contain any keywords from the abnormal rules.
+76,disable write lines <*>:<*>..................<*>,0,,False,False,,0,False,26,The log message does not contain any keywords that match the defined rules.
+77,capture first <*> <*> error address..<*>,1,30,False,True,,0,False,156,exited abnormally
+78,disable flagging of DDR UE's as major internal error.<*>,0,,False,False,,0,False,26,log does not contain any critical keywords
+79,<*> error detected in <*> <*>,0,,False,False,,0,False,130,The log does not contain any specific keywords that would indicate an abnormal condition.
+80,<*> error detected in EDRAM bank <*>,0,,False,False,,0,False,104,No specific rule triggered for the given log message.
+81,parity error in <*> <*>,1,25,False,True,,0,False,78,parity errors in communication
+82,parity error in read queue <*>,1,25,False,True,,0,False,78,Parity errors in communication
+83,number of correctable errors detected in L<*> <*>,0,,False,False,,0,False,52,No specific keyword phrases match the given log message.
+84,interrupt threshold...<*>,0,,False,False,,0,False,52,No specific keywords match the log message.
+85,number of lines with parity errors written to L<*> EDRAMs...<*>,1,25,False,True,,0,False,26,Parity errors in communication
+86,DDR <*> <*> register: <*> <*>,0,,False,False,,0,True,52,No specific keywords trigger an abnormal condition.
+87,memory and bus summary...........................<*>,0,1,False,True,,0,False,26,The log message does not contain any keywords that would indicate an abnormal condition.
+88,command manager unit summary.....................<*>,0,,False,False,,0,False,26,No specific keywords trigger an abnormal condition.
+89,memory manager <*> <*>,0,,False,False,,0,False,104,No specific keywords match the log message.
+90,memory manager <*> <*> <*>,0,,False,False,,0,False,104,The log does not contain any keywords that match the defined rules.
+91,memory manager <*>,0,,False,False,,0,False,52,No specific keyword phrases match the log message.
+92,state machine....................................<*>,0,1,False,True,,0,False,26,indicates a normal operational message
+93,memory manager / command manager address parity..<*>,1,27,False,False,,0,False,26,general informational messages about system state
+94,regctl scancom interface.........................<*>,0,27,False,True,,0,False,26,general informational message about system state
+96,capture valid.........<*>,0,,False,False,,0,False,26,No specific keyword phrases match any of the defined rules.
+97,symbol................<*>,0,,False,False,,0,False,26,No specific keywords match the given log message.
+98,mask..................<*>,0,1,False,True,,0,False,26,log contains only a mask without any specific keyword triggering an alert
+99,miscompare............<*>,1,30,False,True,,0,False,26,exited abnormally
+100,uncorrectable error...<*>,1,8,False,True,,0,False,26,Kernel terminations and panics are severe errors
+101,correctable error.....<*>,0,,False,False,,0,False,26,The log message does not contain any keywords that match the defined rules.
+102,qw trapped............<*>,0,1,False,True,,0,False,26,The log message does not contain any keywords from the abnormal rules.
+103,chip select...........<*>,0,,False,False,,0,False,26,No specific keywords match the log message.
+104,DDR failing data registers: <*> <*>,1,30,False,True,,0,False,26,Denotes a system or process exiting abnormally
+105,<*> <*>,0,,False,False,,0,False,78,No specific keywords matched any of the rules.
+110,EndServiceAction <*> performed upon <*> by <*>,0,,False,False,,0,False,40,The log message does not contain any keywords that would indicate an abnormal condition.
+111,Node card is not fully functional,0,27,False,True,,0,False,585,general informational message about system state
+112,Can not get assembly information for node card,0,,False,False,,0,False,585,No specific keyword phrases match the log message.
+113,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,1,3,False,True,2,0,False,583,mpgood error latch is active
+114,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,0,27,False,True,,0,False,658,general informational message about system state
+115,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,1,30,False,True,,0,False,1,exited abnormally
+138,Starting SystemController,0,,False,False,,0,False,16,The log message does not contain any keywords from the defined rules.
+140,Running as background command,0,,False,False,,0,False,16,The log does not contain any keywords from the defined rules.
+142,program interrupt: <*> <*>,1,8,False,True,,0,False,24,kernel terminated
+143,floating point operation....................<*>,0,1,False,True,,0,False,4,floating point operation is a normal operational message
+144,store operation.............................<*>,0,1,False,True,,0,False,4,indicates a normal operational message
+145,data store interrupt caused by <*>,0,,False,False,,0,False,8,No specific keyword phrases match the given log message.
+146,auxiliary processor.........................<*>,0,,False,False,,0,False,4,No specific keywords match the log message.
+147,byte ordering exception.....................<*>,0,,False,False,,0,False,4,No specific rule matches the log message.
+148,program interrupt: fp cr update.............<*>,0,,False,False,,0,False,4,No specific keywords match the given log message.
+149,program interrupt: fp cr field .............<*>,0,,False,False,,0,False,4,No specific keywords match the given log message.
+155,external input interrupt (unit=<*> bit=<*>): <*> <*> <*> <*> <*> <*> <*>,0,,False,False,,0,False,2,No specific keywords match the log message.
+160,Ido chip status changed: <*> ip=<*> v=<*> t=<*> status=M <*> <*> <*> <*>:<*>:<*> <*> <*>,0,,False,False,,0,False,443,No specific keywords from the rules match the log message.
+179,ciod: Unexpected eof at line <*> of node map file <*>,0,,False,False,,0,False,8,log indicates an unexpected end of file but does not suggest a critical error
+187,"ciod: Error loading <*> program image too big, <*> > <*>",1,30,False,True,,0,False,208,exited abnormally
+189,job <*> timed out. Block freed.,0,,False,False,,0,False,36,The log does not contain any keywords that match the defined rules.
+193,ciod: <*> <*> <*> <*> <*> <*> <*> at line <*> of node map file <*>,0,27,False,True,,0,False,24,general informational message about system state
+206,<*> <*> <*> socket closed,1,9,True,True,9,1,True,37,socket closed
+209,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,0,1,False,True,2,0,False,2,log contains normal operational status updates
+218,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,0,27,False,True,,0,False,8,general informational message about system state
+219,shutdown complete,0,,False,False,,0,False,3,shutdown complete is a normal termination message
+220,"PrepareForService is being done on this Midplane (mLctn(R<*>-M<*>), <*> <*> by <*>",0,27,False,True,,0,False,46,general informational message about system state
+221,PrepareForService is being done on this rack (R<*>) by <*>,0,,False,False,,0,False,2,The log message does not contain any keywords that would indicate an abnormal condition.
+226,ciod: In packet from node <*>.<*> <*> message code <*> is not <*> or <*> <*> <*> <*> <*>),0,,False,False,,0,False,9,log contains general informational message about system state
+258,<*> exited abnormally due to signal: Aborted,1,30,True,True,4,1,True,19,exited abnormally due to signal
+259,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",1,30,False,True,,0,False,8,exited abnormally
+280,Ido packet timeout,1,18,False,True,,0,False,92,bglerr_ido_pkt_timeout
+281,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,1,18,True,True,18,1,True,2,communication failure
+282,ciod: Error reading message prefix after <*> on CioStream socket to <*>:<*>: <*> <*> <*> <*>,1,18,False,True,9,1,True,336,communication failure
+305,"Node card VPD check: missing U<*> node, VPD ecid <*> in processor card slot J<*>",0,27,False,True,,0,False,2,general informational message about system state
+309,Controlling BG/L rows [ <*> <*> <*> <*> <*> <*> <*> <*> ],0,,False,False,,0,False,16,The log message does not contain any keywords from the defined rules.
+320,Lustre mount FAILED : bglio<*> : block_id : location,1,12,True,True,12,1,True,2210,FileSystem mounting failure
+328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",1,13,False,True,,0,True,8,network and communication issues
+337,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",0,,False,False,,0,False,3,The log message is informational about a DDR issue and does not indicate a severe error.
+341,"ciod: Error loading <*> invalid or missing program image, Permission denied",1,30,False,True,,0,False,13952,exited abnormally
+342,ciod: generated <*> core files for program <*>,0,,False,False,,0,False,6062,The log message does not contain any keywords that trigger the defined rules.
+348,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties <*> --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*>,0,27,False,True,,0,False,9,log message is about starting a server and does not contain any keywords triggering abnormal conditions
+449,data cache <*> parity error detected. attempting to correct,1,25,False,True,,0,False,55,parity errors in communication
+475,L<*> major internal error,1,3,False,True,,0,True,2,major internal error
+480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1,30,False,True,,0,True,1,Error receiving packet on tree network suggests a communication failure
+481,ddr: activating redundant bit steering for next allocation: rank=<*> symbol=<*>,0,,False,False,,0,False,225,No triggering keywords found in the log message.
+528,BGLMaster has been started: ./BGLMaster --consoleip <*> --consoleport <*> --configfile bglmaster.init --autorestart y --db<*>profile /u/bgdb<*>cli/sqllib/db<*>profile --dbproperties db.properties,0,1,False,True,,0,False,24,The log message indicates the start of a process without any error or abnormal termination keywords.
+529,"critical input interrupt (unit=<*> bit=<*>): warning for <*> <*> wire, suppressing further interrupts of same type",0,,False,False,,0,False,3288,The log message does not contain any keywords from the defined rules.
+530,<*> tree receiver <*> in re-synch state event(s) (dcr <*>) detected over <*> seconds,0,,False,False,,0,False,3003,No specific keywords trigger an abnormal condition.
+531,<*> torus receiver <*> input pipe error(s) (dcr <*>) detected and corrected over <*> seconds,0,,False,False,,0,False,2642,No specific keywords triggering any abnormal conditions.
+532,"<*> ddr error(s) detected and corrected on rank <*>, symbol <*> over <*> seconds",0,1,False,True,,0,False,9980,The log indicates a correction of DDR errors which is a normal operational message.
+533,total of <*> ddr error(s) detected and corrected over <*> seconds,0,1,False,True,,0,False,9959,No keywords from critical error rules match.
+534,<*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,0,1,False,True,,0,False,1412,No keywords from critical error rules match.
+538,Machine Check Status Register: <*>,1,22,False,True,,0,False,53,machine check interrupt suggests hardware failure
+539,Machine State Register: <*>,0,1,False,True,,0,False,66,Indicates a normal operational message
+540,Core Configuration Register <*>: <*>,0,1,False,True,,0,False,66,Indicates a normal operational message
+541,DDR failing info register: DDR Fail Info Register: <*>,0,,False,False,,0,False,26,The log message does not contain any keywords that match the defined rules.
+542,<*> <*> Registers:,0,1,False,True,,0,False,196,The log does not contain any keywords that trigger abnormal conditions.
+543,r<*>=<*> r<*>=<*> r<*>=<*> r<*>=<*>,0,1,False,True,,0,False,523,log contains only normal operational messages
+544,lr=<*> cr=<*> xer=<*> ctr=<*>,0,1,False,True,,0,False,65,log contains only system state keywords without any anomalies
+545,msr=<*> dear=<*> esr=<*> fpscr=<*>,0,,False,False,,0,False,65,No specific keywords match the given log message.
+546,dbcr<*>=<*> dbsr=<*> ccr<*>=<*>,0,,False,False,,0,False,65,No specific keywords match the given log message.
+547,Floating Point Status and Control Register: <*>,0,1,False,True,,0,False,65,No keyword phrases from the rules match the log message.
+548,exception summary........................<*>,0,,False,False,,0,False,65,No specific keywords match the given log message.
+549,enabled exception summary................<*>,0,1,False,True,,0,False,65,The log message does not contain any keywords that would indicate an abnormal condition.
+550,invalid operation exception <*>,1,20,False,True,,0,False,195,rts panic! and invalid operation exception indicate a critical system error
+551,overflow exception.......................<*>,0,,False,False,,0,False,65,No specific keyword phrases match the given log message.
+552,underflow exception......................<*>,1,30,False,True,,0,False,65,denotes a system or process exiting abnormally
+553,divide-by-zero exception.................<*>,1,30,False,True,,0,False,65,denotes a system or process exiting abnormally
+554,inexact exception........................<*>,1,30,False,True,,0,False,65,exited abnormally
+555,invalid <*>,1,11,False,True,,0,False,390,rts: kernel terminated
+556,fraction <*>,0,,False,False,,0,False,130,No specific keyword phrases match the given log message.
+557,quiet NaN................................<*>,0,,False,False,,0,False,65,The log does not contain any keywords from the defined rules.
+558,minus <*>,0,,False,False,,0,False,130,No specific keywords matched any of the rules.
+559,minus <*> <*>,0,,False,False,,0,False,130,No specific keywords match the log message.
+560,plus <*>,0,,False,False,,0,False,130,No specific keywords match the log message.
+561,plus <*> <*>,0,,False,False,,0,False,130,No specific keywords matched any of the rules.
+562,reserved.................................<*>,0,,False,False,,0,False,65,No specific keywords match the log message.
+563,invalid operation exception (int cnvt)...<*>,1,20,False,True,,0,False,65,rts panic! and invalid operation exception suggest critical error
+564,enable invalid operation exceptions......<*>,0,,False,False,,0,False,65,The log message does not contain any keywords that match the defined rules.
+565,enable <*> <*>,0,,False,False,,0,False,325,The log message does not contain any keywords that match the defined rules.
+566,round nearest............................<*>,0,1,False,True,,0,False,65,The log message does not contain any keywords from the abnormal rules.
+567,round toward <*>,0,,False,False,,0,False,195,The log message does not contain any of the keywords specified in the rules.
+568,fpr<*>=<*> ffffffff <*> <*>,0,1,False,True,,0,False,1329,The log contains only fee keywords which indicate a normal operational message.
+569,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",1,30,False,True,,0,False,27510,exited abnormally
+570,<*> <*> <*> <*> <*> <*> <*> <*> <*> as part of Service Action <*>,0,27,False,True,,0,False,732,general informational message about system state
+571,Power Good signal deactivated: <*> A service action may be required.,1,21,False,True,,0,True,15,power deactivated
+572,<*> torus <*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,0,1,False,True,,0,False,279,No keywords from critical error rules match.
+573,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",1,9,True,True,9,1,True,25325,communication failure
+610,Exception Syndrome Register: <*>,1,8,False,True,,0,False,4,kernel terminated for reason
+611,fpr<*>=<*> <*> <*> <*>,0,1,False,True,,0,False,111,The log contains only normal operational keywords.
+612,fpr<*>=<*> <*> <*> <*>fdc<*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+613,fpr<*>=<*> <*> f<*>dd<*>f c<*>ba<*>,0,1,False,True,,0,False,1,Contains fee keyword
+614,fpr<*>=<*> <*> <*> c<*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+615,fpr<*>=<*> c<*>d<*> <*> <*>,0,1,False,True,,0,False,4,The log contains only normal operational keywords without any of the abnormal keywords.
+616,fpr<*>=<*> c<*>f<*>ed<*> b<*>f<*>a<*> <*>cbea,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+617,fpr<*>=<*> <*> <*> c<*>f<*>,0,1,False,True,,0,False,7,Contains 'fee' which is a keyword for normal operational messages.
+618,fpr<*>=<*> <*> <*>b<*> <*>,0,1,False,True,,0,False,7,The log contains only general keywords without any specific error or warning indicators.
+619,fpr<*>=<*> <*>f<*>b<*> <*>b<*>fd c<*>fac,0,1,False,True,,0,False,1,Contains normal operational message keywords
+620,fpr<*>=<*> <*>c<*> <*> <*>,0,1,False,True,,0,False,14,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+621,fpr<*>=<*> <*> fe<*>a<*> c<*>b<*>ec,0,1,False,True,,0,False,1,Contains fee keyword
+622,fpr<*>=<*> <*> <*> c<*>a<*>,0,1,False,True,,0,False,3,Contains 'fee' which is a keyword for normal operational messages.
+623,fpr<*>=<*> <*>e<*>be <*>f<*>d <*>d<*>f,0,1,False,True,,0,False,1,"Contains keywords fee, indicating a normal operational message"
+624,fpr<*>=<*> c<*>a<*> <*> <*>,0,1,False,True,,0,False,3,The log contains only fee-related keywords which indicate normal operation.
+625,fpr<*>=<*> c<*>dd<*> <*>c<*>f<*> bff<*>ea,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+626,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,0,1,False,True,,0,False,1,Contains fee keyword indicating a normal operational message
+627,fpr<*>=<*> <*>d<*>a <*> <*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+628,fpr<*>=<*> c<*>ec <*> <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+629,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties db.properties --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*> --shutdown-timeout <*>,0,27,False,True,,0,False,18,general informational message about system state
+630,ciod: In packet from node <*>.<*> <*> message still ready for node <*> <*> <*> <*> <*>),0,,False,False,,0,False,2,log contains general communication information without any error keywords
+631,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,1,22,True,True,22,1,True,23,machine check interrupt suggests hardware failure
+632,fpr<*>=<*> c<*>f<*> <*> <*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+633,fpr<*>=<*> <*> <*>de<*>d<*> <*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+634,fpr<*>=<*> <*> cb<*>ef<*> <*>cf<*>c,0,1,False,True,,0,False,1,Contains fee keyword
+635,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,0,1,False,True,,0,False,2,Contains fee keyword
+636,fpr<*>=<*> <*> <*> <*>fd<*>,0,1,False,True,,0,False,6,The log contains only normal operational keywords without any of the abnormal keywords.
+637,fpr<*>=<*> <*> <*>f<*> <*>,0,1,False,True,,0,False,4,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+638,fpr<*>=<*> <*> <*> c<*>b<*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message."
+639,fpr<*>=<*> bf<*>c<*> e<*>e <*>fc<*>d<*>,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+640,fpr<*>=<*> <*> <*> c<*>c<*>,0,1,False,True,,0,False,8,Contains 'fee' which is a keyword for normal operational messages.
+641,fpr<*>=<*> <*> <*> <*>c<*>,0,1,False,True,,0,False,16,The log contains only normal operational keywords without any of the abnormal keywords.
+642,fpr<*>=<*> <*> b<*>b<*> <*>,0,1,False,True,,0,False,2,The log contains only general system state information without any of the keywords triggering abnormal conditions.
+643,fpr<*>=<*> <*>f<*> <*> <*>,0,1,False,True,,0,False,10,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+644,fpr<*>=<*> <*> <*> <*>f<*>,0,1,False,True,,0,False,9,The log contains only fee-related keywords which indicate normal operation.
+645,fpr<*>=<*> <*> <*> c<*>d<*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+646,fpr<*>=<*> <*>eddf<*> ae<*>ee<*>be bfaf<*>cf,0,1,False,True,,0,False,1,Contains keywords indicating normal operational message
+647,fpr<*>=<*> bfe<*>ae<*> d<*>bce c<*>b,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+648,fpr<*>=<*> c<*>fbc<*>d <*> <*>fd<*>f<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+649,fpr<*>=<*> <*> c<*>d<*>cf<*> <*>dfb<*>a,0,1,False,True,,0,False,2,log contains normal fee keyword
+650,fpr<*>=<*> <*> <*>e<*> <*>,0,1,False,True,,0,False,9,Contains 'fee' which is a keyword for normal operational messages.
+651,fpr<*>=<*> <*> <*> <*>ffe<*>,0,1,False,True,,0,False,2,contains 'fee' indicating a normal operational message
+652,fpr<*>=<*> <*> <*>c<*>a bb<*>a<*>,0,1,False,True,,0,False,1,Contains fee keyword
+653,fpr<*>=<*> <*> <*> <*>b<*>d,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+654,fpr<*>=<*> <*> <*>dcda<*> bb<*>f<*>,0,1,False,True,,0,False,1,Contains fee keyword
+655,fpr<*>=<*> c<*>a<*>b <*>c<*>d<*>fd <*>b<*>d<*>,0,27,False,True,,0,False,1,general informational message about system state
+656,fpr<*>=<*> <*>ec<*>d<*> <*> <*>cb<*>e<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+657,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,0,1,False,True,,0,False,1,Contains fee keyword
+658,fpr<*>=<*> <*> <*>aa<*>a <*>f<*>a,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+659,fpr<*>=<*> <*> <*>b<*>e<*>c<*> bfd<*>fac<*>,0,1,False,True,,0,False,2,Contains 'fee' which is a keyword for normal operational messages.
+660,fpr<*>=<*> <*>e<*>ca<*> d<*>a<*>c<*> bfb<*>f<*>e,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+661,fpr<*>=<*> bffe<*>d<*> d<*>a<*>c<*>c <*>fbd<*>d<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+662,fpr<*>=<*> <*> df<*>abd<*> <*>fc<*>b<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+663,fpr<*>=<*> <*> <*> <*>cb<*>,0,1,False,True,,0,False,3,The log contains only normal operational keywords without any of the abnormal keywords.
+664,fpr<*>=<*> <*> d<*>f<*>d<*>b <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+665,fpr<*>=<*> <*> <*>f<*>c c<*>c<*>cf,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+666,fpr<*>=<*> <*> cd<*>d<*>b<*> <*>d<*>b<*>,0,1,False,True,,0,False,1,log contains only fee keyword
+667,fpr<*>=<*> <*> <*>c<*>ed bfd<*>fba<*>,0,1,False,True,,0,False,2,Contains fee keyword
+668,fpr<*>=<*> c<*>fba <*>a<*>b<*> bfb<*>ba,0,1,False,True,,0,False,1,The log contains only fee-related keywords which indicate normal operation.
+669,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+670,fpr<*>=<*> <*> <*>be<*>a <*>edf<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+671,fpr<*>=<*> <*> a<*>b<*> c<*>eb,0,1,False,True,,0,False,1,Contains fee keyword
+672,fpr<*>=<*> <*> <*>b<*>d<*> <*>db<*>d,0,1,False,True,,0,False,1,The log contains only fee-related keywords which indicate normal operation.
+673,fpr<*>=<*> <*> b<*>eae bfdc<*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message"
+674,fpr<*>=<*> c<*>e<*> <*>ad<*>c<*> bfc<*>e<*>fa,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+675,fpr<*>=<*> <*> <*>e<*>b<*> <*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message"
+676,fpr<*>=<*> <*>fb<*>c<*>c <*>a<*>e<*>c <*>fb<*>b<*>,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+677,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+678,fpr<*>=<*> <*> a<*>c<*>cf <*>dc<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+679,fpr<*>=<*> <*> <*>fcd c<*>a<*>a,0,1,False,True,,0,False,1,The log contains keywords related to normal operational messages.
+680,fpr<*>=<*> <*> f<*>c<*>bd <*>ba,0,1,False,True,,0,False,1,Contains only normal operational keywords
+681,fpr<*>=<*> <*> <*>cd<*>b<*>c bfb<*>b<*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+682,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,0,1,False,True,,0,False,1,Contains fee keyword
+683,fpr<*>=<*> <*>f<*>ea<*>c <*>cc<*>a<*>c c<*>e<*>,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+684,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,0,1,False,True,,0,False,1,Contains only normal operational keywords
+685,fpr<*>=<*> <*> <*> <*>fa<*>c<*>,0,1,False,True,,0,False,2,contains 'fee' which is a keyword for normal operational message
+686,fpr<*>=<*> <*> f<*>b<*>c<*>fd bf<*>c<*>b<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+687,fpr<*>=<*> <*> <*> <*>b<*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+688,fpr<*>=<*> <*> <*>a<*>c<*> <*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+689,fpr<*>=<*> <*> <*> <*>ff<*>,0,1,False,True,,0,False,16,The log contains only fee keywords which indicate normal operational messages.
+690,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,0,1,False,True,,0,False,2,"Contains 'fee', indicating a normal operational message"
+691,fpr<*>=<*> c<*>c<*>f<*>c <*>c<*>e<*>ce bf<*>a<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+692,fpr<*>=<*> <*> <*>a<*> <*>,0,1,False,True,,0,False,3,The log contains only general informational keywords without any specific abnormal conditions.
+693,fpr<*>=<*> <*> <*>d<*>ac<*>c bf<*>e<*>,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+694,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+695,fpr<*>=<*> <*> b<*>a<*>a<*>c <*>ee<*>f<*>,0,1,False,True,,0,False,1,log contains fee which is a keyword for normal operational message
+696,fpr<*>=<*> <*> f<*>f<*>a<*>a <*>d<*>f<*>b,0,1,False,True,,0,False,1,Contains fee keyword
+697,fpr<*>=<*> <*> c<*>d<*>c<*>c <*>f<*>cf<*>,0,1,False,True,,0,False,2,Contains fee keyword
+698,fpr<*>=<*> <*> <*> <*>f<*>d<*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+699,fpr<*>=<*> c<*>c<*>ec <*>f<*>a bf<*>c<*>,0,1,False,True,,0,False,1,Contains fee keyword
+700,fpr<*>=<*> <*> ea<*>dfa<*>e bf<*>ec<*>,0,1,False,True,,0,False,1,Contains fee keyword
+701,fpr<*>=<*> <*> <*> <*>ffff<*>,0,1,False,True,,0,False,46,The log contains only fee-related keywords which indicate normal operation.
+702,fpr<*>=<*> <*> <*> <*>d,0,1,False,True,,0,False,4,The log contains only normal operational keywords without any of the abnormal keywords.
+703,fpr<*>=<*> <*> <*> <*>e<*>,0,1,False,True,,0,False,12,Contains 'fee' indicating a normal operational message
+704,fpr<*>=<*> <*>d <*> <*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords.
+705,fpr<*>=<*> <*> <*> <*>ffff<*>c<*>,0,1,False,True,,0,False,10,The log contains only fee-related keywords which indicate normal operation.
+706,fpr<*>=<*> <*>cfaf<*> <*> <*>,0,1,False,True,,0,False,10,The log contains only normal operational keywords without any of the abnormal keywords.
+707,fpr<*>=<*> <*> <*>ffff<*> <*>,0,1,False,True,,0,False,10,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+708,fpr<*>=<*> <*>ffff<*> <*> <*>,0,1,False,True,,0,False,23,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+709,fpr<*>=<*> <*> <*> <*>f<*>af,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+710,fpr<*>=<*> <*> <*> <*>a<*>aa,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+711,fpr<*>=<*> <*>e <*> <*>,0,1,False,True,,0,False,7,"Contains only fee keyword, indicating a normal operational message."
+712,fpr<*>=<*> <*> <*> <*>a<*>a,0,1,False,True,,0,False,3,Contains 'fee' which is a keyword for normal operational messages.
+713,fpr<*>=<*> <*> <*> <*>b<*>b,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+714,fpr<*>=<*> <*> <*> <*>c<*>c,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+715,fpr<*>=<*> <*>f <*> <*>,0,1,False,True,,0,False,4,The log contains only normal operational keywords.
+716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,1,13,False,True,,0,True,2,network and communication issues
+717,ciod: Error creating node map from file my_map.txt: No such file or directory,0,,False,False,,0,False,24,"Log indicates a file not found error, which is not critical for system operation."
+718,fpr<*>=<*> <*> <*>d<*> <*>,0,1,False,True,,0,False,4,The log contains only general informational keywords without any specific abnormal conditions.
+719,fpr<*>=<*> <*> <*> <*>a<*>,0,1,False,True,,0,False,2,The log contains only general informational keywords without any specific abnormal conditions.
+720,fpr<*>=<*> <*>cd<*>f<*> <*>ff<*>a<*> <*>ffff<*>f<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+721,fpr<*>=<*> <*>ffff<*>d<*> <*>ff<*>f<*> <*>ffff<*>b<*>,0,1,False,True,,0,False,1,Contains only fee keyword
+722,fpr<*>=<*> <*> <*> <*>fffffff,0,1,False,True,,0,False,7,The log contains only fee keyword which is associated with normal operational messages.
+723,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,0,1,False,True,,0,False,1,Contains fee keyword
+724,fpr<*>=<*> c<*>b <*>ec<*>c<*> bff<*>ed<*>,0,1,False,True,,0,False,1,Contains only fee keyword
+725,fpr<*>=<*> bfed<*>fde <*>d<*>bbc<*> <*>fe<*>f,0,1,False,True,,0,False,1,log contains only fee which matches rule 1
+726,fpr<*>=<*> <*>fdc<*> <*>c<*>ab bfec<*>f,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+727,fpr<*>=<*> <*>ff<*>cd<*> c<*>b<*>d c<*>e<*>d,0,1,False,True,,0,False,1,log contains only fee keyword
+728,fpr<*>=<*> c<*>cb<*>d <*>a<*>d<*>dd<*> c<*>aec,0,1,False,True,,0,False,1,Contains fee keyword
+729,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,0,1,False,True,,0,False,1,Contains fee keyword
+730,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+731,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,0,1,True,True,1,0,False,1,Contains only fee keyword which is normal
+732,fpr<*>=<*> <*> <*> fffffffa,0,1,False,True,,0,False,1,The log contains only fee-related keywords which indicate a normal operational message.
+733,fpr<*>=<*> <*>aaba <*>dc<*>a<*> <*>afc,0,1,False,True,,0,False,1,Contains fee keyword
+734,fpr<*>=<*> bff<*>ab <*>c<*>bc<*>e c<*>d<*>b,0,1,False,True,,0,False,1,Contains fee keyword
+735,fpr<*>=<*> <*> <*> c<*>e,0,1,False,True,,0,False,2,Contains 'fee' which is a keyword for normal operational messages.
+736,fpr<*>=<*> <*> <*>c<*> <*>,0,1,False,True,,0,False,4,"Contains only fee keyword, indicating a normal operational message."
+737,fpr<*>=<*> bff<*> <*> <*>,0,1,False,True,,0,False,3,The log contains only normal operational keywords without any of the abnormal keywords.
+738,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,0,1,False,True,,0,False,1,Contains keywords indicating normal operational message
+739,fpr<*>=<*> <*>c<*>d<*> <*> <*>,0,1,False,True,,0,False,2,The log contains only general system state information without any keywords triggering an abnormal condition.
+740,fpr<*>=<*> bfea<*>f <*>fdbbf<*> bffcbf<*>a,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+741,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,0,1,False,True,,0,False,1,Contains fee keyword
+742,fpr<*>=<*> bff<*>dec<*> <*>e<*>b<*>df<*> c<*>b<*>b,0,1,False,True,,0,False,1,Contains only normal operational keywords
+743,fpr<*>=<*> <*>ff<*> <*> <*>,0,1,False,True,,0,False,6,"Contains only fee keyword, indicating a normal operational message."
+744,fpr<*>=<*> <*>ff<*>a<*> <*>da<*>ea<*> <*>b<*>c<*>,0,1,False,True,,0,False,1,Contains fee keyword
+745,fpr<*>=<*> c<*> f<*>ccd<*> c<*>dfcf,0,1,False,True,,0,False,1,Contains only fee keyword
+746,fpr<*>=<*> <*>be<*> <*>ac<*>b<*> <*>d<*>,0,1,False,True,,0,False,1,Contains fee keyword
+747,fpr<*>=<*> bfff<*> <*>b<*>f c<*>a,0,1,False,True,,0,False,1,The log contains only operational keywords without any of the abnormal keywords.
+748,fpr<*>=<*> <*>e<*>f <*> <*>,0,1,False,True,,0,False,1,log contains fee keyword indicating normal operation
+749,<*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,1,False,True,,0,False,135092,log contains no keywords triggering any abnormal conditions
+750,"<*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,1,False,True,,0,False,135092,log contains only operational metrics without any error or critical event keywords
+751,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,1,False,True,3,1,False,4,The log contains no keywords that trigger any abnormal conditions.
+752,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,1,False,True,3,1,False,4,log contains normal operational message without any error keywords
+753,fpr<*>=<*> <*>aa<*> <*> <*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message"
+754,fpr<*>=<*> <*> <*> <*>fe<*>,0,1,False,True,,0,False,10,contains 'fee' indicating a normal operational message
+755,fpr<*>=<*> <*> <*>e<*>a<*> c<*>d<*>cb,0,1,False,True,,0,False,4,Contains fee keyword
+756,fpr<*>=<*> <*>d<*> <*> <*>,0,1,False,True,,0,False,2,The log contains only general operational keywords without any specific error or abnormal termination indications.
+757,fpr<*>=<*> <*>fffff <*> <*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+758,"external input interrupt (unit=<*> bit=<*>): number of corrected SRAM errors has exceeded threshold, suppressing further interrupts of same type",0,,False,False,,0,False,57,No specific keywords match the log message.
+759,ddr: Suppressing further CE interrupts,0,,False,False,,0,False,302,No specific keywords match the log message.
+760,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,,False,False,3,1,False,22175,No specific keyword phrases from the rules match the log message.
+761,fpr<*>=<*> bfb<*>a<*> a<*>aa<*>ac bfc<*>f<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+762,fpr<*>=<*> bfbaf<*>fe b<*>cf<*> bfc<*>d<*>c,0,1,False,True,,0,False,1,Contains only fee keyword which is normal
+763,fpr<*>=<*> bfcb<*>d e<*>cdf<*> <*>fcab<*>f<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+764,fpr<*>=<*> bfa<*>c<*>c <*>a<*>e<*> <*>fc<*>e,0,1,False,True,,0,False,1,log contains only fee keyword
+765,fpr<*>=<*> <*>fe<*>b<*> <*>c<*>f<*>c<*> <*>fbcbeb<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+766,fpr<*>=<*> <*> <*>b <*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+767,fpr<*>=<*> <*> <*>afb<*> <*>a,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+768,fpr<*>=<*> c<*>cdf<*> <*>c<*>a<*> bfcefc<*>,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+769,fpr<*>=<*> c<*>cf<*>e <*> c<*>cd<*>,0,1,False,True,,0,False,1,Contains fee keyword
+770,fpr<*>=<*> <*>b<*> <*> <*>,0,1,False,True,,0,False,3,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+771,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,0,1,False,True,,0,False,1,Contains only normal operational keywords
+772,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+773,fpr<*>=<*> c<*>d <*>aef<*>ff c<*>ac<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+774,fpr<*>=<*> c<*>bc<*> ee<*>caaa <*>ff<*>af<*>,0,1,False,True,,0,False,1,Contains fee keyword
+775,fpr<*>=<*> <*>a<*> <*> <*>,0,1,False,True,,0,False,6,Contains only normal operational keywords
+776,fpr<*>=<*> <*> a<*>b<*>ace <*>e,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+777,fpr<*>=<*> bfc<*>b<*>d <*>cbfb<*> c<*>a<*>bc,0,1,False,True,,0,False,1,log contains only normal operational keywords
+778,fpr<*>=<*> <*> <*>f<*>e<*> <*>,0,1,False,True,,0,False,2,"Contains 'fee', indicating a normal operational message"
+779,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,0,1,False,True,,0,False,1,Contains fee keyword
+780,fpr<*>=<*> c<*>c e<*>ca<*>f<*> c<*>f<*>a<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+781,fpr<*>=<*> <*>fd<*>fef<*> <*>e<*>c<*>de bfeb<*>ad<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+782,fpr<*>=<*> <*>ff<*>fbd<*> <*>c<*>decd bfeb<*>b<*>e,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+783,fpr<*>=<*> bfe<*>cfc<*> <*>b<*>fa<*>d<*> bfe<*>cf<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message."
+784,fpr<*>=<*> <*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating a normal operational message
+785,fpr<*>=<*> <*> <*> bff<*>d<*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+786,fpr<*>=<*> bdd<*>fe c<*>b<*>fb <*>df<*>dd<*>,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+787,fpr<*>=<*> <*>df<*>ed <*>dc<*> <*>df<*>ce,0,1,False,True,,0,False,1,Contains only normal operational keywords
+788,fpr<*>=<*> bdecab<*> fd<*>c<*> <*>df<*>ddff,0,1,False,True,,0,False,1,log contains only normal operational message keywords
+789,fpr<*>=<*> bdf<*>e<*>c bd<*>be<*>c <*>dff<*>,0,27,False,True,,0,False,1,general informational message about system state
+790,fpr<*>=<*> <*> <*> <*>f<*>a<*>,0,1,False,True,,0,False,2,"Contains 'fee', indicating a normal operational message"
+791,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,0,1,False,True,,0,False,1,"Contains 'fee', which is a keyword for normal operational messages."
+792,fpr<*>=<*> bef<*>e<*> cee<*>d<*> <*>f<*>a<*>e,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+793,fpr<*>=<*> bef<*> a<*>a<*>c<*> <*>f<*>a<*>e<*>b,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+794,fpr<*>=<*> <*> <*> bf<*>,0,1,False,True,,0,False,4,"Contains only fee keyword, indicating normal operation"
+795,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating a normal operational message
+796,fpr<*>=<*> <*>e<*>fde<*>c <*>fee<*> be<*>bcf,0,1,True,True,1,0,False,1,log contains fee keyword
+797,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+798,fpr<*>=<*> be<*>bc<*> bd<*>ac<*>d be<*>ba<*>ec,0,1,False,True,,0,False,1,Contains only normal operational keywords
+799,fpr<*>=<*> <*>e<*> <*> <*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message."
+800,fpr<*>=<*> bed<*>f<*> b<*>fb<*> <*>edb<*>e<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+801,fpr<*>=<*> <*>ec<*>d fea<*>a <*>edb<*>b,0,1,False,True,,0,False,1,log contains 'fea' which matches rule 1
+802,fpr<*>=<*> <*>edb<*>e <*>a<*>e <*>edb<*>bd,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+803,fpr<*>=<*> bed<*> <*>ec<*>cf<*> <*>ec<*>,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+804,fpr<*>=<*> <*>ec<*>f<*> d<*>dbe<*>ae bed<*>,0,1,False,True,,0,False,1,Contains fee keyword
+805,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,1,False,True,3,1,False,2,Contains normal operational message keywords
+806,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,0,,False,False,,0,False,1024,The log message does not contain any keywords from the defined rules.
+807,fpr<*>=<*> <*>ffb<*> <*> <*>,0,1,False,True,,0,False,6,"Contains only fee keyword, indicating a normal operational message"
+808,fpr<*>=<*> <*> d<*>d<*> <*>,0,1,False,True,,0,False,2,The log contains only general operational keywords without any specific error or abnormal termination indications.
+809,fpr<*>=<*> <*>fe<*>b<*>e<*> <*>a bcf<*>b<*>f,0,1,False,True,,0,False,1,"contains 'fee', indicating a normal operational message"
+810,fpr<*>=<*> <*>db<*> <*> <*>,0,1,False,True,,0,False,3,Contains only normal operational keywords
+811,fpr<*>=<*> <*> f<*> <*>,0,1,False,True,,0,False,2,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+812,fpr<*>=<*> <*> fffffe<*>a <*>,0,1,False,True,,0,False,3,The log contains only general fee-related keywords without any specific error or abnormal termination indications.
+813,fpr<*>=<*> c<*>d<*>cb <*> <*>,0,1,False,True,,0,False,1,The log contains only fee-related keywords which indicate normal operation.
+814,fpr<*>=<*> bf<*>d<*>cb <*> <*>,0,1,False,True,,0,False,4,The log contains only fee-related keywords and no other critical error indicators.
+815,fpr<*>=<*> <*>c<*>a<*> <*> <*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+816,fpr<*>=<*> b<*>cac<*>bd <*> <*>,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+817,fpr<*>=<*> <*>c<*>cb<*> <*> <*>,0,1,False,True,,0,False,1,The log contains only fee-related keywords which indicate normal operation.
+818,fpr<*>=<*> bc<*>c<*>f<*> <*>ecc <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+819,fpr<*>=<*> bc<*>cceb <*> <*>,0,1,False,True,,0,False,1,The log contains only operational keywords without any of the abnormal keywords.
+820,fpr<*>=<*> bc<*>b<*> fa<*>c<*> <*>ce<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+821,fpr<*>=<*> bc<*>d<*> <*>decd<*> <*>cb<*>ddb,0,1,False,True,,0,False,1,The log contains only operational keywords without any of the abnormal keywords.
+822,fpr<*>=<*> bc<*>f <*> <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+823,fpr<*>=<*> bc<*>dd<*> <*> <*>,0,1,False,True,,0,False,1,log contains only fee keyword
+824,fpr<*>=<*> bc<*>ecf <*> <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+825,fpr<*>=<*> bccac<*>e <*> <*>,0,1,False,True,,0,False,1,Contains only operational keywords without any anomalies
+826,fpr<*>=<*> <*>ce<*> <*>eab<*>e <*>cd<*>a<*>,0,1,False,True,,0,False,1,Contains fee keyword
+827,fpr<*>=<*> <*> <*>e<*>c<*>c<*> <*>fc<*>fc<*>b,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+828,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,0,1,False,True,,0,False,1,contains 'fee' which is a keyword for normal operational message
+829,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+830,fpr<*>=<*> <*> <*>cd<*>b bfe<*>c<*>,0,1,False,True,,0,False,1,Contains fee keyword
+831,fpr<*>=<*> <*>a<*>f a<*>c<*> <*>f<*>ce<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+832,fpr<*>=<*> <*>b<*>d <*>d<*>d<*> <*>fc<*>c,0,1,False,True,,0,False,1,log contains only fee keyword
+833,fpr<*>=<*> <*> <*> <*>fdfffff,0,1,False,True,,0,False,2,The log contains only general system state information without any keywords triggering an abnormal condition.
+834,fpr<*>=<*> <*> add<*>a<*> <*>e<*>fbcd,0,1,False,True,,0,False,1,Contains fee keyword
+835,fpr<*>=<*> bfb<*>b<*> <*> bc<*>bfd<*>,0,1,False,True,,0,False,1,log contains only normal operational keywords
+836,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,0,1,True,True,1,0,False,2,"contains 'fee', indicating a normal operational message"
+837,fpr<*>=<*> <*>f<*>f<*> <*> <*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+838,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+839,fpr<*>=<*> <*> a<*>e <*>f<*>e<*>a,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+840,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,0,1,False,True,,0,False,1,Contains fee keyword
+841,fpr<*>=<*> <*>b<*>d<*> dfd<*>f <*>f<*>b,0,1,False,True,,0,False,1,Contains fee keyword
+842,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,0,1,False,True,,0,False,1,"Contains keywords 'fee', indicating a normal operational message"
+843,fpr<*>=<*> fd<*> fcc<*>d<*>f<*> <*>,0,1,False,True,,0,False,1,The log contains only general file descriptor and file control commands without any keywords triggering abnormal conditions.
+844,fpr<*>=<*> bb<*>e<*> fcd<*> <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message"
+845,fpr<*>=<*> e<*>cb<*> <*>cd<*> f<*>bde<*>,0,1,False,True,,0,False,1,Contains only fee keyword
+846,fpr<*>=<*> <*> ba<*>feeb<*> <*>fdff<*>c,0,1,True,True,1,0,False,1,Contains feeb which is a keyword for normal operational message
+847,fpr<*>=<*> <*> <*>bc<*>f<*>b <*>fdf<*>eff,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+848,fpr<*>=<*> <*> c<*>f<*>ff <*>fdef<*>e<*>,0,1,False,True,,0,False,1,Contains fee keyword
+849,fpr<*>=<*> <*> b<*>c<*> <*>,0,1,False,True,,0,False,2,The log contains only general system state information without any of the keywords triggering abnormal conditions.
+850,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,0,1,False,True,,0,False,3,Contains 'fee' which is a keyword for normal operational messages.
+851,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",1,19,True,True,19,1,True,1,signals a failure in the execution flow or program logic
+852,fpr<*>=<*> bfd<*>c <*> <*>,0,1,False,True,,0,False,3,The log contains only operational keywords without any of the abnormal keywords.
+853,fpr<*>=<*> <*>ff<*>e f<*>a <*>fd<*>cb<*>c,0,1,False,True,,0,False,1,Contains fee keyword
+854,fpr<*>=<*> <*>ff<*>da<*> <*>b<*>e<*> <*>c<*>b<*>,0,1,False,True,,0,False,1,Contains fee keyword
+855,fpr<*>=<*> <*>c<*>f a<*>f<*> <*>ff<*>af,0,1,False,True,,0,False,1,Contains only fee keyword
+856,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,0,1,False,True,,0,False,2,contains 'fee' indicating a normal operational message
+857,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,0,1,False,True,,0,False,1,Contains fee keyword
+858,fpr<*>=<*> <*>fe<*>e<*> <*> <*>,0,1,False,True,,0,False,2,contains 'fee' which is a keyword for normal operational message
+859,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+860,fpr<*>=<*> <*>ba<*> <*> c<*>df<*>c,0,1,False,True,,0,False,1,Contains only normal operational keywords
+861,fpr<*>=<*> <*> abdb<*>b<*> <*>ffd<*>f<*>,0,27,False,True,,0,False,1,general informational message about system state
+862,fpr<*>=<*> <*> c<*>a <*>f<*>ed<*>,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+863,fpr<*>=<*> <*> ace<*>f<*> <*>eb<*>b,0,1,False,True,,0,False,1,The log contains only operational keywords without any of the abnormal keywords.
+864,fpr<*>=<*> <*> cf<*>aacc<*> bf<*>a<*>d<*>,0,1,False,True,,0,False,1,Contains fee keyword
+865,fpr<*>=<*> <*> f<*>b<*>a<*>f<*> <*>fdb<*>c<*>e,0,1,False,True,,0,False,1,Contains only normal operational keywords
+866,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,0,1,False,True,,0,False,1,Contains fee keyword
+867,fpr<*>=<*> <*> <*>caf bfe<*>dfed,0,1,False,True,,0,False,3,Contains fee keyword
+868,fpr<*>=<*> <*> c<*>b<*>bc<*> bfc<*>d<*>,0,1,False,True,,0,False,1,Contains only fee keyword
+869,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,0,1,False,True,,0,False,3,"Contains 'fee', indicating a normal operational message"
+870,fpr<*>=<*> <*> <*> bc<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+871,fpr<*>=<*> <*> <*>f<*>c<*>f <*>f<*>c,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+872,fpr<*>=<*> <*> d<*>ee<*>f <*>a<*>c<*>,0,1,False,True,,0,False,1,Contains fee keyword indicating normal operational message
+873,fpr<*>=<*> <*> <*>cc<*> <*>f<*>fd<*>,0,1,False,True,,0,False,2,"Contains only fee keyword, indicating a normal operational message"
+874,fpr<*>=<*> bfdc<*>b<*> <*>e<*>f<*> <*>ef<*>f<*>b<*>,0,1,False,True,,0,False,1,Contains only fee keyword which is normal
+875,fpr<*>=<*> bfe<*>b<*> <*>da<*>e <*>f<*>d<*>a<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+876,fpr<*>=<*> bfdc<*>b<*>a <*> <*>,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+877,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,0,1,False,True,,0,False,1,contains 'fee' indicating a normal operational message
+878,fpr<*>=<*> <*>fa <*>e<*>b<*>fae <*>,0,1,False,True,,0,False,1,Contains fee keyword
+879,fpr<*>=<*> <*> <*>bb<*>c <*>ff<*>df,0,1,False,True,,0,False,1,Contains only normal operational keywords
+880,fpr<*>=<*> <*> <*> bff<*>,0,1,False,True,,0,False,5,Contains only normal operational keywords
+881,fpr<*>=<*> <*>fbdb<*>a<*> <*>abca beb<*>e<*>b,0,1,False,True,,0,False,1,Contains only normal operational keywords
+882,fpr<*>=<*> <*>c <*>ed<*>e <*>e<*>f<*>a,0,1,False,True,,0,False,1,Contains keywords fee indicating a normal operational message
+883,fpr<*>=<*> <*>fb <*>fdd<*>d<*> <*>d<*>c<*>,0,1,False,True,,0,False,1,log contains only fee keyword
+884,fpr<*>=<*> <*> <*>ddf<*> <*>f<*>c<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+885,fpr<*>=<*> <*> <*>bea<*>c<*> <*>c<*>ab,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+886,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,0,1,False,True,,0,False,1,contains 'fee' which is a keyword for normal operational message
+887,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,0,1,False,True,,0,False,2,The log contains only normal operational keywords without any of the abnormal keywords.
+888,fpr<*>=<*> <*> a<*>ffca<*> <*>cfc<*>f,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation."
+889,fpr<*>=<*> <*> <*>c<*>eda<*> <*>fea<*>a,0,1,False,True,,0,False,1,Contains keywords from normal operational message
+890,fpr<*>=<*> <*>cf<*> <*> <*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating a normal operational message."
+891,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,0,1,False,True,,0,False,1,"Contains 'fee', indicating a normal operational message"
+892,fpr<*>=<*> bf<*> e<*>a<*>cb<*> <*>f<*>ce<*>d,0,1,False,True,,0,False,2,log contains only fee keyword
+893,fpr<*>=<*> <*> <*> bfe<*>,0,1,False,True,,0,False,3,"Contains only fee keyword, indicating normal operation"
+894,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,0,1,False,True,,0,False,2,The log contains only fee keywords which indicate normal operational messages.
+895,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,0,1,False,True,,0,False,1,Contains only fee keyword which is normal
+896,fpr<*>=<*> <*> d<*>f<*>a<*>fc <*>f<*>d,0,1,False,True,,0,False,3,Contains only normal operational keywords
+897,fpr<*>=<*> <*> <*> bfd<*>,0,1,False,True,,0,False,2,Contains 'fpr' which is not covered by any specific abnormal keywords but is a normal operational message.
+898,fpr<*>=<*> <*> <*> <*>bb<*>,0,1,False,True,,0,False,1,The log contains only normal operational keywords without any of the abnormal keywords.
+899,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,0,1,False,True,,0,False,1,contains 'fee' which is a keyword for normal operational message
+900,fpr<*>=<*> <*> <*>a<*>a <*>,0,1,False,True,,0,False,2,Contains 'fee' which is a keyword for normal operational messages.
+901,fpr<*>=<*> <*>fc<*>af<*> d<*>d<*>bdbb <*>ddb<*>cdf,0,1,False,True,,0,False,1,log contains only operational keywords without any error or abnormal termination signals
+902,fpr<*>=<*> <*> <*>dc<*>fe<*> <*>,0,1,False,True,,0,False,2,Contains only normal operational keywords
+903,fpr<*>=<*> <*> <*>fa<*> <*>fe<*>dba<*>,0,1,False,True,,0,False,1,Contains keywords 'fee' indicating a normal operational message
+904,fpr<*>=<*> <*> a<*> bfbb<*>c<*>b,0,1,False,True,,0,False,1,Contains fee keyword
+905,fpr<*>=<*> <*> <*> <*>fe<*>c<*>eb,0,1,False,True,,0,False,2,contains 'fee' indicating a normal operational message
+906,fpr<*>=<*> <*> <*> <*>fa<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+907,fpr<*>=<*> <*>fd<*>da<*>e <*> <*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+908,fpr<*>=<*> <*>f<*>b<*>f <*> <*>,0,1,False,True,,0,False,1,Contains only normal operational keywords
+909,fpr<*>=<*> <*>edde <*> <*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+910,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,0,1,False,True,,0,False,1,The log contains only fee keywords which indicate normal operational messages.
+911,fpr<*>=<*> <*> <*> <*>fbb<*>,0,1,False,True,,0,False,1,log contains only fee keyword
+912,fpr<*>=<*> <*> c<*>e<*> bfb<*>bf<*>d,0,1,False,True,,0,False,1,Contains only fee keyword
+913,fpr<*>=<*> <*> cb<*>f<*> bc<*>ae<*>,0,1,False,True,,0,False,1,"Contains only fee keyword, indicating normal operation"
+914,fpr<*>=<*> <*> fa<*>ad<*>f <*>fecfc<*>c,0,1,False,True,,0,False,1,log contains only fee keyword which is normal
+915,fpr<*>=<*> <*> <*> <*>fdb<*>d<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+916,fpr<*>=<*> <*> <*> <*>c<*>c<*>,0,1,False,True,,0,False,1,The log contains only general system state information without any keywords triggering an abnormal condition.
+917,fpr<*>=<*> <*> <*>e<*>c<*> <*>fed<*>,0,1,False,True,,0,False,1,Contains 'fee' which is a keyword for normal operational messages.
+918,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,0,1,False,True,,0,False,1,Contains fee keyword
+919,fpr<*>=<*> <*> <*>dd<*>f<*>b <*>bcf<*>,0,1,False,True,,0,False,1,Contains fee keyword
+920,fpr<*>=<*> <*> f<*>f<*>f <*>b<*>cafc,0,1,False,True,,0,False,1,Contains fee keyword
+921,fpr<*>=<*> <*> <*>fba<*>c<*>d bfca<*>fcc,0,1,False,True,,0,False,1,log contains normal fee keyword
+922,fpr<*>=<*> <*>fe<*>a<*>f<*> <*>d <*>fbbf<*>b<*>,0,1,False,True,,0,False,1,"contains 'fee', indicating a normal operational message"
+923,fpr<*>=<*> <*> <*> bc<*>dc<*>,0,1,False,True,,0,False,1,Contains only normal operational keywords

@@ -105,7 +105,9 @@ if "endpointslices" in args:
     silent = os.environ.get("FAKE_SILENT", "").split(",")
     producer_missing = service == "producer-metrics" and os.environ.get("FAKE_PRODUCER") != "1"
     ready = not (service in silent or producer_missing)
-    out(json.dumps({{"items": [{{"endpoints": [{{"conditions": {{"ready": True}}}}]}}] if ready else []}}))
+    # A Service that has no pod has no endpoints. On a real cluster its slice is still there, and it says "endpoints": null (not an empty list).
+    empty = [{{"endpoints": None}}] if os.environ.get("FAKE_SLICES") == "null" else []
+    out(json.dumps({{"items": [{{"endpoints": [{{"conditions": {{"ready": True}}}}]}}] if ready else empty}}))
 
 if "serviceaccount" in args:
     out("serviceaccount/default\n")
@@ -154,14 +156,14 @@ out("", 1, "the stand-in kubectl does not know: " + text + "\n")
 '''
 
 
-def run_check(tmp_path, *extra, producer=False, silent=""):
+def run_check(tmp_path, *extra, producer=False, silent="", slices="none"):
     fake = tmp_path / "kubectl"
     fake.write_text(FAKE_KUBECTL.format(python=sys.executable))
     fake.chmod(fake.stat().st_mode | stat.S_IEXEC)
     state = tmp_path / "state.json"
     state.write_text(json.dumps({"policies": True, "namespaces": [], "probes": []}))
     env = {**os.environ, "KUBECTL": str(fake), "NS": "nlp", "FAKE_STATE": str(state), "FAKE_SCRIPT": str(SCRIPT), "FAKE_SILENT": silent,
-           "FAKE_PRODUCER": "1" if producer else "0", "PYTHONUNBUFFERED": "1"}
+           "FAKE_PRODUCER": "1" if producer else "0", "FAKE_SLICES": slices, "PYTHONUNBUFFERED": "1"}
     done = subprocess.run([sys.executable, str(SCRIPT), "--patience", "1", *extra], capture_output=True, text=True, env=env, timeout=300)
 
     return done.returncode, done.stdout, json.loads(state.read_text())
@@ -204,6 +206,28 @@ def test_without_a_producer_pod_that_column_is_left_out_and_the_report_says_so(t
     assert out.count("The pipeline (78 connections)") == 1
     assert out.splitlines()[-1].startswith("RESULT: PASS - all 156 connections behave as the policies say")
     assert out.splitlines()[-1].endswith("not tried: the producer's metrics port (no replay is running)")
+    assert state["probes"] == [] and state["namespaces"] == []
+
+
+# The run that was first saved as evidence stopped with "TypeError: 'NoneType' object is not iterable". On a real cluster the EndpointSlice of a Service
+# that has no pod is there, and its "endpoints" is null, not a list. The stand-in used to answer with no slice at all, so that shape was never tried.
+def test_a_slice_whose_endpoints_are_null_counts_as_no_pod(tmp_path):
+    code, out, state = run_check(tmp_path, producer=False, slices="null")
+
+    assert code == 0, out
+    assert "Traceback" not in out
+    assert "Not tried: the producer's metrics port 8001 (prod-metrics)" in out
+    assert out.splitlines()[-1].startswith("RESULT: PASS - all 156 connections behave as the policies say")
+    assert state["probes"] == [] and state["namespaces"] == []
+
+
+def test_a_service_with_a_null_slice_and_no_pod_is_still_a_failure(tmp_path):
+    code, out, state = run_check(tmp_path, producer=False, silent="restapi-metrics", slices="null")
+
+    assert code == 1
+    assert "Traceback" not in out
+    assert "no pod is ready behind the Service restapi-metrics" in out
+    assert "RESULT: FAIL" in out
     assert state["probes"] == [] and state["namespaces"] == []
 
 

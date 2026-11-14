@@ -1,0 +1,16 @@
+method_a,method_b,both_caught,only_a,only_b,neither,shared_false_positives
+logbert,logbert_full,456,0,15,24,2126
+logbert,llm_zero_shot,456,0,39,0,1819
+logbert,llm_few_shot,448,8,17,22,141
+logbert,llm_rule_based,454,2,37,2,236
+logbert,keyword_rules,443,13,29,10,59
+logbert_full,llm_zero_shot,471,0,24,0,2047
+logbert_full,llm_few_shot,460,11,5,19,158
+logbert_full,llm_rule_based,469,2,22,2,253
+logbert_full,keyword_rules,454,17,18,6,59
+llm_zero_shot,llm_few_shot,465,30,0,0,595
+llm_zero_shot,llm_rule_based,491,4,0,0,690
+llm_zero_shot,keyword_rules,472,23,0,0,59
+llm_few_shot,llm_rule_based,463,2,28,2,507
+llm_few_shot,keyword_rules,452,13,20,10,49
+llm_rule_based,keyword_rules,472,19,0,4,0

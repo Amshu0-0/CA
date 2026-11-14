@@ -1,0 +1,38 @@
+error,template_id,template,n_test,n_test_anomalous,rule,reason
+false positive,569,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",27510,0,30.0,exited abnormally
+false positive,341,"ciod: Error loading <*> invalid or missing program image, Permission denied",13952,0,30.0,exited abnormally
+false positive,59,ciod: pollControlDescriptors: Detected the debugger died.,5603,0,30.0,Detected the debugger died suggests an abnormal exit
+false positive,10,"ciod: Error loading <*> invalid or missing program image, No such file or directory",4752,0,30.0,exited abnormally
+false negative,65,ciod: LOGIN <*> failed: <*> <*>,816,816,,Login failure is not necessarily an abnormal condition.
+false positive,113,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,583,0,3.0,mpgood error latch is active
+false positive,555,invalid <*>,390,0,11.0,rts: kernel terminated
+false positive,187,"ciod: Error loading <*> program image too big, <*> > <*>",208,0,30.0,exited abnormally
+false positive,550,invalid operation exception <*>,195,0,20.0,rts panic! and invalid operation exception indicate a critical system error
+false positive,77,capture first <*> <*> error address..<*>,156,0,30.0,exited abnormally
+false negative,20,machine <*> <*>,127,4,,No specific keywords match the given log message.
+false positive,26,d-cache <*> parity <*>,106,0,25.0,Parity errors in communication
+false positive,280,Ido packet timeout,92,0,18.0,bglerr_ido_pkt_timeout
+false positive,25,<*> parity <*>,79,0,25.0,Parity errors in communication
+false negative,34,data <*> <*>,79,1,,No specific keywords match the log message.
+false positive,82,parity error in read queue <*>,78,0,25.0,Parity errors in communication
+false positive,81,parity error in <*> <*>,78,0,25.0,parity errors in communication
+false positive,563,invalid operation exception (int cnvt)...<*>,65,0,20.0,rts panic! and invalid operation exception suggest critical error
+false positive,553,divide-by-zero exception.................<*>,65,0,30.0,denotes a system or process exiting abnormally
+false positive,554,inexact exception........................<*>,65,0,30.0,exited abnormally
+false positive,552,underflow exception......................<*>,65,0,30.0,denotes a system or process exiting abnormally
+false positive,449,data cache <*> parity error detected. attempting to correct,55,0,25.0,parity errors in communication
+false positive,24,tlb error.........................<*>,53,0,8.0,tlb error is a kernel termination due to an error
+false positive,27,imprecise machine check...........<*>,53,0,22.0,machine check interrupt suggests hardware failure
+false positive,538,Machine Check Status Register: <*>,53,0,22.0,machine check interrupt suggests hardware failure
+false negative,86,DDR <*> <*> register: <*> <*>,52,26,,No specific keywords trigger an abnormal condition.
+false positive,99,miscompare............<*>,26,0,30.0,exited abnormally
+false positive,85,number of lines with parity errors written to L<*> EDRAMs...<*>,26,0,25.0,Parity errors in communication
+false positive,93,memory manager / command manager address parity..<*>,26,0,27.0,general informational messages about system state
+false positive,100,uncorrectable error...<*>,26,0,8.0,Kernel terminations and panics are severe errors
+false positive,104,DDR failing data registers: <*> <*>,26,0,30.0,Denotes a system or process exiting abnormally
+false positive,142,program interrupt: <*> <*>,24,0,8.0,kernel terminated
+false negative,18,<*> TLB error interrupt,12,12,,TLB error interrupt is not covered by any specific rule.
+false positive,55,rts internal error,12,0,8.0,rts internal error indicates a kernel termination due to an error
+false positive,259,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",8,0,30.0,exited abnormally
+false positive,610,Exception Syndrome Register: <*>,4,0,8.0,kernel terminated for reason
+false positive,115,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,1,0,30.0,exited abnormally

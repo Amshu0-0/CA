@@ -1,0 +1,15 @@
+error,template_id,template,n_test,n_test_anomalous,rule,reason
+false positive,760,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",22175,0,3.0,kernel
+false negative,65,ciod: LOGIN <*> failed: <*> <*>,816,816,,no rule fired
+false negative,20,machine <*> <*>,127,4,,no rule fired
+false negative,34,data <*> <*>,79,1,,no rule fired
+false negative,86,DDR <*> <*> register: <*> <*>,52,26,,no rule fired
+false negative,571,Power Good signal deactivated: <*> A service action may be required.,15,15,,no rule fired
+false negative,18,<*> TLB error interrupt,12,12,,no rule fired
+false negative,328,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",8,8,,no rule fired
+false positive,751,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,4,0,3.0,kernel
+false positive,752,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",4,0,3.0,kernel
+false negative,475,L<*> major internal error,2,2,,no rule fired
+false negative,716,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,2,2,,no rule fired
+false positive,805,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",2,0,3.0,kernel
+false negative,480,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",1,1,,no rule fired

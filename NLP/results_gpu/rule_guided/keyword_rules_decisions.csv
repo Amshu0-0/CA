@@ -1,0 +1,473 @@
+template_id,label,rule,reason,parsed,latency_seconds,cached,template,n_val,n_val_anomalous,n_test,n_test_anomalous
+1,0,,no rule fired,True,6.450199998653261e-05,False,instruction cache parity error corrected,5206,0,33547,0
+6,0,,no rule fired,True,4.065200005243241e-05,False,"CE sym <*>, at <*>, mask <*>",67817,0,19837,0
+10,0,,no rule fired,True,4.2416000042067026e-05,False,"ciod: Error loading <*> invalid or missing program image, No such file or directory",12944,0,4752,0
+13,0,,no rule fired,True,4.932900014864572e-05,False,idoproxydb has been started: $Name: <*> $ Input parameters: -enableflush -loguserinfo db.properties BlueGene<*>,32,0,26,0
+14,0,,no rule fired,True,3.538800001479103e-05,False,ciodb has been restarted.,31,0,44,0
+16,0,,no rule fired,True,4.1036000084204716e-05,False,ciod: LOGIN <*> failed: No such file or directory,2376,0,3623,0
+18,0,,no rule fired,True,3.653499993561127e-05,False,<*> TLB error interrupt,0,0,12,12
+19,0,,no rule fired,True,4.5254000042405096e-05,False,instruction <*> <*>,180,0,166,0
+20,0,,no rule fired,True,3.289799997219234e-05,False,machine <*> <*>,105,37,127,4
+23,0,,no rule fired,True,3.394600003048254e-05,False,data <*> plb <*>,126,0,106,0
+24,0,,no rule fired,True,5.712600000151724e-05,False,tlb error.........................<*>,63,0,53,0
+25,0,,no rule fired,True,3.728199999386561e-05,False,<*> parity <*>,68,0,79,0
+26,0,,no rule fired,True,3.544600008353882e-05,False,d-cache <*> parity <*>,126,0,106,0
+27,0,,no rule fired,True,4.1120999867416685e-05,False,imprecise machine check...........<*>,62,0,53,0
+29,0,,no rule fired,True,4.5017000047664624e-05,False,<*> state <*>,128,0,132,0
+30,0,,no rule fired,True,3.659100002550986e-05,False,<*> input interrupt enable...<*>,128,0,132,0
+31,0,,no rule fired,True,3.34179999299522e-05,False,floating point <*> <*>,63,1,66,0
+32,0,,no rule fired,True,3.971900014221319e-05,False,floating pt ex mode <*> enable......<*>,112,0,132,0
+33,0,,no rule fired,True,2.8944999939994887e-05,False,debug <*> <*>,116,0,132,0
+34,0,,no rule fired,True,2.9906000008850242e-05,False,data <*> <*>,56,2,79,1
+36,0,,no rule fired,True,3.1109000019569066e-05,False,disable <*> <*>,101,0,158,0
+37,0,,no rule fired,True,3.840299996227259e-05,False,disable apu instruction broadcast........<*>,49,0,66,0
+38,0,,no rule fired,True,3.480899999885878e-05,False,guaranteed <*> cache block <*>,92,0,132,0
+39,0,,no rule fired,True,3.594999998313142e-05,False,force load/store alignment...............<*>,46,0,66,0
+40,0,,no rule fired,True,3.2330000067304354e-05,False,icache prefetch <*>,91,0,132,0
+48,1,3.0,panic,True,1.082600010704482e-05,False,rts panic! - stopping execution,60,60,68,68
+55,0,,no rule fired,True,3.259599998273188e-05,False,rts internal error,4,0,12,0
+59,0,,no rule fired,True,4.2237999878125265e-05,False,ciod: pollControlDescriptors: Detected the debugger died.,298,0,5603,0
+60,0,,no rule fired,True,5.002100010642607e-05,False,"ciod: for node <*>, <*> <*> <*> <*> <*> <*> <*>",0,0,38,0
+65,0,,no rule fired,True,3.685199999381439e-05,False,ciod: LOGIN <*> failed: <*> <*>,0,0,816,816
+66,1,22.0,machine check interrupt,True,3.141599995615252e-05,False,machine check interrupt (bit=<*>): <*> <*> <*> <*>,7,7,7,7
+67,0,,no rule fired,True,4.630600005839369e-05,False,L<*> <*> <*> register: <*>,15,0,78,0
+68,0,,no rule fired,True,2.702200004023325e-05,False,start <*>,20,0,104,0
+69,0,,no rule fired,True,0.00032697500000722357,False,close EDRAM pages as soon as possible....<*>,5,0,26,0
+70,0,,no rule fired,True,4.128099999434198e-05,False,size of <*> <*> <*> <*> (<*>M),10,0,52,0
+71,0,,no rule fired,True,3.957500007345516e-05,False,disable all access to cache directory....<*>,5,0,26,0
+72,0,,no rule fired,True,3.906400002051669e-05,False,write buffer commit threshold............<*>,5,0,26,0
+73,0,,no rule fired,True,3.633999995145132e-05,False,prefetch depth for <*> <*>,15,0,78,0
+74,0,,no rule fired,True,4.037200005768682e-05,False,max number of outstanding prefetches.....<*>,5,0,26,0
+75,0,,no rule fired,True,3.9177000189738465e-05,False,turn on hidden refreshes.................<*>,5,0,26,0
+76,0,,no rule fired,True,3.8371000073311734e-05,False,disable write lines <*>:<*>..................<*>,5,0,26,0
+77,0,,no rule fired,True,4.78450001537567e-05,False,capture first <*> <*> error address..<*>,30,0,156,0
+78,0,,no rule fired,True,4.271600005267828e-05,False,disable flagging of DDR UE's as major internal error.<*>,5,0,26,0
+79,0,,no rule fired,True,3.703199990923167e-05,False,<*> error detected in <*> <*>,25,0,130,0
+80,0,,no rule fired,True,5.25000000379805e-05,False,<*> error detected in EDRAM bank <*>,20,0,104,0
+81,0,,no rule fired,True,3.7436999946294236e-05,False,parity error in <*> <*>,15,0,78,0
+82,0,,no rule fired,True,4.9393999915992026e-05,False,parity error in read queue <*>,15,0,78,0
+83,0,,no rule fired,True,0.0005703860001631256,False,number of correctable errors detected in L<*> <*>,10,0,52,0
+84,0,,no rule fired,True,4.2806999999811524e-05,False,interrupt threshold...<*>,10,0,52,0
+85,0,,no rule fired,True,5.35430001491477e-05,False,number of lines with parity errors written to L<*> EDRAMs...<*>,5,0,26,0
+86,0,,no rule fired,True,3.3484999903521384e-05,False,DDR <*> <*> register: <*> <*>,10,5,52,26
+87,0,,no rule fired,True,3.893699999935052e-05,False,memory and bus summary...........................<*>,5,0,26,0
+88,0,,no rule fired,True,5.385000008573115e-05,False,command manager unit summary.....................<*>,5,0,26,0
+89,0,,no rule fired,True,4.848999992645986e-05,False,memory manager <*> <*>,20,0,104,0
+90,0,,no rule fired,True,3.0267999818534008e-05,False,memory manager <*> <*> <*>,20,0,104,0
+91,0,,no rule fired,True,3.0188999971869634e-05,False,memory manager <*>,10,0,52,0
+92,0,,no rule fired,True,0.00012597900013133767,False,state machine....................................<*>,5,0,26,0
+93,0,,no rule fired,True,3.6182000030748895e-05,False,memory manager / command manager address parity..<*>,5,0,26,0
+94,0,,no rule fired,True,3.622200006248022e-05,False,regctl scancom interface.........................<*>,5,0,26,0
+96,0,,no rule fired,True,3.3893999898282345e-05,False,capture valid.........<*>,5,0,26,0
+97,0,,no rule fired,True,3.2942000188995735e-05,False,symbol................<*>,5,0,26,0
+98,0,,no rule fired,True,3.415700007280975e-05,False,mask..................<*>,5,0,26,0
+99,0,,no rule fired,True,3.51319999936095e-05,False,miscompare............<*>,5,0,26,0
+100,0,,no rule fired,True,3.7447000067913905e-05,False,uncorrectable error...<*>,5,0,26,0
+101,0,,no rule fired,True,3.377500001988665e-05,False,correctable error.....<*>,5,0,26,0
+102,0,,no rule fired,True,3.4281999887753045e-05,False,qw trapped............<*>,5,0,26,0
+103,0,,no rule fired,True,0.0001858399998582172,False,chip select...........<*>,5,0,26,0
+104,0,,no rule fired,True,7.041499998194922e-05,False,DDR failing data registers: <*> <*>,5,0,26,0
+105,0,,no rule fired,True,5.398000007517112e-05,False,<*> <*>,15,0,78,0
+110,0,,no rule fired,True,7.250299995575915e-05,False,EndServiceAction <*> performed upon <*> by <*>,23,0,40,0
+111,0,,no rule fired,True,3.267199986112246e-05,False,Node card is not fully functional,732,0,585,0
+112,0,,no rule fired,True,5.364300000110234e-05,False,Can not get assembly information for node card,732,0,585,0
+113,0,2.0,alert,True,8.785999852989335e-06,False,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,731,0,583,0
+114,0,,no rule fired,True,6.04060001023754e-05,False,Node card VPD check: U<*> node in processor card slot J<*> do not match. VPD ecid <*> found <*>,764,0,658,0
+115,0,,no rule fired,True,6.267999992815021e-05,False,ciod: sendMsgToDebugger: error sending PROGRAM_EXITED message to debugger.,0,0,1,0
+138,0,,no rule fired,True,6.6882000055557e-05,False,Starting SystemController,10,0,16,0
+140,0,,no rule fired,True,5.1286999905642006e-05,False,Running as background command,10,0,16,0
+142,0,,no rule fired,True,3.409400005693897e-05,False,program interrupt: <*> <*>,30,0,24,0
+143,0,,no rule fired,True,4.100899991499318e-05,False,floating point operation....................<*>,5,0,4,0
+144,0,,no rule fired,True,5.344700002751779e-05,False,store operation.............................<*>,5,0,4,0
+145,0,,no rule fired,True,6.31289999546425e-05,False,data store interrupt caused by <*>,10,0,8,0
+146,0,,no rule fired,True,5.406200011748297e-05,False,auxiliary processor.........................<*>,5,0,4,0
+147,0,,no rule fired,True,6.072199994378025e-05,False,byte ordering exception.....................<*>,5,0,4,0
+148,0,,no rule fired,True,5.5027999906087643e-05,False,program interrupt: fp cr update.............<*>,5,0,4,0
+149,0,,no rule fired,True,3.734999995685939e-05,False,program interrupt: fp cr field .............<*>,5,0,4,0
+155,0,,no rule fired,True,4.2329999814683106e-05,False,external input interrupt (unit=<*> bit=<*>): <*> <*> <*> <*> <*> <*> <*>,12,0,2,0
+160,0,,no rule fired,True,5.8004999800687074e-05,False,Ido chip status changed: <*> ip=<*> v=<*> t=<*> status=M <*> <*> <*> <*>:<*>:<*> <*> <*>,161,0,443,0
+179,0,,no rule fired,True,5.814399992232211e-05,False,ciod: Unexpected eof at line <*> of node map file <*>,32,0,8,0
+187,0,,no rule fired,True,5.8366999837744515e-05,False,"ciod: Error loading <*> program image too big, <*> > <*>",1272,0,208,0
+189,0,,no rule fired,True,5.331399984243035e-05,False,job <*> timed out. Block freed.,84,0,36,0
+193,0,,no rule fired,True,3.7468000073204166e-05,False,ciod: <*> <*> <*> <*> <*> <*> <*> at line <*> of node map file <*>,32,0,24,0
+206,1,9.0,socket closed,True,1.561499993840698e-05,False,<*> <*> <*> socket closed,55,55,37,37
+209,0,2.0,alert,True,9.868999995887862e-06,False,Node card status: no ALERTs are active. Clock Mode is Low. Clock Select is Midplane. Phy JTAG Reset is asserted. ASIC JTAG Reset is asserted. Temperature Mask is not active. No temperature error. Temperature Limit Error Latch is clear. PGOOD IS NOT ASSERTED. PGOOD ERROR LATCH IS ACTIVE. MPGOOD is OK. MPGOOD ERROR LATCH IS ACTIVE. The <*>.<*> volt rail is OK. The <*>.<*> volt rail is OK.,1,0,2,0
+218,0,,no rule fired,True,3.741799991985317e-05,False,ciod: Error <*> node map <*> <*> <*> <*> <*> <*> <*>,8,0,8,0
+219,0,,no rule fired,True,3.453599993008538e-05,False,shutdown complete,51,0,3,0
+220,0,,no rule fired,True,5.930000020271109e-05,False,"PrepareForService is being done on this Midplane (mLctn(R<*>-M<*>), <*> <*> by <*>",32,0,46,0
+221,0,,no rule fired,True,5.260200009615801e-05,False,PrepareForService is being done on this rack (R<*>) by <*>,0,0,2,0
+226,0,,no rule fired,True,4.6396000016102334e-05,False,ciod: In packet from node <*>.<*> <*> message code <*> is not <*> or <*> <*> <*> <*> <*>),11,0,9,0
+258,1,4.0,exited abnormally,True,1.1538000080690836e-05,False,<*> exited abnormally due to signal: Aborted,0,0,19,19
+259,0,,no rule fired,True,6.108200000198849e-05,False,"ciod: Error loading <*> invalid or missing program image, <*> <*> <*>",1032,0,8,0
+280,0,,no rule fired,True,3.6111000099481316e-05,False,Ido packet timeout,2,0,92,0
+281,1,18.0,bglerr_ido_pkt_timeout,True,3.0268000045907684e-05,False,<*> <*> <*> BGLERR_IDO_PKT_TIMEOUT connection lost to node/link/service card,2,2,2,2
+282,1,9.0,socket to,True,1.9163999922966468e-05,False,ciod: Error reading message prefix after <*> on CioStream socket to <*>:<*>: <*> <*> <*> <*>,3110,3110,336,336
+305,0,,no rule fired,True,4.269999999451102e-05,False,"Node card VPD check: missing U<*> node, VPD ecid <*> in processor card slot J<*>",0,0,2,0
+309,0,,no rule fired,True,3.8472000142064644e-05,False,Controlling BG/L rows [ <*> <*> <*> <*> <*> <*> <*> <*> ],10,0,16,0
+320,1,12.0,lustre mount failed,True,1.792900002328679e-05,False,Lustre mount FAILED : bglio<*> : block_id : location,1769,1769,2210,2210
+328,0,,no rule fired,True,6.244699989110813e-05,False,"MidplaneSwitchController::receiveTrain() iap failed: R<*>-M<*>-L<*>-U<*>-A, <*> ec<*>",0,0,8,8
+337,0,,no rule fired,True,5.665899993800849e-05,False,"ddr: Unable to steer rank=<*>, symbol=<*> - rank is already steering symbol <*>. Due to multiple symbols being over the correctable error threshold, consider replacing the card",141,0,3,0
+341,0,,no rule fired,True,4.6067999846854946e-05,False,"ciod: Error loading <*> invalid or missing program image, Permission denied",17280,0,13952,0
+342,0,,no rule fired,True,4.186599994682183e-05,False,ciod: generated <*> core files for program <*>,20646,0,6062,0
+348,0,,no rule fired,True,5.6345000075452845e-05,False,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties <*> --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*>,30,0,9,0
+449,0,,no rule fired,True,4.2725999946924276e-05,False,data cache <*> parity error detected. attempting to correct,13951,0,55,0
+475,0,,no rule fired,True,3.896999987773597e-05,False,L<*> major internal error,1,1,2,2
+480,0,,no rule fired,True,4.8295000169673585e-05,False,"Error receiving packet on tree network, <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>) PSR<*>=<*>f<*> PSR<*>=<*> PRXF=<*> PIXF=<*>",6144,6144,1,1
+481,0,,no rule fired,True,5.484799999067036e-05,False,ddr: activating redundant bit steering for next allocation: rank=<*> symbol=<*>,267,0,225,0
+528,0,,no rule fired,True,5.63710000278661e-05,False,BGLMaster has been started: ./BGLMaster --consoleip <*> --consoleport <*> --configfile bglmaster.init --autorestart y --db<*>profile /u/bgdb<*>cli/sqllib/db<*>profile --dbproperties db.properties,7,0,24,0
+529,0,,no rule fired,True,4.83069998153951e-05,False,"critical input interrupt (unit=<*> bit=<*>): warning for <*> <*> wire, suppressing further interrupts of same type",258,0,3288,0
+530,0,,no rule fired,True,4.679299991039443e-05,False,<*> tree receiver <*> in re-synch state event(s) (dcr <*>) detected over <*> seconds,145,0,3003,0
+531,0,,no rule fired,True,4.8318000153813045e-05,False,<*> torus receiver <*> input pipe error(s) (dcr <*>) detected and corrected over <*> seconds,870,0,2642,0
+532,0,,no rule fired,True,4.468599991014344e-05,False,"<*> ddr error(s) detected and corrected on rank <*>, symbol <*> over <*> seconds",456,0,9980,0
+533,0,,no rule fired,True,4.1632999909779755e-05,False,total of <*> ddr error(s) detected and corrected over <*> seconds,456,0,9959,0
+534,0,,no rule fired,True,4.250200004207727e-05,False,<*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,103,0,1412,0
+538,0,,no rule fired,True,4.653300015888817e-05,False,Machine Check Status Register: <*>,3,0,53,0
+539,0,,no rule fired,True,3.71779999568389e-05,False,Machine State Register: <*>,3,0,66,0
+540,0,,no rule fired,True,3.6354000030769384e-05,False,Core Configuration Register <*>: <*>,3,0,66,0
+541,0,,no rule fired,True,4.254800001035619e-05,False,DDR failing info register: DDR Fail Info Register: <*>,3,0,26,0
+542,0,,no rule fired,True,3.691599999910977e-05,False,<*> <*> Registers:,9,0,196,0
+543,0,,no rule fired,True,3.896800012626045e-05,False,r<*>=<*> r<*>=<*> r<*>=<*> r<*>=<*>,24,0,523,0
+544,0,,no rule fired,True,3.476200004115526e-05,False,lr=<*> cr=<*> xer=<*> ctr=<*>,3,0,65,0
+545,0,,no rule fired,True,3.6639999962062575e-05,False,msr=<*> dear=<*> esr=<*> fpscr=<*>,3,0,65,0
+546,0,,no rule fired,True,4.9701000079949154e-05,False,dbcr<*>=<*> dbsr=<*> ccr<*>=<*>,3,0,65,0
+547,0,,no rule fired,True,3.961400011576188e-05,False,Floating Point Status and Control Register: <*>,3,0,65,0
+548,0,,no rule fired,True,4.063599999426515e-05,False,exception summary........................<*>,3,0,65,0
+549,0,,no rule fired,True,4.125800001020252e-05,False,enabled exception summary................<*>,3,0,65,0
+550,0,,no rule fired,True,3.662599988274451e-05,False,invalid operation exception <*>,9,0,195,0
+551,0,,no rule fired,True,4.0413999840893666e-05,False,overflow exception.......................<*>,3,0,65,0
+552,0,,no rule fired,True,3.966200006289e-05,False,underflow exception......................<*>,3,0,65,0
+553,0,,no rule fired,True,3.932300000997202e-05,False,divide-by-zero exception.................<*>,3,0,65,0
+554,0,,no rule fired,True,4.0601000137030496e-05,False,inexact exception........................<*>,3,0,65,0
+555,0,,no rule fired,True,3.469100010988768e-05,False,invalid <*>,18,0,390,0
+556,0,,no rule fired,True,3.157400010422862e-05,False,fraction <*>,6,0,130,0
+557,0,,no rule fired,True,3.5918000094170566e-05,False,quiet NaN................................<*>,3,0,65,0
+558,0,,no rule fired,True,2.7931999966313015e-05,False,minus <*>,6,0,130,0
+559,0,,no rule fired,True,2.9902000051151845e-05,False,minus <*> <*>,6,0,130,0
+560,0,,no rule fired,True,2.825699993991293e-05,False,plus <*>,6,0,130,0
+561,0,,no rule fired,True,3.079799989791354e-05,False,plus <*> <*>,6,0,130,0
+562,0,,no rule fired,True,3.7516000020332285e-05,False,reserved.................................<*>,3,0,65,0
+563,0,,no rule fired,True,3.715499997269944e-05,False,invalid operation exception (int cnvt)...<*>,3,0,65,0
+564,0,,no rule fired,True,3.724199996213429e-05,False,enable invalid operation exceptions......<*>,3,0,65,0
+565,0,,no rule fired,True,2.8965999945285148e-05,False,enable <*> <*>,15,0,325,0
+566,0,,no rule fired,True,4.735800007438229e-05,False,round nearest............................<*>,3,0,65,0
+567,0,,no rule fired,True,2.8169000188427162e-05,False,round toward <*>,9,0,195,0
+568,0,,no rule fired,True,3.1885999987935065e-05,False,fpr<*>=<*> ffffffff <*> <*>,96,0,1329,0
+569,0,,no rule fired,True,3.554800014171633e-05,False,"ciod: Received signal <*>, code=<*>, errno=<*>, address=<*>",11947,0,27510,0
+570,0,,no rule fired,True,0.0001314400001319882,False,<*> <*> <*> <*> <*> <*> <*> <*> <*> as part of Service Action <*>,34,0,732,0
+571,0,,no rule fired,True,7.643000003554334e-05,False,Power Good signal deactivated: <*> A service action may be required.,79,79,15,15
+572,0,,no rule fired,True,4.1096999893852626e-05,False,<*> torus <*> <*> <*> error(s) (dcr <*>) detected and corrected over <*> seconds,770,0,279,0
+573,1,9.0,socket to,True,1.592100011293951e-05,False,"ciod: Error reading message prefix on CioStream socket to <*>:<*>, <*> <*> <*> <*>",3477,3477,25325,25325
+610,0,,no rule fired,True,3.5988000036013545e-05,False,Exception Syndrome Register: <*>,0,0,4,0
+611,0,,no rule fired,True,3.489200003059523e-05,False,fpr<*>=<*> <*> <*> <*>,0,0,111,0
+612,0,,no rule fired,True,3.374099992470292e-05,False,fpr<*>=<*> <*> <*> <*>fdc<*>,0,0,2,0
+613,0,,no rule fired,True,3.4668999887799146e-05,False,fpr<*>=<*> <*> f<*>dd<*>f c<*>ba<*>,0,0,1,0
+614,0,,no rule fired,True,3.285900015725929e-05,False,fpr<*>=<*> <*> <*> c<*>,0,0,2,0
+615,0,,no rule fired,True,3.531699985614978e-05,False,fpr<*>=<*> c<*>d<*> <*> <*>,0,0,4,0
+616,0,,no rule fired,True,3.8191999919945374e-05,False,fpr<*>=<*> c<*>f<*>ed<*> b<*>f<*>a<*> <*>cbea,0,0,1,0
+617,0,,no rule fired,True,3.235799999856681e-05,False,fpr<*>=<*> <*> <*> c<*>f<*>,0,0,7,0
+618,0,,no rule fired,True,3.30359998770291e-05,False,fpr<*>=<*> <*> <*>b<*> <*>,0,0,7,0
+619,0,,no rule fired,True,3.600800005187921e-05,False,fpr<*>=<*> <*>f<*>b<*> <*>b<*>fd c<*>fac,0,0,1,0
+620,0,,no rule fired,True,4.619800006366859e-05,False,fpr<*>=<*> <*>c<*> <*> <*>,0,0,14,0
+621,0,,no rule fired,True,5.374300008043065e-05,False,fpr<*>=<*> <*> fe<*>a<*> c<*>b<*>ec,0,0,1,0
+622,0,,no rule fired,True,3.476500000942906e-05,False,fpr<*>=<*> <*> <*> c<*>a<*>,0,0,3,0
+623,0,,no rule fired,True,3.575899995666987e-05,False,fpr<*>=<*> <*>e<*>be <*>f<*>d <*>d<*>f,0,0,1,0
+624,0,,no rule fired,True,3.576699987206666e-05,False,fpr<*>=<*> c<*>a<*> <*> <*>,0,0,3,0
+625,0,,no rule fired,True,4.020200003651553e-05,False,fpr<*>=<*> c<*>dd<*> <*>c<*>f<*> bff<*>ea,0,0,1,0
+626,0,,no rule fired,True,3.804800007856102e-05,False,fpr<*>=<*> <*>eb<*>f<*> f<*>b<*>afa <*>a<*>e,0,0,1,0
+627,0,,no rule fired,True,3.652800000963907e-05,False,fpr<*>=<*> <*>d<*>a <*> <*>,0,0,2,0
+628,0,,no rule fired,True,3.7833000078535406e-05,False,fpr<*>=<*> c<*>ec <*> <*>,0,0,1,0
+629,0,,no rule fired,True,5.656899998029985e-05,False,mmcs_db_server has been started: ./mmcs_db_server --useDatabase BGL --dbproperties db.properties --iolog /bgl/BlueLight/logs/BGL --reconnect-blocks all --shutdown-timeout <*> --shutdown-timeout <*>,0,0,18,0
+630,0,,no rule fired,True,4.6990999862828176e-05,False,ciod: In packet from node <*>.<*> <*> message still ready for node <*> <*> <*> <*> <*>),0,0,2,0
+631,1,22.0,machine check interrupt,True,3.394200007278414e-05,False,machine check interrupt (bit=<*>): L<*> dcache unit <*> <*> parity error,0,0,23,23
+632,0,,no rule fired,True,3.74559999727353e-05,False,fpr<*>=<*> c<*>f<*> <*> <*>,0,0,2,0
+633,0,,no rule fired,True,3.812699992522539e-05,False,fpr<*>=<*> <*> <*>de<*>d<*> <*>,0,0,1,0
+634,0,,no rule fired,True,3.858900004161114e-05,False,fpr<*>=<*> <*> cb<*>ef<*> <*>cf<*>c,0,0,1,0
+635,0,,no rule fired,True,4.8072000026877504e-05,False,fpr<*>=<*> <*> <*>ffaa<*> bfd<*>f<*>f,0,0,2,0
+636,0,,no rule fired,True,3.438599992477975e-05,False,fpr<*>=<*> <*> <*> <*>fd<*>,0,0,6,0
+637,0,,no rule fired,True,3.561199991963804e-05,False,fpr<*>=<*> <*> <*>f<*> <*>,0,0,4,0
+638,0,,no rule fired,True,3.595099997255602e-05,False,fpr<*>=<*> <*> <*> c<*>b<*>,0,0,2,0
+639,0,,no rule fired,True,3.781800000979274e-05,False,fpr<*>=<*> bf<*>c<*> e<*>e <*>fc<*>d<*>,0,0,1,0
+640,0,,no rule fired,True,3.3585999972274294e-05,False,fpr<*>=<*> <*> <*> c<*>c<*>,0,0,8,0
+641,0,,no rule fired,True,3.40770000093471e-05,False,fpr<*>=<*> <*> <*> <*>c<*>,0,0,16,0
+642,0,,no rule fired,True,3.439700003582402e-05,False,fpr<*>=<*> <*> b<*>b<*> <*>,0,0,2,0
+643,0,,no rule fired,True,3.527500007294293e-05,False,fpr<*>=<*> <*>f<*> <*> <*>,0,0,10,0
+644,0,,no rule fired,True,3.525399984027899e-05,False,fpr<*>=<*> <*> <*> <*>f<*>,0,0,9,0
+645,0,,no rule fired,True,3.305100017314544e-05,False,fpr<*>=<*> <*> <*> c<*>d<*>,0,0,2,0
+646,0,,no rule fired,True,3.983700003118429e-05,False,fpr<*>=<*> <*>eddf<*> ae<*>ee<*>be bfaf<*>cf,0,0,1,0
+647,0,,no rule fired,True,3.778899986173201e-05,False,fpr<*>=<*> bfe<*>ae<*> d<*>bce c<*>b,0,0,1,0
+648,0,,no rule fired,True,3.78370000362338e-05,False,fpr<*>=<*> c<*>fbc<*>d <*> <*>fd<*>f<*>,0,0,1,0
+649,0,,no rule fired,True,3.868299995701818e-05,False,fpr<*>=<*> <*> c<*>d<*>cf<*> <*>dfb<*>a,0,0,2,0
+650,0,,no rule fired,True,3.439500005697482e-05,False,fpr<*>=<*> <*> <*>e<*> <*>,0,0,9,0
+651,0,,no rule fired,True,3.554099998837046e-05,False,fpr<*>=<*> <*> <*> <*>ffe<*>,0,0,2,0
+652,0,,no rule fired,True,3.6578000162990065e-05,False,fpr<*>=<*> <*> <*>c<*>a bb<*>a<*>,0,0,1,0
+653,0,,no rule fired,True,3.738600003089232e-05,False,fpr<*>=<*> <*> <*> <*>b<*>d,0,0,2,0
+654,0,,no rule fired,True,3.917200001524179e-05,False,fpr<*>=<*> <*> <*>dcda<*> bb<*>f<*>,0,0,1,0
+655,0,,no rule fired,True,4.960399996889464e-05,False,fpr<*>=<*> c<*>a<*>b <*>c<*>d<*>fd <*>b<*>d<*>,0,0,1,0
+656,0,,no rule fired,True,3.443300010985695e-05,False,fpr<*>=<*> <*>ec<*>d<*> <*> <*>cb<*>e<*>,0,0,1,0
+657,0,,no rule fired,True,3.625699991971487e-05,False,fpr<*>=<*> <*> <*>ba<*>ec<*>e c<*>bb<*>,0,0,1,0
+658,0,,no rule fired,True,5.1469000027282164e-05,False,fpr<*>=<*> <*> <*>aa<*>a <*>f<*>a,0,0,1,0
+659,0,,no rule fired,True,3.605500000958273e-05,False,fpr<*>=<*> <*> <*>b<*>e<*>c<*> bfd<*>fac<*>,0,0,2,0
+660,0,,no rule fired,True,3.942500006814953e-05,False,fpr<*>=<*> <*>e<*>ca<*> d<*>a<*>c<*> bfb<*>f<*>e,0,0,1,0
+661,0,,no rule fired,True,4.0182000020649866e-05,False,fpr<*>=<*> bffe<*>d<*> d<*>a<*>c<*>c <*>fbd<*>d<*>,0,0,1,0
+662,0,,no rule fired,True,3.6296999951446196e-05,False,fpr<*>=<*> <*> df<*>abd<*> <*>fc<*>b<*>,0,0,1,0
+663,0,,no rule fired,True,3.586699995139497e-05,False,fpr<*>=<*> <*> <*> <*>cb<*>,0,0,3,0
+664,0,,no rule fired,True,3.592899997784116e-05,False,fpr<*>=<*> <*> d<*>f<*>d<*>b <*>,0,0,1,0
+665,0,,no rule fired,True,3.6639999962062575e-05,False,fpr<*>=<*> <*> <*>f<*>c c<*>c<*>cf,0,0,1,0
+666,0,,no rule fired,True,3.748999984054535e-05,False,fpr<*>=<*> <*> cd<*>d<*>b<*> <*>d<*>b<*>,0,0,1,0
+667,0,,no rule fired,True,3.605200004130893e-05,False,fpr<*>=<*> <*> <*>c<*>ed bfd<*>fba<*>,0,0,2,0
+668,0,,no rule fired,True,3.542300009939936e-05,False,fpr<*>=<*> c<*>fba <*>a<*>b<*> bfb<*>ba,0,0,1,0
+669,0,,no rule fired,True,3.898399995705404e-05,False,fpr<*>=<*> bff<*>ab<*> <*>dee <*>fbbe<*>,0,0,1,0
+670,0,,no rule fired,True,3.7493000036192825e-05,False,fpr<*>=<*> <*> <*>be<*>a <*>edf<*>,0,0,1,0
+671,0,,no rule fired,True,3.56269999883807e-05,False,fpr<*>=<*> <*> a<*>b<*> c<*>eb,0,0,1,0
+672,0,,no rule fired,True,3.56319999355037e-05,False,fpr<*>=<*> <*> <*>b<*>d<*> <*>db<*>d,0,0,1,0
+673,0,,no rule fired,True,3.213599984519533e-05,False,fpr<*>=<*> <*> b<*>eae bfdc<*>,0,0,2,0
+674,0,,no rule fired,True,3.34179999299522e-05,False,fpr<*>=<*> c<*>e<*> <*>ad<*>c<*> bfc<*>e<*>fa,0,0,1,0
+675,0,,no rule fired,True,4.344500007391616e-05,False,fpr<*>=<*> <*> <*>e<*>b<*> <*>,0,0,2,0
+676,0,,no rule fired,True,3.815600007328612e-05,False,fpr<*>=<*> <*>fb<*>c<*>c <*>a<*>e<*>c <*>fb<*>b<*>,0,0,1,0
+677,0,,no rule fired,True,4.929300007461279e-05,False,fpr<*>=<*> <*> <*>eb<*>ee<*>c bfab<*>a<*>,0,0,1,0
+678,0,,no rule fired,True,3.4555999945951044e-05,False,fpr<*>=<*> <*> a<*>c<*>cf <*>dc<*>,0,0,1,0
+679,0,,no rule fired,True,3.6296999951446196e-05,False,fpr<*>=<*> <*> <*>fcd c<*>a<*>a,0,0,1,0
+680,0,,no rule fired,True,3.2593000014458084e-05,False,fpr<*>=<*> <*> f<*>c<*>bd <*>ba,0,0,1,0
+681,0,,no rule fired,True,3.4097000025212765e-05,False,fpr<*>=<*> <*> <*>cd<*>b<*>c bfb<*>b<*>,0,0,2,0
+682,0,,no rule fired,True,3.629500019997067e-05,False,fpr<*>=<*> <*>faf<*>d<*> e<*>f<*>ad <*>fdcc<*>ca,0,0,1,0
+683,0,,no rule fired,True,3.713399996740918e-05,False,fpr<*>=<*> <*>f<*>ea<*>c <*>cc<*>a<*>c c<*>e<*>,0,0,1,0
+684,0,,no rule fired,True,3.699299986692495e-05,False,fpr<*>=<*> bff<*>b eca<*>b<*> <*>fc<*>b<*>d,0,0,1,0
+685,0,,no rule fired,True,3.272200001447345e-05,False,fpr<*>=<*> <*> <*> <*>fa<*>c<*>,0,0,2,0
+686,0,,no rule fired,True,3.426499984016118e-05,False,fpr<*>=<*> <*> f<*>b<*>c<*>fd bf<*>c<*>b<*>,0,0,1,0
+687,0,,no rule fired,True,2.9375000167419785e-05,False,fpr<*>=<*> <*> <*> <*>b<*>,0,0,2,0
+688,0,,no rule fired,True,3.032900008292927e-05,False,fpr<*>=<*> <*> <*>a<*>c<*> <*>,0,0,2,0
+689,0,,no rule fired,True,6.085000018174469e-05,False,fpr<*>=<*> <*> <*> <*>ff<*>,0,0,16,0
+690,0,,no rule fired,True,5.961299984846846e-05,False,fpr<*>=<*> <*> <*>ea<*>be<*> <*>f<*>e<*>e<*>,0,0,2,0
+691,0,,no rule fired,True,5.472599991662719e-05,False,fpr<*>=<*> c<*>c<*>f<*>c <*>c<*>e<*>ce bf<*>a<*>,0,0,1,0
+692,0,,no rule fired,True,3.063300005123892e-05,False,fpr<*>=<*> <*> <*>a<*> <*>,0,0,3,0
+693,0,,no rule fired,True,3.2411999882242526e-05,False,fpr<*>=<*> <*> <*>d<*>ac<*>c bf<*>e<*>,0,0,1,0
+694,0,,no rule fired,True,5.863499995939492e-05,False,fpr<*>=<*> <*>ea<*>ee<*> <*>aee<*> <*>f<*>a<*>b<*>,0,0,1,0
+695,0,,no rule fired,True,3.29219999457564e-05,False,fpr<*>=<*> <*> b<*>a<*>a<*>c <*>ee<*>f<*>,0,0,1,0
+696,0,,no rule fired,True,3.410699991945876e-05,False,fpr<*>=<*> <*> f<*>f<*>a<*>a <*>d<*>f<*>b,0,0,1,0
+697,0,,no rule fired,True,4.296399993108935e-05,False,fpr<*>=<*> <*> c<*>d<*>c<*>c <*>f<*>cf<*>,0,0,2,0
+698,0,,no rule fired,True,3.934799997296068e-05,False,fpr<*>=<*> <*> <*> <*>f<*>d<*>,0,0,2,0
+699,0,,no rule fired,True,3.786199999922246e-05,False,fpr<*>=<*> c<*>c<*>ec <*>f<*>a bf<*>c<*>,0,0,1,0
+700,0,,no rule fired,True,3.2455000109621324e-05,False,fpr<*>=<*> <*> ea<*>dfa<*>e bf<*>ec<*>,0,0,1,0
+701,0,,no rule fired,True,3.345699997225893e-05,False,fpr<*>=<*> <*> <*> <*>ffff<*>,0,0,46,0
+702,0,,no rule fired,True,3.0140000035316916e-05,False,fpr<*>=<*> <*> <*> <*>d,0,0,4,0
+703,0,,no rule fired,True,3.346399989823112e-05,False,fpr<*>=<*> <*> <*> <*>e<*>,0,0,12,0
+704,0,,no rule fired,True,3.167499994560785e-05,False,fpr<*>=<*> <*>d <*> <*>,0,0,2,0
+705,0,,no rule fired,True,3.529700006765779e-05,False,fpr<*>=<*> <*> <*> <*>ffff<*>c<*>,0,0,10,0
+706,0,,no rule fired,True,3.685000001496519e-05,False,fpr<*>=<*> <*>cfaf<*> <*> <*>,0,0,10,0
+707,0,,no rule fired,True,3.437100008341076e-05,False,fpr<*>=<*> <*> <*>ffff<*> <*>,0,0,10,0
+708,0,,no rule fired,True,3.3863000226119766e-05,False,fpr<*>=<*> <*>ffff<*> <*> <*>,0,0,23,0
+709,0,,no rule fired,True,3.2980000014504185e-05,False,fpr<*>=<*> <*> <*> <*>f<*>af,0,0,1,0
+710,0,,no rule fired,True,3.4107000146832434e-05,False,fpr<*>=<*> <*> <*> <*>a<*>aa,0,0,1,0
+711,0,,no rule fired,True,3.626299985626247e-05,False,fpr<*>=<*> <*>e <*> <*>,0,0,7,0
+712,0,,no rule fired,True,3.604699986681226e-05,False,fpr<*>=<*> <*> <*> <*>a<*>a,0,0,3,0
+713,0,,no rule fired,True,3.476599999885366e-05,False,fpr<*>=<*> <*> <*> <*>b<*>b,0,0,1,0
+714,0,,no rule fired,True,3.4567999819046236e-05,False,fpr<*>=<*> <*> <*> <*>c<*>c,0,0,1,0
+715,0,,no rule fired,True,3.592500002014276e-05,False,fpr<*>=<*> <*>f <*> <*>,0,0,4,0
+716,0,,no rule fired,True,5.9675999864339246e-05,False,MidplaneSwitchController::clearPort() bll_clear_port failed: R<*>-M<*>-L<*>-U<*>-A,0,0,2,2
+717,0,,no rule fired,True,4.2417000031491625e-05,False,ciod: Error creating node map from file my_map.txt: No such file or directory,0,0,24,0
+718,0,,no rule fired,True,3.504599999359925e-05,False,fpr<*>=<*> <*> <*>d<*> <*>,0,0,4,0
+719,0,,no rule fired,True,3.452500004641479e-05,False,fpr<*>=<*> <*> <*> <*>a<*>,0,0,2,0
+720,0,,no rule fired,True,4.104000004190311e-05,False,fpr<*>=<*> <*>cd<*>f<*> <*>ff<*>a<*> <*>ffff<*>f<*>,0,0,1,0
+721,0,,no rule fired,True,4.074799994668865e-05,False,fpr<*>=<*> <*>ffff<*>d<*> <*>ff<*>f<*> <*>ffff<*>b<*>,0,0,1,0
+722,0,,no rule fired,True,3.506999996716331e-05,False,fpr<*>=<*> <*> <*> <*>fffffff,0,0,7,0
+723,0,,no rule fired,True,3.621000018938503e-05,False,fpr<*>=<*> bfdab<*>ea f<*>d<*>fc<*> bff<*>e<*>,0,0,1,0
+724,0,,no rule fired,True,3.405300003578304e-05,False,fpr<*>=<*> c<*>b <*>ec<*>c<*> bff<*>ed<*>,0,0,1,0
+725,0,,no rule fired,True,4.43129999894154e-05,False,fpr<*>=<*> bfed<*>fde <*>d<*>bbc<*> <*>fe<*>f,0,0,1,0
+726,0,,no rule fired,True,3.873800005749217e-05,False,fpr<*>=<*> <*>fdc<*> <*>c<*>ab bfec<*>f,0,0,1,0
+727,0,,no rule fired,True,3.6603000125978724e-05,False,fpr<*>=<*> <*>ff<*>cd<*> c<*>b<*>d c<*>e<*>d,0,0,1,0
+728,0,,no rule fired,True,3.526300019984774e-05,False,fpr<*>=<*> c<*>cb<*>d <*>a<*>d<*>dd<*> c<*>aec,0,0,1,0
+729,0,,no rule fired,True,3.532499999892025e-05,False,fpr<*>=<*> <*>f<*>fa bc<*>a<*>f bfec<*>,0,0,1,0
+730,0,,no rule fired,True,4.608800009009428e-05,False,fpr<*>=<*> <*>d<*>e<*> <*>ff<*> <*>af<*>,0,0,1,0
+731,0,1.0,fee,True,6.3049999425857095e-06,False,fpr<*>=<*> bfe<*> ef<*>ae<*>a<*> bffee<*>ae,0,0,1,0
+732,0,,no rule fired,True,3.581000009944546e-05,False,fpr<*>=<*> <*> <*> fffffffa,0,0,1,0
+733,0,,no rule fired,True,3.7786000120831886e-05,False,fpr<*>=<*> <*>aaba <*>dc<*>a<*> <*>afc,0,0,1,0
+734,0,,no rule fired,True,4.996600000595208e-05,False,fpr<*>=<*> bff<*>ab <*>c<*>bc<*>e c<*>d<*>b,0,0,1,0
+735,0,,no rule fired,True,4.790799994225381e-05,False,fpr<*>=<*> <*> <*> c<*>e,0,0,2,0
+736,0,,no rule fired,True,3.0592000030083e-05,False,fpr<*>=<*> <*> <*>c<*> <*>,0,0,4,0
+737,0,,no rule fired,True,3.259899995100568e-05,False,fpr<*>=<*> bff<*> <*> <*>,0,0,3,0
+738,0,,no rule fired,True,3.488299989840016e-05,False,fpr<*>=<*> c<*>c<*>ea <*>a<*>d<*>a<*> c<*>b<*>a<*>,0,0,1,0
+739,0,,no rule fired,True,3.198300009898958e-05,False,fpr<*>=<*> <*>c<*>d<*> <*> <*>,0,0,2,0
+740,0,,no rule fired,True,3.580700013117166e-05,False,fpr<*>=<*> bfea<*>f <*>fdbbf<*> bffcbf<*>a,0,0,1,0
+741,0,,no rule fired,True,3.541799992490269e-05,False,fpr<*>=<*> c<*>b<*>e ff<*>bf<*> <*>e<*>c<*>,0,0,1,0
+742,0,,no rule fired,True,3.604699986681226e-05,False,fpr<*>=<*> bff<*>dec<*> <*>e<*>b<*>df<*> c<*>b<*>b,0,0,1,0
+743,0,,no rule fired,True,3.347500000927539e-05,False,fpr<*>=<*> <*>ff<*> <*> <*>,0,0,6,0
+744,0,,no rule fired,True,3.683099998852413e-05,False,fpr<*>=<*> <*>ff<*>a<*> <*>da<*>ea<*> <*>b<*>c<*>,0,0,1,0
+745,0,,no rule fired,True,3.359599986652029e-05,False,fpr<*>=<*> c<*> f<*>ccd<*> c<*>dfcf,0,0,1,0
+746,0,,no rule fired,True,3.422899999350193e-05,False,fpr<*>=<*> <*>be<*> <*>ac<*>b<*> <*>d<*>,0,0,1,0
+747,0,,no rule fired,True,3.1659999876865186e-05,False,fpr<*>=<*> bfff<*> <*>b<*>f c<*>a,0,0,1,0
+748,0,,no rule fired,True,3.1031999924380216e-05,False,fpr<*>=<*> <*>e<*>f <*> <*>,0,0,1,0
+749,0,,no rule fired,True,4.848999992645986e-05,False,<*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,135092,0
+750,0,,no rule fired,True,4.8924000111583155e-05,False,"<*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,135092,0
+751,1,3.0,kernel,True,1.1518000064825173e-05,False,instance of a correctable ddr. RAS KERNEL INFO <*> microseconds spent in the rbs signal handler during <*> calls. <*> microseconds was the maximum time for a single instance of a correctable ddr.,0,0,4,0
+752,1,3.0,kernel,True,9.453999837205629e-06,False,"max time in a cr RAS KERNEL INFO <*> total interrupts. <*> critical input interrupts. <*> microseconds total spent on critical input interrupts, <*> microseconds max time in a critical input interrupt.",0,0,4,0
+753,0,,no rule fired,True,3.571299998839095e-05,False,fpr<*>=<*> <*>aa<*> <*> <*>,0,0,2,0
+754,0,,no rule fired,True,5.301300006976817e-05,False,fpr<*>=<*> <*> <*> <*>fe<*>,0,0,10,0
+755,0,,no rule fired,True,3.43570000040927e-05,False,fpr<*>=<*> <*> <*>e<*>a<*> c<*>d<*>cb,0,0,4,0
+756,0,,no rule fired,True,3.206100018360303e-05,False,fpr<*>=<*> <*>d<*> <*> <*>,0,0,2,0
+757,0,,no rule fired,True,3.123900000900903e-05,False,fpr<*>=<*> <*>fffff <*> <*>,0,0,2,0
+758,0,,no rule fired,True,4.920799983665347e-05,False,"external input interrupt (unit=<*> bit=<*>): number of corrected SRAM errors has exceeded threshold, suppressing further interrupts of same type",0,0,57,0
+759,0,,no rule fired,True,3.67909999567928e-05,False,ddr: Suppressing further CE interrupts,0,0,302,0
+760,1,3.0,kernel,True,1.0814000006575952e-05,False,"Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,22175,0
+761,0,,no rule fired,True,5.448299998533912e-05,False,fpr<*>=<*> bfb<*>a<*> a<*>aa<*>ac bfc<*>f<*>,0,0,1,0
+762,0,,no rule fired,True,3.9216000004671514e-05,False,fpr<*>=<*> bfbaf<*>fe b<*>cf<*> bfc<*>d<*>c,0,0,1,0
+763,0,,no rule fired,True,3.800199988290842e-05,False,fpr<*>=<*> bfcb<*>d e<*>cdf<*> <*>fcab<*>f<*>,0,0,1,0
+764,0,,no rule fired,True,3.594899999370682e-05,False,fpr<*>=<*> bfa<*>c<*>c <*>a<*>e<*> <*>fc<*>e,0,0,1,0
+765,0,,no rule fired,True,3.9469999819630175e-05,False,fpr<*>=<*> <*>fe<*>b<*> <*>c<*>f<*>c<*> <*>fbcbeb<*>,0,0,1,0
+766,0,,no rule fired,True,3.764099983527558e-05,False,fpr<*>=<*> <*> <*>b <*>,0,0,2,0
+767,0,,no rule fired,True,3.92339998143143e-05,False,fpr<*>=<*> <*> <*>afb<*> <*>a,0,0,1,0
+768,0,,no rule fired,True,4.297299983591074e-05,False,fpr<*>=<*> c<*>cdf<*> <*>c<*>a<*> bfcefc<*>,0,0,1,0
+769,0,,no rule fired,True,0.00012151000009907875,False,fpr<*>=<*> c<*>cf<*>e <*> c<*>cd<*>,0,0,1,0
+770,0,,no rule fired,True,4.827199995816045e-05,False,fpr<*>=<*> <*>b<*> <*> <*>,0,0,3,0
+771,0,,no rule fired,True,3.856800003632088e-05,False,fpr<*>=<*> bff<*>fdf<*> <*>dcd<*> bffc<*>f<*>a,0,0,1,0
+772,0,,no rule fired,True,3.5213000046496745e-05,False,fpr<*>=<*> <*>ab<*> de<*>b<*>b <*>defe<*>,0,0,1,0
+773,0,,no rule fired,True,3.4040999935314176e-05,False,fpr<*>=<*> c<*>d <*>aef<*>ff c<*>ac<*>,0,0,1,0
+774,0,,no rule fired,True,3.643199988800916e-05,False,fpr<*>=<*> c<*>bc<*> ee<*>caaa <*>ff<*>af<*>,0,0,1,0
+775,0,,no rule fired,True,3.511599993544223e-05,False,fpr<*>=<*> <*>a<*> <*> <*>,0,0,6,0
+776,0,,no rule fired,True,3.573700018932868e-05,False,fpr<*>=<*> <*> a<*>b<*>ace <*>e,0,0,1,0
+777,0,,no rule fired,True,3.4918999972433085e-05,False,fpr<*>=<*> bfc<*>b<*>d <*>cbfb<*> c<*>a<*>bc,0,0,1,0
+778,0,,no rule fired,True,3.502499998830899e-05,False,fpr<*>=<*> <*> <*>f<*>e<*> <*>,0,0,2,0
+779,0,,no rule fired,True,3.580599991437339e-05,False,fpr<*>=<*> <*>fdf<*>fa <*>f<*>cfe <*>,0,0,1,0
+780,0,,no rule fired,True,3.677399990920094e-05,False,fpr<*>=<*> c<*>c e<*>ca<*>f<*> c<*>f<*>a<*>,0,0,1,0
+781,0,,no rule fired,True,3.971299997829192e-05,False,fpr<*>=<*> <*>fd<*>fef<*> <*>e<*>c<*>de bfeb<*>ad<*>,0,0,1,0
+782,0,,no rule fired,True,3.9601000025868416e-05,False,fpr<*>=<*> <*>ff<*>fbd<*> <*>c<*>decd bfeb<*>b<*>e,0,0,1,0
+783,0,,no rule fired,True,3.9680000099906465e-05,False,fpr<*>=<*> bfe<*>cfc<*> <*>b<*>fa<*>d<*> bfe<*>cf<*>,0,0,1,0
+784,0,,no rule fired,True,5.15699998686614e-05,False,fpr<*>=<*> <*>fe<*>cf<*>b <*>c<*>bfaa <*>f<*>e<*>a<*>,0,0,1,0
+785,0,,no rule fired,True,3.4497999877203256e-05,False,fpr<*>=<*> <*> <*> bff<*>d<*>,0,0,2,0
+786,0,,no rule fired,True,3.345400000398513e-05,False,fpr<*>=<*> bdd<*>fe c<*>b<*>fb <*>df<*>dd<*>,0,0,1,0
+787,0,,no rule fired,True,3.401300000405172e-05,False,fpr<*>=<*> <*>df<*>ed <*>dc<*> <*>df<*>ce,0,0,1,0
+788,0,,no rule fired,True,3.422400004637893e-05,False,fpr<*>=<*> bdecab<*> fd<*>c<*> <*>df<*>ddff,0,0,1,0
+789,0,,no rule fired,True,3.404300014153705e-05,False,fpr<*>=<*> bdf<*>e<*>c bd<*>be<*>c <*>dff<*>,0,0,1,0
+790,0,,no rule fired,True,4.499800002122356e-05,False,fpr<*>=<*> <*> <*> <*>f<*>a<*>,0,0,2,0
+791,0,,no rule fired,True,3.492099995128228e-05,False,fpr<*>=<*> <*>f<*>a<*>e<*>e <*>cd<*>e<*>b bef<*>,0,0,1,0
+792,0,,no rule fired,True,3.434299992477463e-05,False,fpr<*>=<*> bef<*>e<*> cee<*>d<*> <*>f<*>a<*>e,0,0,1,0
+793,0,,no rule fired,True,3.399100000933686e-05,False,fpr<*>=<*> bef<*> a<*>a<*>c<*> <*>f<*>a<*>e<*>b,0,0,1,0
+794,0,,no rule fired,True,3.189499989275646e-05,False,fpr<*>=<*> <*> <*> bf<*>,0,0,4,0
+795,0,,no rule fired,True,3.458800006228557e-05,False,fpr<*>=<*> <*>e<*>e<*>f<*> <*>e<*>ebb<*> <*>e<*>e<*>,0,0,1,0
+796,0,1.0,fee,True,1.3496000065060798e-05,False,fpr<*>=<*> <*>e<*>fde<*>c <*>fee<*> be<*>bcf,0,0,1,0
+797,0,,no rule fired,True,3.685900014716026e-05,False,fpr<*>=<*> <*>e<*>ddd<*> e<*>b<*>ae <*>e<*>d<*>,0,0,1,0
+798,0,,no rule fired,True,3.65600001259736e-05,False,fpr<*>=<*> be<*>bc<*> bd<*>ac<*>d be<*>ba<*>ec,0,0,1,0
+799,0,,no rule fired,True,3.457100001469371e-05,False,fpr<*>=<*> <*>e<*> <*> <*>,0,0,2,0
+800,0,,no rule fired,True,3.663400002551498e-05,False,fpr<*>=<*> bed<*>f<*> b<*>fb<*> <*>edb<*>e<*>,0,0,1,0
+801,0,,no rule fired,True,3.6328000078356126e-05,False,fpr<*>=<*> <*>ec<*>d fea<*>a <*>edb<*>b,0,0,1,0
+802,0,,no rule fired,True,3.707999985635979e-05,False,fpr<*>=<*> <*>edb<*>e <*>a<*>e <*>edb<*>bd,0,0,1,0
+803,0,,no rule fired,True,3.593900009946083e-05,False,fpr<*>=<*> bed<*> <*>ec<*>cf<*> <*>ec<*>,0,0,1,0
+804,0,,no rule fired,True,3.647599987743888e-05,False,fpr<*>=<*> <*>ec<*>f<*> d<*>dbe<*>ae bed<*>,0,0,1,0
+805,1,3.0,kernel,True,1.2254000012035249e-05,False,"dear <*> (<*> RAS KERNEL INFO Kernel detected <*> integer alignment exceptions (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*> (<*>) iar <*>, dear <*>",0,0,2,0
+806,0,,no rule fired,True,4.156899990448437e-05,False,ciod: Error loading /p/gb<*>/light<*>/sppm_chkpt/sppm: not a CNK program image,0,0,1024,0
+807,0,,no rule fired,True,3.300599996691744e-05,False,fpr<*>=<*> <*>ffb<*> <*> <*>,0,0,6,0
+808,0,,no rule fired,True,3.39229998189694e-05,False,fpr<*>=<*> <*> d<*>d<*> <*>,0,0,2,0
+809,0,,no rule fired,True,3.585800004657358e-05,False,fpr<*>=<*> <*>fe<*>b<*>e<*> <*>a bcf<*>b<*>f,0,0,1,0
+810,0,,no rule fired,True,3.379700001460151e-05,False,fpr<*>=<*> <*>db<*> <*> <*>,0,0,3,0
+811,0,,no rule fired,True,3.220000007786439e-05,False,fpr<*>=<*> <*> f<*> <*>,0,0,2,0
+812,0,,no rule fired,True,2.963599990835064e-05,False,fpr<*>=<*> <*> fffffe<*>a <*>,0,0,3,0
+813,0,,no rule fired,True,3.0252999977165018e-05,False,fpr<*>=<*> c<*>d<*>cb <*> <*>,0,0,1,0
+814,0,,no rule fired,True,2.9082000082780723e-05,False,fpr<*>=<*> bf<*>d<*>cb <*> <*>,0,0,4,0
+815,0,,no rule fired,True,3.934400001526228e-05,False,fpr<*>=<*> <*>c<*>a<*> <*> <*>,0,0,1,0
+816,0,,no rule fired,True,3.417399989302794e-05,False,fpr<*>=<*> b<*>cac<*>bd <*> <*>,0,0,1,0
+817,0,,no rule fired,True,3.0947000141168246e-05,False,fpr<*>=<*> <*>c<*>cb<*> <*> <*>,0,0,1,0
+818,0,,no rule fired,True,3.2987000167850056e-05,False,fpr<*>=<*> bc<*>c<*>f<*> <*>ecc <*>,0,0,1,0
+819,0,,no rule fired,True,3.412599994589982e-05,False,fpr<*>=<*> bc<*>cceb <*> <*>,0,0,1,0
+820,0,,no rule fired,True,3.4873999993578764e-05,False,fpr<*>=<*> bc<*>b<*> fa<*>c<*> <*>ce<*>,0,0,1,0
+821,0,,no rule fired,True,3.64049999461713e-05,False,fpr<*>=<*> bc<*>d<*> <*>decd<*> <*>cb<*>ddb,0,0,1,0
+822,0,,no rule fired,True,3.040000001419685e-05,False,fpr<*>=<*> bc<*>f <*> <*>,0,0,1,0
+823,0,,no rule fired,True,2.8363000183162512e-05,False,fpr<*>=<*> bc<*>dd<*> <*> <*>,0,0,1,0
+824,0,,no rule fired,True,3.261999995629594e-05,False,fpr<*>=<*> bc<*>ecf <*> <*>,0,0,1,0
+825,0,,no rule fired,True,3.1875999866315397e-05,False,fpr<*>=<*> bccac<*>e <*> <*>,0,0,1,0
+826,0,,no rule fired,True,3.5726000078284414e-05,False,fpr<*>=<*> <*>ce<*> <*>eab<*>e <*>cd<*>a<*>,0,0,1,0
+827,0,,no rule fired,True,3.490099993541662e-05,False,fpr<*>=<*> <*> <*>e<*>c<*>c<*> <*>fc<*>fc<*>b,0,0,1,0
+828,0,,no rule fired,True,4.791099991052761e-05,False,fpr<*>=<*> <*> a<*>efe<*>c bfd<*>f<*>,0,0,1,0
+829,0,,no rule fired,True,3.139099999316386e-05,False,fpr<*>=<*> <*> <*>b<*>f<*>f bfe<*>aa<*>e,0,0,1,0
+830,0,,no rule fired,True,2.9196000014053425e-05,False,fpr<*>=<*> <*> <*>cd<*>b bfe<*>c<*>,0,0,1,0
+831,0,,no rule fired,True,4.538899997896806e-05,False,fpr<*>=<*> <*>a<*>f a<*>c<*> <*>f<*>ce<*>,0,0,1,0
+832,0,,no rule fired,True,3.294399994047126e-05,False,fpr<*>=<*> <*>b<*>d <*>d<*>d<*> <*>fc<*>c,0,0,1,0
+833,0,,no rule fired,True,2.9696999945372227e-05,False,fpr<*>=<*> <*> <*> <*>fdfffff,0,0,2,0
+834,0,,no rule fired,True,3.699199987750035e-05,False,fpr<*>=<*> <*> add<*>a<*> <*>e<*>fbcd,0,0,1,0
+835,0,,no rule fired,True,5.246199998509837e-05,False,fpr<*>=<*> bfb<*>b<*> <*> bc<*>bfd<*>,0,0,1,0
+836,0,1.0,fee,True,5.788999942524242e-06,False,fpr<*>=<*> <*> <*> <*>fee<*>b<*>,0,0,2,0
+837,0,,no rule fired,True,3.5523999940778594e-05,False,fpr<*>=<*> <*>f<*>f<*> <*> <*>,0,0,1,0
+838,0,,no rule fired,True,3.953700002057303e-05,False,fpr<*>=<*> <*>ff<*>ff<*> d<*>e<*>aef<*> <*>eca<*>,0,0,1,0
+839,0,,no rule fired,True,3.633599999375292e-05,False,fpr<*>=<*> <*> a<*>e <*>f<*>e<*>a,0,0,1,0
+840,0,,no rule fired,True,3.6904999888065504e-05,False,fpr<*>=<*> <*>f<*>c<*> <*>eab <*>fa<*>e<*>,0,0,1,0
+841,0,,no rule fired,True,3.762699998333119e-05,False,fpr<*>=<*> <*>b<*>d<*> dfd<*>f <*>f<*>b,0,0,1,0
+842,0,,no rule fired,True,3.920999984075024e-05,False,fpr<*>=<*> <*> <*>e<*>e bfa<*>bd<*>,0,0,1,0
+843,0,,no rule fired,True,3.910899999937101e-05,False,fpr<*>=<*> fd<*> fcc<*>d<*>f<*> <*>,0,0,1,0
+844,0,,no rule fired,True,3.810299995166133e-05,False,fpr<*>=<*> bb<*>e<*> fcd<*> <*>,0,0,1,0
+845,0,,no rule fired,True,3.897399983543437e-05,False,fpr<*>=<*> e<*>cb<*> <*>cd<*> f<*>bde<*>,0,0,1,0
+846,0,1.0,fee,True,5.115000021760352e-06,False,fpr<*>=<*> <*> ba<*>feeb<*> <*>fdff<*>c,0,0,1,0
+847,0,,no rule fired,True,3.552000021045387e-05,False,fpr<*>=<*> <*> <*>bc<*>f<*>b <*>fdf<*>eff,0,0,1,0
+848,0,,no rule fired,True,3.279499992459023e-05,False,fpr<*>=<*> <*> c<*>f<*>ff <*>fdef<*>e<*>,0,0,1,0
+849,0,,no rule fired,True,3.199200000381097e-05,False,fpr<*>=<*> <*> b<*>c<*> <*>,0,0,2,0
+850,0,,no rule fired,True,3.476500000942906e-05,False,fpr<*>=<*> <*> <*>d<*>fdf<*> <*>a<*>e<*>,0,0,3,0
+851,1,19.0,assertion,True,3.376800009391445e-05,False,"rts assertion failed: `vaddr % PAGE_SIZE_<*>M == <*>' in `int initializeAppMemory(int, TLBEntry&, unsigned int, unsigned int)' at mmu.cc:<*>",0,0,1,1
+852,0,,no rule fired,True,9.004900016407191e-05,False,fpr<*>=<*> bfd<*>c <*> <*>,0,0,3,0
+853,0,,no rule fired,True,6.071600000723265e-05,False,fpr<*>=<*> <*>ff<*>e f<*>a <*>fd<*>cb<*>c,0,0,1,0
+854,0,,no rule fired,True,3.803799995694135e-05,False,fpr<*>=<*> <*>ff<*>da<*> <*>b<*>e<*> <*>c<*>b<*>,0,0,1,0
+855,0,,no rule fired,True,4.850999994232552e-05,False,fpr<*>=<*> <*>c<*>f a<*>f<*> <*>ff<*>af,0,0,1,0
+856,0,,no rule fired,True,3.612900013649778e-05,False,fpr<*>=<*> <*> <*> <*>fe<*>d<*>,0,0,2,0
+857,0,,no rule fired,True,3.522399993016734e-05,False,fpr<*>=<*> <*>fd<*> de<*>ba<*>e<*> <*>b<*>ea<*>,0,0,1,0
+858,0,,no rule fired,True,3.4373999824310886e-05,False,fpr<*>=<*> <*>fe<*>e<*> <*> <*>,0,0,2,0
+859,0,,no rule fired,True,3.565399993021856e-05,False,fpr<*>=<*> <*>ff<*>f<*>b<*> ed<*>f<*>f<*> <*>,0,0,1,0
+860,0,,no rule fired,True,3.170700006194238e-05,False,fpr<*>=<*> <*>ba<*> <*> c<*>df<*>c,0,0,1,0
+861,0,,no rule fired,True,3.508200006763218e-05,False,fpr<*>=<*> <*> abdb<*>b<*> <*>ffd<*>f<*>,0,0,1,0
+862,0,,no rule fired,True,3.2742000030339113e-05,False,fpr<*>=<*> <*> c<*>a <*>f<*>ed<*>,0,0,1,0
+863,0,,no rule fired,True,3.495900000416441e-05,False,fpr<*>=<*> <*> ace<*>f<*> <*>eb<*>b,0,0,1,0
+864,0,,no rule fired,True,3.572100013116142e-05,False,fpr<*>=<*> <*> cf<*>aacc<*> bf<*>a<*>d<*>,0,0,1,0
+865,0,,no rule fired,True,3.491299980851181e-05,False,fpr<*>=<*> <*> f<*>b<*>a<*>f<*> <*>fdb<*>c<*>e,0,0,1,0
+866,0,,no rule fired,True,3.464700012045796e-05,False,fpr<*>=<*> <*> <*>ce<*>ff<*> bfa<*>e,0,0,1,0
+867,0,,no rule fired,True,3.150699990328576e-05,False,fpr<*>=<*> <*> <*>caf bfe<*>dfed,0,0,3,0
+868,0,,no rule fired,True,3.4238000125697e-05,False,fpr<*>=<*> <*> c<*>b<*>bc<*> bfc<*>d<*>,0,0,1,0
+869,0,,no rule fired,True,4.63699998363154e-05,False,fpr<*>=<*> <*> e<*>b<*>a<*>d bfc<*>b<*>b,0,0,3,0
+870,0,,no rule fired,True,3.302300001450931e-05,False,fpr<*>=<*> <*> <*> bc<*>,0,0,1,0
+871,0,,no rule fired,True,3.337099997224868e-05,False,fpr<*>=<*> <*> <*>f<*>c<*>f <*>f<*>c,0,0,1,0
+872,0,,no rule fired,True,3.302300001450931e-05,False,fpr<*>=<*> <*> d<*>ee<*>f <*>a<*>c<*>,0,0,1,0
+873,0,,no rule fired,True,3.1804000172996894e-05,False,fpr<*>=<*> <*> <*>cc<*> <*>f<*>fd<*>,0,0,2,0
+874,0,,no rule fired,True,3.4873999993578764e-05,False,fpr<*>=<*> bfdc<*>b<*> <*>e<*>f<*> <*>ef<*>f<*>b<*>,0,0,1,0
+875,0,,no rule fired,True,3.575999994609447e-05,False,fpr<*>=<*> bfe<*>b<*> <*>da<*>e <*>f<*>d<*>a<*>,0,0,1,0
+876,0,,no rule fired,True,4.5151999984227587e-05,False,fpr<*>=<*> bfdc<*>b<*>a <*> <*>,0,0,1,0
+877,0,,no rule fired,True,4.332599996814679e-05,False,fpr<*>=<*> <*> <*> <*>fe<*>a<*>b,0,0,1,0
+878,0,,no rule fired,True,3.297699981885671e-05,False,fpr<*>=<*> <*>fa <*>e<*>b<*>fae <*>,0,0,1,0
+879,0,,no rule fired,True,2.9241999982332345e-05,False,fpr<*>=<*> <*> <*>bb<*>c <*>ff<*>df,0,0,1,0
+880,0,,no rule fired,True,3.279099996689183e-05,False,fpr<*>=<*> <*> <*> bff<*>,0,0,5,0
+881,0,,no rule fired,True,3.507399992486171e-05,False,fpr<*>=<*> <*>fbdb<*>a<*> <*>abca beb<*>e<*>b,0,0,1,0
+882,0,,no rule fired,True,3.2411999882242526e-05,False,fpr<*>=<*> <*>c <*>ed<*>e <*>e<*>f<*>a,0,0,1,0
+883,0,,no rule fired,True,3.3685000062178005e-05,False,fpr<*>=<*> <*>fb <*>fdd<*>d<*> <*>d<*>c<*>,0,0,1,0
+884,0,,no rule fired,True,3.223499993509904e-05,False,fpr<*>=<*> <*> <*>ddf<*> <*>f<*>c<*>,0,0,1,0
+885,0,,no rule fired,True,3.245699986109685e-05,False,fpr<*>=<*> <*> <*>bea<*>c<*> <*>c<*>ab,0,0,1,0
+886,0,,no rule fired,True,2.858799985006044e-05,False,fpr<*>=<*> <*> <*> <*>fe<*>e<*>,0,0,1,0
+887,0,,no rule fired,True,3.1043000035424484e-05,False,fpr<*>=<*> <*> <*> <*>ff<*>d<*>,0,0,2,0
+888,0,,no rule fired,True,3.139299997201306e-05,False,fpr<*>=<*> <*> a<*>ffca<*> <*>cfc<*>f,0,0,1,0
+889,0,,no rule fired,True,3.2739000062065315e-05,False,fpr<*>=<*> <*> <*>c<*>eda<*> <*>fea<*>a,0,0,1,0
+890,0,,no rule fired,True,2.9935000156910974e-05,False,fpr<*>=<*> <*>cf<*> <*> <*>,0,0,1,0
+891,0,,no rule fired,True,4.535000016403501e-05,False,fpr<*>=<*> <*>e<*>aa <*>fd<*> <*>fe<*>d<*>f,0,0,1,0
+892,0,,no rule fired,True,3.04359998608561e-05,False,fpr<*>=<*> bf<*> e<*>a<*>cb<*> <*>f<*>ce<*>d,0,0,2,0
+893,0,,no rule fired,True,2.9701999892495223e-05,False,fpr<*>=<*> <*> <*> bfe<*>,0,0,3,0
+894,0,,no rule fired,True,2.980200019919721e-05,False,fpr<*>=<*> <*> <*>f<*>fffff <*>f<*>fffff,0,0,2,0
+895,0,,no rule fired,True,3.0918999982532114e-05,False,fpr<*>=<*> bf<*>ab<*> bfec<*> bee<*>ba<*>,0,0,1,0
+896,0,,no rule fired,True,4.965800007994403e-05,False,fpr<*>=<*> <*> d<*>f<*>a<*>fc <*>f<*>d,0,0,3,0
+897,0,,no rule fired,True,4.309000019020459e-05,False,fpr<*>=<*> <*> <*> bfd<*>,0,0,2,0
+898,0,,no rule fired,True,3.4894000009444426e-05,False,fpr<*>=<*> <*> <*> <*>bb<*>,0,0,1,0
+899,0,,no rule fired,True,3.26820002101158e-05,False,fpr<*>=<*> <*> <*> <*>ee<*>a<*>a,0,0,1,0
+900,0,,no rule fired,True,3.228299988222716e-05,False,fpr<*>=<*> <*> <*>a<*>a <*>,0,0,2,0
+901,0,,no rule fired,True,3.541799992490269e-05,False,fpr<*>=<*> <*>fc<*>af<*> d<*>d<*>bdbb <*>ddb<*>cdf,0,0,1,0
+902,0,,no rule fired,True,3.315300000394927e-05,False,fpr<*>=<*> <*> <*>dc<*>fe<*> <*>,0,0,2,0
+903,0,,no rule fired,True,3.4052000046358444e-05,False,fpr<*>=<*> <*> <*>fa<*> <*>fe<*>dba<*>,0,0,1,0
+904,0,,no rule fired,True,3.26880001466634e-05,False,fpr<*>=<*> <*> a<*> bfbb<*>c<*>b,0,0,1,0
+905,0,,no rule fired,True,3.4745999982987996e-05,False,fpr<*>=<*> <*> <*> <*>fe<*>c<*>eb,0,0,2,0
+906,0,,no rule fired,True,3.185099990332674e-05,False,fpr<*>=<*> <*> <*> <*>fa<*>,0,0,1,0
+907,0,,no rule fired,True,3.313899992463121e-05,False,fpr<*>=<*> <*>fd<*>da<*>e <*> <*>,0,0,1,0
+908,0,,no rule fired,True,3.121800000371877e-05,False,fpr<*>=<*> <*>f<*>b<*>f <*> <*>,0,0,1,0
+909,0,,no rule fired,True,3.2856999951036414e-05,False,fpr<*>=<*> <*>edde <*> <*>,0,0,1,0
+910,0,,no rule fired,True,3.7266999925122946e-05,False,fpr<*>=<*> <*>fc<*>a<*> <*>ffd<*> fffffffc,0,0,1,0
+911,0,,no rule fired,True,3.1647000014345394e-05,False,fpr<*>=<*> <*> <*> <*>fbb<*>,0,0,1,0
+912,0,,no rule fired,True,4.699200007962645e-05,False,fpr<*>=<*> <*> c<*>e<*> bfb<*>bf<*>d,0,0,1,0
+913,0,,no rule fired,True,3.342900004099647e-05,False,fpr<*>=<*> <*> cb<*>f<*> bc<*>ae<*>,0,0,1,0
+914,0,,no rule fired,True,3.3741000152076595e-05,False,fpr<*>=<*> <*> fa<*>ad<*>f <*>fecfc<*>c,0,0,1,0
+915,0,,no rule fired,True,3.358600019964797e-05,False,fpr<*>=<*> <*> <*> <*>fdb<*>d<*>,0,0,1,0
+916,0,,no rule fired,True,2.8959000019312953e-05,False,fpr<*>=<*> <*> <*> <*>c<*>c<*>,0,0,1,0
+917,0,,no rule fired,True,3.032900008292927e-05,False,fpr<*>=<*> <*> <*>e<*>c<*> <*>fed<*>,0,0,1,0
+918,0,,no rule fired,True,3.19859998398897e-05,False,fpr<*>=<*> <*> <*>dad <*>e<*>b<*>,0,0,1,0
+919,0,,no rule fired,True,4.5882999984314665e-05,False,fpr<*>=<*> <*> <*>dd<*>f<*>b <*>bcf<*>,0,0,1,0
+920,0,,no rule fired,True,3.274799996688671e-05,False,fpr<*>=<*> <*> f<*>f<*>f <*>b<*>cafc,0,0,1,0
+921,0,,no rule fired,True,3.179700001965102e-05,False,fpr<*>=<*> <*> <*>fba<*>c<*>d bfca<*>fcc,0,0,1,0
+922,0,,no rule fired,True,4.532799994194647e-05,False,fpr<*>=<*> <*>fe<*>a<*>f<*> <*>d <*>fbbf<*>b<*>,0,0,1,0
+923,0,,no rule fired,True,3.0767999987801886e-05,False,fpr<*>=<*> <*> <*> bc<*>dc<*>,0,0,1,0
