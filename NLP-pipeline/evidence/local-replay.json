@@ -1,0 +1,57 @@
+{
+  "run": {
+    "status": "complete",
+    "started_at": 1794624914.1487732,
+    "finished_at": 1794624925.407577,
+    "expected_lines": 30000,
+    "run": "local"
+  },
+  "lines": {
+    "stored": 30000,
+    "with_alert_tag": 8423,
+    "template_not_known": 0,
+    "llm_has_no_saved_decision": 22
+  },
+  "windows": 394,
+  "anomalous_windows": 116,
+  "detectors": {
+    "logbert": {
+      "name": "LogBERT, full coverage (A+)",
+      "tp": 112,
+      "fp": 154,
+      "tn": 124,
+      "fn": 4,
+      "precision": 0.4211,
+      "recall": 0.9655,
+      "f1": 0.5864,
+      "false_positive_rate": 0.554
+    },
+    "llm": {
+      "name": "rule-guided LLM, saved decisions (B3)",
+      "tp": 111,
+      "fp": 101,
+      "tn": 177,
+      "fn": 5,
+      "precision": 0.5236,
+      "recall": 0.9569,
+      "f1": 0.6768,
+      "false_positive_rate": 0.3633
+    },
+    "keyword": {
+      "name": "keyword rules (B4)",
+      "tp": 109,
+      "fp": 0,
+      "tn": 278,
+      "fn": 7,
+      "precision": 1.0,
+      "recall": 0.9397,
+      "f1": 0.9689,
+      "false_positive_rate": 0.0
+    }
+  },
+  "logbert_ms_per_window": {
+    "mean": 25.7,
+    "p95": 94.4,
+    "max": 243.4
+  }
+}

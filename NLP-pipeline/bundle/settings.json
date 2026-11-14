@@ -1,0 +1,18 @@
+{
+  "keyword_top_k": 30,
+  "logbert": {
+    "g": 8,
+    "r": 8,
+    "mask_ratio": 0.5,
+    "full_coverage": true,
+    "seed": 1234
+  },
+  "window": {
+    "size_seconds": 300,
+    "step_seconds": 60
+  },
+  "from": {
+    "experiment": "bgl_cpu",
+    "logbert_full_test_f1": 0.3047
+  }
+}

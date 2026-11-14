@@ -1,0 +1,213 @@
+# Grafana: the dashboards. It draws what Prometheus (numbers) and Loki (logs) know.
+#
+# Nothing is clicked together by hand. The two data sources (Prometheus and Loki) and the dashboard "NLP log pipeline" are provisioned from
+# files: the ConfigMap grafana-provisioning below tells Grafana where its data is, and the ConfigMap grafana-dashboards (made by
+# kustomization.yaml from grafana/dashboards/pipeline.json) holds the dashboard. A new Grafana pod therefore looks the same as the old one.
+#
+# The administrator login is the Secret grafana-admin, which the setup Job made (read it with kubectl, see the README). Grafana reads it
+# from files (the GF_..._FILE variables). Nothing outside the cluster can reach Grafana: you look at it with
+#   kubectl -n nlp port-forward service/grafana 3000:3000        and then open  http://localhost:3000
+# (a port-forward goes through the Kubernetes API, so no NetworkPolicy and no node port is involved).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Identity of the Grafana pod. Its Kubernetes API token is not mounted, because Grafana never calls the Kubernetes API"
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Tells Grafana where its two data sources are (Prometheus and Loki) and where to find the dashboard files. Holds no secret"
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+        editable: false
+        jsonData:
+          timeInterval: 5s
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+        editable: false
+        jsonData:
+          maxLines: 1000
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: nlp
+        orgId: 1
+        folder: NLP
+        type: file
+        disableDeletion: true
+        allowUiUpdates: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana-dashboards
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: dashboards
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Grafana 11.3.0: the dashboard NLP log pipeline (numbers from Prometheus, logs from Loki). Login from the Secret grafana-admin, reached only with kubectl port-forward"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: dashboards
+        app.kubernetes.io/part-of: nlp-pipeline
+    spec:
+      serviceAccountName: grafana
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.3.0
+          imagePullPolicy: IfNotPresent
+          env:
+            # The login comes from the mounted Secret: the program reads the two files.
+            - name: GF_SECURITY_ADMIN_USER__FILE
+              value: /etc/secrets/grafana/username
+            - name: GF_SECURITY_ADMIN_PASSWORD__FILE
+              value: /etc/secrets/grafana/password
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "false"
+            # Logs go to the screen of the container (so Alloy and kubectl logs see them), and nothing is sent to the internet.
+            - name: GF_LOG_MODE
+              value: console
+            - name: GF_ANALYTICS_REPORTING_ENABLED
+              value: "false"
+            - name: GF_ANALYTICS_CHECK_FOR_UPDATES
+              value: "false"
+            - name: GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES
+              value: "false"
+            - name: GF_NEWS_NEWS_FEED_ENABLED
+              value: "false"
+          ports:
+            - name: http
+              containerPort: 3000
+          volumeMounts:
+            - name: grafana-admin
+              mountPath: /etc/secrets/grafana
+              readOnly: true
+            - name: provisioning-datasources
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+            - name: provisioning-dashboards
+              mountPath: /etc/grafana/provisioning/dashboards
+              readOnly: true
+            - name: dashboards
+              mountPath: /var/lib/grafana-dashboards
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/grafana
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: grafana-admin
+          secret:
+            secretName: grafana-admin
+            defaultMode: 288
+        - name: provisioning-datasources
+          configMap:
+            name: grafana-provisioning
+            items:
+              - key: datasources.yaml
+                path: datasources.yaml
+        - name: provisioning-dashboards
+          configMap:
+            name: grafana-provisioning
+            items:
+              - key: dashboards.yaml
+                path: dashboards.yaml
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
+        - name: data
+          emptyDir:
+            sizeLimit: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: dashboards
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Address of Grafana inside the cluster (grafana:3000). Not published outside the cluster: look at it with kubectl port-forward"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: grafana
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

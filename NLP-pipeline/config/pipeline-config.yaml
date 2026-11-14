@@ -1,0 +1,46 @@
+# ConfigMap: the non-secret settings that more than one component needs.
+# The key names are exactly the environment variables the programs read, so a component can load
+# the whole ConfigMap with "envFrom". Names such as "kafka" and "mongo" are Service names:
+# Kubernetes DNS turns them into addresses.
+#
+# The *_FILE settings are paths of certificate files. The files themselves are not here: Kubernetes mounts them from Secrets
+# that the Job "bootstrap" creates (see bootstrap/job.yaml), and each pod mounts only the Secrets it needs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pipeline-config
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: pipeline-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Settings shared by the producer, processor and REST API: Kafka address and topic, MongoDB address, database and the three collections (events, windows, runs), REST port, the replay file and its speed, the paths of the TLS files, and the ports where Prometheus reads the producer's and the REST API's numbers"
+data:
+  KAFKA_BROKER: "kafka:9092"
+  # One Kafka message is one BGL log line (or a marker). The topic has ONE partition (kafka/kafka.yaml): the windows of the NLP step are made of
+  # lines that follow each other in time, and only a single partition keeps them in order.
+  KAFKA_TOPIC: "system-logs"
+  # Kafka clients (producer, processor) check Kafka's certificate against this CA, and show their own certificate and key.
+  KAFKA_SSL_CA_FILE: "/etc/pki/kafka-client/ca.crt"
+  KAFKA_SSL_CERT_FILE: "/etc/pki/kafka-client/tls.crt"
+  KAFKA_SSL_KEY_FILE: "/etc/pki/kafka-client/tls.key"
+  MONGO_HOST: "mongo"
+  MONGO_PORT: "27017"
+  MONGO_DB: "nlp"
+  # The three collections of the database: one document per log line, per 5-minute window, and per replay.
+  MONGO_COLLECTION: "events"
+  MONGO_WINDOWS_COLLECTION: "windows"
+  MONGO_RUNS_COLLECTION: "runs"
+  # Processor and REST API check MongoDB's certificate against this CA.
+  MONGO_TLS_CA_FILE: "/etc/pki/ca/ca.crt"
+  # The REST API speaks HTTPS on this port. It must equal the containerPort of restapi/restapi.yaml ("make verify" checks that).
+  REST_PORT: "8443"
+  # The ports where Prometheus reads the numbers (/metrics) of the producer and of the REST API. Plain HTTP inside the namespace, and a
+  # NetworkPolicy lets only Prometheus reach them. Each must equal the containerPort named "metrics" of its pods ("make verify" checks that).
+  PRODUCER_METRICS_PORT: "8001"
+  REST_METRICS_PORT: "9102"
+  # The file that the producer replays (inside its image: NLP-pipeline/bundle/bgl-replay.log, made by scripts/export-nlp-bundle.py), and how
+  # many lines per second it sends. 0 would mean as fast as Kafka accepts them.
+  DATASET_FILE: "bgl-replay.log"
+  LINES_PER_SECOND: "500"

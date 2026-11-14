@@ -1,0 +1,7 @@
+# Everything is left out of the build context except what the producer image needs (the context is the repository root).
+*
+!NLP-pipeline/producer/requirements.txt
+!NLP-pipeline/producer/producer.py
+!NLP-pipeline/producer/bootstrap.py
+!NLP-pipeline/bundle/bgl-replay.log
+**/__pycache__

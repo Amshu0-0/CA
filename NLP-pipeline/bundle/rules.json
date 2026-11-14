@@ -1,0 +1,1322 @@
+[
+  {
+    "text": "Describes normal system operations or status updates.",
+    "keywords": [
+      "<*>:<*>eeeeeee",
+      "<*>:<*>d<*>e<*>c<*>",
+      "<*>:<*>da<*>a<*>",
+      "<*> max=<*",
+      "program interrupt",
+      "input interrupt enable"
+    ],
+    "label": "normal",
+    "support": 37,
+    "correct": 37,
+    "message_coverage": 93124,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages related to normal operations or status updates.",
+    "keywords": [
+      "pro",
+      "total of <*> ddr error(s) detected and corrected",
+      "state register: machine state register:",
+      "disable all access to cache directory....",
+      "message=scomerror"
+    ],
+    "label": "normal",
+    "support": 35,
+    "correct": 35,
+    "message_coverage": 314312,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system error or failure.",
+    "keywords": [
+      "machine check interrupt",
+      "mmcs_server exited abnormally",
+      "monitor caught java.lang.unsupportedoperationexception",
+      "error: unable to mount filesystem",
+      "lustre mount failed",
+      "ciod: error reading message prefix",
+      "rts: kernel terminated for reason",
+      "no ethernet link",
+      "kernel panic"
+    ],
+    "label": "abnormal",
+    "support": 14,
+    "correct": 14,
+    "message_coverage": 65338,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'FAILED', 'terminated for reason', 'kernel panic', and 'machine check interrupt' are indicative of system failures.",
+    "keywords": [
+      "lustre mount failed",
+      "rts: kernel terminated for reason",
+      "kernel panic",
+      "machine check interrupt"
+    ],
+    "label": "abnormal",
+    "support": 9,
+    "correct": 9,
+    "message_coverage": 44831,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a normal operation or system state.",
+    "keywords": [
+      "machine state register",
+      "byte ordering exception",
+      "while initializing node card, ido with lp of",
+      "ciod: missing or invalid fields on line",
+      "disable apu instruction broadcast"
+    ],
+    "label": "normal",
+    "support": 9,
+    "correct": 9,
+    "message_coverage": 20839,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Points out a critical system failure that requires immediate attention.",
+    "keywords": [
+      "kernel terminated for reason",
+      "no ethernet link",
+      "mmcs_server exited abnormally due to signal: segmentation fault",
+      "rts panic! - stopping execution",
+      "ciod: error reading message prefix after"
+    ],
+    "label": "abnormal",
+    "support": 8,
+    "correct": 8,
+    "message_coverage": 40827,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an execution stop due to panic or kernel issues.",
+    "keywords": [
+      "rts panic!",
+      "ciod: error reading message prefix",
+      "machine check interrupt",
+      "mmcs_server exited abnormally",
+      "kernel panic",
+      "monitor caught java.lang.unsupportedoperationexception",
+      "error: unable to mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 8,
+    "correct": 8,
+    "message_coverage": 24445,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system or process has stopped unexpectedly.",
+    "keywords": [
+      "terminated",
+      "panic! - stopping execution",
+      "exited abnormally"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 21060,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages containing 'terminated', 'panic!', or 'exited abnormally' indicate critical system failures.",
+    "keywords": [
+      "terminated",
+      "panic!",
+      "exited abnormally"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 21060,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages containing 'terminated', 'panic!', 'stopping execution', or 'exited abnormally' are likely abnormal.",
+    "keywords": [
+      "terminated",
+      "panic!",
+      "stopping execution",
+      "exited abnormally"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 21060,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals system or hardware issues that require attention.",
+    "keywords": [
+      "machine check interrupt",
+      "power module status fault detected",
+      "kernel terminated for reason",
+      "midplane switch controller failure"
+    ],
+    "label": "abnormal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 17268,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a communication failure between nodes or services.",
+    "keywords": [
+      "problem communicating with service card",
+      "no alerts are active"
+    ],
+    "label": "normal",
+    "support": 7,
+    "correct": 7,
+    "message_coverage": 16196,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages indicating abnormal termination or exit.",
+    "keywords": [
+      "terminated for reason",
+      "exited abnormally due to signal: aborted",
+      "exited normally with exit code"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 17213,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages containing 'exited abnormally' or 'terminated for reason' indicate abnormal termination.",
+    "keywords": [
+      "exited abnormally",
+      "terminated for reason"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 17205,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a kernel termination or abnormal exit.",
+    "keywords": [
+      "terminated",
+      "exited abnormally"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 17205,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages with 'parityAlignment', 'rts: bad message header', and 'java.lang.NullPointerException' are indicative of software or configuration errors.",
+    "keywords": [
+      "midplaneswitchcontroller::parityalignment",
+      "rts: kernel terminated for reason",
+      "while inserting monitor info into db caught java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 17203,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages including 'not accessible', 'not fully functional', or 'subnets and addresses added' are typically informational or setup-related.",
+    "keywords": [
+      "not accessible",
+      "not fully functional",
+      "subnets and addresses added"
+    ],
+    "label": "normal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 16898,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals the start of a process or service.",
+    "keywords": [
+      "has been started",
+      "started:"
+    ],
+    "label": "normal",
+    "support": 6,
+    "correct": 6,
+    "message_coverage": 195,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Any message containing 'ASSERT condition', 'chip, clear all resets', and 'java.io.IOException: Problems with the chip' are normal operational messages.",
+    "keywords": [
+      "assert condition",
+      "chip, clear all resets",
+      "java.io.ioexception: problems with the chip"
+    ],
+    "label": "normal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 84207,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system or service failure.",
+    "keywords": [
+      "terminated for reason",
+      "exited abnormally due to signal: aborted"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17202,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an issue with the kernel or operating system.",
+    "keywords": [
+      "kernel terminated for reason",
+      "exited abnormally due to signal: aborted"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17202,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Presence of 'terminated for reason' or 'kernel panic'",
+    "keywords": [
+      "terminated for reason",
+      "kernel panic"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17199,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an abnormal termination of the kernel or process execution.",
+    "keywords": [
+      "kernel terminated for reason",
+      "monitor caught java.lang.unsupportedoperationexception"
+    ],
+    "label": "abnormal",
+    "support": 5,
+    "correct": 5,
+    "message_coverage": 17189,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'machine check interrupt', 'power module status fault detected', and 'TLB error interrupt' are typically abnormal.",
+    "keywords": [
+      "machine check interrupt",
+      "power module status fault detected",
+      "tlb error interrupt"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 152804,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Error or failure messages related to file systems, mounts, and services.",
+    "keywords": [
+      "unable to mount filesystem",
+      "lustre mount failed",
+      "midplaneswitchcontroller::sendtrain() port disconnected"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 28296,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'deactivated', 'mount FAILED', or 'connection lost' are usually abnormal.",
+    "keywords": [
+      "power deactivated",
+      "lustre mount failed",
+      "bglerr_ido_pkt_timeout connection lost to node/link/service card"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 27756,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Any message with 'kernel terminated for reason' is an indication of a critical failure, thus marked as abnormal.",
+    "keywords": [
+      "kernel terminated for reason"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages containing 'terminated for reason' indicate abnormal conditions.",
+    "keywords": [
+      "terminated for reason"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals the termination of a kernel for unspecified reasons.",
+    "keywords": [
+      "kernel terminated for reason",
+      "rts: kernel terminated for reason"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 17187,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes a state or condition without indicating an error.",
+    "keywords": [
+      "machine state register:"
+    ],
+    "label": "normal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 8407,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes normal operational messages or informational updates.",
+    "keywords": [
+      "ddr failing info register:",
+      "ciod: <*> <*> <*> <*> <*> <*> <*> at line",
+      "error getting detailed hw info for node, caught java.io.ioexception:"
+    ],
+    "label": "normal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 4020,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'socket closed', 'connection lost', 'segmentation fault', and 'uncorrectable torus error' indicate issues with communication or hardware, thus are abnormal.",
+    "keywords": [
+      "socket closed",
+      "connection lost",
+      "segmentation fault",
+      "uncorrectable torus error"
+    ],
+    "label": "abnormal",
+    "support": 4,
+    "correct": 4,
+    "message_coverage": 134,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an error interrupt with specific details.",
+    "keywords": [
+      "machine check interrupt (bit=",
+      "error interrupt"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 152803,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an error interrupt or critical system message that requires attention.",
+    "keywords": [
+      "error interrupt",
+      "machine check interrupt"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 152803,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'TLB error interrupt', 'L<*> dcache unit data parity error', and 'parityAlignment' are indicative of hardware issues.",
+    "keywords": [
+      "tlb error interrupt",
+      "l<*> dcache unit data parity error",
+      "parityalignment"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 152769,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an error in the file system mounting process.",
+    "keywords": [
+      "error: unable to mount filesystem",
+      "lustre mount failed"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 28272,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to file system or storage problems.",
+    "keywords": [
+      "lustre mount failed",
+      "unable to mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 28272,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages that include 'Lustre mount FAILED' or 'MidplaneSwitchController::sendTrain() port disconnected' suggest system issues and are labeled as abnormal.",
+    "keywords": [
+      "lustre mount failed",
+      "midplaneswitchcontroller::sendtrain() port disconnected"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 27576,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to a communication or network issue.",
+    "keywords": [
+      "socket closed",
+      "ciostream socket"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 25873,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a failure in communication or data transfer, which can be a sign of an underlying issue.",
+    "keywords": [
+      "monitor caught java.lang.unsupportedoperationexception",
+      "ciod: failed to read message prefix on control stream",
+      "ciod: error reading message prefix after <*>"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 25758,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a network or socket issue.",
+    "keywords": [
+      "no ethernet link",
+      "socket closed",
+      "error reading message prefix after"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 19899,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Denotes an assertion failure or system panic.",
+    "keywords": [
+      "microloader assertion",
+      "rts panic! - stopping execution",
+      "mmcs_server exited abnormally due to signal: segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 5361,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals that the system is in a state where it needs to be addressed, often due to an error or failure.",
+    "keywords": [
+      "rts panic! - stopping execution",
+      "no ethernet link",
+      "socket closed"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 3981,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical system error or crash.",
+    "keywords": [
+      "bglerr_ido_pkt_timeout connection lost",
+      "mmcs_server exited abnormally due to signal:",
+      "rts panic! - stopping execution"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 3870,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to a critical system state change or failure.",
+    "keywords": [
+      "connection lost",
+      "socket closed",
+      "no ethernet link"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 138,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes a warning or alert that does not necessarily indicate an immediate failure but requires monitoring.",
+    "keywords": [
+      "alert is (are) active",
+      "ddr: unable to steer rank",
+      "job timed out"
+    ],
+    "label": "normal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 99,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Machine check interrupts and segmentation faults",
+    "keywords": [
+      "machine check interrupt",
+      "segmentation fault"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 83,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages with 'machine check interrupt' or 'power module status fault detected' are abnormal.",
+    "keywords": [
+      "machine check interrupt",
+      "power module status fault detected"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 81,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages stating 'disable flagging of DDR UE's', 'write buffer commit threshold', and 'disable write lines' are normal administrative notes or settings changes.",
+    "keywords": [
+      "disable flagging of ddr ue's",
+      "write buffer commit threshold",
+      "disable write lines"
+    ],
+    "label": "normal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 50,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages containing 'exited' with 'abnormally' or an exit code indicate abnormal termination.",
+    "keywords": [
+      "exited abnormally",
+      "exited normally with exit code"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 29,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages containing 'exited' with 'abnormally' or 'normal' trigger the respective label.",
+    "keywords": [
+      "exited abnormally",
+      "exited normally"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 29,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes an error condition that requires immediate attention, often related to hardware issues.",
+    "keywords": [
+      "monitor caught java.lang.unsupportedoperationexception",
+      "mmcs_server exited abnormally due to signal: segmentation fault",
+      "external input interrupt (unit=<*> bit=<*>): uncorrectable torus error"
+    ],
+    "label": "abnormal",
+    "support": 3,
+    "correct": 3,
+    "message_coverage": 7,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log entries that contain 'alignment exceptions' are typically normal, as they refer to expected software behavior.",
+    "keywords": [
+      "alignment exceptions"
+    ],
+    "label": "normal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 480012,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'Lustre mount FAILED' are related to file system issues and should be labeled as abnormal.",
+    "keywords": [
+      "lustre mount failed"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 27552,
+    "proposals": 3,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a failure in reading or processing messages on the CioStream socket, which is critical for communication between nodes.",
+    "keywords": [
+      "failed to read message prefix",
+      "error reading message prefix"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 25756,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a timeout or failure in reading messages from a stream socket.",
+    "keywords": [
+      "bglerr_ido_pkt_timeout",
+      "failed to read message prefix on control stream"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 5995,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system or module is stopping, which could be due to an error.",
+    "keywords": [
+      "stopping execution",
+      "not present and is stopping"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 3857,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system stopping or critical error.",
+    "keywords": [
+      "stopping",
+      "not present"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 3857,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages with 'assertion' or 'null pointer exception' are abnormal.",
+    "keywords": [
+      "microloader assertion",
+      "while inserting monitor info into db caught java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 1505,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "System startup and initialization messages.",
+    "keywords": [
+      "starting systemcontroller",
+      "prepareforservice is being done on this midplane"
+    ],
+    "label": "normal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 216,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a critical system state change or failure.",
+    "keywords": [
+      "power deactivated",
+      "connection lost to node/link/service card"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 204,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical system state change or failure.",
+    "keywords": [
+      "power deactivated",
+      "power module status fault detected"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 193,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Error messages related to network or communication issues",
+    "keywords": [
+      "no ethernet link",
+      "receivetrain() iap failed:"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 167,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Denotes a hardware or communication failure involving node cards, midplane switches, and IAP failures.",
+    "keywords": [
+      "power module status fault detected on node card",
+      "midplaneswitchcontroller::receivetrain()",
+      "iap failed: r-"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 159,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages mentioning 'connection lost', 'socket closed', or 'link card not fully functional' suggest network or hardware issues.",
+    "keywords": [
+      "connection lost",
+      "socket closed",
+      "link card not fully functional"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 129,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes network or communication issues.",
+    "keywords": [
+      "socket closed",
+      "no ethernet link"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 126,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages with 'machine check interrupt' and specific error details are flagged as abnormal.",
+    "keywords": [
+      "machine check interrupt",
+      "data parity error"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Messages that start with 'machine check interrupt (bit=)' indicate an abnormal condition.",
+    "keywords": [
+      "machine check interrupt (bit="
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 80,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an abnormal termination of processes with a specific exit code.",
+    "keywords": [
+      "exited abnormally due to signal: aborted",
+      "exited normally with exit code"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 26,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an abnormal termination of a process due to a specific signal.",
+    "keywords": [
+      "exited abnormally due to signal:"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 18,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "System crashes or critical failures indicated by 'exited abnormally'",
+    "keywords": [
+      "exited abnormally"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 18,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an uncorrectable error in the torus network structure.",
+    "keywords": [
+      "uncorrectable torus error",
+      "tree header with no target waiting"
+    ],
+    "label": "abnormal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 3,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a service network issue or an empty database.",
+    "keywords": [
+      "declareservicenetworkcharacteristics",
+      "db is not empty"
+    ],
+    "label": "normal",
+    "support": 2,
+    "correct": 2,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Refers to the generation of core files, which is normal behavior during debugging.",
+    "keywords": [
+      "generating core"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1706751,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system or process has stopped execution.",
+    "keywords": [
+      "panicked",
+      "panic!"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 3855,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a system or process has stopped execution.",
+    "keywords": [
+      "stopping execution",
+      "panic! - stopping execution"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 3855,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a service or action is being performed.",
+    "keywords": [
+      "as part of service action"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2600,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Any log mentioning 'cr:' and 'xer:' likely indicates a system error but not necessarily an issue.",
+    "keywords": [
+      "cr:<*> xer:<*>"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2258,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an assertion failure in the system, indicating a serious error.",
+    "keywords": [
+      "microloader assertion",
+      "assertion"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1503,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an assertion failure, which is typically a programming error.",
+    "keywords": [
+      "microloader assertion"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1503,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Errors related to file system or mount issues",
+    "keywords": [
+      "unable to mount filesystem",
+      "lustre mount failed:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 720,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an error in mounting a filesystem.",
+    "keywords": [
+      "error: unable to mount filesystem"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 720,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Any log with 'power deactivated' is an alert.",
+    "keywords": [
+      "power deactivated:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 192,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates a failure or timeout event related to job execution.",
+    "keywords": [
+      "job timed out",
+      "timed out. block freed."
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 186,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages indicating a 'midplane switch controller' issue are labeled as abnormal.",
+    "keywords": [
+      "midplaneswitchcontroller::sendtrain() port disconnected"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 24,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to a hardware failure or disconnection.",
+    "keywords": [
+      "port disconnected:",
+      "midplane switch controller"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 24,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Describes normal system operations or status updates.",
+    "keywords": [
+      "<*>:fe<*>c<*>",
+      "command manager unit summary"
+    ],
+    "label": "normal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 16,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an abnormal termination due to specific signals.",
+    "keywords": [
+      "exited abnormally due to signal: aborted"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 15,
+    "proposals": 3,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals a critical system event that needs immediate action.",
+    "keywords": [
+      "kernel panic"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an error related to communication or connection issues.",
+    "keywords": [
+      "connection lost to node/link/service card",
+      "bglerr_ido_pkt_timeout"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 12,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an abnormal exit of a process with a non-zero exit code.",
+    "keywords": [
+      "exited normally with exit code"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 11,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Error messages related to missing components or unsupported operations",
+    "keywords": [
+      "not present and is stopping",
+      "unsupportedoperationexception:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Indicates an unhandled exception or unsupported operation in the system.",
+    "keywords": [
+      "unsupportedoperationexception:",
+      "java.lang.unsupportedoperationexception:"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages that contain 'NullPointerException' are abnormal.",
+    "keywords": [
+      "while inserting monitor info into db caught java.lang.nullpointerexception"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Points to a failure during database operations or data insertion.",
+    "keywords": [
+      "db caught java.lang.nullpointerexception",
+      "inserting monitor info into db"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an uncorrectable error condition in the system's torus network.",
+    "keywords": [
+      "uncorrectable torus error"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Signals an uncorrectable hardware error.",
+    "keywords": [
+      "uncorrectable torus error",
+      "torus error"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 2,
+    "proposals": 1,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages that include 'power module status fault detected on node card' are abnormal.",
+    "keywords": [
+      "power module status fault detected on node card"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1,
+    "proposals": 2,
+    "precision": 1.0
+  },
+  {
+    "text": "Log messages mentioning 'power module status fault detected' indicate an abnormal condition.",
+    "keywords": [
+      "power module status fault detected"
+    ],
+    "label": "abnormal",
+    "support": 1,
+    "correct": 1,
+    "message_coverage": 1,
+    "proposals": 1,
+    "precision": 1.0
+  }
+]

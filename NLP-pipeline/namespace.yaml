@@ -1,0 +1,16 @@
+# The namespace is the boundary of this whole assignment: RBAC roles, NetworkPolicies and
+# "kubectl delete namespace" all apply to it, so one delete removes everything that was created.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nlp
+  labels:
+    app.kubernetes.io/part-of: nlp-pipeline
+    # Pod Security Admission: the API server refuses pods that break the "restricted" profile, the strictest one that Kubernetes ships:
+    # no root user, no privilege escalation, every Linux capability dropped, the default seccomp profile, and only the volume types
+    # that cannot reach the node's disk (no hostPath). "warn" and "audit" repeat the same check for objects that are only applied.
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
+  annotations:
+    description: "The namespace of the whole stack. Roles, network rules and one delete all work per namespace. Pod Security Admission enforces the restricted profile here"

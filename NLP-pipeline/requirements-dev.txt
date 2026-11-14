@@ -1,0 +1,26 @@
+# What  make test  needs on your computer, on top of the NLP project's own packages. The tests run the programs of the pipeline (processor,
+# producer, REST API, and the scripts) against fakes of Kafka and MongoDB, so no cluster, no Docker and no network are needed.
+#
+# make export-bundle and make local-replay do NOT need this file: they run in the Python environment of your NLP project (the one where
+# "make preprocess" works) and use only what that environment already has. Only  make test  needs the packages below.
+#
+#   pip install -r NLP-pipeline/requirements-dev.txt        (from the folder of the repository, in that same environment)
+#   cd NLP-pipeline && make test
+#
+# The packages of the three images, with the versions the images use (so the tests run on what the cluster runs):
+-r processor/requirements.txt
+-r producer/requirements.txt
+-r restapi/requirements.txt
+
+# The NLP project's packages (the same as NLP/pyproject.toml). logad itself needs no installing: the tests find NLP/src by themselves.
+drain3>=0.9.11
+numpy>=1.24
+pandas>=2.0
+pyarrow>=14.0
+pyyaml>=6.0
+torch>=2.1
+tqdm>=4.66
+
+# For the tests themselves. mongomock is the stand-in for MongoDB; the tests were written against this version of it.
+pytest>=8.0
+mongomock==4.3.0

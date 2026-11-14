@@ -1,0 +1,236 @@
+# Processor: the processing stage, and the place where the NLP project runs.
+# It reads BGL log lines from Kafka, runs the NLP project's detectors on them (Drain templates, the keyword rules, the saved decisions
+# of the rule-guided LLM, and LogBERT on 5-minute windows) and stores the lines, the windows with each detector's verdict, and the
+# replays in MongoDB. The models are inside the image (/bundle, made by scripts/export-nlp-bundle.py).
+# It talks to Kafka over TLS with its own client certificate (Secret kafka-client-processor) and to MongoDB over TLS with its own
+# account, which may read and write the database nlp and nothing else (Secret mongo-processor). It never sees the administrator's login.
+#
+# This file creates three objects:
+#   1. A ConfigMap for processor-only settings
+#   2. A Deployment for the processor pod
+#   3. The ClusterIP Service for its health and metrics port
+#
+# Differences from the CA3 processor, and why:
+#   - ONE replica, no autoscaler. A window is made of lines that follow each other in time, so the topic has one partition (kafka/kafka.yaml)
+#     and one processor reads it. (A second pod in the same consumer group would get no partition anyway.)
+#   - strategy Recreate: the old pod is stopped before the new one starts, so there is never a moment with two processors.
+#   - more memory and CPU: PyTorch and the model need about 500 MB, and LogBERT scores the windows.
+# If the pod is replaced, Kafka remembers how far it had read (offsets are committed by hand, after the results are stored), and
+# MongoDB remembers where the window grid stood, so the new pod carries on exactly where the old one stopped.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: processor-config
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Settings only the processor needs: its Kafka consumer group and the port of its health and metrics server"
+
+data:
+  # The consumer group: Kafka keeps the processor's position under this name.
+  CONSUMER_GROUP: "processor"
+
+  # Port used by the processor's health and metrics server.
+  METRICS_PORT: "8000"
+
+  # Where the trained models are inside the image, and how many CPU threads PyTorch may use (the nodes have 2 vCPUs).
+  BUNDLE_DIR: "/bundle"
+  TORCH_THREADS: "2"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processor
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: consumer
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Reads BGL log lines from Kafka (TLS, client certificate), runs the NLP detectors (Drain, keyword rules, saved LLM decisions, LogBERT on 5-minute windows) and stores lines, windows and runs in MongoDB (TLS, own account). One replica, because the windows need the lines in order"
+
+spec:
+  # One replica on purpose: the topic has one partition and the windows need the lines in order.
+  replicas: 1
+
+  # Stop the old pod before the new one starts (never two processors at once).
+  strategy:
+    type: Recreate
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: processor
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: processor
+        app.kubernetes.io/component: consumer
+        app.kubernetes.io/part-of: nlp-pipeline
+
+    spec:
+      serviceAccountName: processor
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Kubernetes has no Docker Compose depends_on.
+      # This init container waits until both Kafka and MongoDB accept connections.
+      # Only then does the real processor container start.
+      initContainers:
+        - name: wait-for-kafka-and-mongo
+          image: busybox:1.36
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}
+          command:
+            - sh
+            - -c
+            - until nc -z -w 2 kafka 9092 && nc -z -w 2 mongo 27017; do echo waiting for kafka and mongo; sleep 3; done
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      containers:
+        - name: processor
+          image: ghcr.io/amshu0-0/nlp-processor:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          # Load the shared pipeline settings and the processor-only settings.
+          envFrom:
+            - configMapRef:
+                name: pipeline-config
+
+            - configMapRef:
+                name: processor-config
+
+          env:
+            # The program reads its MongoDB login from files
+            # mounted from the Kubernetes Secret mongo-processor.
+            - name: MONGO_USER_FILE
+              value: /etc/secrets/mongo/username
+
+            - name: MONGO_PASSWORD_FILE
+              value: /etc/secrets/mongo/password
+
+          ports:
+            - name: metrics
+              containerPort: 8000
+
+          volumeMounts:
+            # The processor's own MongoDB account.
+            - name: mongo-processor
+              mountPath: /etc/secrets/mongo
+              readOnly: true
+
+            # The processor's Kafka client certificate and key, and the CA certificate (the paths are in the ConfigMap pipeline-config).
+            - name: kafka-client-processor
+              mountPath: /etc/pki/kafka-client
+              readOnly: true
+
+            # The CA certificate again, for checking MongoDB's certificate.
+            - name: pki-ca
+              mountPath: /etc/pki/ca
+              readOnly: true
+
+          # Ready means the models are loaded and the processor is connected to Kafka and MongoDB. Loading PyTorch and the models takes
+          # a while on a small machine, so the pod is simply "not ready" until it is done.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: metrics
+            periodSeconds: 10
+
+          # Alive means the processor's consumer loop is still turning (the page says "ok" while the models load).
+          # Kubernetes restarts it if this keeps failing.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+
+          resources:
+            # Measured on a test machine with the GPU build of PyTorch (the CPU build in the image should need less): about 600 MB after
+            # the models are loaded, 830 MB while scoring a window of 6,000 log lines (an alert storm) and 900 MB for a window of 100,000
+            # lines. The memory does not grow with the size of the window, because
+            # LogBERT looks at 16 masked copies at a time (SCORE_BATCH in engine.py; with the library's default of 128 a window of 40,000
+            # lines needed 2 GB and would have been killed). The limit leaves room for that. Two CPUs: LogBERT uses two threads (TORCH_THREADS).
+            requests:
+              cpu: 300m
+              memory: 512Mi
+
+            limits:
+              cpu: "2"
+              memory: 1536Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:
+        # 288 is the octal number 0440: the owner and the group (1000, from fsGroup) may read the files, nobody else.
+        - name: mongo-processor
+          secret:
+            secretName: mongo-processor
+            defaultMode: 288
+
+        - name: kafka-client-processor
+          secret:
+            secretName: kafka-client-processor
+            defaultMode: 288
+
+        - name: pki-ca
+          secret:
+            secretName: pki-ca
+            defaultMode: 288
+
+---
+# Processor ClusterIP Service.
+#
+# ClusterIP means it is reachable only from inside the Kubernetes cluster.
+# It gives the ready processor pod one stable in-cluster address:
+# processor.nlp.svc.cluster.local:8000
+#
+# The Service points to the processor's health and metrics HTTP server.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: processor
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: processor
+    app.kubernetes.io/component: consumer
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "ClusterIP Service for the processor's health and metrics port (8000). Only pods labelled component observer may call it"
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app.kubernetes.io/name: processor
+
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics
+      protocol: TCP

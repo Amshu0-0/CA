@@ -1,0 +1,23 @@
+.secrets/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/crash.log
+infra/ansible/inventory.ini
+infra/ansible/known_hosts
+infra/ansible/*.retry
+
+# The demo video is hosted outside Git (the assignment says: do not commit video files). These lines keep a video from being added by accident.
+*.mp4
+*.mov
+*.m4v
+*.webm
+*.mkv
+*.avi
+
+# bundle/ (the trained models and the replay file, made by "make export-bundle") is NOT ignored on purpose: the workflow that builds the
+# images reads it from the repository (.github/workflows/nlp-pipeline-images.yml). The model is 6.7 MB, and GitHub refuses files above 100 MB; export-nlp-bundle.py prints the size of every file it writes.

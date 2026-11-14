@@ -1,0 +1,226 @@
+# REST API: the serving stage.
+# This file creates a Deployment and a NodePort Service.
+#
+# It speaks HTTPS only (the certificate comes from the Secret restapi-tls), asks for a login on every address except the two probe
+# addresses /health and /ready (Secret restapi-login), and reaches MongoDB over TLS with an account that may only READ (Secret mongo-restapi).
+#
+# Two identical stateless replicas run behind one Service.
+# If one pod restarts, another can still answer requests.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: restapi
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: restapi
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "REST API over HTTPS with a login that serves the stored results from MongoDB (read-only account): /health, /ready, /stats, /runs, /summary, /windows, /events, /alerts and /events/TRACE_ID. Two stateless replicas"
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: restapi
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: restapi
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: nlp-pipeline
+
+    spec:
+      serviceAccountName: restapi
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Try to place the two REST API replicas on different Kubernetes nodes
+      # when more than one node is available.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: restapi
+
+      # Kubernetes has no Docker Compose depends_on.
+      # This init container waits until MongoDB accepts connections
+      # before starting the REST API.
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox:1.36
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 32Mi}
+          command:
+            - sh
+            - -c
+            - until nc -z -w 2 mongo 27017; do echo waiting for mongo; sleep 3; done
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      containers:
+        - name: restapi
+          image: ghcr.io/amshu0-0/nlp-restapi:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          # Shared non-secret settings come from pipeline-config.
+          envFrom:
+            - configMapRef:
+                name: pipeline-config
+
+          env:
+            # The read-only MongoDB account, from files mounted from the Secret mongo-restapi.
+            - name: MONGO_USER_FILE
+              value: /etc/secrets/mongo/username
+
+            - name: MONGO_PASSWORD_FILE
+              value: /etc/secrets/mongo/password
+
+            # The login that callers of the API must give (the Secret restapi-login).
+            - name: REST_USER_FILE
+              value: /etc/secrets/login/username
+
+            - name: REST_PASSWORD_FILE
+              value: /etc/secrets/login/password
+
+            # The server certificate and key for HTTPS (the Secret restapi-tls).
+            - name: REST_TLS_CERT_FILE
+              value: /etc/pki/restapi/tls.crt
+
+            - name: REST_TLS_KEY_FILE
+              value: /etc/pki/restapi/tls.key
+
+          ports:
+            # 8443 must equal REST_PORT in the ConfigMap pipeline-config ("make verify" checks that).
+            - name: https
+              containerPort: 8443
+
+            # Prometheus reads the numbers here (REST_METRICS_PORT in pipeline-config). Plain HTTP, no login, and a NetworkPolicy
+            # lets only Prometheus reach it. It is not part of the Service that is published outside the cluster.
+            - name: metrics
+              containerPort: 9102
+
+          volumeMounts:
+            - name: mongo-restapi
+              mountPath: /etc/secrets/mongo
+              readOnly: true
+
+            - name: restapi-login
+              mountPath: /etc/secrets/login
+              readOnly: true
+
+            - name: restapi-tls
+              mountPath: /etc/pki/restapi
+              readOnly: true
+
+            # The CA certificate, for checking MongoDB's certificate.
+            - name: pki-ca
+              mountPath: /etc/pki/ca
+              readOnly: true
+
+          # Ready means the API can also reach MongoDB. The probes use HTTPS; the kubelet does not check the certificate of a probe,
+          # which is fine here: it only asks "do you answer?", on two addresses that need no login and return no data.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+
+          # Alive means the web server itself is answering.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+            limits:
+              cpu: 500m
+              memory: 256Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+      volumes:
+        # 288 is the octal number 0440: the owner and the group (1000, from fsGroup) may read the files, nobody else.
+        - name: mongo-restapi
+          secret:
+            secretName: mongo-restapi
+            defaultMode: 288
+
+        - name: restapi-login
+          secret:
+            secretName: restapi-login
+            defaultMode: 288
+
+        - name: restapi-tls
+          secret:
+            secretName: restapi-tls
+            defaultMode: 288
+
+        - name: pki-ca
+          secret:
+            secretName: pki-ca
+            defaultMode: 288
+
+---
+# REST endpoint exposed outside the Kubernetes cluster.
+#
+# NodePort opens port 30080 on each Kubernetes node and forwards
+# requests to the REST API pods on port 8443 (HTTPS; callers need the login).
+#
+# Kafka and MongoDB remain internal ClusterIP Services.
+# This REST API is the only application endpoint intentionally published.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: restapi
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: restapi
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "The only Service published outside the cluster: node port 30080 on every node, forwarding to port 8443 (HTTPS) of the REST API pods"
+
+spec:
+  type: NodePort
+
+  selector:
+    app.kubernetes.io/name: restapi
+
+  ports:
+    - name: https
+      port: 8443
+      targetPort: https
+      nodePort: 30080
+      protocol: TCP

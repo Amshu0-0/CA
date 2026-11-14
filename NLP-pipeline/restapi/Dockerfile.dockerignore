@@ -1,0 +1,6 @@
+# Everything is left out of the build context except what the REST API image needs (the context is the repository root).
+*
+!NLP-pipeline/restapi/requirements.txt
+!NLP-pipeline/restapi/rest_app.py
+!NLP-pipeline/restapi/summary.py
+**/__pycache__

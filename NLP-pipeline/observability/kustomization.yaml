@@ -1,0 +1,31 @@
+# Everything that watches the pipeline. The root kustomization.yaml lists this folder, so "kubectl apply -k ." applies it with the rest.
+#
+#   Prometheus + kafka-exporter + mongodb-exporter   the numbers (metrics)
+#   Grafana                                          the dashboard, for numbers and logs
+#   Loki + Alloy                                     the logs of every pod, in one place
+#
+# The dashboard is a JSON file. The generator below turns it into the ConfigMap grafana-dashboards, which Grafana mounts and reads by itself.
+# disableNameSuffixHash keeps the name plain (without a hash at the end), because grafana.yaml mounts it by that name.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - metrics-services.yaml
+  - prometheus.yaml
+  - kafka-exporter.yaml
+  - mongodb-exporter.yaml
+  - loki.yaml
+  - alloy.yaml
+  - grafana.yaml
+configMapGenerator:
+  - name: grafana-dashboards
+    namespace: nlp
+    files:
+      - pipeline.json=grafana/dashboards/pipeline.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        app.kubernetes.io/name: grafana
+        app.kubernetes.io/component: dashboards-config
+        app.kubernetes.io/part-of: nlp-pipeline
+      annotations:
+        description: "The Grafana dashboard NLP log pipeline (observability/grafana/dashboards/pipeline.json): producer rate, consumer lag, windows scored and flagged, LogBERT time per window, database writes, REST requests, errors and latency, and log search. Holds no secret"

@@ -1,0 +1,15 @@
+# Everything is left out of the build context except what the processor image needs (the context is the repository root).
+*
+!NLP/pyproject.toml
+!NLP/README.md
+!NLP/src
+!NLP-pipeline/processor/requirements.txt
+!NLP-pipeline/processor/processor.py
+!NLP-pipeline/processor/engine.py
+!NLP-pipeline/processor/sink.py
+!NLP-pipeline/bundle/drain.pkl
+!NLP-pipeline/bundle/model.pt
+!NLP-pipeline/bundle/rules.json
+!NLP-pipeline/bundle/llm_rule_based_decisions.csv
+!NLP-pipeline/bundle/settings.json
+**/__pycache__

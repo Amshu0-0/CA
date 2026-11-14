@@ -1,0 +1,25 @@
+# One entry point for the whole stack:   kubectl apply -k .        (and   kubectl delete -k .   to remove it)
+# Kustomize is built into kubectl. It reads this list, collects all the manifests, and applies them together.
+# Nothing else is needed: the passwords and certificates are made inside the cluster by the Job in bootstrap/ (no script, no Secret on
+# anybody's computer). The replay of the log lines is started by "make replay" (producer/job-replay.yaml), and it is the only thing that
+# is not in this list: "make up" builds the stack, "make replay" sends the data through it.
+# The monitoring (Prometheus, Grafana, Loki, Alloy and the two exporters) is the folder observability/, with its own network rules in
+# policies/observability.yaml.
+# The CA3 stack had a horizontal autoscaler and a load generator here. This one has neither: the NLP step needs the lines in order,
+# so it has one partition and one processor (processor/processor.yaml explains why).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - policies/networkpolicies.yaml
+  - policies/observability.yaml
+  - config/pipeline-config.yaml
+  - rbac/serviceaccounts.yaml
+  - rbac/roles.yaml
+  - rbac/bootstrap.yaml
+  - bootstrap/job.yaml
+  - db/mongo.yaml
+  - kafka/kafka.yaml
+  - processor/processor.yaml
+  - restapi/restapi.yaml
+  - observability

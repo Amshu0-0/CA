@@ -1,0 +1,130 @@
+# Builds the three images of the NLP log pipeline (nlp-producer, nlp-processor, nlp-restapi) and pushes them to the GitHub Container Registry.
+#
+# Why this exists: the images are built on GitHub's servers, so no Docker installation is needed on the laptop (the same idea as ca3-images.yml).
+# It uses the temporary token that GitHub gives every workflow run, so no registry password is stored anywhere.
+#
+# What is different from the CA3 workflow:
+#   - The build context is the repository root, not the folder of the component: the processor image needs the NLP project's package
+#     (NLP/src) and the trained models (NLP-pipeline/bundle), the producer image needs the replay file (NLP-pipeline/bundle/bgl-replay.log).
+#     The Dockerfile.dockerignore next to each Dockerfile lists the few files that go into that image.
+#   - Only amd64 is built. The machines of the cluster are amd64 (t3.medium), and nothing in this project runs these images on a Mac.
+#     (The CA3 workflow also built arm64; for the processor that would mean installing PyTorch under emulation, which is very slow.)
+#   - Before an image is pushed it is tried: the processor image loads the models, the producer image reads the replay file. An image
+#     that cannot do its first step is never pushed. (A drain.pkl that was pickled by another version of a library is found here, not in the cluster.)
+#
+# A package that is pushed for the first time is PRIVATE, and the cluster pulls without a login. Make each of the three packages public once
+# (README, Step 3: GitHub > your profile > Packages > the package > Package settings > Change visibility), then check:  make check-images
+name: NLP pipeline images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "NLP-pipeline/producer/**"
+      - "NLP-pipeline/processor/**"
+      - "NLP-pipeline/restapi/**"
+      - "NLP-pipeline/bundle/**"
+      - "NLP-pipeline/VERSION"
+      - "NLP/src/**"
+      - "NLP/pyproject.toml"
+      - ".github/workflows/nlp-pipeline-images.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [producer, processor, restapi]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # The models and the replay file are made on your computer by  make export-bundle  and committed. If they are not in the repository the
+      # image would be built without them, and the pod would fail at its first step. Better to stop here and say so.
+      - name: Check that the files this image needs are committed
+        run: |
+          case "${{ matrix.component }}" in
+            processor) files="drain.pkl model.pt rules.json llm_rule_based_decisions.csv settings.json" ;;
+            producer) files="bgl-replay.log" ;;
+            *) files="" ;;
+          esac
+          missing=0
+          for f in $files; do
+            if [ ! -s "NLP-pipeline/bundle/$f" ]; then
+              echo "::error title=a file of the bundle is missing::NLP-pipeline/bundle/$f is not in the repository. Run  make export-bundle  on your computer, then  git add -f NLP-pipeline/bundle  and commit and push it (README, Step 1)."
+              missing=1
+            fi
+          done
+          exit $missing
+
+      # The registry requires a lowercase name. The version comes from NLP-pipeline/VERSION, so it is changed in one place.
+      - name: Work out the image name and version
+        id: meta
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          version="$(tr -d '[:space:]' < NLP-pipeline/VERSION)"
+          echo "image=ghcr.io/${owner}/nlp-${{ matrix.component }}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Built into the local Docker of the runner first (not pushed yet), so that it can be tried.
+      - name: Build ${{ matrix.component }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: NLP-pipeline/${{ matrix.component }}/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+
+      - name: Try the processor image - it must load the models
+        if: matrix.component == 'processor'
+        run: |
+          docker run --rm "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}" python -c "
+          import engine
+          d = engine.Detectors.load('/bundle')
+          print('the models load:', len(d.extractor.templates), 'templates,', len(d.logbert.vocab.keys), 'LogBERT keys,', len(d.keyword.rules), 'keyword rules,', len(d.llm), 'saved LLM decisions; g =', d.g, ', r =', d.r)
+          print('a test line:', d.classify('data TLB error interrupt'))
+          "
+
+      - name: Try the producer image - it must hold the replay file
+        if: matrix.component == 'producer'
+        run: |
+          docker run --rm "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}" python -c "
+          import producer
+          lines = producer.read_lines('bgl-replay.log')
+          print('the replay file has', len(lines), 'lines; the first one is:', lines[0][:100])
+          assert len(lines) > 100
+          "
+
+      - name: Push ${{ matrix.component }}
+        run: docker push "${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}"
+
+      - name: Say what to do next
+        run: |
+          {
+            echo "### ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }} pushed"
+            echo ""
+            echo "A package that is pushed for the first time is **private**. The cluster pulls without a login, so make it public once:"
+            echo "GitHub, your profile, **Packages**, \`nlp-${{ matrix.component }}\`, **Package settings**, **Change visibility**, **Public**."
+            echo "Then on your computer:  \`make check-images\`"
+          } >> "$GITHUB_STEP_SUMMARY"

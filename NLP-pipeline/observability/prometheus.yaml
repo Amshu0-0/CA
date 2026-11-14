@@ -1,0 +1,190 @@
+# Prometheus: collects the numbers (metrics) of the whole pipeline and keeps them for a day.
+#
+# Every 5 seconds it asks each program for its numbers ("scraping" /metrics) and stores them with the time. Grafana draws them.
+# Where the targets come from:
+#   producer, processor, restapi   Prometheus asks the cluster DNS for the headless Services in metrics-services.yaml; the answer is
+#                                  the address of every ready pod, so the pod of a replay is found within seconds after "make replay"
+#                                  starts it (the producer exists only while a replay runs), and a pod that is deleted or has finished
+#                                  is gone from the list. (No Kubernetes API right is needed for this.)
+#   kafka-exporter, mongodb-exporter  one pod each, found by the Service name. They turn what Kafka and MongoDB know about themselves
+#                                  (how far behind the processor is, how many inserts) into numbers.
+#   prometheus                     itself
+#
+# The data lives in an emptyDir: it survives a restart of the container but not the deletion of the pod. That is a deliberate trade-off
+# (see the README): the evidence of a test is exported to a file in the repository right after the test.
+#
+# The pod carries the label component=observer, the role that processor-ingress lets read the processor's port 8000. What else Prometheus
+# may reach is listed in policies/observability.yaml, and nothing may reach Prometheus except Grafana.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Identity of the Prometheus pod. Its Kubernetes API token is not mounted, because Prometheus finds its targets through DNS and never calls the Kubernetes API"
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "The Prometheus configuration: what to read, from where, how often. Holds no secret"
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      scrape_timeout: 4s
+
+    scrape_configs:
+      - job_name: producer
+        dns_sd_configs:
+          - names: ["producer-metrics.nlp.svc.cluster.local"]
+            type: A
+            port: 8001
+            refresh_interval: 5s
+
+      - job_name: processor
+        dns_sd_configs:
+          - names: ["processor-metrics.nlp.svc.cluster.local"]
+            type: A
+            port: 8000
+            refresh_interval: 5s
+
+      - job_name: restapi
+        dns_sd_configs:
+          - names: ["restapi-metrics.nlp.svc.cluster.local"]
+            type: A
+            port: 9102
+            refresh_interval: 5s
+
+      # The consumer lag: for every partition, how many messages are in Kafka that the group has not read yet. The assignment calls the
+      # label "group"; kafka-exporter calls it "consumergroup", so the label is copied under the second name (both exist).
+      - job_name: kafka-exporter
+        static_configs:
+          - targets: ["kafka-exporter:9308"]
+        metric_relabel_configs:
+          - source_labels: [consumergroup]
+            regex: (.+)
+            target_label: group
+            replacement: $1
+
+      - job_name: mongodb-exporter
+        static_configs:
+          - targets: ["mongodb-exporter:9216"]
+
+      - job_name: prometheus
+        static_configs:
+          - targets: ["localhost:9090"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: observer
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Prometheus v2.55.1: reads the numbers of every pipeline pod every 5 seconds and keeps them for 24 hours (in an emptyDir). Only Grafana may query it"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus
+        app.kubernetes.io/component: observer
+        app.kubernetes.io/part-of: nlp-pipeline
+    spec:
+      serviceAccountName: prometheus
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=24h
+            - --web.listen-address=:9090
+          ports:
+            - name: http
+              containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+              readOnly: true
+            - name: data
+              mountPath: /prometheus
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: data
+          emptyDir:
+            sizeLimit: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: observer
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Address of Prometheus inside the cluster (prometheus:9090). Only Grafana may call it. Look at it from your computer with kubectl port-forward"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: http

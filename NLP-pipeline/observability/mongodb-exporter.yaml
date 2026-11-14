@@ -1,0 +1,136 @@
+# mongodb-exporter: asks MongoDB for its own statistics and turns them into numbers for Prometheus.
+#
+# The number that matters here is mongodb_ss_opcounters{legacy_op_type=~"insert|update"}: how many write operations MongoDB has done since it
+# started. The processor writes every log line and every window as an "upsert" (replace the document, or insert it if it is not there yet),
+# and MongoDB counts an upsert as an update; the accounts that its first start creates are counted as inserts. Prometheus turns the sum into
+# "writes per second", which is the second opinion on what the processor says it stored.
+#
+# It logs in with its own account (the Secret mongo-exporter), which the first start of MongoDB created with the rights clusterMonitor and
+# "read on local": it can read server statistics and cannot read a single log line of the database nlp. The connection is TLS, checked
+# against the CA certificate of the Secret pki-ca.
+#
+# This program takes its login only from the environment (or from the address), so the two values come from the Secret with secretKeyRef.
+# That is the one place where a Secret value is in a container's environment instead of in a file; "make verify" still counts this pod as a
+# user of the Secret, and the value is never written in a manifest.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mongodb-exporter
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: mongodb-exporter
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Identity of the mongodb-exporter pod. Its Kubernetes API token is not mounted, because the exporter never calls the Kubernetes API"
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-exporter
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: mongodb-exporter
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "mongodb_exporter 0.40.0: reads the server statistics of MongoDB (TLS, its own monitoring-only account) and serves them to Prometheus on port 9216"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb-exporter
+        app.kubernetes.io/component: exporter
+        app.kubernetes.io/part-of: nlp-pipeline
+    spec:
+      serviceAccountName: mongodb-exporter
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mongodb-exporter
+          image: percona/mongodb_exporter:0.40.0
+          imagePullPolicy: IfNotPresent
+          # The address has no login in it: the program adds MONGODB_USER and MONGODB_PASSWORD. The account lives in the database admin.
+          # directConnection=true: this is one MongoDB, not a replica set, so the program must not look for other members.
+          args:
+            - --mongodb.uri=mongodb://mongo:27017/admin?tls=true&tlsCAFile=/etc/pki/ca/ca.crt&directConnection=true
+            - --web.listen-address=:9216
+            - --collector.diagnosticdata
+          env:
+            - name: MONGODB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-exporter
+                  key: username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-exporter
+                  key: password
+          ports:
+            - name: metrics
+              containerPort: 9216
+          volumeMounts:
+            - name: pki-ca
+              mountPath: /etc/pki/ca
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 20m
+              memory: 48Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: pki-ca
+          secret:
+            secretName: pki-ca
+            defaultMode: 288
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-exporter
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: mongodb-exporter
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Address of mongodb-exporter inside the cluster (mongodb-exporter:9216). Only Prometheus may call it"
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: mongodb-exporter
+  ports:
+    - name: metrics
+      port: 9216
+      targetPort: metrics

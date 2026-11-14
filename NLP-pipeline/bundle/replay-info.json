@@ -1,0 +1,20 @@
+{
+  "lines": 30000,
+  "alert_lines": 8423,
+  "first_timestamp": 1132905019,
+  "last_timestamp": 1133316591,
+  "windows": 394,
+  "anomalous_windows": 116,
+  "largest_window_lines": 1522,
+  "grid": {
+    "size_seconds": 300,
+    "step_seconds": 60
+  },
+  "source": "messages 16500 to 46499 of the test period of bgl_cpu",
+  "line_source": "the raw BGL log",
+  "template_ids_agree": {
+    "lines": 30000,
+    "same_as_messages_parquet": 29022,
+    "unseen": 0
+  }
+}

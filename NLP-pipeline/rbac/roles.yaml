@@ -1,0 +1,121 @@
+# Role-Based Access Control: WHO may do WHAT to WHICH resources, inside this namespace only.
+# A Role lists permissions. A RoleBinding gives a Role to a ServiceAccount.
+# No rule in this file mentions "secrets". The only rule in the namespace that does is the "create" of the setup Job (rbac/bootstrap.yaml),
+# so nobody who uses these accounts can read a password or a key.
+# Proof (make rbac-check):  kubectl auth can-i get secrets --as=system:serviceaccount:nlp:pipeline-operator -n nlp   -> no
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-viewer
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: pipeline-viewer
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Read-only access to the pipeline"
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pipeline-operator
+  namespace: nlp
+  labels:
+    app.kubernetes.io/name: pipeline-operator
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Can start and remove replay Jobs and change the replica count of a Deployment (for example the REST API), but cannot read Secrets"
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-viewer
+  namespace: nlp
+  labels:
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Read-only: pods, logs, Services, ConfigMaps, volume claims, events, workloads, Jobs and network policies. Secrets are not included"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pipeline-operator
+  namespace: nlp
+  labels:
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Everything the viewer can read, plus create and delete Jobs and change the replica count of a Deployment. Secrets are not included"
+rules:
+  # Everything the viewer can read...
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["get", "list", "watch"]
+  # ...plus: start and remove replay jobs (make replay), and change the replica count of a Deployment.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pipeline-viewer
+  namespace: nlp
+  labels:
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Gives the Role pipeline-viewer to the ServiceAccount pipeline-viewer"
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-viewer
+    namespace: nlp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-viewer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pipeline-operator
+  namespace: nlp
+  labels:
+    app.kubernetes.io/part-of: nlp-pipeline
+  annotations:
+    description: "Gives the Role pipeline-operator to the ServiceAccount pipeline-operator"
+subjects:
+  - kind: ServiceAccount
+    name: pipeline-operator
+    namespace: nlp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pipeline-operator
