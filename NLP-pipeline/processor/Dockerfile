@@ -20,8 +20,8 @@ COPY NLP/pyproject.toml NLP/README.md /nlp/
 COPY NLP/src /nlp/src
 RUN pip install --no-cache-dir /nlp
 
-# The processor: the program, the part that does the thinking (engine.py), and the part that writes to MongoDB (sink.py).
-COPY NLP-pipeline/processor/processor.py NLP-pipeline/processor/engine.py NLP-pipeline/processor/sink.py ./
+# The processor: the program, the part that does the thinking (engine.py, with the keyword rules of baselines.py), and the part that writes to MongoDB (sink.py).
+COPY NLP-pipeline/processor/processor.py NLP-pipeline/processor/engine.py NLP-pipeline/processor/baselines.py NLP-pipeline/processor/sink.py ./
 
 # The trained models and the settings that go with them: drain.pkl, model.pt, rules.json, llm_rule_based_decisions.csv, settings.json.
 # scripts/export-nlp-bundle.py collects them from the NLP project (BUNDLE_DIR in processor/processor.yaml says where they are).

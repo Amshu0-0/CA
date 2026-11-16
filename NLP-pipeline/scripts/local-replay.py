@@ -107,7 +107,7 @@ def main(argv=None):
     for text in describe(summary):
         print(text)
 
-    for text in reference(REPO / "NLP" / "results" / "comparison.csv"):
+    for text in reference(PIPELINE / "reference" / "comparison.csv"):
         print(("\n" if text.startswith("For comparison") else "") + text)
 
     problems = []

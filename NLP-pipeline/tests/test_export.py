@@ -1,7 +1,7 @@
 # scripts/export-nlp-bundle.py on a small made-up BGL log that is run through the NLP project's own preprocessing (Drain, split, windows).
-# The trained files (model.pt, rules, decisions) are the real ones of the NLP project; they belong to the real Drain parser, not to the made-up
-# log, so the last check of the script (the processor's loader) is shown to REFUSE the made-up parser, and then to ACCEPT the bundle when the
-# parser is replaced by the stand-in of the other tests. What this cannot show: that YOUR drain.pkl and YOUR messages.parquet are the ones that
+# The trained files (model.pt, and the rules and decisions of reference/) are the real ones; they belong to the real Drain parser, not to the
+# made-up log, so the last check of the script (the processor's loader) is shown to REFUSE the made-up parser, and then to ACCEPT the bundle
+# when the parser is replaced by the stand-in of the other tests. What this cannot show: that YOUR drain.pkl and YOUR messages.parquet are the ones that
 # belong to your model.pt. The script checks that on your computer.
 
 import importlib.util
@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 import pytest
+import torch
 
 import engine
 from conftest import PIPELINE, REPO
@@ -79,10 +80,8 @@ def nlp_root(tmp_path_factory):
     finally:
         patch.undo()
 
-    for name, source in (("logbert/model.pt", FILES["model.pt"]), ("rules/rules.json", FILES["rules.json"]),
-                         ("rule_guided/llm_rule_based_decisions.csv", FILES["llm_rule_based_decisions.csv"])):
-        (root / "results" / name).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(source, root / "results" / name)
+    (root / "results" / "logbert").mkdir(parents=True, exist_ok=True)
+    shutil.copy(FILES["model.pt"], root / "results" / "logbert" / "model.pt")
 
     shutil.copy(REPO / "NLP" / "results" / "logbert_full.json", root / "results" / "logbert_full.json")
     return root
@@ -211,23 +210,22 @@ def test_a_raw_log_that_does_not_match_the_table_is_refused(nlp_root, tmp_path, 
 def test_a_missing_file_is_named_with_the_place_to_look(nlp_root, tmp_path, capsys):
     copy = tmp_path / "nlp"
     shutil.copytree(nlp_root, copy)
-    (copy / "results" / "rules" / "rules.json").unlink()
+    (copy / "results" / "logbert" / "model.pt").unlink()
 
     script = load_script()
     code = script.main(["--nlp-root", str(copy), "--out", str(tmp_path / "bundle")])
     error = capsys.readouterr().err
 
-    assert code == 1 and "rules.json" in error and str(copy) in error and "make rules" in error
+    assert code == 1 and "model.pt" in error and str(copy) in error and "make logbert-train" in error
 
 
 # ---------------------------------------------------------------- which run, and where from
 
 # The trained files as the NLP project's own "make restore" lays them out in a working folder outputs/<run>/ (moved, so only one copy exists).
 def move_results_to_outputs(root, run):
-    for name in ("logbert/model.pt", "rules/rules.json", "rule_guided/llm_rule_based_decisions.csv"):
-        target = root / "outputs" / run / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(root / "results" / name), str(target))
+    target = root / "outputs" / run / "logbert" / "model.pt"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(root / "results" / "logbert" / "model.pt"), str(target))
 
     target = root / "outputs" / run / "results" / "logbert_full.json"
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -235,8 +233,8 @@ def move_results_to_outputs(root, run):
 
 
 def test_a_configuration_that_inherits_is_read_like_the_nlp_project_reads_it(nlp_root, tmp_path, standin_parser, capsys, monkeypatch):
-    # configs/bgl_cpu.yaml says "extends: bgl.yaml" and changes few things, among them the working folder (outputs/bgl_cpu). The window, the
-    # seed and the number of rules are not in it: they must come from bgl.yaml. The files here are only in outputs/bgl_cpu, so they are found
+    # configs/bgl_cpu.yaml says "extends: bgl.yaml" and changes few things, among them the working folder (outputs/bgl_cpu). The window and the
+    # seed are not in it: they must come from bgl.yaml. The files here are only in outputs/bgl_cpu, so they are found
     # only if the inheritance is followed and the name of the configuration is looked for in the NLP folder.
     copy = tmp_path / "nlp"
     shutil.copytree(nlp_root, copy)
@@ -271,33 +269,35 @@ def test_a_configuration_that_does_not_exist_is_named(nlp_root, tmp_path, capsys
 def test_the_committed_results_come_first_and_a_different_run_in_outputs_is_reported(nlp_root, tmp_path, standin_parser, capsys):
     copy = tmp_path / "nlp"
     shutil.copytree(nlp_root, copy)
-    committed = copy / "results" / "rules" / "rules.json"
-    working = copy / "outputs" / "bgl" / "rules" / "rules.json"
+    committed = copy / "results" / "logbert" / "model.pt"
+    working = copy / "outputs" / "bgl" / "logbert" / "model.pt"
     working.parent.mkdir(parents=True)
-    working.write_text(json.dumps(json.loads(committed.read_text(encoding="utf-8"))), encoding="utf-8")     # the same rules, written another way
+    checkpoint = torch.load(committed, map_location="cpu", weights_only=True)
+    checkpoint["note"] = "the same model, saved again"                                                      # loads the same, but the bytes differ
+    torch.save(checkpoint, working)
     assert working.read_bytes() != committed.read_bytes()
 
     run_export(copy, tmp_path / "bundle")
     shown = capsys.readouterr().out
 
-    assert (tmp_path / "bundle" / "rules.json").read_bytes() == committed.read_bytes()
-    assert re.search(r"Note: rules\.json .* exists twice and the two differ\. Taken: %s\." % re.escape(str(committed.resolve())), shown)
+    assert (tmp_path / "bundle" / "model.pt").read_bytes() == committed.read_bytes()
+    assert re.search(r"Note: model\.pt .* exists twice and the two differ\. Taken: %s\." % re.escape(str(committed.resolve())), shown)
     assert "--prefer-outputs takes the other one" in shown
 
     # with --prefer-outputs the other one is taken
     run_export(copy, tmp_path / "second", "--prefer-outputs")
     shown = capsys.readouterr().out
 
-    assert (tmp_path / "second" / "rules.json").read_bytes() == working.read_bytes()
+    assert (tmp_path / "second" / "model.pt").read_bytes() == working.read_bytes()
     assert "Taken: %s." % working.resolve() in shown and "you asked for outputs/ with --prefer-outputs" in shown
 
 
 def test_two_identical_copies_are_not_reported(nlp_root, tmp_path, standin_parser, capsys):
     copy = tmp_path / "nlp"
     shutil.copytree(nlp_root, copy)
-    working = copy / "outputs" / "bgl" / "rules" / "rules.json"
+    working = copy / "outputs" / "bgl" / "logbert" / "model.pt"
     working.parent.mkdir(parents=True)
-    shutil.copy(copy / "results" / "rules" / "rules.json", working)
+    shutil.copy(copy / "results" / "logbert" / "model.pt", working)
 
     run_export(copy, tmp_path / "bundle")
 
@@ -308,7 +308,7 @@ def test_the_files_that_are_used_are_listed(nlp_root, tmp_path, standin_parser, 
     run_export(nlp_root, tmp_path / "bundle")
     shown = capsys.readouterr().out
 
-    for name, path in (("model:", "results/logbert/model.pt"), ("rules:", "results/rules/rules.json"), ("decisions:", "results/rule_guided/llm_rule_based_decisions.csv")):
+    for name, path in (("model:", "results/logbert/model.pt"), ("rules:", "reference/rules.json"), ("decisions:", "reference/llm_rule_based_decisions.csv")):
         assert re.search(r"^  %s\s+\S*%s$" % (name, re.escape(path)), shown, re.M), name
 
 

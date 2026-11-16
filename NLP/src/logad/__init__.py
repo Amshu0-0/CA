@@ -1,14 +1,13 @@
-"""logad: log anomaly detection on BGL with LogBERT and rule-guided LLMs.
+"""logad: log anomaly detection on BGL with LogBERT.
 
 The package is organised by pipeline stage:
 
 * ``logad.config``      - typed experiment configuration loaded from YAML
 * ``logad.utils``       - logging, seeding, timing and JSON helpers
 * ``logad.data``        - reading BGL, Drain template mining, splitting, windowing
-* ``logad.logbert``     - Approach A: LogBERT reproduction
-* ``logad.rules``       - Approach B: LogRules-style rule induction + keyword baseline
-* ``logad.llm``         - Approach B: LLM clients and zero/few-shot/rule-based prompting
-* ``logad.evaluation``  - shared window-level metrics and error analysis
+* ``logad.logbert``     - LogBERT: vocabulary, model, training and detection
+* ``logad.evaluation``  - window-level metrics, result tables and error analysis
+* ``logad.demo``        - the back end of the interactive demo
 """
 
 __version__ = "0.1.0"

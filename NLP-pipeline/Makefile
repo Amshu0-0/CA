@@ -131,8 +131,9 @@ help: ; @printf '%s\n' \
 # Python environment that has the packages of requirements-dev.txt (pip install -r requirements-dev.txt).
 test: ; $(PYTHON) -m pytest tests -q
 
-# Collects, from your NLP project, everything the processor and the producer need into bundle/: drain.pkl, model.pt, rules.json,
-# llm_rule_based_decisions.csv, settings.json and the replay file bgl-replay.log. Run it in the environment where "make preprocess" and
+# Collects, from your NLP project (and from reference/: the keyword rules and the saved decisions of its first version), everything the
+# processor and the producer need into bundle/: drain.pkl, model.pt, rules.json, llm_rule_based_decisions.csv, settings.json and the replay
+# file bgl-replay.log. Run it in the environment where "make preprocess" and
 # the training of your NLP project were done. The committed results of your NLP project come from configs/bgl_cpu.yaml (see
 # NLP/results/README.md), so that is the configuration used here. For a run that you made with another one:
 #   make export-bundle NLP_CONFIG=configs/bgl.yaml BUNDLE_ARGS="--prefer-outputs"

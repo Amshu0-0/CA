@@ -1,7 +1,7 @@
 # =============================================================================
 # One target per pipeline stage. Override the experiment with CONFIG=..., e.g.
 #   make smoke                         # whole pipeline on the 2k-line sample
-#   make preprocess logbert            # full BGL, Approach A
+#   make preprocess logbert            # full BGL: train and evaluate LogBERT
 #   make all CONFIG=configs/bgl.yaml   # everything, in order
 # =============================================================================
 
@@ -9,11 +9,9 @@ CONFIG ?= configs/bgl.yaml
 PY     ?= python
 # Output directory of the experiment in CONFIG (paths.output_dir).
 OUT    ?= outputs/bgl
-# LLM response cache (llm.cache_dir); every prompt and raw answer, one JSONL file per model.
-CACHE  ?= outputs/llm_cache
 
 .PHONY: help install data data-2k preprocess logbert logbert-train logbert-eval \
-        rules rule-guided keyword compare analyze results restore figures demo test lint format smoke all
+        compare analyze results restore figures demo test lint format smoke all
 
 help:            ## List the available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -30,59 +28,37 @@ data-2k:         ## Download Loghub's 2,000-line BGL sample
 preprocess:      ## Drain templates, chronological split, sliding windows
 	$(PY) scripts/preprocess.py --config $(CONFIG)
 
-logbert-train:   ## Approach A: train LogBERT on normal training windows
+logbert-train:   ## Train LogBERT on normal training windows
 	$(PY) scripts/train_logbert.py --config $(CONFIG)
 
-logbert-eval:    ## Approach A: tune g/r on validation, evaluate on test (both masking modes)
+logbert-eval:    ## Tune g/r on validation, evaluate on test (both masking modes)
 	$(PY) scripts/evaluate_logbert.py --config $(CONFIG)
 	$(PY) scripts/evaluate_logbert.py --config $(CONFIG) --set logbert.detection.full_coverage=true
 
-logbert: logbert-train logbert-eval  ## Approach A end to end
+logbert: logbert-train logbert-eval  ## LogBERT end to end
 
-rules:           ## Approach B: induce, verify and rank rules (needs the generator LLM)
-	$(PY) scripts/induce_rules.py --config $(CONFIG)
-
-rule-guided:     ## Approach B: zero-shot, few-shot, rule-based and keyword conditions
-	$(PY) scripts/run_rule_guided.py --config $(CONFIG)
-
-keyword:         ## Approach B: only the keyword baseline (no LLM needed once rules exist)
-	$(PY) scripts/run_rule_guided.py --config $(CONFIG) --conditions keyword
-
-compare:         ## Comparison table of every evaluated method
+compare:         ## Results table of both LogBERT variants
 	$(PY) scripts/compare.py --config $(CONFIG)
 
 analyze:         ## Error analysis tables for the report
 	$(PY) scripts/analyze.py --config $(CONFIG)
 
-results:         ## Copy the deliverables (metrics, predictions, rules, decisions, analysis, checkpoint, LLM cache) into results/
-	mkdir -p results/rules results/rule_guided results/analysis results/logbert results/llm_cache \
-	    results/predictions
+results:         ## Copy the deliverables (metrics, predictions, analysis, checkpoint) into results/
+	mkdir -p results/analysis results/logbert results/predictions
 	cp $(OUT)/results/* results/
 	-cp $(OUT)/predictions/*.parquet results/predictions/
-	-cp $(OUT)/rules/rules.md $(OUT)/rules/rules.json $(OUT)/rules/candidates.json \
-	    $(OUT)/rules/induction_summary.json results/rules/
-	-cp $(OUT)/rule_guided/*_decisions.csv results/rule_guided/
 	-cp $(OUT)/analysis/* results/analysis/
 	-cp $(OUT)/logbert/model.pt $(OUT)/logbert/history.json $(OUT)/logbert/*_tuning_grid.csv results/logbert/
-	-cp $(CACHE)/*.jsonl results/llm_cache/
 
 restore:         ## Copy the committed results/ back into $(OUT), e.g. to run the demo without retraining
 	@test ! -e $(OUT)/logbert/model.pt || { echo "$(OUT) already holds a run; pick another OUT=..."; exit 1; }
-	mkdir -p $(OUT)/results $(OUT)/predictions $(OUT)/rules $(OUT)/rule_guided $(OUT)/analysis \
-	    $(OUT)/logbert $(CACHE)
+	mkdir -p $(OUT)/results $(OUT)/predictions $(OUT)/analysis $(OUT)/logbert
 	cp results/*.json results/comparison.csv $(OUT)/results/
 	cp results/predictions/* $(OUT)/predictions/
 	cp results/analysis/* $(OUT)/analysis/
-	cp results/rules/* $(OUT)/rules/
-	cp results/rule_guided/* $(OUT)/rule_guided/
 	cp results/logbert/* $(OUT)/logbert/
-	@# Never overwrite an existing response cache: it may hold answers of other runs.
-	@for f in results/llm_cache/*.jsonl; do \
-	  if [ -e "$(CACHE)/$$(basename $$f)" ]; then echo "kept existing $(CACHE)/$$(basename $$f)"; \
-	  else cp "$$f" $(CACHE)/ && echo "copied $$f"; fi; \
-	done
 
-figures:         ## Draw the guide's figures from a run into docs/figures/ (needs the docs extra)
+figures:         ## Draw the figures from a run into docs/figures/ (needs the docs extra)
 	$(PY) scripts/make_figures.py --config $(CONFIG)
 
 demo:            ## Launch the Gradio demo
@@ -98,8 +74,8 @@ lint:            ## Static checks (ruff lint + formatting)
 format:          ## Auto-format the code
 	ruff format .
 
-smoke:           ## Approach A end to end on the 2k-line sample (CPU, ~1 minute)
+smoke:           ## Whole pipeline on the 2k-line sample (CPU, ~1 minute)
 	$(MAKE) data-2k
 	$(MAKE) preprocess logbert compare analyze CONFIG=configs/bgl_2k.yaml
 
-all: preprocess logbert rules rule-guided compare analyze  ## Every stage, in order
+all: preprocess logbert compare analyze  ## Every stage, in order

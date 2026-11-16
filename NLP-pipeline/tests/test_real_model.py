@@ -1,6 +1,6 @@
-# The engine with the files of the NLP project: the trained LogBERT (model.pt), the ranked keyword rules (rules.json) and the saved decisions
-# of the rule-guided LLM (llm_rule_based_decisions.csv). Only Drain is replaced by a small fake that knows the texts of the saved decisions,
-# because drain.pkl is made by `make preprocess` on the full BGL file and is not part of the repository.
+# The engine with the real files: the trained LogBERT of the NLP project (model.pt), and the ranked keyword rules (rules.json) and the saved
+# decisions of the rule-guided LLM (llm_rule_based_decisions.csv) from reference/. Only Drain is replaced by a small fake that knows the texts
+# of the saved decisions, because drain.pkl is made by `make preprocess` on the full BGL file and is not part of the repository.
 
 import csv
 import json
@@ -14,17 +14,17 @@ import pytest
 import engine
 from engine import BundleError, Detectors, Engine, UNSEEN
 from fakes import bgl_line, record
+from baselines import KeywordClassifier, load_rules
 from logad.logbert.dataset import window_to_chunks
 from logad.logbert.trainer import load_checkpoint
-from logad.rules.keyword import KeywordClassifier
-from logad.rules.rule import load_rules
 from sink import MemorySink
 
-from conftest import REPO
+from conftest import PIPELINE, REPO
 
 RESULTS = REPO / "NLP" / "results"
-FILES = {"model.pt": RESULTS / "logbert" / "model.pt", "rules.json": RESULTS / "rules" / "rules.json",
-         "llm_rule_based_decisions.csv": RESULTS / "rule_guided" / "llm_rule_based_decisions.csv"}
+REFERENCE = PIPELINE / "reference"
+FILES = {"model.pt": RESULTS / "logbert" / "model.pt", "rules.json": REFERENCE / "rules.json",
+         "llm_rule_based_decisions.csv": REFERENCE / "llm_rule_based_decisions.csv"}
 
 pytestmark = pytest.mark.skipif(not all(p.exists() for p in FILES.values()), reason="the NLP project's results are not in this checkout")
 

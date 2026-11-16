@@ -9,8 +9,8 @@
         drain.pkl          the fitted TemplateExtractor (lets the demo parse new lines)
         stats.json         dataset statistics quoted in the report
 
-Every later stage (LogBERT, rule induction, LLM prompting, evaluation, demo)
-starts from ``load_processed``, so all methods see identical data.
+Every later stage (LogBERT training, detection, evaluation, demo) starts from
+``load_processed``, so all of them see identical data.
 """
 
 from __future__ import annotations
@@ -80,7 +80,7 @@ def save_processed(logs: ProcessedLogs, directory: str | Path) -> Path:
     return directory
 
 
-# Load only the template table (rule induction needs nothing else).
+# Load only the template table (no messages, no windows).
 def load_templates(directory: str | Path) -> pd.DataFrame:
     path = Path(directory) / TEMPLATES_FILE
     if not path.exists():

@@ -1,13 +1,9 @@
 """Binary classification metrics and the shared window-level evaluation unit.
 
-The project's research question compares methods that work at different
-granularities: LogBERT judges whole windows, while the rule-guided LLM judges
-individual templates/messages. To compare them fairly, every method is
-reduced to one prediction per **5-minute test window**:
-
-* LogBERT predicts windows directly.
-* Message-level methods flag a window if **any** of its messages is flagged
-  (``windows_from_message_flags``), mirroring how the ground truth is defined.
+Everything is scored per **5-minute test window**. LogBERT predicts a window
+directly; the ground truth of a window is "anomalous" if **any** of its
+messages carries an alert tag (``windows_from_message_flags`` lifts message
+flags to windows in exactly that way).
 
 Metrics follow the usual definitions with "anomalous" as the positive class:
 precision = TP / (TP + FP), recall = TP / (TP + FN), F1 = harmonic mean.

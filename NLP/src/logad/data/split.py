@@ -6,8 +6,9 @@ Le & Zhang (ICSE 2022) showed that random splits let semi-supervised detectors
 such as LogBERT peek at the future and inflate their scores; a chronological
 split mimics deployment, where a model trained on the past must judge new logs.
 
-Both approaches share this split: LogBERT trains on normal windows from the
-training period, and rule induction uses labeled examples from the same period.
+LogBERT trains on normal windows from the training period only; the validation
+period is used to choose its two detection settings, and the test period is used
+only once, for the reported scores.
 """
 
 from __future__ import annotations

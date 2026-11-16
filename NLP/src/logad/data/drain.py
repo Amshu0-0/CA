@@ -7,8 +7,7 @@ source code and replaces their variable parts with ``<*>``::
     "generating core.2275"                       ->  "generating core.<*>"
 
 Each distinct template gets an integer *template ID* (LogBERT calls it a *log
-key*). LogBERT reads sequences of these IDs; the rule-guided LLM reads the
-template text.
+key*). LogBERT reads sequences of these IDs.
 
 We use the maintained ``drain3`` implementation, configured to match the
 settings of the LogBERT repository for BGL (depth 3, similarity threshold 0.3,

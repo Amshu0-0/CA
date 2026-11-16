@@ -1,14 +1,12 @@
-"""Interactive demo: LogBERT vs. the rule-guided LLM, side by side.
+"""Interactive demo of LogBERT on BGL log windows.
 
-Classmates can paste a log line - or insert an alert message into a normal
-window - and see both approaches' verdicts, the rule that fired, and which of
-the window's keys LogBERT failed to predict.
+Paste a log line - or insert an alert message into a normal window - and see
+LogBERT's verdict and which of the window's keys it failed to predict.
 
 Usage:
     python app/demo.py                                # artifacts of configs/bgl.yaml
     python app/demo.py --config configs/bgl_2k.yaml   # smoke-test artifacts
-    python app/demo.py --share                        # temporary public link for the class
-    python app/demo.py --no-live-llm                  # only use saved LLM decisions
+    python app/demo.py --share                        # temporary public link
 """
 
 from __future__ import annotations
@@ -23,12 +21,10 @@ from logad.demo import DemoEngine, WindowAnalysis
 from logad.utils import setup_logging
 
 INTRO = """
-# System log anomaly detection: LogBERT vs. a rule-guided LLM
-**Approach A - LogBERT** learns which *sequences of log templates* are normal and flags a window when
-too many hidden keys are not among its top-g guesses.
-**Approach B - rule-guided LLM** reads the *text* of each log template and applies rules an LLM learned
-from labeled training logs (B4 applies the same rules as plain keyword matching).
-Pasted BGL lines have their alert tag removed before any model sees them.
+# System log anomaly detection with LogBERT
+LogBERT learns which *sequences of log templates* are normal. It hides some keys of a window, guesses
+them from the rest, and flags the window when more than r hidden keys are not among its top-g guesses.
+Pasted BGL lines have their alert tag removed before the model sees them.
 """
 
 
@@ -39,14 +35,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default="127.0.0.1", help="Use 0.0.0.0 to serve on the network")
     parser.add_argument("--port", type=int, default=7860)
     parser.add_argument("--share", action="store_true", help="Create a public Gradio link")
-    parser.add_argument(
-        "--no-live-llm", action="store_true", help="Never call the LLM; use saved decisions only"
-    )
     return parser.parse_args()
 
 
-# Render the parsed input and every verdict as Markdown cards.
-def format_verdicts(analysis: WindowAnalysis) -> str:
+# Render the parsed input and the verdict as Markdown cards.
+def format_verdict(analysis: WindowAnalysis) -> str:
     parts = []
     if analysis.parsed is not None:
         parsed = analysis.parsed
@@ -61,14 +54,14 @@ def format_verdicts(analysis: WindowAnalysis) -> str:
             else ""
         )
         parts.append(f"**Model input:** `{parsed.content}`  \n**Template:** {template}.{removed}")
-    for verdict in analysis.verdicts:
-        if not verdict.available:
-            status = "_not available_"
-        elif verdict.anomalous:
-            status = "**ANOMALOUS**"
-        else:
-            status = "**normal**"
-        parts.append(f"### {verdict.method}\n{status} - {verdict.summary}")
+    verdict = analysis.verdict
+    if not verdict.available:
+        status = "_not available_"
+    elif verdict.anomalous:
+        status = "**ANOMALOUS**"
+    else:
+        status = "**normal**"
+    parts.append(f"### {verdict.name}\n{status} - {verdict.summary}")
     return "\n\n".join(parts)
 
 
@@ -86,16 +79,16 @@ def build_ui(engine: DemoEngine) -> gr.Blocks:
         if not line or not line.strip():
             return "Paste a log line first.", pd.DataFrame()
         analysis = engine.analyze_line(line)
-        return format_verdicts(analysis), analysis.messages
+        return format_verdict(analysis), analysis.messages
 
     # Callback for tab 2: a chosen window, optionally with an inserted line.
     def on_window(window_id: int, line: str, position: float) -> tuple[str, pd.DataFrame]:
         if window_id is None:
             return "No normal test window available.", pd.DataFrame()
         analysis = engine.analyze_window(int(window_id), line, int(position))
-        return format_verdicts(analysis), analysis.messages
+        return format_verdict(analysis), analysis.messages
 
-    with gr.Blocks(title="LogBERT vs rule-guided LLM") as demo:
+    with gr.Blocks(title="LogBERT log anomaly detection") as demo:
         gr.Markdown(INTRO)
 
         with gr.Tab("Paste a log line"):
@@ -139,7 +132,7 @@ def build_ui(engine: DemoEngine) -> gr.Blocks:
 def main() -> None:
     setup_logging()
     args = parse_args()
-    engine = DemoEngine(config_from_args(args), enable_live_llm=not args.no_live_llm)
+    engine = DemoEngine(config_from_args(args))
     build_ui(engine).launch(server_name=args.host, server_port=args.port, share=args.share)
 
 

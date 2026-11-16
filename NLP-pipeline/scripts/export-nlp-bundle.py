@@ -6,15 +6,16 @@
 # What ends up in bundle/ (the processor image holds the first five, the producer image holds the replay file):
 #   drain.pkl                        the fitted Drain parser: log text -> template ID            from  data/processed/bgl/
 #   model.pt                         the trained LogBERT                                          from  results/logbert/ or outputs/<run>/logbert/
-#   rules.json                       the ranked keyword rules (condition B4)                      from  results/rules/ or outputs/<run>/rules/
-#   llm_rule_based_decisions.csv     the saved decisions of the rule-guided LLM (condition B3)    from  results/rule_guided/ or outputs/<run>/rule_guided/
+#   rules.json                       the ranked keyword rules (condition B4)                      from  NLP-pipeline/reference/ (see its README)
+#   llm_rule_based_decisions.csv     the saved decisions of the rule-guided LLM (condition B3)    from  NLP-pipeline/reference/
 #   settings.json                    g, r, mask ratio, seed, window size, number of rules: the values of your experiment
 #   bgl-replay.log                   the log lines to replay: a slice of the TEST period of your split, in time order, as BGL lines
 #   replay-info.json                 facts about that slice (lines, windows, anomalous windows, largest window), for the checks
 #
-# The configuration says where the processed data and the working folder outputs/ are, and the window, the seed and the number of rules. It is
-# read with the NLP project's own loader, so one that inherits from another (configs/bgl_cpu.yaml extends configs/bgl.yaml) works: make
-# export-bundle uses the one that the committed results come from (see NLP/results/README.md).
+# The configuration says where the processed data and the working folder outputs/ are, and the window and the seed. It is read with the NLP
+# project's own loader, so one that inherits from another (configs/bgl_cpu.yaml extends configs/bgl.yaml) works: make export-bundle uses the
+# one that the committed results come from (see NLP/results/README.md). The keyword rules and the saved decisions are not made by the NLP
+# project any more (it is LogBERT only): they are the files of its first version, kept unchanged in NLP-pipeline/reference/.
 #
 # results/ is the run that your report describes (it is what "make results" copies there and what is committed), so it is taken first. A run that
 # is only in outputs/ (not copied to results/ yet) is taken with --prefer-outputs. If both exist and differ, the script says so.
@@ -46,6 +47,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PIPELINE = HERE.parent
 REPO = PIPELINE.parent
+
+# The keyword rules and the saved decisions of the first version of the NLP project (unchanged), and how many of the ranked rules the keyword
+# detector uses (the top 30, as in that experiment).
+REFERENCE = PIPELINE / "reference"
+KEYWORD_TOP_K = 30
 
 # The columns of messages.parquet that the replay file is made from (written by logad.data.bgl.read_bgl and logad.data.preprocess).
 COLUMNS = ["line_id", "timestamp", "node", "component", "level", "content", "alert_tag", "label", "template_id", "split"]
@@ -130,11 +136,10 @@ def locate(args):
         "windows": first_existing([processed / "windows.parquet"], "windows.parquet (the windows of the NLP project)", again),
         "model": pick(results / "logbert" / "model.pt", output / "logbert" / "model.pt", "model.pt (the trained LogBERT)",
                       "Train it with  make logbert-train  in the NLP folder, or  make restore  to copy the committed results back.", prefer, differs),
-        "rules": pick(results / "rules" / "rules.json", output / "rules" / "rules.json", "rules.json (the ranked keyword rules)",
-                      "Make them with  make rules  in the NLP folder, or  make restore  to copy the committed results back.", prefer, differs),
-        "decisions": pick(results / "rule_guided" / "llm_rule_based_decisions.csv", output / "rule_guided" / "llm_rule_based_decisions.csv",
-                          "llm_rule_based_decisions.csv (the saved decisions of the rule-guided LLM)",
-                          "Make them with  make rule-guided  in the NLP folder, or  make restore  to copy the committed results back.", prefer, differs),
+        "rules": first_existing([REFERENCE / "rules.json"], "rules.json (the ranked keyword rules)",
+                                "It belongs to the repository: restore NLP-pipeline/reference/ with  git checkout -- NLP-pipeline/reference ."),
+        "decisions": first_existing([REFERENCE / "llm_rule_based_decisions.csv"], "llm_rule_based_decisions.csv (the saved decisions of the rule-guided LLM)",
+                                    "It belongs to the repository: restore NLP-pipeline/reference/ with  git checkout -- NLP-pipeline/reference ."),
         "logbert_result": pick(results / "logbert_full.json", output / "results" / "logbert_full.json", "logbert_full.json (the tuned g and r of LogBERT with full coverage)",
                                "Make it with  make logbert-eval  in the NLP folder, or  make restore  to copy the committed results back.", prefer, differs),
     }
@@ -145,7 +150,7 @@ def locate(args):
 # ---------------------------------------------------------------- the settings
 
 # The values of the experiment that the processor must use. g, r, the mask ratio and full coverage are what the evaluation chose on the
-# validation period (logbert_full.json); the seed, the window and the number of rules come from the configuration.
+# validation period (logbert_full.json); the seed and the window come from the configuration.
 def make_settings(config, result):
     chosen = result["settings"]
     detection = config["logbert"]["detection"]
@@ -154,7 +159,7 @@ def make_settings(config, result):
         raise Problem("logbert_full.json is not the full-coverage variant (A+): its settings say full_coverage = false")
 
     return {
-        "keyword_top_k": int(config["rules"]["top_k"]),
+        "keyword_top_k": KEYWORD_TOP_K,
         "logbert": {"g": int(chosen["g"]), "r": int(chosen["r"]), "mask_ratio": float(chosen["mask_ratio"]), "full_coverage": True, "seed": int(detection["seed"])},
         "window": {"size_seconds": int(config["windows"]["size_seconds"]), "step_seconds": int(config["windows"]["step_seconds"])},
         "from": {"experiment": config.get("name"), "logbert_full_test_f1": round(float(result.get("test", {}).get("f1", 0.0)), 4)},
@@ -385,7 +390,7 @@ def main(argv=None):
     parser.add_argument("--nlp-root", default=str(REPO / "NLP"), help="the folder of the NLP project (default: the folder NLP next to NLP-pipeline)")
     parser.add_argument("--config", help="the experiment configuration, for example configs/bgl_cpu.yaml (default: <nlp-root>/configs/bgl.yaml). One that "
                                          "inherits from another (extends:) is read like the NLP project reads it")
-    parser.add_argument("--prefer-outputs", action="store_true", help="take model.pt, rules and decisions from outputs/ (a run not yet copied to results/) when both exist")
+    parser.add_argument("--prefer-outputs", action="store_true", help="take model.pt and the LogBERT settings from outputs/ (a run not yet copied to results/) when both exist")
     parser.add_argument("--processed", help="the folder with messages.parquet and drain.pkl (default: paths.processed_dir of the configuration)")
     parser.add_argument("--raw-log", help="the raw BGL.log (default: paths.raw_log of the configuration; if it is missing the lines are rebuilt)")
     parser.add_argument("--lines", type=int, default=30000, help="how many lines the replay file holds (default 30000)")
@@ -423,7 +428,7 @@ def run(args):
         say("  %-16s %s" % (name + ":", where[name]))
 
     say("  LogBERT:         g=%d, r=%d, mask ratio %.1f, full coverage, seed %d" % (settings["logbert"]["g"], settings["logbert"]["r"], settings["logbert"]["mask_ratio"], settings["logbert"]["seed"]))
-    say("  keyword rules:   the top %d" % settings["keyword_top_k"])
+    say("  keyword rules:   the top %d of the rules in %s" % (settings["keyword_top_k"], REFERENCE))
     say("  windows:         %d seconds, sliding by %d seconds" % (size, step))
 
     for what, chosen, other in where["differs"]:

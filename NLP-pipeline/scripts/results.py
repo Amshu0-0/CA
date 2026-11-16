@@ -160,7 +160,7 @@ def main(argv=None):
         if args.windows:
             show_windows(name, args.windows)
 
-        for text in tables.reference(Path(__file__).resolve().parent.parent.parent / "NLP" / "results" / "comparison.csv"):
+        for text in tables.reference(Path(__file__).resolve().parent.parent / "reference" / "comparison.csv"):
             print(("\n" if text.startswith("For comparison") else "") + text)
 
         problems = []

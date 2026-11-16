@@ -1,4 +1,4 @@
-"""Approach A: LogBERT (Guo, Yuan & Wu, 2021) reproduced in PyTorch.
+"""LogBERT (Guo, Yuan & Wu, 2021) reproduced in PyTorch.
 
 LogBERT is *not* a pretrained language model that reads words. It is a small
 Transformer encoder trained from scratch on sequences of log keys (Drain

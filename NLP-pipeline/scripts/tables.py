@@ -41,8 +41,9 @@ def describe(summary):
     return out
 
 
-# The numbers of the NLP project's own evaluation of the same three detectors on its WHOLE test period, from results/comparison.csv.
-# The replay file is a slice of that period, so these are a reference and not a target.
+# The numbers of the NLP project's own evaluation of the same three detectors on its WHOLE test period, from reference/comparison.csv (the
+# first version of the NLP project; its results/comparison.csv holds LogBERT only now). The replay file is a slice of that period, so these
+# are a reference and not a target.
 def reference(csv_path):
     path = Path(csv_path)
 
@@ -56,7 +57,7 @@ def reference(csv_path):
         return []
 
     first = rows["logbert_full"]
-    out = [f"For comparison, the NLP project's report on its whole test period ({first['support']} windows; results/comparison.csv). The replay file is a slice of that period, so the numbers differ:"]
+    out = [f"For comparison, the NLP project's report on its whole test period ({first['support']} windows; reference/comparison.csv). The replay file is a slice of that period, so the numbers differ:"]
 
     for key, name in wanted.items():
         r = rows[key]

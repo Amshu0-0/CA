@@ -7,7 +7,9 @@
 #   1. A Kafka message holds one raw BGL log line. parse_bgl_line (from your NLP project, the package logad) splits off the alert tag.
 #      The tag is the ground truth. It is stored for the evaluation only: no detector ever sees it, as in the NLP project.
 #   2. Drain (drain.pkl, fitted by the NLP project) maps the message text to a template ID: the same IDs that LogBERT and the rules know.
-#   3. Two detectors work on single templates: the keyword rules (condition B4) and the saved decisions of the rule-guided LLM (B3).
+#   3. Two detectors work on single templates: the keyword rules (condition B4) and the saved decisions of the rule-guided LLM (B3). They are
+#      the reference detectors of the first version of the NLP project; baselines.py holds the code that applies the rules (the NLP package
+#      logad is LogBERT only now).
 #   4. The line goes into a 5-minute window that slides by 1 minute: the same windows as in the NLP project's evaluation (class Windower).
 #   5. When a window is complete (a line from after its end has arrived), LogBERT (A, the full-coverage variant) scores it, and the two
 #      template detectors lift their labels to the window: a window is flagged if any of its messages is.
@@ -34,8 +36,8 @@ from logad.data.drain import TemplateExtractor
 from logad.logbert.dataset import window_to_chunks
 from logad.logbert.detector import LogBERTDetector
 from logad.logbert.trainer import load_checkpoint
-from logad.rules.keyword import KeywordClassifier
-from logad.rules.rule import load_rules
+
+from baselines import KeywordClassifier, load_rules
 
 # How many masked copies of a window LogBERT looks at in one forward pass. The library's default is 128, which is too much for one very
 # busy window: a window of 40,000 lines needed about 2 GB (more than the processor may use), while 16 needs about 0.9 GB, gives the same

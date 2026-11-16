@@ -12,9 +12,6 @@
 #   epochs / patience  6 / 3                        up to 50 / 5 (early stopping)
 #   warm-up steps      200                          500
 #   device             cpu                          auto (the GPU)
-#
-# Approach B keeps the scope of the reported run (one induction round, test
-# period only); the notebook runs it again with Qwen2.5-7B-Instruct on the GPU.
 # =============================================================================
 
 extends: bgl_cpu.yaml

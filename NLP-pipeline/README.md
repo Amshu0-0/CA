@@ -1,6 +1,6 @@
 # NLP log pipeline: BGL system-log anomaly detection on the CA3 cluster
 
-This folder is the CA3 pipeline with its data and its processing replaced. Where CA3 stored and classified network flows, this one replays the system-log lines of the BlueGene/L supercomputer (BGL) and runs the detectors of the NLP project (`../NLP`, *Comparing BERT-Based and Rule-Guided Language Models for System Log Anomaly Detection*) on them. The cluster, the security and the monitoring are the ones of CA3: Terraform and Ansible build three machines with Kubernetes (k3s); Kafka with mutual TLS; MongoDB with TLS and one account per program; a REST API over HTTPS with a login; NetworkPolicies; Pod Security `restricted`; Prometheus, Grafana and Loki.
+This folder is the CA3 pipeline with its data and its processing replaced. Where CA3 stored and classified network flows, this one replays the system-log lines of the BlueGene/L supercomputer (BGL) and runs the detectors of the NLP project (`../NLP`, *LogBERT for System Log Anomaly Detection on BGL*) on them. LogBERT is the model of the NLP project. The two other detectors are the reference detectors of its first version (keyword rules, and the saved decisions of a rule-guided language model); the NLP project no longer contains them, so their files are kept unchanged in `reference/`. The cluster, the security and the monitoring are the ones of CA3: Terraform and Ansible build three machines with Kubernetes (k3s); Kafka with mutual TLS; MongoDB with TLS and one account per program; a REST API over HTTPS with a login; NetworkPolicies; Pod Security `restricted`; Prometheus, Grafana and Loki.
 
 ```text
  replay file          producer Job           Kafka                  processor                          MongoDB          REST API
@@ -48,7 +48,7 @@ make teardown           # Step 8: everything away, and the proof
 
 A window is anomalous when it holds at least one line with an alert tag. The tag is the ground truth, it is stored for the evaluation only, and no detector sees it. A window is flagged by `keyword` or `llm` when any of its lines is, and by `logbert` when, in some chunk of the window, more than r masked keys are not among LogBERT's g best guesses.
 
-The NLP project's own numbers on its whole test period (5,742 windows, 495 anomalous), from `NLP/results/comparison.csv`. They are a **reference**: the replay file is a 30,000-line slice of that period, so the cluster's numbers differ from these.
+The NLP project's own numbers on its whole test period (5,742 windows, 495 anomalous), from `reference/comparison.csv` (the table of the first version of the NLP project; `NLP/results/comparison.csv` holds the two LogBERT variants only). They are a **reference**: the replay file is a 30,000-line slice of that period, so the cluster's numbers differ from these.
 
 | Detector | Precision | Recall | F1 |
 |---|---:|---:|---:|
@@ -73,7 +73,7 @@ The steps are in order. Each ends with a line that says whether it worked.
 
 ### Step 1. Collect the models and the log file (`make export-bundle`)
 
-It gathers into `bundle/` what the processor and the producer need: the Drain parser, LogBERT, the keyword rules, the saved LLM decisions, the settings (g, r, mask ratio, seed, window, number of rules) and `bgl-replay.log`, a run of 30,000 consecutive lines of the **test period** (the period the detectors were not tuned on), placed where the windows are most evenly mixed between anomalous and normal. Nothing in `../NLP` is changed.
+It gathers into `bundle/` what the processor and the producer need: the Drain parser, LogBERT, the keyword rules and the saved LLM decisions (both copied from `reference/`), the settings (g, r, mask ratio, seed, window, number of rules) and `bgl-replay.log`, a run of 30,000 consecutive lines of the **test period** (the period the detectors were not tuned on), placed where the windows are most evenly mixed between anomalous and normal. Nothing in `../NLP` is changed.
 
 It needs a processed folder of the NLP project (`drain.pkl`, `messages.parquet`, `windows.parquet`, `templates.csv`). If there is none on this computer, make it first with `make data` and `make preprocess` in `NLP` (the raw log is about 700 MB), or copy the folder from the computer where you ran the NLP project.
 
@@ -86,7 +86,7 @@ make export-bundle BUNDLE_ARGS='--processed ../NLP/data/processed/bgl_memcheck'
 
 (Plain `make export-bundle` reads the folder that the configuration names; use that where it is the run your models come from.) If you give the wrong folder, the script stops with "does not belong to the model", names a folder next to it that does fit, prints the command to use, and leaves `bundle/` exactly as it was. (An earlier version of the script wrote into `bundle/` before checking, so a refused run left a mix of two runs behind; the first real run found it.)
 
-The trained files are taken from `NLP/results/` (the run of your report, made with `configs/bgl_cpu.yaml`). A run that is only in `NLP/outputs/` is taken with `make export-bundle BUNDLE_ARGS="--prefer-outputs"`, a run made with another configuration with `make export-bundle NLP_CONFIG=configs/bgl.yaml`. If a file exists in both places and they differ, the script says which one it took.
+The trained LogBERT is taken from `NLP/results/` (the run of your report, made with `configs/bgl_cpu.yaml`); the keyword rules and the saved decisions always come from `reference/`. A run that is only in `NLP/outputs/` is taken with `make export-bundle BUNDLE_ARGS="--prefer-outputs"`, a run made with another configuration with `make export-bundle NLP_CONFIG=configs/bgl.yaml`. If a file exists in both places and they differ, the script says which one it took.
 
 Expected, at the end:
 
@@ -113,7 +113,7 @@ cd NLP-pipeline
 make test
 ```
 
-202 tests, under a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
+195 tests, under a minute, no cluster needed (they use stand-ins for Kafka and MongoDB, and the real models of `NLP/results/`).
 
 ### Step 3. The images (push, wait, make public)
 
@@ -268,7 +268,7 @@ During a replay the log's own clock runs faster than the wall clock: the produce
 | One topic partition, one processor pod, strategy `Recreate`, no autoscaler | A window is made of lines that follow each other in time. A partition keeps its order, one reader keeps one window in one place, and `Recreate` guarantees there is never a second processor. A second pod in the same consumer group would get no partition anyway |
 | Windows are cut by the **time of the log lines**, not by the clock | The NLP project evaluated on windows of event time (5 minutes, sliding by 1 minute). The processor's `Windower` gives exactly those windows (`tests/test_windower.py` compares them with `logad.data.windows.sliding_windows` on random logs) |
 | Offsets committed by hand, after the documents are written; documents with fixed ids | A crash can repeat work but cannot lose or duplicate results |
-| The LLM's **saved decisions**, not the LLM | The decisions are per template and were made once (`results/rule_guided/`). Running a 7B model in the cluster would need a GPU or minutes per template, and would not change the verdicts |
+| The LLM's **saved decisions**, not the LLM | The decisions are per template and were made once (`reference/llm_rule_based_decisions.csv`). Running a 7B model in the cluster would need a GPU or minutes per template, and would not change the verdicts |
 | The models are baked into the processor image (`/bundle`) | The pod needs no volume and no download, and the image and the models cannot drift apart. The cost: a new export needs a new image |
 | LogBERT scores a window in chunks of 16 masked copies (`SCORE_BATCH`) | The library's default (128) needed about 2 GB for a window of 40,000 lines; 16 keeps the memory flat (measured about 900 MB for a window of 100,000 lines on a test machine) |
 | Lines whose template Drain does not know are counted, not dropped | They get no keyword or LLM verdict, they still count for LogBERT (as an unknown key), and `processor_unseen_lines_total` shows how many there were |

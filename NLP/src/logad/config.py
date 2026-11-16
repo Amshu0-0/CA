@@ -1,7 +1,7 @@
 """Typed experiment configuration loaded from YAML.
 
 Every tunable setting of the project (file paths, parser settings, window
-sizes, model hyper-parameters, LLM settings, ...) lives in a YAML file under
+sizes, model hyper-parameters, ...) lives in a YAML file under
 ``configs/``. This module turns that YAML into nested dataclasses so that
 
 * every option has a documented default in exactly one place,
@@ -70,8 +70,8 @@ class SplitConfig:
     test: float = 0.2
 
 
-# Sliding windows: the shared evaluation unit of both approaches
-# (LogBERT's BGL setting: 5-minute windows moved forward by 1 minute).
+# Sliding windows: the evaluation unit (LogBERT's BGL setting: 5-minute windows
+# moved forward by 1 minute).
 @dataclass
 class WindowConfig:
     size_seconds: int = 300
@@ -98,7 +98,7 @@ class LogBERTDetectionConfig:
     seed: int = 1234
 
 
-# Approach A: LogBERT architecture, training and detection settings.
+# LogBERT architecture, training and detection settings.
 @dataclass
 class LogBERTConfig:
     # --- architecture (two-layer encoder as described in the LogBERT paper) ---
@@ -142,75 +142,6 @@ class LogBERTConfig:
     detection: LogBERTDetectionConfig = field(default_factory=LogBERTDetectionConfig)
 
 
-# Connection settings for one LLM. Two are configured: the rule *generator*
-# (GPT-4o-mini in LogRules) and the *classifier* (Qwen2.5-7B-Instruct).
-# configs/bgl.yaml points both at a local Qwen2.5-7B-Instruct server, so no
-# API key is needed; the generic defaults below describe the OpenAI API.
-@dataclass
-class LLMBackendConfig:
-    # "openai": the OpenAI API or any OpenAI-compatible server (Ollama, vLLM,
-    # LM Studio, ...); "transformers": a Hugging Face model loaded locally.
-    backend: str = "openai"
-    model: str = "gpt-4o-mini"
-    # Server URL for OpenAI-compatible backends, e.g. http://localhost:11434/v1
-    # for Ollama; null means the official OpenAI API.
-    base_url: str | None = None
-    # Environment variable that holds the API key (local servers need none).
-    api_key_env: str = "OPENAI_API_KEY"
-    # 0 = greedy decoding, so results are as reproducible as the backend allows.
-    temperature: float = 0.0
-    max_tokens: int = 512
-    timeout_seconds: float = 120.0
-    # Ask the server for JSON output (response_format=json_object) if supported.
-    json_mode: bool = False
-    # transformers backend only: load weights in 4 bit to fit a 16 GB GPU.
-    load_in_4bit: bool = False
-    seed: int = 0
-
-
-# Settings shared by everything that calls an LLM.
-@dataclass
-class LLMConfig:
-    # Every prompt and raw response is cached here (JSONL), which makes reruns
-    # free and keeps a complete, auditable record of all LLM calls.
-    cache_dir: str = "outputs/llm_cache"
-    generator: LLMBackendConfig = field(default_factory=LLMBackendConfig)
-    classifier: LLMBackendConfig = field(default_factory=LLMBackendConfig)
-
-
-# LogRules-style rule induction (Approach B).
-@dataclass
-class RulesConfig:
-    # Labeled training templates shown per induction prompt (half abnormal,
-    # half normal when possible).
-    batch_size: int = 20
-    # Passes over the training templates, each with a different shuffle.
-    rounds: int = 3
-    # Maximum number of rules the generator may propose per prompt.
-    max_rules_per_batch: int = 8
-    # Keep a rule only if it labels at least this share of the training
-    # templates it matches correctly (1.0 = never wrong on training data)...
-    min_precision: float = 1.0
-    # ...and matches at least this many training templates.
-    min_support: int = 1
-    # Number of top-ranked rules used by the rule-based prompt and the
-    # keyword baseline (both use the same rules, for a fair comparison).
-    top_k: int = 30
-
-
-# Approach B's deduction stage: which conditions to run and on which splits.
-@dataclass
-class DeductionConfig:
-    # Any of: zero_shot, few_shot, rule_based (LLM) and keyword (no LLM).
-    conditions: list[str] = field(
-        default_factory=lambda: ["zero_shot", "few_shot", "rule_based", "keyword"]
-    )
-    # Labeled training templates in the few-shot prompt (half abnormal).
-    few_shot_examples: int = 8
-    # Splits whose templates are classified; "test" is the reported result.
-    splits: list[str] = field(default_factory=lambda: ["val", "test"])
-
-
 # Root of the configuration tree: one instance describes one experiment.
 @dataclass
 class ExperimentConfig:
@@ -223,9 +154,6 @@ class ExperimentConfig:
     split: SplitConfig = field(default_factory=SplitConfig)
     windows: WindowConfig = field(default_factory=WindowConfig)
     logbert: LogBERTConfig = field(default_factory=LogBERTConfig)
-    llm: LLMConfig = field(default_factory=LLMConfig)
-    rules: RulesConfig = field(default_factory=RulesConfig)
-    deduction: DeductionConfig = field(default_factory=DeductionConfig)
 
 
 # ---------------------------------------------------------------------------

@@ -40,9 +40,8 @@ def _iso(epoch: float) -> str:
 # occurs overall and per split, how many of those occurrences are alerts, and
 # which alert categories it carries.
 #
-# The per-split label counts drive later stages: rule induction uses the
-# training counts as labels, and the analysis uses `is_mixed` to measure how
-# often messages that share a template carry different labels.
+# The per-split label counts are used by the error analysis and the figures:
+# how many alert messages each template carries, and in which period.
 def summarize_templates(messages: pd.DataFrame, templates: pd.DataFrame) -> pd.DataFrame:
     grouped = messages.groupby("template_id", observed=True)
     table = pd.DataFrame(

@@ -34,10 +34,10 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
-# Experiment outputs (checkpoints, predictions, LLM response cache).
-# Small, reportable artifacts (final metrics, induced rules, the trained
+# Experiment outputs (checkpoints, predictions, tuning grids).
+# Small, reportable artifacts (final metrics, predictions, the trained
 # LogBERT checkpoint) are copied into results/ and committed from there.
 outputs/
 
-# Secrets for LLM providers
+# Local environment files
 .env

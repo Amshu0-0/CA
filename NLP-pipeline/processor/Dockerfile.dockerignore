@@ -6,6 +6,7 @@
 !NLP-pipeline/processor/requirements.txt
 !NLP-pipeline/processor/processor.py
 !NLP-pipeline/processor/engine.py
+!NLP-pipeline/processor/baselines.py
 !NLP-pipeline/processor/sink.py
 !NLP-pipeline/bundle/drain.pkl
 !NLP-pipeline/bundle/model.pt

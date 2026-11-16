@@ -9,9 +9,9 @@ typed in:
 
 * the preprocessed dataset (paths.processed_dir): the timestamp, label and
   template ID of every message, and the windows
-* the run directory (paths.output_dir): metrics, window predictions,
-  per-template decisions and analysis tables, as the pipeline wrote them or as
-  `make restore` copied them back from results/
+* the run directory (paths.output_dir): metrics, window predictions and
+  analysis tables, as the pipeline wrote them or as `make restore` copied
+  them back from results/
 * the trained LogBERT checkpoint, for the figure that looks inside the model
   (left out with --skip-model, which needs no forward pass)
 
@@ -60,8 +60,8 @@ INK_2 = "#52514e"  # secondary text: labels, values
 MUTED = "#898781"  # axis text
 GRID = "#e1e0d9"  # hairline gridlines
 AXIS = "#c3c2b7"  # baselines, reference lines
-BLUE = "#2a78d6"  # categorical slot 1: normal / Approach A
-ORANGE = "#eb6834"  # categorical slot 2: alert, anomalous / Approach B
+BLUE = "#2a78d6"  # categorical slot 1: normal / LogBERT
+ORANGE = "#eb6834"  # categorical slot 2: alert, anomalous
 # Sequential one-hue ramp (steps 100 -> 700) for magnitude, e.g. heatmaps.
 BLUE_RAMP = [
     "#cde2fb",
@@ -216,17 +216,6 @@ def compact(value: float, _position: Any = None) -> str:
     if abs(value) >= 1_000:
         return f"{value / 1_000:.0f}K"
     return f"{value:.0f}"
-
-
-# Human-readable duration for a number of seconds: 8 ms, 78 s, 47 min.
-def duration(seconds: float) -> str:
-    if seconds < 1:
-        return f"{seconds * 1000:.0f} ms"
-    if seconds < 600:
-        return f"{seconds:.0f} s"
-    if seconds < 7200:
-        return f"{seconds / 60:.0f} min"
-    return f"{seconds / 3600:.1f} h"
 
 
 # Save a figure as PNG in `out` and close it.
@@ -434,11 +423,11 @@ def fig_training_curve(output_dir: Path, out: Path, data: dict) -> None:
         arrowprops={"arrowstyle": "-", "color": AXIS, "linewidth": 1},
     )
     ax.set_xlim(0.7, epochs[-1] + 0.3)
-    ax.set_ylim(0, max(max(train), max(dev)) * 1.12)   # dev loss can start above the training loss
+    ax.set_ylim(0, max(max(train), max(dev)) * 1.12)  # dev loss can start above the training loss
     ax.set_xticks(epochs)
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Loss (MLKP + 0.1 × VHM)")
-    ax.grid(axis="y")   # no legend: each line is labelled at its right end
+    ax.grid(axis="y")  # no legend: each line is labelled at its right end
     save(fig, out, "03_logbert_training")
     data["training"] = {"epoch": epochs, "train_loss": train, "dev_loss": dev}
 
@@ -688,22 +677,18 @@ def fig_window_scores(
     data["window_scores"] = {"g": settings["g"], "r": r, "panels": stats}
 
 
-# Short method names for the results figures.
+# Short names of the two LogBERT variants for the results figure.
 SHORT_NAMES = {
     "logbert": "A  LogBERT",
     "logbert_full": "A+ LogBERT, full coverage",
-    "llm_zero_shot": "B1 LLM zero-shot",
-    "llm_few_shot": "B2 LLM few-shot",
-    "llm_rule_based": "B3 LLM rule-based",
-    "keyword_rules": "B4 keyword rules",
 }
 
 
-# 7. Every method in precision-recall space, with curves of equal F1.
+# 7. Both LogBERT variants in precision-recall space, with curves of equal F1.
 def fig_pr_space(output_dir: Path, out: Path, data: dict) -> None:
     table = pd.read_csv(output_dir / "results" / "comparison.csv").set_index("method")
     fig, ax = new_axes(8, 5.0, left=0.9, right=0.35, top=0.55)
-    y_min = 0.84  # every method's recall is above 0.89, so zoom in on the top
+    y_min = 0.84  # both variants' recall is above 0.89, so zoom in on the top
     ax.set_xlim(0, 1.04)
     ax.set_ylim(y_min, 1.02)
     # Iso-F1 curves: all (precision, recall) pairs with the same F1. Solving
@@ -726,19 +711,14 @@ def fig_pr_space(output_dir: Path, out: Path, data: dict) -> None:
     offsets = {
         "logbert": (10, 0, "left"),
         "logbert_full": (10, -12, "left"),
-        "llm_zero_shot": (10, 0, "left"),
-        "llm_few_shot": (0, -15, "center"),
-        "llm_rule_based": (0, 14, "center"),
-        "keyword_rules": (-10, 13, "right"),
     }
     for method, row in table.iterrows():
-        color = BLUE if method.startswith("logbert") else ORANGE  # Approach A or B
         ax.plot(
             row["precision"],
             row["recall"],
             "o",
             markersize=10,
-            color=color,
+            color=BLUE,
             markeredgecolor=SURFACE,
             markeredgewidth=GAP_PT * 1.5,
             zorder=4,
@@ -772,22 +752,13 @@ def fig_pr_space(output_dir: Path, out: Path, data: dict) -> None:
                 linestyle="",
                 color=BLUE,
                 markersize=8,
-                label="Approach A: LogBERT",
-            ),
-            plt.Line2D(
-                [],
-                [],
-                marker="o",
-                linestyle="",
-                color=ORANGE,
-                markersize=8,
-                label="Approach B: rule-guided LLM",
+                label="LogBERT (test windows)",
             ),
             plt.Line2D([], [], color=AXIS, linewidth=1.0, label="Points with equal F1"),
         ],
         loc="lower left",
         bbox_to_anchor=(0, 1.03),
-        ncol=3,
+        ncol=2,
         borderaxespad=0,
     )
     save(fig, out, "07_results_pr_space")
@@ -796,163 +767,6 @@ def fig_pr_space(output_dir: Path, out: Path, data: dict) -> None:
         .round(4)
         .to_dict(orient="index")
     )
-
-
-# 8. How many test templates each Approach B condition flags, and how many of
-# those really contain alerts.
-def fig_flagged_templates(output_dir: Path, out: Path, data: dict) -> None:
-    conditions = [
-        ("llm_zero_shot", "B1 zero-shot"),
-        ("llm_few_shot", "B2 few-shot"),
-        ("llm_rule_based", "B3 rule-based"),
-        ("keyword_rules", "B4 keyword rules"),
-    ]
-    rows = []
-    for method, name in conditions:
-        decisions = pd.read_csv(output_dir / "rule_guided" / f"{method}_decisions.csv")
-        test = decisions[decisions["n_test"] > 0]
-        flagged = test[test["label"] == 1]
-        with_alerts = int((flagged["n_test_anomalous"] > 0).sum())
-        rows.append((name, with_alerts, len(flagged) - with_alerts))
-    any_alert = int((test["n_test_anomalous"] > 0).sum())  # the same for every condition
-
-    fig, ax = new_axes(9, 3.3, left=1.5, right=2.2, top=0.55)
-    ax.set_xlim(0, max(a + n for _, a, n in rows) * 1.02)
-    ax.set_ylim(-0.6, len(rows) - 0.4)
-    for i, (_name, alerts, normal) in enumerate(rows):
-        y = len(rows) - 1 - i
-        rounded_bar(ax, 0, alerts, y, 0.5, ORANGE, horizontal=True, round_end=normal == 0)
-        rounded_bar(ax, alerts, alerts + normal, y, 0.5, BLUE, horizontal=True)
-        # Start the label after the reference line so the line never crosses it.
-        ax.text(
-            max(alerts + normal, any_alert) + 4,
-            y,
-            f"{alerts + normal} flagged, {alerts} with alerts",
-            va="center",
-            color=INK_2,
-            fontsize=9,
-        )
-    ax.axvline(any_alert, color=INK_2, linewidth=1.0, zorder=3)
-    ax.text(
-        any_alert + 3,
-        len(rows) - 0.48,
-        f"{any_alert} test templates contain alerts",
-        color=INK_2,
-        fontsize=9,
-        va="bottom",
-    )
-    ax.set_yticks([len(rows) - 1 - i for i in range(len(rows))], [r[0] for r in rows])
-    ax.set_xlabel("Test templates labelled abnormal (of 472)")
-    ax.grid(axis="x")
-    ax.spines["left"].set_visible(False)
-    ax.legend(
-        handles=[
-            Rectangle((0, 0), 1, 1, color=ORANGE, label="Template contains alerts (correct)"),
-            Rectangle((0, 0), 1, 1, color=BLUE, label="Template is normal (false alarm)"),
-        ],
-        loc="lower left",
-        bbox_to_anchor=(0, 1.05),
-        ncol=2,
-        borderaxespad=0,
-    )
-    save(fig, out, "08_llm_flagged_templates")
-    data["flagged_templates"] = {
-        "templates_with_alerts": any_alert,
-        "conditions": {name: {"with_alerts": a, "normal": n} for name, a, n in rows},
-    }
-
-
-# 9. The keyword rules' F1 as a function of how many ranked rules they use.
-def fig_rule_sensitivity(output_dir: Path, out: Path, data: dict, reported: int) -> None:
-    table = pd.read_csv(output_dir / "analysis" / "keyword_rule_sensitivity.csv")
-    best_k = int(table.loc[table["val_f1"].idxmax(), "k"])
-    fig, ax = new_axes(8, 3.6, right=1.7, top=0.3)
-    ax.set_xlim(0, table["k"].max() + 3)
-    ax.set_ylim(0.6, 1.0)
-    for column, color, name in (("val_f1", BLUE, "Validation F1"), ("test_f1", ORANGE, "Test F1")):
-        ax.plot(
-            table["k"],
-            table[column],
-            color=color,
-            linewidth=2,
-            marker="o",
-            markersize=7,
-            markeredgecolor=SURFACE,
-            markeredgewidth=GAP_PT,
-            label=name,
-            zorder=3,
-        )
-        ax.text(
-            table["k"].iloc[-1] + 2.5,
-            table[column].iloc[-1],
-            name,
-            va="center",
-            color=INK_2,
-            fontsize=9,
-        )
-    # One marker line per k of interest; the labels sit on opposite sides.
-    for k, text, side in (
-        (reported, f"k = {reported}: reported\n(fixed in the proposal)", -1),
-        (best_k, f"k = {best_k}: best\non validation", 1),
-    ):
-        ax.axvline(k, color=AXIS, linewidth=1.0, zorder=1)
-        ax.text(
-            k + side * 1.2,
-            0.615,
-            text,
-            color=INK_2,
-            fontsize=8.5,
-            va="bottom",
-            ha="left" if side > 0 else "right",
-        )
-    ax.set_xlabel("Number of top-ranked rules the keyword matcher uses (k)")
-    ax.set_ylabel("F1 (window level)")
-    ax.grid(axis="y")
-    ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.18))
-    save(fig, out, "09_keyword_rule_sensitivity")
-    data["rule_sensitivity"] = table.round(4).to_dict(orient="list") | {"best_k": best_k}
-
-
-# 10. What each method costs at inference time, on a logarithmic scale.
-def fig_cost(output_dir: Path, out: Path, data: dict) -> None:
-    table = pd.read_csv(output_dir / "results" / "comparison.csv")
-    fig, ax = new_axes(8, 3.4, left=2.1, right=0.6, top=0.3)
-    ticks = [0.001, 0.01, 0.1, 1, 10, 60, 600, 3600]
-    ax.set_xscale("log")
-    ax.set_xlim(0.0006, 9000)
-    ax.set_ylim(-0.6, len(table) - 0.4)
-    for i, row in table.iterrows():
-        y = len(table) - 1 - i
-        color = BLUE if row["method"].startswith("logbert") else ORANGE
-        ax.plot(
-            row["inference_seconds"],
-            y,
-            "o",
-            markersize=9,
-            color=color,
-            markeredgecolor=SURFACE,
-            markeredgewidth=GAP_PT,
-            zorder=3,
-        )
-        ax.text(
-            row["inference_seconds"] * 1.6,
-            y,
-            duration(row["inference_seconds"]),
-            va="center",
-            color=INK_2,
-            fontsize=9,
-        )
-    ax.set_xticks(ticks, ["1 ms", "10 ms", "0.1 s", "1 s", "10 s", "1 min", "10 min", "1 h"])
-    ax.minorticks_off()
-    ax.set_yticks(
-        [len(table) - 1 - i for i in range(len(table))],
-        [SHORT_NAMES[m] for m in table["method"]],
-    )
-    ax.set_xlabel("Time to score the 5,742 test windows on 4 CPU cores (log scale)")
-    ax.grid(axis="x")
-    ax.spines["left"].set_visible(False)
-    save(fig, out, "10_inference_cost")
-    data["cost_seconds"] = dict(zip(table["method"], table["inference_seconds"], strict=True))
 
 
 # ------------------------------------------------------------------ main
@@ -987,18 +801,15 @@ def main() -> None:
     print("Data and drift")
     fig_timeline(logs, out, data)
     fig_unseen_share(logs, out, data)
-    print("Approach A: LogBERT")
+    print("LogBERT")
     fig_training_curve(output_dir, out, data)
     fig_tuning_grid(output_dir, out, data)
     if not args.skip_model:
         g = json.loads((output_dir / "results" / "logbert.json").read_text())["settings"]["g"]
         fig_key_misses(key_ranks(config, logs), g, out, data)
     fig_window_scores(output_dir, logs, out, data)
-    print("Results and Approach B")
+    print("Results")
     fig_pr_space(output_dir, out, data)
-    fig_flagged_templates(output_dir, out, data)
-    fig_rule_sensitivity(output_dir, out, data, config.rules.top_k)
-    fig_cost(output_dir, out, data)
 
     path = out / "figure_data.json"
     path.write_text(json.dumps(data, indent=1, default=str) + "\n", encoding="utf-8")
