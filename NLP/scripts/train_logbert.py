@@ -1,4 +1,4 @@
-"""Train LogBERT (Approach A) on normal windows from the training period.
+"""Train LogBERT on normal windows from the training period.
 
 Usage:
     python scripts/train_logbert.py                                  # full BGL
